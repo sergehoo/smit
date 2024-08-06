@@ -57,8 +57,8 @@
                             </div>
                             <div class="nk-header-brand d-xl-none">
                                 <a href="#" class="logo-link">
-                                    <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
-                                    <img class="logo-dark logo-img" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
+                                    <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
+                                    <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
                                 </a>
                             </div><!-- .nk-header-brand -->
                            {% include 'layout/notif_header.html' %}
@@ -133,6 +133,29 @@
 {% endif %}
 {% endfor %}
 {% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+    const darkSwitch = document.querySelector('.dark-switch');
+    const body = document.body;
+
+    // Check if the dark mode is enabled in localStorage
+    if (localStorage.getItem('dark-mode') === 'enabled') {
+        body.classList.add('dark-mode');
+    }
+
+    // Toggle dark mode
+    darkSwitch.addEventListener('click', () => {
+        if (body.classList.contains('dark-mode')) {
+            body.classList.remove('dark-mode');
+            localStorage.setItem('dark-mode', 'disabled');
+        } else {
+            body.classList.add('dark-mode');
+            localStorage.setItem('dark-mode', 'enabled');
+        }
+    });
+});
+</script>
 </body>
 
 </html>

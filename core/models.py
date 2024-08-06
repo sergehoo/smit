@@ -642,6 +642,7 @@ class Employee(models.Model):
 class Patient(TimestampedModel):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     code_patient = models.CharField(max_length=100, blank=True, unique=True)
+    code_vih = models.CharField(max_length=100, blank=True,null=True, unique=True)
     nom = models.CharField(max_length=225)
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)

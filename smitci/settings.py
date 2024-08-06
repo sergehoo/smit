@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'schedule',
     'django_extensions',
     'django_unicorn',
-    'core'
+    'core',
+    'import_export',
 ]
 
 MIDDLEWARE = [
