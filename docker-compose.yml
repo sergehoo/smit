@@ -1,0 +1,44 @@
+services:
+
+  smit-back:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+  #port du server : port de l'appliaction
+      - 2008:8000
+    volumes:
+      - .:/smit-app/
+    environment:
+    #variable dans le setting de django : variable du ficher .env
+      - DB_NAME=$DATABASE_NAME
+      - DB_USER=$DATABASE_USER
+      - DB_PASSWORD=$DATABASE_PASSWORD
+      - DB_HOST=$DATABASE_HOST
+      - DB_PORT=$DATABASE_PORT
+    depends_on:
+      - smit-db
+
+
+  smit-db:
+    image: postgres
+    #garder le port pour un acces a lexterrieur si non retirer
+#      ports:
+#        -5432:5432
+    environment:
+      - POSTGRES_PASSWORD=$DATABASE_PASSWORD
+      - POSTGRES_DB=$DATABASE_NAME
+      - POSTGRES_USER=$DATABASE_USER
+      - PG_DATA=/data
+    volumes:
+      - ogah:/data
+
+  adminer:
+    image: adminer
+    restart: always
+
+    ports:
+      - 8080:8080
+
+volumes:
+  ogah:

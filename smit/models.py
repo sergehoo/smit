@@ -1,0 +1,412 @@
+import datetime
+import io
+import random
+
+from PIL import Image, ImageDraw, ImageFont
+from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
+from django.db import models
+from django.db.models import Max
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from django.utils.timezone import now
+from django_countries.fields import CountryField
+from schedule.models import Calendar, Event
+from simple_history.models import HistoricalRecords
+from tinymce.models import HTMLField
+
+from core.models import Patient, Service, Employee, ServiceSubActivity
+from pharmacy.models import Medicament, Molecule
+
+
+# from pharmacy.models import Medication
+
+
+
+class Appointment(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
+    date = models.DateField()
+    time = models.TimeField()
+    reason = models.CharField(max_length=255)
+    status = models.CharField(max_length=50, choices=[
+        ('Scheduled', 'Scheduled'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled')
+    ])
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='appointments_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.date} {self.time}"
+
+
+class Emergency(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='emergencies')
+    arrival_time = models.DateTimeField(default=timezone.now)
+    reason = models.TextField()
+    status = models.CharField(max_length=50, choices=[
+        ('Waiting', 'Waiting'),
+        ('In Progress', 'In Progress'),
+        ('Resolved', 'Resolved'),
+        ('Referred', 'Referred')
+    ])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.arrival_time}"
+
+
+class Protocole(models.Model):
+    nom = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    duree = models.PositiveIntegerField(null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    date_fin = models.DateField(null=True, blank=True)
+    molecules = models.ManyToManyField(Molecule)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="protocoles")
+
+    def __str__(self):
+        return self.nom
+
+
+class EtapeProtocole(models.Model):
+    protocole = models.ForeignKey(Protocole, on_delete=models.CASCADE, related_name="etapes")
+    nom = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    date_fin = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.protocole.nom} - {self.nom}"
+
+
+class Evaluation(models.Model):
+    etape = models.ForeignKey(EtapeProtocole, on_delete=models.CASCADE, related_name="evaluations", null=True,
+                              blank=True)
+    date_evaluation = models.DateField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    etat_patient = models.CharField(max_length=255, null=True,
+                                    blank=True)  # Ex. 'Amélioration', 'Stable', 'Dégradation'
+
+    def __str__(self):
+        return f"Évaluation de {self.etape.protocole.patient.nom} le {self.date_evaluation}"
+
+
+class Symptomes(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True)
+    nom = models.CharField(max_length=255, null=True, blank=True)
+    descriptif = models.CharField(max_length=255, null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Symptomes for {self.patient.nom} on {self.created_at}"
+
+
+class AntecedentsMedicaux(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    nom = models.CharField(max_length=255, null=True, blank=True)
+    descriptif = models.CharField(max_length=255, null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Antecedents Medicaux for {self.patient.nom} on {self.created_at}"
+
+
+class Allergies(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    titre = models.CharField(max_length=255, null=True, blank=True)
+    descriptif = models.CharField(max_length=255, null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Allergies for {self.patient.nom} on {self.created_at}"
+
+
+class Analyse(models.Model):
+    # code = models.CharField(default=analyse_number, max_length=100, unique=True)
+    name = models.CharField(max_length=255, verbose_name='Nom de l\'analyse', unique=True)
+    # category = models.ForeignKey('CathegorieAnalyse', null=True, blank=True, on_delete=models.CASCADE)
+    nbrb = models.PositiveIntegerField(null=True, blank=True, default=100)
+    tarif_base = models.PositiveIntegerField(null=True, blank=True, default=100)
+    tarif_public = models.PositiveIntegerField(null=True, blank=True)
+    tarif_mutuelle = models.PositiveIntegerField(null=True, blank=True)
+    forfait_assurance = models.PositiveIntegerField(null=True, blank=True)
+    forfait_societe = models.PositiveIntegerField(null=True, blank=True)
+    lanema = models.PositiveIntegerField(null=True, blank=True)
+    analysis_description = HTMLField(null=True, blank=True)
+    analysis_method = models.CharField(max_length=50, null=True, blank=True)
+    # analysis_equipment = models.ManyToManyField('Equipment', verbose_name='Kit')
+    # analysis_reagents = models.ManyToManyField('Reagent', verbose_name='Réactif')
+    delai_analyse = models.PositiveIntegerField(null=True, blank=True)
+    # laboratoire = models.ForeignKey('Laboratory', blank=True, null=True, on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        # self.age = (date.today() - self.date_naissance) // (timedelta(days=365.2425))
+
+        if self.tarif_base:
+            self.tarif_public = self.tarif_base * self.nbrb.valeur
+            self.tarif_mutuelle = (self.tarif_public * 50 / 100) + self.tarif_public
+            self.forfait_assurance = (self.tarif_public * 100 / 100) + self.tarif_public
+            self.forfait_societe = (self.tarif_public * 80 / 100) + self.tarif_public
+            self.lanema = (self.tarif_public + 0.2 * self.tarif_public) / 2
+
+        super(Analyse, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.analysis_name}"
+
+
+class Examen(models.Model):
+    # request_number = models.CharField(default=request_number, max_length=100, unique=True)
+    patients_requested = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="patients")
+    number = models.CharField(blank=True, null=True, max_length=300)
+    delivered_by = models.CharField(blank=True, null=True, max_length=300)
+    delivered_contact = models.CharField(blank=True, null=True, max_length=300)
+    delivered_services = models.CharField(blank=True, null=True, max_length=300)
+    date = models.DateField(blank=True, null=True)
+    analyses = models.ManyToManyField('Analyse', blank=True, verbose_name="Type d'analyse")
+    accepted = models.BooleanField(default=False, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    result = models.TextField()
+    notes = models.TextField(blank=True, null=True)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.analyses} for {self.patients_requested} on {self.created_at}"
+
+
+class Consultation(models.Model):
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_consultations",
+                                 null=True, blank=True, )
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    constante = models.ForeignKey('Constante', on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name='patientconstantes')
+    symptomes = models.ManyToManyField('Symptomes', related_name='patientsymptomes', blank=True)
+    antecedentsMedicaux = models.ManyToManyField('AntecedentsMedicaux', blank=True, related_name='patientantecedents')
+    examens = models.ForeignKey('Examen', on_delete=models.SET_NULL, blank=True, null=True,
+                                related_name='patientexamens')
+    allergies = models.ManyToManyField('Allergies', related_name='patientallergies', blank=True)
+    services = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True,
+                                 related_name='consultations')
+
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True, related_name='consultations')
+    consultation_date = models.DateTimeField(default=timezone.now, blank=True)
+    reason = models.TextField(blank=True, null=True, )
+    diagnosis = HTMLField()
+    commentaires = HTMLField()
+
+    suivi = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True, related_name='suivi')
+    status = models.CharField(max_length=50, blank=True, null=True,
+                              choices=[('Scheduled', 'Scheduled'), ('Completed', 'Completed'),
+                                       ('Cancelled', 'Cancelled'), ])
+    hospitalised = models.PositiveIntegerField(default=0, blank=True, null=True,)
+    requested_at = models.DateTimeField(blank=True, null=True,)
+    motifrejet = models.CharField(max_length=300, blank=True, null=True,)
+    validated_at = models.DateTimeField(blank=True, null=True,)
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,
+                                   related_name='consultation_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Consultation for {self.patient.nom} on {self.consultation_date}"
+
+
+class Constante(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="constantes")
+    tension_systolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle systolique")
+    tension_diastolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle diastolique")
+    frequence_cardiaque = models.IntegerField(null=True, blank=True, verbose_name="Fréquence cardiaque")
+    frequence_respiratoire = models.IntegerField(null=True, blank=True, verbose_name="Fréquence respiratoire")
+    temperature = models.FloatField(null=True, blank=True, verbose_name="Température")
+    saturation_oxygene = models.IntegerField(null=True, blank=True, verbose_name="Saturation en oxygène")
+    glycemie = models.FloatField(null=True, blank=True, verbose_name="Glycémie")
+    poids = models.FloatField(null=True, blank=True, verbose_name="Poids")
+    taille = models.FloatField(null=True, blank=True, verbose_name="Taille")
+    pouls = models.FloatField(null=True, blank=True, verbose_name="Pouls")
+    imc = models.FloatField(null=True, blank=True, verbose_name="IMC", editable=False)
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='constantes_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def imc_status(self):
+        if self.imc < 18.5:
+            return 'Maigreur'
+        elif self.imc >= 18.5 and self.imc <= 24.9:
+            return 'Normal'
+        elif self.imc >= 25 and self.imc <= 29.9:
+            return 'Surpoids'
+        elif self.imc >= 30 and self.imc <= 34.9:
+            return 'Obésité modérée'
+        elif self.imc >= 35 and self.imc <= 39.9:
+            return 'Obésité sévère'
+        elif self.imc >= 40:
+            return 'Obésité morbide'
+
+    @property
+    def tension_status(self):
+        if self.tension < 9:
+            return 'Hypotension'
+        elif self.tension >= 9 and self.tension <= 13:
+            return 'Tension normale'
+        elif self.tension >= 14 and self.tension <= 16:
+            return 'Hypertension modérée'
+        elif self.tension >= 17 and self.tension <= 20:
+            return 'Hypertension sévère'
+        elif self.tension >= 21:
+            return 'Hypertension très sévère'
+
+    @property
+    def pouls_status(self):
+        if self.pouls < 60:
+            return 'Bradycardie'
+        elif self.pouls >= 60 and self.pouls <= 100:
+            return 'Normal'
+        elif self.pouls >= 101:
+            return 'Tachycardie'
+
+    @property
+    def temperature_status(self):
+        if self.temperature < 36:
+            return 'Hypothermie'
+        elif self.temperature >= 36 and self.temperature <= 37.5:
+            return 'Normal'
+        elif self.temperature >= 37.6 and self.temperature <= 38.5:
+            return 'Fièvre modérée'
+        elif self.temperature >= 38.6 and self.temperature <= 40:
+            return 'Fièvre élevée'
+        elif self.temperature >= 40.1:
+            return 'Hyperthermie'
+
+    def save(self, *args, **kwargs):
+        if self.poids and self.taille:
+            self.imc = self.poids / (self.taille / 100) ** 2
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Constantes pour {self.patient} le {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Constante"
+        verbose_name_plural = "Constantes"
+
+
+class Prescription(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions')
+    medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    prescribed_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=50, choices=[
+        ('Pending', 'Pending'),
+        ('Dispensed', 'Dispensed'),
+        ('Cancelled', 'Cancelled')
+    ])
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescription_creator')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.medication.name}"
+
+
+class WaitingRoom(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, related_name='waiting_rooms')
+    arrival_time = models.DateTimeField(default=timezone.now)
+    reason = models.TextField()
+    status = models.CharField(max_length=50, choices=[
+        ('Waiting', 'Waiting'),
+        ('In Progress', 'In Progress'),
+        ('Completed', 'Completed')
+    ])
+    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='waiting_rooms')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.arrival_time}"
+
+
+class Suivi(models.Model):
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_suivi",
+                                 null=True, blank=True, )
+
+
+class Hospitalization(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='hospitalized')
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_hospitalied",
+                                 null=True, blank=True, )
+    doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hospitaliza_doctor')
+    admission_date = models.DateTimeField()
+    discharge_date = models.DateTimeField(null=True, blank=True)
+    room = models.CharField(max_length=100)
+    bed = models.ForeignKey('LitHospitalisation', on_delete=models.SET_NULL, null=True, blank=True)
+    reason_for_admission = models.TextField()
+    status = models.CharField(max_length=50, choices=[
+        ('Admitted', 'Admitted'),
+        ('Discharged', 'Discharged'),
+        ('Transferred', 'Transferred'),
+        ('Deceased', 'Deceased')
+    ])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.admission_date}"
+
+
+class UniteHospitalisation(models.Model):
+    nom = models.CharField(max_length=100)
+    capacite = models.PositiveIntegerField(default=1)
+    type = models.CharField(max_length=100)
+
+    def __str__(self): return self.nom
+
+
+class ChambreHospitalisation(models.Model):
+    unite = models.ForeignKey(UniteHospitalisation, on_delete=models.CASCADE, related_name='chambres')
+    nom = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.nom} - {self.unite}'
+
+
+class BoxHospitalisation(models.Model):
+    chambre = models.ForeignKey(ChambreHospitalisation, on_delete=models.CASCADE, related_name='boxes')
+    capacite = models.PositiveIntegerField(default=1)
+    nom = models.CharField(max_length=100)
+    occuper = models.BooleanField(default=False)
+    occupant = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.nom} - {self.chambre}'
+
+
+class LitHospitalisation(models.Model):
+    box = models.ForeignKey(BoxHospitalisation, on_delete=models.CASCADE, related_name='lits')
+    nom = models.CharField(max_length=100, default='lit')
+    occuper = models.BooleanField(default=False)
+    occupant = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, blank=True)
+    reserved_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.nom} - {self.box}--{self.box.chambre}--{self.box.chambre.unite}'
+
+#---- Partie Pharmacie

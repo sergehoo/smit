@@ -1,0 +1,658 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+
+        <div class="container-xl wide-lg">
+
+            <div class="nk-content-body">
+
+                <div class="nk-block-head nk-block-head-sm "><div class="row rounded" style="height: 200px; background-image: url('{% static 'images/patient_add_banner1.png' %}')">
+                    <div class="nk-block-between">
+
+                        <div class="nk-block-head-content">
+                            <h1 class="nk-block-title page-title ml-20 center" style="color: black"> Consultation du Patient</h1>
+                            <div class="nk-block-des">
+                                <h2> {{ consultationsdupatientdupatient.patient }} </h2>
+
+                            </div>
+                        </div><!-- .nk-block-head-content -->
+
+                             </div>
+                    </div><!-- .nk-block-between -->
+
+                    <div class="mt-2">
+                    <a href="#" data-toggle="modal" data-target="#constanteover" class="btn btn-outline-primary mr-4" ><em class="icon ni ni-note-add"></em>Constantes</a>
+                    <div class="modal fade" tabindex="-1" id="constanteover">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Overview des constante du Patient : <span class="text-primary">{{ consultationsdupatientdupatient.patient }}</span> </h5>
+            </div>
+            <div class="modal-body">
+                <div class="nk-block card card-bordered">
+
+                     {% if consultationsdupatientdupatient.patient.latest_constante %}
+                     <h4>Deniere constante enregistrée le : {{ consultationsdupatientdupatient.patient.latest_constante.created_at }} </h4>
+                            <table class="table table-ulogs">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th class="tb-col-os"><span class="overline-title">Libélé <span class="d-sm-none">/ IP</span></span>
+                                    </th>
+                                    <th class="tb-col-ip"><span class="overline-title">Valeure</span></th>
+                                    <th class="tb-col-time"><span class="overline-title">Observation</span></th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+
+
+
+
+
+                                <tr>
+                                    <td class="tb-col-os">Tension systolique</td>
+                                    <td class="tb-col-ip">
+                                        <span class="sub-text">{{ consultationsdupatientdupatient.patient.latest_constante.tension_systolique }}</span>
+                                    </td>
+                                    <td class="tb-col-time">
+                                         {% if consultationsdupatientdupatient.patient.latest_constante.tension_systolique < 90 or consultationsdupatientdupatient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                        </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Tension diastolique</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.tension_diastolique }}</span></td>
+                                    <td class="tb-col-time">
+
+                                        {% if consultationsdupatient.patient.latest_constante.tension_diastolique < 60 or consultationsdupatient.patient.latest_constante.tension_diastolique > 90 %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
+                                            {% endif %}</td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Frequence cardiaque</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.frequence_cardiaque }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.frequence_cardiaque < 60 or consultationsdupatient.patient.latest_constante.frequence_cardiaque > 100 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Frequence respiratoire</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.frequence_respiratoire }}</span></td>
+                                    <td class="tb-col-time">
+                                         {% if consultationsdupatient.patient.latest_constante.frequence_respiratoire < 12 or consultationsdupatient.patient.latest_constante.frequence_respiratoire  > 20 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Temperature</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.temperature }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.temperature < 36 or consultationsdupatient.patient.latest_constante.temperature > 37.5 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Saturation oxygene</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.saturation_oxygene }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.saturation_oxygene < 95 or consultationsdupatient.patient.latest_constante.saturation_oxygene > 100 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Glycemie</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.glycemie }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.glycemie < 70 or consultationsdupatient.patient.latest_constante.glycemie > 140 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">poids</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.poids }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.tension_systolique < 90 or consultationsdupatient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">taille</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.taille }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.tension_systolique < 90 or consultationsdupatient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                    <tr>
+                                    <td class="tb-col-os">pouls</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.pouls }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.tension_systolique < 90 or consultationsdupatient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">IMC</td>
+                                    <td class="tb-col-ip"><span class="sub-text">{{ consultationsdupatient.patient.latest_constante.imc }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if consultationsdupatient.patient.latest_constante.tension_systolique < 90 or consultationsdupatient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+
+                    {% else %}
+                        Pas de constantes enregistrées
+                    {% endif %}
+                </div>
+
+
+            </div>
+            <div class="modal-footer bg-light">
+                <span class="sub-text">Prise de tension {{ patient.patient}} {{ consultationsdupatient.patient.code_patient}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+                        <a href="{% url 'detail_patient' consultationsdupatient.patient.pk %}" class="btn btn-outline-primary mr-4" ><em class="icon ni ni-folder"></em>Dossier</a>
+                        <a href="#" class="btn btn-outline-lighter float-right" ><em class="icon ni ni-printer"></em> Imprimer</a>
+                    <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id  %}" class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>
+                    
+                     
+
+                        </div>
+
+
+                </div><!-- .nk-block-head -->
+
+                <div class="nk-block">
+                    <div class="card card-bordered card-stretch">
+                        <div class="card-inner-group">
+    <blockquote class="blockquote text-center">
+        <p class="mb-0">Motif de consultation du <strong class="text-primary" >{{ consultationsdupatient.created_at }}</strong>:</p>
+                                        <footer class="blockquote-footer">{{ consultationsdupatient.reason }}</footer>
+                                    </blockquote>
+                                    <hr>
+                            <div class="row m-4">
+
+
+
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+                                            <div class="card-header">Diagnostiques <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#diagnosis"> <em class="icon ni ni-plus-circle-fill"></em></button></div>
+                                            <div class="card-inner text-black-70">
+                                                {{ consultationsdupatient.diagnosis|safe }}
+                                            </div>
+                                        </div>
+</div>
+
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Symptomes <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#symptomes"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-black-70">
+                                            <table class="table">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date de debut</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for symptome in consultationsdupatient.symptomes.all %}
+                                                     <tr>
+                                                     <td>{{ symptome.nom }}</td>
+                                                     <td style="text-align: right">{{ symptome.date_debut }}</td>
+                                                         <td style="text-align: right"><a href="{% url 'symptome_delete' symp=symptome.id consultation_id=consultationsdupatient.id  %}" class="btn btn-outline-light"><i class="fa-solid fa-trash-alt"></i></a></td>
+                                                     </tr>
+                                                      {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6  mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Antécédents médicaux <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#Antecedents"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-black-70">
+                                            <table class="table-responsive">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date de debut</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for antecedant in consultationsdupatient.antecedentsMedicaux.all %}
+                                                     <tr>
+                                                     <td>{{ antecedant.nom }}</td>
+                                                     <td style="text-align: right">--</td>
+                                                     <td style="text-align: right">del</td>
+                                                     </tr>
+                                                     {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Allergies <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#Allergies"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-black-70">
+                                            <table class="table-responsive">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date d'ajout</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for allergie in consultationsdupatient.allergies.all %}
+                                                     <tr>
+                                                     <td>{{ allergie.titre }}</td>
+                                                     <td style="text-align: right">{{ allergie.created_at }}</td>
+                                                     <td style="text-align: right">del</td>
+                                                     </tr>
+                                                      {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Examens <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#Examens"> <em class="icon ni ni-plus-circle-fill"></em></button></div>
+                                            <div class="card-inner text-black-70">
+                                            <table class="table-responsive">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date de debut</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for examen in consultationsdupatient.examens.all %}
+                                                     <tr>
+                                                     <td>{{ examen.nom }}</td>
+                                                     <td style="text-align: right">--</td>
+                                                     <td style="text-align: right">del</td>
+                                                     </tr>
+                                                      {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-dark bg-dark-dim">
+
+        <div class="card-header">Protocoles de traitement <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#protocoles"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-dark">
+                                            <table class="table-responsive">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date de debut</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for protocole in consultationsdupatient.all %}
+                                                     <tr>
+                                                     <td>{{ symptome.nom }}</td>
+                                                     <td style="text-align: right">{{ symptome.date_debut }}</td>
+                                                     <td style="text-align: right">del</td>
+                                                     </tr>
+                                                      {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Rendez-vous <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#rendezvous"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-black-70">
+                                            <table class="table-responsive">
+                                            <th>Titre</th>
+                                            <th style="text-align: right">Date de debut</th>
+                                            <th style="text-align: right">Action</th>
+                                                 {% for rdv in consultationsdupatient.re.all %}
+                                                     <tr>
+                                                     <td>{{ symptome.nom }}</td>
+                                                     <td style="text-align: right">{{ symptome.date_debut }}</td>
+                                                     <td style="text-align: right">del</td>
+                                                     </tr>
+                                                      {%  empty %}
+                                                     <tr><td style="font-style: italic; text-align: center" class="text-white"> Aucune donnée enregistrée</td></tr>
+
+                                                {% endfor %}
+                                            </table>
+                                            </div>
+
+                                        </div>
+</div>
+<div class="col-6 col-md-6 mb-5">
+    <div class="card text-black-100 bg-dark-dim">
+
+                                            <div class="card-header">Conseils & recommandation <button type="button" class="btn btn-dark float-right" data-toggle="modal" data-target="#conseils"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                    </div>
+                                            <div class="card-inner text-black-70">
+                                           {{ consultationsdupatient.commentaires }}
+                                            </div>
+
+                                        </div>
+</div>
+
+
+                                <div class="modal fade" tabindex="-1" id="diagnosis">
+                                <div class="modal-dialog" role="document">
+<div class="modal-content">
+    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+        <em class="icon ni ni-cross"></em>
+    </a>
+    <div class="modal-header">
+        <h5 class="modal-title">Diagnostiques</h5>
+    </div>
+    <form method="post" action="">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div id="fiagnosique">
+                {% for form in formconsult %}
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12 mb-3">
+                            <div class="form-group">
+                                  {{ form.label }}
+                                {{ form }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-symptome" class="btn btn-secondary">Ajouter <i class="fa-solid fa-plus-circle fa-lg ml-5"> </i></button>
+        </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+                            </div>
+                                <div class="modal fade" tabindex="-1" id="symptomes">
+                                <div class="modal-dialog" role="document">
+<div class="modal-content">
+    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+        <em class="icon ni ni-cross"></em>
+    </a>
+    <div class="modal-header">
+        <h5 class="modal-title">Symptômes</h5>
+    </div>
+    <form method="post" action="{% url 'create_symptomes' consultation_id=consultationsdupatient.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div id="symptomes-forms">
+                {% for form in symptomes_forms %}
+                    <div class="row">
+                        <div class="col-lg-6 col-sm-12 mb-3">
+                            <div class="form-group">
+                                <label class="form-label" for="nom_{{ form.prefix }}">{{ form.nom.label }}</label>
+                                <input type="text" name="nom[]" maxlength="255" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-nom">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 mb-3">
+                            <div class="form-group">
+                                <label class="form-label" for="date_debut_{{ form.prefix }}">{{ form.date_debut.label }}</label>
+                                <input type="date" name="date_debut[]" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-date_debut">
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-symptome" class="btn btn-secondary">Ajouter <i class="fa-solid fa-plus-circle fa-lg ml-5"> </i></button>
+        </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+                            </div>
+                                <div class="modal fade" tabindex="-1" id="Antecedents">
+                                    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="{% url 'Antecedents_create' consultation_id=consultationsdupatient.id %}" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Antécédents médicaux</h5>
+        </div>
+        <form action="{% url 'Antecedents_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+            {{ antecedentsMedicaux_form }}
+        </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+                                <div class="modal fade" tabindex="-1" id="Allergies">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Allergies</h5>
+        </div>
+        <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+            {{ allergies_form }}            </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+                                <div class="modal fade" tabindex="-1" id="Examens">
+                                <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Examen physique</h5>
+        </div>
+
+        <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+            {{ examen_form }}            </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div></div>
+                                <div class="modal fade" tabindex="-1" id="conseils">
+                                <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Conseeils</h5>
+        </div>
+
+         <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+              {{ conseils_form }}           </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div></div>
+                                <div class="modal fade" tabindex="-1" id="rendezvous">
+                                <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Rendez-vous</h5>
+        </div>
+
+        <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+            {{ examen_form }}            </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div></div>
+                                <div class="modal fade" tabindex="-1" id="protocoles">
+                                <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+            <em class="icon ni ni-cross"></em>
+        </a>
+        <div class="modal-header">
+            <h5 class="modal-title">Protocole</h5>
+        </div>
+           <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}" method="post">
+            {% csrf_token %}
+        <div class="modal-body">
+              {{ conseils_form }}           </div>
+        <div class="modal-footer bg-light">
+            <div class="col-md-12 float-right mb-10">
+                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div></div>
+
+                            </div>
+                        </div><!-- .card-inner-group -->
+                    </div><!-- .card -->
+                </div><!-- .nk-block -->
+            </div>
+        </div>
+    </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let formIdx = {{ symptomes_forms|length }};
+        document.getElementById('add-symptome').addEventListener('click', function() {
+            const newForm = document.createElement('div');
+            newForm.className = 'row';
+            const formHtml = `<div class="col-lg-6 col-sm-12 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label" for="id_symptomes-${formIdx}-nom">Nom</label>
+                                    <input type="text" name="nom[]" maxlength="255" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-nom">
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-sm-12 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label" for="id_symptomes-${formIdx}-date_debut">Date début</label>
+                                    <input type="date" name="date_debut[]" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-date_debut">
+                                </div>
+                              </div>`;
+            newForm.innerHTML = formHtml;
+            document.getElementById('symptomes-forms').appendChild(newForm);
+            formIdx++;
+        });
+    });
+</script>
+{% endblock %}

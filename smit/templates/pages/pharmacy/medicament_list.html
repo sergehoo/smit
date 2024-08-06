@@ -1,0 +1,184 @@
+{% extends 'layout/base.html' %}
+{% load unicorn %}
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Liste des Medicaments</h3>
+                        <div class="nk-block-des text-soft">
+                            <p>{{ medicaments_nbr }} Medicaments</p>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        {% include 'layout/toggleoption.html' %}
+                    </div>
+                </div>
+            </div>
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner position-relative card-tools-toggle">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-wrap w-150px">
+                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Molecules">
+                                                <option value="">Molecules</option>
+                                            </select>
+                                        </div>
+                                        <div class="btn-wrap">
+                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
+                                            <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-tools mr-n1">
+                                    <ul class="btn-toolbar gx-1">
+                                        <li>
+                                            <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
+                                        </li>
+                                        <li class="btn-toolbar-sep"></li>
+                                        <li>
+                                            <div class="toggle-wrap">
+                                                <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
+                                                <div class="toggle-content" data-content="cardTools">
+                                                    <ul class="btn-toolbar gx-1">
+                                                        <li class="toggle-close">
+                                                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-arrow-left"></em></a>
+                                                        </li>
+                                                        <li>
+                                                            <div class="dropdown">
+                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                                    <div class="dot dot-primary"></div>
+                                                                    <em class="icon ni ni-filter-alt"></em>
+                                                                </a>
+                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
+                                                                    <div class="dropdown-head">
+                                                                        <span class="sub-title dropdown-title">Filter Medicaments</span>
+                                                                        <div class="dropdown">
+                                                                            <a href="#" class="btn btn-sm btn-icon">
+                                                                                <em class="icon ni ni-more-h"></em>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="dropdown-body dropdown-body-rg">
+                                                                        <div class="row gx-6 gy-3">
+                                                                            <div class="col-6">
+                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                    <input type="checkbox" class="custom-control-input" id="hasStock">
+                                                                                    <label class="custom-control-label" for="hasStock"> In Stock</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                    <input type="checkbox" class="custom-control-input" id="expired">
+                                                                                    <label class="custom-control-label" for="expired"> Expired</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <div class="form-group">
+                                                                                    <label class="overline-title overline-title-alt">Category</label>
+                                                                                    <select class="form-select form-select-sm">
+                                                                                        <option value="any">Any Category</option>
+                                                                                        {% for category in categorie %}
+                                                                                        <option value="{{ category.nom }}">{{ category.nom }}</option>
+                                                                                        {% endfor %}
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="dropdown-foot between">
+                                                                        <a class="clickable" href="#">Reset Filter</a>
+                                                                        <a href="#">Save Filter</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="dropdown">
+                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                                    <em class="icon ni ni-setting"></em>
+                                                                </a>
+                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                                                    <ul class="link-check">
+                                                                        <li><span>Show</span></li>
+                                                                        <li class="active"><a href="#">10</a></li>
+
+                                                                                        <li><a href="#">20</a></li>
+                                                                                        <li><a href="#">50</a></li>
+                                                                                    </ul>
+                                                                                    <ul class="link-check">
+                                                                                        <li><span>Order</span></li>
+                                                                                        <li class="active"><a href="#">DESC</a></li>
+                                                                                        <li><a href="#">ASC</a></li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div><!-- .dropdown -->
+                                                                        </li><!-- li -->
+                                                                    </ul><!-- .btn-toolbar -->
+                                                                </div><!-- .toggle-content -->
+                                                            </div><!-- .toggle-wrap -->
+                                                        </li><!-- li -->
+                                                    </ul><!-- .btn-toolbar -->
+                                                </div><!-- .card-tools -->
+                                            </div><!-- .card-title-group -->
+                                            <div class="card-search search-wrap" data-search="search">
+                                                <div class="card-body">
+                                                    <div class="search-content">
+                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
+                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
+                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+                                                    </div>
+                                                </div>
+                                            </div><!-- .card-search -->
+                                        </div><!-- .card-inner -->
+                                        <div class="card-inner p-0">
+                                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                                <ul class="row g-gs preview-icon-svg p-3">
+                                                    {% for medocs in medicament %}
+                                                        <li class="col-lg-3 col-6 col-sm-4">
+                                            <div class="preview-icon-box card card-bordered">
+                                                <div class="preview-icon-wrap">
+                                                   <svg height="100px" width="100px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 511.97 511.97" xml:space="preserve" fill="#53d5fd" stroke="#53d5fd" stroke-width="0.0051196900000000005" transform="rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:##f438a3;" d="M373.349,122.882c0,11.781-9.546,21.327-21.327,21.327H159.94c-11.781,0-21.335-9.546-21.335-21.327 V21.327C138.605,9.546,148.16,0,159.94,0h192.081c11.781,0,21.327,9.546,21.327,21.327L373.349,122.882L373.349,122.882z"></path> <path style="fill:#E6E9ED;" d="M437.313,447.972c0,35.342-28.654,63.996-63.995,63.996H138.652 c-35.342,0-63.996-28.654-63.996-63.996V170.646c0-35.342,28.654-63.997,63.996-63.997h234.665 c35.341,0,63.995,28.655,63.995,63.997V447.972z"></path> <path style="fill:#CCD1D9;" d="M373.318,106.65h-21.343c35.342,0,63.996,28.655,63.996,63.997v277.326 c0,35.342-28.654,63.996-63.996,63.996h21.343c35.341,0,63.995-28.654,63.995-63.996V170.646 C437.313,135.304,408.659,106.65,373.318,106.65z"></path> <g> <path style="fill:#ff0014;" d="M202.842,0v42.654c0,5.89,4.773,10.671,10.664,10.671s10.664-4.781,10.664-10.671V0H202.842z"></path> <path style="fill:#00a3d7;" d="M287.978,0v42.654c0,5.89,4.781,10.671,10.656,10.671c5.905,0,10.687-4.781,10.687-10.671V0H287.978 z"></path> <path style="fill:#00a3d7;" d="M319.977,277.31c11.734,0,21.343,9.609,21.343,21.327v21.343c0,11.733-9.608,21.326-21.343,21.326 H191.986c-11.734,0-21.335-9.593-21.335-21.326v-21.343c0-11.718,9.601-21.327,21.335-21.327H319.977z"></path> </g> <path style="fill:##00a3d7;" d="M287.978,373.304c0,11.734-9.593,21.327-21.334,21.327h-21.327c-11.733,0-21.334-9.593-21.334-21.327 V245.312c0-11.732,9.601-21.326,21.334-21.326h21.327c11.741,0,21.334,9.594,21.334,21.326L287.978,373.304L287.978,373.304z"></path> </g></svg>
+                                                </div>
+                                                <span class="preview-icon-name">{{ medocs.nom|upper }}</span>
+                                            </div><!-- .preview-icon-box -->
+                                        </li><!-- .col -->
+                                                    {% endfor %}
+                                    </ul>
+                                            </div><!-- .nk-tb-list -->
+                                        </div><!-- .card-inner -->
+                                       <div class="card-inner">
+                                            <ul class="pagination justify-content-center justify-content-md-start">
+                                                {% if page_obj.has_previous %}
+                                                    <li class="page-item"><a class="page-link" href="medicaments/?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                                {% endif %}
+
+                                                {% for num in page_obj.paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="medicaments/?page={{ num }}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% if page_obj.has_next %}
+                                                    <li class="page-item"><a class="page-link" href="medicaments/?page={{ page_obj.next_page_number }}">Next</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div><!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+                                </div><!-- .card -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+{% endblock %}
