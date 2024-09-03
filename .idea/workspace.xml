@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +163,7 @@
       <workItem from="1723819341625" duration="590000" />
       <workItem from="1724581945698" duration="598000" />
       <workItem from="1724804397099" duration="7251000" />
-      <workItem from="1725114627154" duration="36910000" />
+      <workItem from="1725114627154" duration="39508000" />
     </task>
     <servers />
   </component>
@@ -186,7 +186,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/forms.py</url>
-          <line>333</line>
+          <line>338</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

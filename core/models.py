@@ -682,8 +682,8 @@ class Patient(TimestampedModel):
     #         self.code_patient = get_random_code()
     #     super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
-        if not self.code_vih:
-            self.code_vih = get_incremental_code()
+        # if not self.code_vih:
+        #     self.code_vih = get_incremental_code()
         if not self.code_patient:
             self.code_patient = self.generate_numeric_uuid()
         if not self.avatar:
