@@ -1,6 +1,0 @@
-services:
-
-  smitweb:
-    build:
-      context: .
-      dockerfile: Dockerfile

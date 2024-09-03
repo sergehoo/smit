@@ -9,7 +9,7 @@ COPY requirements.txt /smit-app/requirements.txt
 
 RUN pip install -r requirements.txt
 
-COPY . /smit-app/
+COPY . /smitci-app/
 
 RUN python3 manage.py makemigrations && python3 manage.py migrate
 

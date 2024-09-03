@@ -5,44 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/static/images/armoirie.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/armoirieci.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logoMSHPCMU.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logoMSHPCMU.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logo_ministere_jpg.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logomshp.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/146753ce-731f-4ee3-8800-f15eb3fbe8d0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/146753ce-731f-4ee3-8800-f15eb3fbe8d0/storage_v2/_src_/schema/main.uQUzAA.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/be074c5b-53a3-4fd0-898e-898bd94cc8f9.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/be074c5b-53a3-4fd0-898e-898bd94cc8f9/storage_v2/_src_/schema/main.uQUzAA.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/smit.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/context_processors.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/context_processors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0002_alter_consultation_hospitalised.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0003_consultation_motifrejet.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0004_consultation_requested_at_consultation_validated_at.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0005_lithospitalisation_reserved_by.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/appointments/appointment_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/appointments/appointment_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/appointments/waitingrom.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/appointments/waitingrom.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient_vih.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient_vih.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/TUBERCULOSE/consultation_TB.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/TUBERCULOSE/consultation_TB.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/consultation_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/consultation_VIH.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/hospitalisation_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/hospitalisation_VIH.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/suivi_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/suivi_VIH.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,7 +163,7 @@
       <workItem from="1723819341625" duration="590000" />
       <workItem from="1724581945698" duration="598000" />
       <workItem from="1724804397099" duration="7251000" />
-      <workItem from="1725114627154" duration="30253000" />
+      <workItem from="1725114627154" duration="30608000" />
     </task>
     <servers />
   </component>
