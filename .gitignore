@@ -3,10 +3,10 @@
 *.docker-compose
 
 # Ignore Docker Compose files
-#docker-compose.yml
-#docker-compose*.yml
-#
-#Dockerfile
-#
-## Ignore .env files
-#.env
+docker-compose.yml
+docker-compose*.yml
+
+Dockerfile
+
+# Ignore .env files
+.env
