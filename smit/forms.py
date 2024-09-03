@@ -17,6 +17,7 @@ school_level = [
 
 ]
 
+
 class PatientCreateForm(forms.ModelForm):
     nom = forms.CharField(
         widget=forms.TextInput(
@@ -35,7 +36,7 @@ class PatientCreateForm(forms.ModelForm):
                'id': 'outlined'}))
     date_naissance = forms.DateField(
         widget=forms.DateInput(
-            attrs={'class': 'form-control form-control-lg form-control-outlined date-picker', 'id': 'outlined',
+            attrs={'class': 'form-control form-control-lg form-control-outlined', 'id': 'outlined',
                    'type': 'date'}))
     genre = forms.ChoiceField(choices=Sexe_choices,
                               widget=forms.Select(
@@ -55,9 +56,10 @@ class PatientCreateForm(forms.ModelForm):
     groupe_sanguin = forms.ChoiceField(choices=Goupe_sanguin_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'groupe_sanguin'}))
-    niveau_etude = forms.ChoiceField( choices=school_level,
-        widget=forms.Select(
-            attrs={'class': 'form-control  form-control-lg form-control-outlined', 'id': 'outlined', }))
+    niveau_etude = forms.ChoiceField(choices=school_level,
+                                     widget=forms.Select(
+                                         attrs={'class': 'form-control  form-control-lg form-control-outlined',
+                                                'id': 'outlined', }))
     employeur = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
     pays = forms.ChoiceField(choices=pays_choices, widget=forms.Select(
@@ -256,20 +258,23 @@ class EnqueteVihForm(forms.ModelForm):
         widget=forms.NumberInput(attrs={'class': 'form-control', 'type': 'number', 'id': 'score_karnofsky'})
     )
     traitement_prophylactique_cotrimoxazole = forms.BooleanField(label='Prophylactique cotrimoxazole',
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-control', 'id': 'traitement_prophylactique_cotrimoxazole'})
-    )
+                                                                 required=False,
+                                                                 widget=forms.CheckboxInput(
+                                                                     attrs={'class': 'form-control',
+                                                                            'id': 'traitement_prophylactique_cotrimoxazole'})
+                                                                 )
     evolutif_cdc_1993 = forms.ChoiceField(choices=[('Adulte Stade A', 'Adulte Stade A'),
-                                                  ('Adulte Stade B', 'Adulte Stade B'),
-                                                  ('Adulte Stade C', 'Adulte Stade C'),
+                                                   ('Adulte Stade B', 'Adulte Stade B'),
+                                                   ('Adulte Stade C', 'Adulte Stade C'),
 
-                                                  ('Enfant Stade N', 'Enfant Stade N'),
-                                                  ('Enfant Stade A', 'Enfant Stade A'),
-                                                  ('Enfant Stade B', 'Enfant Stade B'),
-                                                  ('Enfant Stade C', 'Enfant Stade C')],
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-control', 'id': 'evolutif_cdc_1993'})
-    )
+                                                   ('Enfant Stade N', 'Enfant Stade N'),
+                                                   ('Enfant Stade A', 'Enfant Stade A'),
+                                                   ('Enfant Stade B', 'Enfant Stade B'),
+                                                   ('Enfant Stade C', 'Enfant Stade C')],
+                                          required=False,
+                                          widget=forms.Select(
+                                              attrs={'class': 'form-control', 'id': 'evolutif_cdc_1993'})
+                                          )
     infection_opportuniste = forms.ModelMultipleChoiceField(
         required=False,
         queryset=MaladieOpportuniste.objects.all(),
