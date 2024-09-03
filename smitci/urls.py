@@ -25,7 +25,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ConsultationSidaDetailView, ConsultationSidaListView, create_symptome_and_update_consultation, Antecedents_create, \
     Allergies_create, Examens_create, Conseils_add, Rendezvous_create, Protocoles_create, symptome_delete, \
     ActiviteListView, Constantes_create, hospitalisation_send_create, patient_list_view, \
-    mark_consultation_as_hospitalised
+    mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -56,11 +56,12 @@ urlpatterns = [
 
 
     # Consultation
+    path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
     path('hospitalisation/<int:consultation_id>/<int:patient_id>', mark_consultation_as_hospitalised, name='mark_hospitalisation'),
 
     path('hospitalized/<int:consultations_id>/<int:patient_id>', hospitalisation_send_create, name='send_hospitalisation'),
 
-    path('consultation/<int:patient_id>', consultation_send_create, name='send_consultation'),
+    path('consultation/<int:patient_id>/<int:rdv_id>', consultation_send_create, name='send_consultation'),
     path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
     path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
 
@@ -68,6 +69,8 @@ urlpatterns = [
 
     path('symptomes/create/<int:consultation_id>', create_symptome_and_update_consultation, name='create_symptomes'),
     path('Antecedents_create/create/<int:consultation_id>', Antecedents_create, name='Antecedents_create'),
+
+    path('enquete_create/<int:consultation_id>', enquete_create, name='enquete_create'),
     path('Allergies_create/create/<int:consultation_id>', Allergies_create, name='Allergies_create'),
     path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
     path('Conseils_add/create/<int:consultation_id>', Conseils_add, name='Conseils_add'),
@@ -76,9 +79,9 @@ urlpatterns = [
 
     path('symptome_delete/<int:consultation_id>/<int:symp>', symptome_delete, name='symptome_delete'),
 
-
-
     path('constantes/<int:patient_id>', Constantes_create, name='ajouter_constantes'),
+
+    path('consultation_print/<int:patient_id> <int:consultation_id>', create_consultation_pdf, name='telecharger_consultations'),
     # path('constantes/<int:patient_id>', ConstanteCreateView.as_view(), name='ajouter_constantes'),
 
     path('appointments/new/', views.appointment_create, name='appointment_create'),

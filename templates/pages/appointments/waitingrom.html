@@ -241,7 +241,19 @@
                                                     </div>
 
                                                     <div class="nk-tb-col">
-                                                      <span class="tb-status text-gray">en attente </span>
+                                                      {% if patient.status == 'Scheduled'%}
+                                                        <span class="tb-status badge badge-dark">En attente</span>
+
+                                                            {% elif patient.status == 'Completed' %}
+                                                            <span class="tb-status badge badge-success">Recu</span>
+
+                                                            {% elif patient.status == 'Cancelled' %}
+                                                            <span class="tb-status badge badge-danger">Annuler</span>
+
+                                                            {% else %}
+
+Cancelled
+                                                        {% endif %}
                                                     </div>
                                                     <div class="nk-tb-col nk-tb-col-tools">
                                                         <ul class="nk-tb-actions gx-2">
@@ -293,7 +305,7 @@
 
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'send_consultation' patient_id=patient.patient.id %}">
+                <form method="post" action="{% url 'send_consultation' rdv_id=patient.id patient_id=patient.patient.id %}">
             {% csrf_token %}
             <div class="row m-4">
                 {% for field in ConsultationSendForm %}
@@ -320,7 +332,7 @@
 
             </div>
             <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
+                <span class="">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
             </div>
         </div>
     </div>
@@ -359,7 +371,7 @@
                                 <tr>
                                     <td class="tb-col-os">Tension systolique</td>
                                     <td class="tb-col-ip">
-                                        <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
+                                        <span class="">{{ patient.patient.latest_constante.tension_systolique }}</span>
                                     </td>
                                     <td class="tb-col-time">
                                          {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
@@ -372,7 +384,7 @@
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Tension diastolique</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
                                     <td class="tb-col-time">
 
                                         {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
@@ -384,11 +396,11 @@
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Frequence cardiaque</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
                                     <td class="tb-col-time">
 
                                          {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
                                             {% else %}
                                              <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
                                             {% endif %}
@@ -397,10 +409,10 @@
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Frequence respiratoire</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
                                     <td class="tb-col-time">
                                          {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
                                             {% else %}
                                              <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
                                             {% endif %}
@@ -409,24 +421,24 @@
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Temperature</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.temperature }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.temperature }}</span></td>
                                     <td class="tb-col-time">
 
-                                         {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
+                                         {% if patient.patient.latest_constante.temperature_status == 'Normal' %}
+                                             <span class=""><i class="fa-solid fa-thumbs-up text-primary"></i> Température normal</span>
                                             {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
+                                             <span class="sub-text font-italic"> <i class="fa-solid fa-circle-exclamation text-danger"></i> {{ patient.patient.latest_constante.temperature_status }}</span>
                                             {% endif %}
                                     </td>
 
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Saturation oxygene</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
                                     <td class="tb-col-time">
 
                                          {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
                                             {% else %}
                                              <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
                                             {% endif %}
@@ -435,7 +447,7 @@
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">Glycemie</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span></td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.glycemie }}</span></td>
                                     <td class="tb-col-time">
 
                                          {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
@@ -447,53 +459,49 @@
 
                                 </tr>
                                 <tr>
-                                    <td class="tb-col-os">poids</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.poids }}</span></td>
+                                    <td class="tb-col-os">Poids</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.poids }}</span></td>
                                     <td class="tb-col-time">
 
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
+
+                                             <span class="sub-text font-italic">RAS</span>
+
                                     </td>
 
                                 </tr>
                                 <tr>
-                                    <td class="tb-col-os">taille</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.taille }}</span></td>
+                                    <td class="tb-col-os">Taille</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.taille }}</span></td>
                                     <td class="tb-col-time">
 
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
+
+                                             <span class="sub-text font-italic">RAS</span>
+
                                     </td>
 
                                 </tr>
                                     <tr>
-                                    <td class="tb-col-os">pouls</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.pouls }}</span></td>
+                                    <td class="tb-col-os">Pouls</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.pouls }}</span></td>
                                     <td class="tb-col-time">
 
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                         {% if patient.patient.latest_constante.pouls_status == 'Normal' %}
+                                             <span class="sub-text"><i class="fa-solid fa-thumbs-up text-primary"></i> Poul Normal </span>
                                             {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                             <span class="sub-text font-italic"> <i class="fa fa-warning"></i>  {{ patient.patient.latest_constante.pouls_status }}</span>
                                             {% endif %}
                                     </td>
 
                                 </tr>
                                 <tr>
                                     <td class="tb-col-os">IMC</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.imc }}</span></td>
+                                    <td class="tb-col-ip"><span class="bold">{{ patient.patient.latest_constante.imc|floatformat:2 }}</span></td>
                                     <td class="tb-col-time">
 
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                         {% if patient.patient.latest_constante.imc_status == 'Normal' %}
+                                             <span class="sub-text">  <i class="fa-solid fa-thumbs-up text-primary"></i>  L'Indice max corporelle est normale</span>
                                             {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                             <span class="sub-text font-italic"> <i class="fa-solid fa-circle-exclamation text-danger"></i>{{ patient.patient.latest_constante.imc_status }}</span>
                                             {% endif %}
                                     </td>
 

@@ -7,7 +7,7 @@ from core.models import Location
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     ServiceSubActivity, Consultation, EtapeProtocole, Protocole, Evaluation, Molecule, Allergies, \
-    AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization
+    AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste
 
 
 # Register your models here.
@@ -174,7 +174,33 @@ class PatientResource(resources.ModelResource):
                   'lieu_naissance', 'date_naissance', 'genre', 'nationalite', 'profession', 'nbr_enfants',
                   'groupe_sanguin', 'niveau_etude', 'employeur', 'created_by', 'avatar', 'localite', 'status')
 
+
 class PatientAdmin(ImportExportModelAdmin):
     resource_class = PatientResource
 
+
 admin.site.register(Patient, PatientAdmin)
+
+
+class TestRapideVIHAdmin(ImportExportModelAdmin):
+    pass
+    # resource_class = PatientResource
+
+
+admin.site.register(TestRapideVIH, TestRapideVIHAdmin)
+
+
+class EnqueteVihAdmin(ImportExportModelAdmin):
+    pass
+    # resource_class = PatientResource
+
+
+admin.site.register(EnqueteVih, EnqueteVihAdmin)
+
+
+class MaladieOpportunisteAdmin(ImportExportModelAdmin):
+    pass
+    # resource_class = PatientResource
+
+
+admin.site.register(MaladieOpportuniste, MaladieOpportunisteAdmin)

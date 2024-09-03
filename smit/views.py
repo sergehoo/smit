@@ -1,19 +1,30 @@
+import os
 from datetime import date
 
+import qrcode
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import request
+from django.http import request, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView, DetailView
 
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
+from reportlab.platypus.tables import TableStyle, Table
+from six import BytesIO
+
 from core.models import Location
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
-    ConseilsForm, HospitalizationSendForm
+    ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
-    Hospitalization, Suivi
+    Hospitalization, Suivi, TestRapideVIH, EnqueteVih
 
 
 # Create your views here.
@@ -56,6 +67,7 @@ def appointment_create(request):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             consultation = form.save(commit=False)
+            consultation.status = 'Scheduled'
             form.save()
             messages.success(request, 'Rendez-vous créé avec succès!')
             return redirect('appointment_list')
@@ -87,8 +99,9 @@ def appointment_create(request):
 #         form = ConsultationSendForm()
 #     return redirect('attente')
 @login_required
-def consultation_send_create(request, patient_id):
+def consultation_send_create(request, patient_id, rdv_id):
     patient = get_object_or_404(Patient, id=patient_id)
+    appointment = get_object_or_404(Appointment, id=rdv_id)
     if request.method == 'POST':
         form = ConsultationSendForm(request.POST)
         if form.is_valid():
@@ -104,6 +117,10 @@ def consultation_send_create(request, patient_id):
             activite = ServiceSubActivity.objects.filter(service=service, nom='Consultation').first()
             consultation.activite = activite
 
+            # Update the status of the appointment to 'Completed'
+            appointment.status = 'Completed'
+            appointment.save()
+
             consultation.save()
             messages.success(request, 'Patient transféré en consultation avec succès!')
             return redirect('attente')
@@ -117,6 +134,139 @@ def consultation_send_create(request, patient_id):
         'patient': patient,
     }
     return redirect('attente')
+
+
+def create_consultation_pdf(request, patient_id, consultation_id):
+    # Récupérer la consultation et l'enquête VIH associée
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    patient = consultation.patient
+    doctor = consultation.doctor if consultation.doctor else 'Inconnu'
+    enquete_vih = EnqueteVih.objects.filter(consultation=consultation).first()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Consultation_{consultation_id}_Patient_{patient.nom}.pdf"'
+
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)  # Mode portrait
+
+    # Charger les images
+    logo_path = os.path.join(settings.STATIC_ROOT, 'images/logoMSHPCMU.jpg')
+    logo_ci = os.path.join(settings.STATIC_ROOT, 'images/armoirieci.jpg')
+    watermark_path = os.path.join(settings.STATIC_ROOT, 'images/logokeneya260.png')
+    logo_image = ImageReader(logo_path) if os.path.exists(logo_path) else None
+    logo_ci = ImageReader(logo_ci) if os.path.exists(logo_ci) else None
+    watermark_image = ImageReader(watermark_path) if os.path.exists(watermark_path) else None
+
+    # Générer un QR code avec des informations de la consultation
+    qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    qr_data = f"Consultation ID: {consultation_id} - Patient: {patient.nom}- Code Patient: {patient.code_patient}"
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill='black', back_color='white')
+    qr_buffer = BytesIO()
+    qr_img.save(qr_buffer)
+    qr_image = ImageReader(qr_buffer)
+
+    # Dimensions de la page A4
+    width, height = A4
+
+    # Dessiner le filigrane en arrière-plan
+    if watermark_image:
+        c.saveState()
+        c.setFillAlpha(0.1)  # Ajustez la transparence du filigrane ici
+        c.drawImage(watermark_image, 0, 0, width=width, height=height, mask='auto')
+        c.restoreState()
+
+    # Ajouter le logo en haut à gauche
+    if logo_image:
+        c.drawImage(logo_image, 2.5 * cm, height - 2 * cm, width=50, height=50)
+
+    if logo_ci:
+        c.drawImage(logo_ci, 16 * cm, height - 2 * cm, width=100, height=50)
+
+    # Ajouter le QR code en bas à droite
+    c.drawImage(qr_image, width - 4 * cm, 1 * cm, width=50, height=50)
+
+    # Ajouter l'en-tête
+    c.setFont("Helvetica", 8)
+    c.drawString(1 * cm, height - 2.3 * cm, "Ministère de la Santé de l'hygiène Publique")  # Texte à gauche
+    c.drawString(1 * cm, height - 2.6 * cm, "et de la Couverture Maladie Universelle")  # Texte à gauche
+    # c.drawString(16 * cm, height - 2 * cm, "République de Côte d'Ivoire")  # Texte à droite
+    c.drawString(16.2 * cm, height - 2.3 * cm, "Union-Discipline-Travail")  # Texte à droite
+
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(5 * cm, height - 5 * cm, "FICHE DE SUIVIE DES PERSONNES VIVANT AVEC LE VIH")  # Texte à droite
+    c.line(5 * cm, height - 5.2 * cm, width - 4 * cm, height - 5.2 * cm)
+
+    # Ajouter une ligne pour séparer l'en-tête du contenu
+    # c.line(1 * cm, height - 2.2 * cm, width - 1 * cm, height - 2.2 * cm)
+
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(2.5 * cm, height - 6 * cm, "SUI 01 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 6.5 * cm, "SUI 02 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 7 * cm, "SUI 03 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 7.5 * cm, "SUI 04 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 8 * cm, "SUI 05 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 8.5 * cm, "SUI 06 .")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 9 * cm, "SUI 07 .")  # Texte à gauche
+
+    c.setFont("Helvetica", 8)
+    c.drawString(0.4 * cm, height - 6 * cm, "(DINTV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 6.5 * cm, "(SUJETNO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 7 * cm, "(LABNO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 7.5 * cm, "(NOMSERV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 8 * cm, "(SERVICE)")  # Texte à gauche
+
+
+    # Position de départ pour le formulaire
+    y_position = height - 6 * cm
+    line_height = 0.5 * cm
+
+    # Fonction pour dessiner une ligne de formulaire avec pointillés
+    c.setFont("Helvetica", 8)
+
+    def draw_form_line(label, value):
+        nonlocal y_position
+        c.drawString(4 * cm, y_position, f"{label}:")
+        c.drawString(9 * cm, y_position, str(value) if value else '______________________________')
+        c.setDash(1, 2)  # Pointillé
+        c.line(9 * cm, y_position - 0.2 * cm, width - 2 * cm, y_position - 0.2 * cm)
+        c.setDash()  # Réinitialiser les lignes normales
+        y_position -= line_height
+
+    # Informations de la consultation sous forme de lignes de formulaire
+    draw_form_line("Code VIH", patient.code_vih)
+    draw_form_line("Nom", patient.nom)
+    draw_form_line("Prenom", patient.prenoms)
+
+    draw_form_line("SUI 04. Médecin", doctor)
+    draw_form_line("SUI 05. Date de consultation", consultation.consultation_date.strftime('%d-%m-%Y %H:%M'))
+    draw_form_line("Diagnostic", consultation.diagnosis)
+    draw_form_line("Commentaires", consultation.commentaires)
+
+    # Ajouter les informations de l'enquête VIH si disponible
+    if enquete_vih:
+        draw_form_line("Prophylaxie antirétrovirale", "Oui" if enquete_vih.prophylaxie_antiretrovirale else "Non")
+        draw_form_line("Type de prophylaxie", enquete_vih.prophylaxie_type)
+        draw_form_line("Traitement antirétroviral", "Oui" if enquete_vih.traitement_antiretrovirale else "Non")
+        draw_form_line("Type de traitement", enquete_vih.traitement_type)
+        draw_form_line("Dernier régime antirétroviral", "Oui" if enquete_vih.dernier_regime_antiretrovirale else "Non")
+        draw_form_line("Type du dernier régime", enquete_vih.dernier_regime_antiretrovirale_type)
+        draw_form_line("Traitement prophylactique Cotrimoxazole",
+                       "Oui" if enquete_vih.traitement_prophylactique_cotrimoxazole else "Non")
+        draw_form_line("Évolutif CDC 1993", enquete_vih.evolutif_cdc_1993)
+        draw_form_line("Sous traitement", "Oui" if enquete_vih.sous_traitement else "Non")
+        draw_form_line("Score Karnofsky", enquete_vih.score_karnofsky)
+        draw_form_line("Descriptif", enquete_vih.descriptif)
+
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    response.write(buffer.getvalue())
+    buffer.close()
+
+    return response
 
 
 @login_required
@@ -260,6 +410,26 @@ def Antecedents_create(request, consultation_id):
             return redirect('detail_consultation', pk=consultation.id)
         else:
             messages.error(request, 'Erreur lors de la création de l\'antécédent médical.')
+    else:
+        form = AntecedentsMedicauxForm()
+    return redirect('detail_consultation', pk=consultation.id)
+
+
+@login_required
+def enquete_create(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    if request.method == 'POST':
+        form = EnqueteVihForm(request.POST)
+        if form.is_valid():
+            enquete = form.save(commit=False)
+            enquete.patient = consultation.patient
+            enquete.consultation = consultation
+            enquete.save()
+            messages.success(request, 'Enquête VIH créée avec succès!')
+
+            return redirect('detail_consultation', pk=consultation.id)
+        else:
+            messages.error(request, 'Erreur lors de la création de l\'Enquête.')
     else:
         form = AntecedentsMedicauxForm()
     return redirect('detail_consultation', pk=consultation.id)
@@ -519,8 +689,8 @@ class SalleAttenteListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = date.today()
-        appointments = Appointment.objects.filter(date=today).order_by('time')
-        appointments_nbr = Appointment.objects.filter(date=today).count()
+        appointments = Appointment.objects.filter(date=today, status='Scheduled').order_by('time')
+        appointments_nbr = Appointment.objects.filter(date=today, status='Scheduled').count()
 
         # Récupérer la dernière constante pour chaque patient
 
@@ -707,9 +877,41 @@ class ConsultationSidaListView(LoginRequiredMixin, ListView):
     context_object_name = "consultations_vih"
 
 
+def test_rapide_vih_create(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    if request.method == 'POST':
+        form = TestRapideVIHForm(request.POST)
+        if form.is_valid():
+            test_rapide = form.save(commit=False)
+            test_rapide.patient = consultation.patient
+            test_rapide.consultation = consultation
+            test_rapide.test_type = form.cleaned_data['test_type']
+            test_rapide.commentaire = form.cleaned_data['commentaire']
+
+            test_rapide.save()
+            messages.success(request, 'Rendez-vous ajouté avec succès!')
+            return redirect('detail_consultation', pk=consultation.id)
+    else:
+        form = TestRapideVIHForm()
+        messages.error(request, 'Le test a echoué!')
+    return redirect('detail_consultation', pk=consultation.id)
+
+
+# def test_rapide_vih_update(request, pk):
+#     test = get_object_or_404(TestRapideVIH, pk=pk)
+#     if request.method == 'POST':
+#         form = TestRapideVIHForm(request.POST, instance=test)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('test_rapide_vih_list')
+#     else:
+#         form = TestRapideVIHForm(instance=test)
+#     return render(request, 'test_rapide_vih_form.html', {'form': form})
+
+
 class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
     model = Consultation
-    template_name = "pages/services/consultations_form.html"
+    template_name = "pages/services/VIH-SIDA/details_consultation_VIH.html"
     context_object_name = "consultationsdupatient"
 
     def get_context_data(self, **kwargs):
@@ -721,7 +923,9 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['antecedentsMedicaux_form'] = AntecedentsMedicauxForm()
         context['allergies_form'] = AllergiesForm()
         context['conseils_form'] = ConseilsForm()
+        context['EnqueteVihForm'] = EnqueteVihForm()
         context['hospit_form'] = HospitalizationSendForm()
+        context['depistage_form'] = TestRapideVIHForm()
 
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]

@@ -16,12 +16,23 @@ from schedule.models import Calendar, Event
 from simple_history.models import HistoricalRecords
 from tinymce.models import HTMLField
 
-from core.models import Patient, Service, Employee, ServiceSubActivity
+from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices
 from pharmacy.models import Medicament, Molecule
 
-
 # from pharmacy.models import Medication
-
+RAPID_HIV_TEST_TYPES = [
+    ('Determine HIV-1/2', 'Determine HIV-1/2'),
+    ('Uni-Gold HIV', 'Uni-Gold HIV'),
+    ('SD Bioline HIV-1/2', 'SD Bioline HIV-1/2'),
+    ('OraQuick HIV', 'OraQuick HIV'),
+    ('INSTI HIV-1/HIV-2', 'INSTI HIV-1/HIV-2'),
+    ('Alere HIV Combo, First Response HIV 1-2-0 Card Test', 'Alere HIV Combo, First Response HIV 1-2-0 Card Test'),
+    ('Chembio HIV 1/2 STAT-PAK® Assay', 'Chembio HIV 1/2 STAT-PAK® Assay'),
+    ('OraQuick HIV 1/2', 'OraQuick HIV 1/2'),
+    ('Alere Determine HIV-1/2 Ag/Ab Combo', 'Alere Determine HIV-1/2 Ag/Ab Combo'),
+    ('Geenius™ HIV 1/2 Confirmatory Assay', 'Geenius™ HIV 1/2 Confirmatory Assay'),
+    # Ajoutez d'autres types si nécessaire
+]
 
 
 class Appointment(models.Model):
@@ -111,6 +122,49 @@ class Symptomes(models.Model):
         return f"Symptomes for {self.patient.nom} on {self.created_at}"
 
 
+class MaladieOpportuniste(models.Model):
+    nom = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nom
+
+
+class EnqueteVih(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='enquetevihs', null=True, blank=True)
+    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='enqueteconsultation', null=True, blank=True)
+    antecedents = models.ManyToManyField(MaladieOpportuniste, related_name='antecedents_vih')
+    prophylaxie_antiretrovirale = models.BooleanField(default=False)
+    prophylaxie_type = models.CharField(max_length=255, null=True, blank=True)
+    traitement_antiretrovirale = models.BooleanField(default=False)
+    traitement_type = models.CharField(max_length=255, null=True, blank=True)
+    dernier_regime_antiretrovirale = models.BooleanField(default=False)
+    dernier_regime_antiretrovirale_type = models.CharField(max_length=255, null=True, blank=True)
+
+    traitement_prophylactique_cotrimoxazole = models.BooleanField(default=False)
+
+    evolutif_cdc_1993 = models.CharField(choices=[('Adulte Stade A', 'Adulte Stade A'),
+                                                  ('Adulte Stade B', 'Adulte Stade B'),
+                                                  ('Adulte Stade C', 'Adulte Stade C'),
+
+                                                  ('Enfant Stade N', 'Enfant Stade N'),
+                                                  ('Enfant Stade A', 'Enfant Stade A'),
+                                                  ('Enfant Stade B', 'Enfant Stade B'),
+                                                  ('Enfant Stade C', 'Enfant Stade C'),
+                                                  ], max_length=255,
+                                         null=True, blank=True)
+
+    infection_opportuniste = models.ManyToManyField(MaladieOpportuniste, related_name='infection_opportuniste')
+    sous_traitement = models.BooleanField(default=False)
+
+    score_karnofsky = models.IntegerField(null=True, blank=True)
+    descriptif = models.CharField(max_length=255, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Antecedents Medicaux for {self.patient.nom} on {self.created_at}"
+
+
 class AntecedentsMedicaux(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     nom = models.CharField(max_length=255, null=True, blank=True)
@@ -150,22 +204,24 @@ class Analyse(models.Model):
     # analysis_reagents = models.ManyToManyField('Reagent', verbose_name='Réactif')
     delai_analyse = models.PositiveIntegerField(null=True, blank=True)
     # laboratoire = models.ForeignKey('Laboratory', blank=True, null=True, on_delete=models.CASCADE)
+    result = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     history = HistoricalRecords()
 
-    def save(self, *args, **kwargs):
-        # self.age = (date.today() - self.date_naissance) // (timedelta(days=365.2425))
-
-        if self.tarif_base:
-            self.tarif_public = self.tarif_base * self.nbrb.valeur
-            self.tarif_mutuelle = (self.tarif_public * 50 / 100) + self.tarif_public
-            self.forfait_assurance = (self.tarif_public * 100 / 100) + self.tarif_public
-            self.forfait_societe = (self.tarif_public * 80 / 100) + self.tarif_public
-            self.lanema = (self.tarif_public + 0.2 * self.tarif_public) / 2
-
-        super(Analyse, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # self.age = (date.today() - self.date_naissance) // (timedelta(days=365.2425))
+    #
+    #     if self.tarif_base:
+    #         self.tarif_public = self.tarif_base * self.nbrb.valeur
+    #         self.tarif_mutuelle = (self.tarif_public * 50 / 100) + self.tarif_public
+    #         self.forfait_assurance = (self.tarif_public * 100 / 100) + self.tarif_public
+    #         self.forfait_societe = (self.tarif_public * 80 / 100) + self.tarif_public
+    #         self.lanema = (self.tarif_public + 0.2 * self.tarif_public) / 2
+    #
+    #     super(Analyse, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.analysis_name}"
+        return f"{self.name}"
 
 
 class Examen(models.Model):
@@ -179,13 +235,34 @@ class Examen(models.Model):
     analyses = models.ManyToManyField('Analyse', blank=True, verbose_name="Type d'analyse")
     accepted = models.BooleanField(default=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    result = models.TextField()
-    notes = models.TextField(blank=True, null=True)
     history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.analyses} for {self.patients_requested} on {self.created_at}"
+
+
+class TestRapideVIH(models.Model):
+    RESULTAT_CHOICES = [
+        ('POSITIF', 'Positif'),
+        ('NEGATIF', 'Négatif'),
+        ('INDETERMINE', 'Indéterminé'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='tests_rapides_vih')
+    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, blank=True, null=True,
+                                     related_name='tests_for_consultation_vih')
+    date_test = models.DateTimeField(auto_now_add=True)
+    resultat = models.CharField(max_length=20, choices=RESULTAT_CHOICES)
+    laboratoire = models.CharField(max_length=100)
+    test_type = models.CharField(max_length=100, choices=[], blank=True, null=True)
+    commentaire = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Test {self.resultat} - {self.patient.nom} {self.patient.prenoms} - {self.date_test.strftime('%d/%m/%Y')}"
+
+    class Meta:
+        verbose_name = "Test Rapide VIH"
+        verbose_name_plural = "Tests Rapides VIH"
 
 
 class Consultation(models.Model):
@@ -212,10 +289,10 @@ class Consultation(models.Model):
     status = models.CharField(max_length=50, blank=True, null=True,
                               choices=[('Scheduled', 'Scheduled'), ('Completed', 'Completed'),
                                        ('Cancelled', 'Cancelled'), ])
-    hospitalised = models.PositiveIntegerField(default=0, blank=True, null=True,)
-    requested_at = models.DateTimeField(blank=True, null=True,)
-    motifrejet = models.CharField(max_length=300, blank=True, null=True,)
-    validated_at = models.DateTimeField(blank=True, null=True,)
+    hospitalised = models.PositiveIntegerField(default=0, blank=True, null=True, )
+    requested_at = models.DateTimeField(blank=True, null=True, )
+    motifrejet = models.CharField(max_length=300, blank=True, null=True, )
+    validated_at = models.DateTimeField(blank=True, null=True, )
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,
                                    related_name='consultation_creator')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -297,6 +374,44 @@ class Constante(models.Model):
             self.imc = self.poids / (self.taille / 100) ** 2
         super().save(*args, **kwargs)
 
+    @property
+    def alerte(self):
+        alertes = []
+
+        # Définir les plages normales pour chaque constante vitale
+        if self.tension_systolique and not (90 <= self.tension_systolique <= 140):
+            alertes.append(f"Tension systolique anormale: {self.tension_systolique} mmHg")
+
+        if self.tension_diastolique and not (60 <= self.tension_diastolique <= 90):
+            alertes.append(f"Tension diastolique anormale: {self.tension_diastolique} mmHg")
+
+        if self.frequence_cardiaque and not (60 <= self.frequence_cardiaque <= 100):
+            alertes.append(f"Fréquence cardiaque anormale: {self.frequence_cardiaque} bpm")
+
+        if self.frequence_respiratoire and not (12 <= self.frequence_respiratoire <= 20):
+            alertes.append(f"Fréquence respiratoire anormale: {self.frequence_respiratoire} respirations/min")
+
+        if self.temperature and not (36.1 <= self.temperature <= 37.8):
+            alertes.append(f"Température anormale: {self.temperature} °C")
+
+        if self.saturation_oxygene and not (95 <= self.saturation_oxygene <= 100):
+            alertes.append(f"Saturation en oxygène anormale: {self.saturation_oxygene} %")
+
+        if self.glycemie and not (0.7 <= self.glycemie <= 1.1):
+            alertes.append(f"Glycémie anormale: {self.glycemie} g/L")
+
+        if self.pouls and not (60 <= self.pouls <= 100):
+            alertes.append(f"Pouls anormal: {self.pouls} bpm")
+
+        # Calculer l'IMC si taille et poids sont disponibles
+        if self.taille and self.poids:
+            self.imc = round(self.poids / (self.taille / 100) ** 2, 2)
+            if not (18.5 <= self.imc <= 24.9):
+                alertes.append(f"IMC anormal: {self.imc}")
+
+        # Renvoie les alertes si elles existent, sinon un message normal
+        return " | ".join(alertes) if alertes else "Toutes les constantes sont dans les normes."
+
     def __str__(self):
         return f"Constantes pour {self.patient} le {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
 
@@ -345,8 +460,8 @@ class WaitingRoom(models.Model):
 
 
 class Suivi(models.Model):
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_suivi",
-                                 null=True, blank=True, )
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_suivi", null=True,
+                                 blank=True, )
 
 
 class Hospitalization(models.Model):
@@ -359,12 +474,7 @@ class Hospitalization(models.Model):
     room = models.CharField(max_length=100)
     bed = models.ForeignKey('LitHospitalisation', on_delete=models.SET_NULL, null=True, blank=True)
     reason_for_admission = models.TextField()
-    status = models.CharField(max_length=50, choices=[
-        ('Admitted', 'Admitted'),
-        ('Discharged', 'Discharged'),
-        ('Transferred', 'Transferred'),
-        ('Deceased', 'Deceased')
-    ])
+    status = models.CharField(max_length=50, choices=Patient_statut_choices, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

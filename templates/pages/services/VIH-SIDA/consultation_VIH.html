@@ -162,6 +162,7 @@
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
 
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code VIH</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Service</span></div>
@@ -206,9 +207,26 @@
                                          
                                                 {% for patient in consultations.all %}
                                                 <div class="nk-tb-item">
+                                                <div class="nk-tb-col tb-col-md">
+                                                          <span class="tb-status text-gray">VIH-{{ patient.patient.code_vih }} </span>
+                                                    </div>
+
+
                                                     <div class="nk-tb-col tb-col-md">
                                                         <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
-                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img src="{% static 'images/gift/alert.gif' %}" width="20"/></a> </span>
+                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
+                                                          {% with constante=patient.patient.constantes.last %}
+                                                              {% if constante %}
+                                                                  {% if constante.alerte %}
+
+                                                                      <span> <img src="{% static 'images/gift/alert.gif' %}" width="20"/></span>
+                                                                      <!-- Affiche les anomalies -->
+                                                                  {% else %}
+                                                                      <span>RAS</span> <!-- Tout est normal -->
+                                                                  {% endif %}
+                                                              {% endif %}
+                                                          {% endwith %}
+                                                          </a> </span>
                                                     </div>
                                                     <div class="nk-tb-col">
                                                         <div class="user-card">
@@ -231,36 +249,22 @@
                                                     </div>
 
                                                     <div class="nk-tb-col">
-                                                      <span class="tb-status text-gray">en attente</span>
+                                                      <span class="tb-status text-gray">{{ patient.status }}</span>
                                                     </div>
                                                     <div class="nk-tb-col nk-tb-col-tools">
                                                         <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="{% url 'detail_consultation' patient.pk %}" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Consulter">
-                                                                     <i class="fa-solid fa-edit fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Envoyer en Hospitalisation">
-                                                                    <i class="fa-solid fa-bed-pulse fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Retirer de la liste">
-                                                                    <i class="fa-solid fa-trash-alt fa-xl"></i>
-                                                                </a>
-                                                            </li>
+
                                                             <li>
                                                                 <div class="drodown">
                                                                     <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <ul class="link-list-opt no-bdr">
-                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier </span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
+                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a></li>
+                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Reprendre les Constantes</span></a></li>
                                                                             <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-na"></em><span>Suspend User</span></a></li>
+                                                                            <li><a href="{% url 'detail_consultation' patient.pk %}"><em class="fa fa-edit mr-1"></em><span>Consulter</span></a></li>
+                                                                            <li><a href="#"><em class="fa fa-bed-pulse mr-1"></em><span>Hospitaliser</span></a></li>
+                                                                            <li><a href="#"><em class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a></li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -270,7 +274,7 @@
                                                 <!-- Modal Trigger Code -->
 
 
-<!-- Modal Content Code -->
+
 <div class="modal fade" tabindex="-1" id="constante{{ patient.patient.id }}">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -506,7 +510,7 @@
                                                 {% endfor %}
 
 
-                                            </div><!-- .nk-tb-list -->
+                                            </div>
                                         </div><!-- .card-inner -->
                                        <div class="card-inner">
                                             <ul class="pagination justify-content-center justify-content-md-start">

@@ -13,7 +13,7 @@ def services_processor(request):
 
 def menu_processor(request):
     today = date.today()
-    appointments_today = Appointment.objects.filter(date=today).count()
+    appointments_today = Appointment.objects.filter(date=today, status='Scheduled').count()
     patient_nbr = Patient.objects.all().count()
     appointments_all = Appointment.objects.all().count()
     Hospitaliza = Hospitalization.objects.all().count()

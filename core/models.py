@@ -1,6 +1,7 @@
 import datetime
 import io
 import random
+import uuid
 
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
@@ -261,8 +262,11 @@ situation_matrimoniales_choices = [
 Patient_statut_choices = [
     ('Admis', 'Admis'),
     ('Sorti', 'Sorti'),
-    ('Transféré', 'Transféré'),
-    ('Décédé', 'Décédé'),
+    ('Gueris-EXEA', 'Gueris-EXEA'),
+    ('Transféré-TRANSF', 'Transféré-TRANSF'),
+    ('SCAM', 'SCAM'),
+    ('EVADE', 'EVADE'),
+    ('DCD', 'DCD'),
     ('Sous observation', 'Sous observation'),
     ('Sous traitement', 'Sous traitement'),
     ('Chirurgie programmée', 'Chirurgie programmée'),
@@ -642,7 +646,7 @@ class Employee(models.Model):
 class Patient(TimestampedModel):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     code_patient = models.CharField(max_length=100, blank=True, unique=True)
-    code_vih = models.CharField(max_length=100, blank=True,null=True, unique=True)
+    code_vih = models.CharField(max_length=100, blank=True, null=True, unique=True)
     nom = models.CharField(max_length=225)
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
@@ -678,14 +682,20 @@ class Patient(TimestampedModel):
     #         self.code_patient = get_random_code()
     #     super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
+        if not self.code_vih:
+            self.code_vih = get_incremental_code()
         if not self.code_patient:
-            self.code_patient = get_incremental_code()
+            self.code_patient = self.generate_numeric_uuid()
         if not self.avatar:
             name = f"{self.nom} {self.prenoms}"
             bg_color = (0, 122, 255) if self.genre == 'HOMME' else (0, 122, 255)
             avatar_image = generate_avatar(name, bg_color)
             self.avatar.save(f"{self.code_patient}.png", ContentFile(avatar_image.read()), save=False)
         super(Patient, self).save(*args, **kwargs)
+
+    def generate_numeric_uuid(self):
+        # Génère un UUID et convertit en une chaîne numérique de longueur 8
+        return str(random.randint(10000000, 99999999))
 
     # Optionally, you can also use signals to handle the avatar generation
     # @receiver(post_save, sender=Patient)

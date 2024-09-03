@@ -54,7 +54,7 @@
                                                         <div class="tb-tnx-total">
                                                             <span class="amount">{{ demande.services }}</span>
                                                         </div>
-                                                        <div class="tb-tnx-status"><span class="badge badge-dot badge-secondary">En attente</span></div>
+                                                        <div class="tb-tnx-status"><span class="badge badge-dot badge-secondary">{{ demande.status }}</span></div>
                                                     </td>
                                                     <td class="tb-tnx-action">
                                                         <div class="dropdown">
@@ -143,7 +143,7 @@
         </div>
     </div>
 </div>
-{% endfor %}
+                                            {% endfor %}
 
 <!-- Modal Content Code -->
 
