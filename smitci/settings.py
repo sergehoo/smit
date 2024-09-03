@@ -27,7 +27,11 @@ SECRET_KEY = 'django-insecure-toc#mdj)1snmjab-u(nw%25x^u%7f&vix@n7*@$$d^x0fl-!99
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com','www.smitci.com', 'http://smitci.com', '*']
+CSRF_TRUSTED_ORIGINS = ['https://smitci.com','http://smitci.com']
+CORS_ALLOWED_ORIGINS = [
+    'https://smitci.com', 'smitci.com','www.smitci.com', 'https://smitci.com'
+]
 
 
 # Application definition
@@ -100,24 +104,25 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 #local
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'smit.sqlite3',
-    }
-}
-
-#prod
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.environ.get('DB_NAME'),
-#         'USER': os.environ.get('DB_USER'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD'),
-#         'HOST': os.environ.get('DB_HOST'),
-#         'PORT': os.environ.get('DB_PORT'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'smit.sqlite3',
 #     }
 # }
+
+#prod
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'),
+        'PORT': os.environ.get('DATABASE_PORT'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
