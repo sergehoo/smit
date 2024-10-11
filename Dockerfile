@@ -20,8 +20,7 @@ RUN apt-get update && \
     libpq-dev \
     gcc \
     && apt-get clean && \
-    rm -rf /var/lib/apt/lists/* \
-
+    rm -rf /var/lib/apt/lists/*
 
 # Définir la variable d'environnement pour GDAL
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
