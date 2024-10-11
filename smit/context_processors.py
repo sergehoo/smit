@@ -17,10 +17,11 @@ def menu_processor(request):
     patient_nbr = Patient.objects.all().count()
     appointments_all = Appointment.objects.all().count()
     Hospitaliza = Hospitalization.objects.all().count()
+    consultations = Consultation.objects.filter(status='Scheduled').count()
     # vih_consult = Consultation.objects.filter(service='VIH-SIDA').count()
 
     return {'apointments_nbr': appointments_today, 'patient_nbr': patient_nbr, 'appointments_all': appointments_all,
-            'hoapi_nbr': Hospitaliza}
+            'hoapi_nbr': Hospitaliza, 'consul_nbr': consultations}
 
 # def check_accueil_group(request):
 #     is_accueil = False

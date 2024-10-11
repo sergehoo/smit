@@ -11,7 +11,7 @@
                                     <div class="nk-block-head-content">
                                         <h3 class="nk-block-title page-title">Suivi VHI</h3>
                                         <div class="nk-block-des text-soft">
-                                            <p> Liste des consultations </p>
+                                            <p> Liste des Patents suivis </p>
                                         </div>
                                     </div><!-- .nk-block-head-content -->
                                     <div class="nk-block-head-content">
@@ -204,7 +204,7 @@
                                                         </div>
                                                     </div>
                                                 </div><!-- .nk-tb-item -->
-                                         
+                                         {{ suivis }}
                                                 {% for patient in consultations.all %}
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col tb-col-md">

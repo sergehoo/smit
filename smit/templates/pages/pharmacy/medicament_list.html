@@ -91,9 +91,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="dropdown-foot between">
-                                                                        <a class="clickable" href="#">Reset Filter</a>
-                                                                        <a href="#">Save Filter</a>
+                                                                    <div class="dropdown-foot between"><a class="clickable" href="#">Reset Filter</a><a href="#">Save Filter</a>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -143,12 +141,54 @@
                                                         <li class="col-lg-3 col-6 col-sm-4">
                                             <div class="preview-icon-box card card-bordered">
                                                 <div class="preview-icon-wrap">
+                                                    <a href="#" data-toggle="modal" data-target="#medocs{{ medocs.id }}">
+                                                        {% if medocs.miniature %}
+                                                            <img src="{{ medocs.miniature.url }}" width="100px" height="100px"/>
+
+                                                            {% else %}
+
                                                    <svg height="100px" width="100px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 511.97 511.97" xml:space="preserve" fill="#53d5fd" stroke="#53d5fd" stroke-width="0.0051196900000000005" transform="rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:##f438a3;" d="M373.349,122.882c0,11.781-9.546,21.327-21.327,21.327H159.94c-11.781,0-21.335-9.546-21.335-21.327 V21.327C138.605,9.546,148.16,0,159.94,0h192.081c11.781,0,21.327,9.546,21.327,21.327L373.349,122.882L373.349,122.882z"></path> <path style="fill:#E6E9ED;" d="M437.313,447.972c0,35.342-28.654,63.996-63.995,63.996H138.652 c-35.342,0-63.996-28.654-63.996-63.996V170.646c0-35.342,28.654-63.997,63.996-63.997h234.665 c35.341,0,63.995,28.655,63.995,63.997V447.972z"></path> <path style="fill:#CCD1D9;" d="M373.318,106.65h-21.343c35.342,0,63.996,28.655,63.996,63.997v277.326 c0,35.342-28.654,63.996-63.996,63.996h21.343c35.341,0,63.995-28.654,63.995-63.996V170.646 C437.313,135.304,408.659,106.65,373.318,106.65z"></path> <g> <path style="fill:#ff0014;" d="M202.842,0v42.654c0,5.89,4.773,10.671,10.664,10.671s10.664-4.781,10.664-10.671V0H202.842z"></path> <path style="fill:#00a3d7;" d="M287.978,0v42.654c0,5.89,4.781,10.671,10.656,10.671c5.905,0,10.687-4.781,10.687-10.671V0H287.978 z"></path> <path style="fill:#00a3d7;" d="M319.977,277.31c11.734,0,21.343,9.609,21.343,21.327v21.343c0,11.733-9.608,21.326-21.343,21.326 H191.986c-11.734,0-21.335-9.593-21.335-21.326v-21.343c0-11.718,9.601-21.327,21.335-21.327H319.977z"></path> </g> <path style="fill:##00a3d7;" d="M287.978,373.304c0,11.734-9.593,21.327-21.334,21.327h-21.327c-11.733,0-21.334-9.593-21.334-21.327 V245.312c0-11.732,9.601-21.326,21.334-21.326h21.327c11.741,0,21.334,9.594,21.334,21.326L287.978,373.304L287.978,373.304z"></path> </g></svg>
+                                               {% endif %}
+                                                    </a>
                                                 </div>
                                                 <span class="preview-icon-name">{{ medocs.nom|upper }}</span>
                                             </div><!-- .preview-icon-box -->
                                         </li><!-- .col -->
-                                                    {% endfor %}
+<!-- Modal Trigger Code -->
+                                                        <div class="modal fade" tabindex="-1" id="medocs{{ medocs.id }}">
+                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                <div class="modal-content">
+                                                                    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <em class="icon ni ni-cross"></em>
+                                                                    </a>
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">{{ medocs.nom|upper }}  | {{ medocs.codebarre }}</h5>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                    {% if medocs.miniature %}
+                                                            <img src="{{ medocs.miniature.url }}" width="auto" height="400px"/>
+
+                                                            {% else %}
+
+                                                   <svg height="400px" width="100px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 511.97 511.97" xml:space="preserve" fill="#53d5fd" stroke="#53d5fd" stroke-width="0.0051196900000000005" transform="rotate(0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path style="fill:##f438a3;" d="M373.349,122.882c0,11.781-9.546,21.327-21.327,21.327H159.94c-11.781,0-21.335-9.546-21.335-21.327 V21.327C138.605,9.546,148.16,0,159.94,0h192.081c11.781,0,21.327,9.546,21.327,21.327L373.349,122.882L373.349,122.882z"></path> <path style="fill:#E6E9ED;" d="M437.313,447.972c0,35.342-28.654,63.996-63.995,63.996H138.652 c-35.342,0-63.996-28.654-63.996-63.996V170.646c0-35.342,28.654-63.997,63.996-63.997h234.665 c35.341,0,63.995,28.655,63.995,63.997V447.972z"></path> <path style="fill:#CCD1D9;" d="M373.318,106.65h-21.343c35.342,0,63.996,28.655,63.996,63.997v277.326 c0,35.342-28.654,63.996-63.996,63.996h21.343c35.341,0,63.995-28.654,63.995-63.996V170.646 C437.313,135.304,408.659,106.65,373.318,106.65z"></path> <g> <path style="fill:#ff0014;" d="M202.842,0v42.654c0,5.89,4.773,10.671,10.664,10.671s10.664-4.781,10.664-10.671V0H202.842z"></path> <path style="fill:#00a3d7;" d="M287.978,0v42.654c0,5.89,4.781,10.671,10.656,10.671c5.905,0,10.687-4.781,10.687-10.671V0H287.978 z"></path> <path style="fill:#00a3d7;" d="M319.977,277.31c11.734,0,21.343,9.609,21.343,21.327v21.343c0,11.733-9.608,21.326-21.343,21.326 H191.986c-11.734,0-21.335-9.593-21.335-21.326v-21.343c0-11.718,9.601-21.327,21.335-21.327H319.977z"></path> </g> <path style="fill:##00a3d7;" d="M287.978,373.304c0,11.734-9.593,21.327-21.334,21.327h-21.327c-11.733,0-21.334-9.593-21.334-21.327 V245.312c0-11.732,9.601-21.326,21.334-21.326h21.327c11.741,0,21.334,9.594,21.334,21.326L287.978,373.304L287.978,373.304z"></path> </g></svg>
+                                               {% endif %}
+
+                                                                        <p style="text-align: justify" class="mt-5">{{ medocs.description|upper }}</p>
+
+                                                                        <ul><strong><u>Molecules:</u></strong>
+                                                                    {% for molecules in medocs.molecules.all %}
+                                                                        <li><span class="badge badge-primary">{{ molecules }}</span></li>
+                                                                    {% endfor %}
+                                                                </ul>
+                                                                    </div>
+
+                                                                    <div class="modal-footer bg-light">
+                                                                        <span class="sub-text">{{ medocs.codebarre }} | SERVICE PHARMACIE SMIT</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                  {% endfor %}
                                     </ul>
                                             </div><!-- .nk-tb-list -->
                                         </div><!-- .card-inner -->

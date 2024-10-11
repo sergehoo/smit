@@ -1,11 +1,15 @@
 import uuid
 from datetime import datetime
 
+import phonenumbers
 from django import forms
+from django.core.exceptions import ValidationError
+from django_countries.fields import CountryField
 from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
-    professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices
+    professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices
+from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste
@@ -18,6 +22,14 @@ school_level = [
 ]
 
 
+class ConsultationForm(forms.ModelForm):
+    class Meta:
+        model = Consultation
+        fields = ['activite', 'patient', 'constante', 'symptomes', 'antecedentsMedicaux', 'examens', 'allergies',
+                  'services', 'doctor', 'consultation_date', 'reason', 'diagnosis', 'commentaires', 'suivi', 'status',
+                  'hospitalised', 'requested_at', 'motifrejet', 'validated_at']
+
+
 class PatientCreateForm(forms.ModelForm):
     nom = forms.CharField(
         widget=forms.TextInput(
@@ -25,9 +37,12 @@ class PatientCreateForm(forms.ModelForm):
     prenoms = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'prenom', }))
+
     contact = forms.CharField(
         widget=forms.TextInput(
-            attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': '0701020304', }))
+            attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
+                   'placeholder': '0701020304', 'id': 'phone'}))
+
     situation_matrimoniale = forms.ChoiceField(choices=situation_matrimoniales_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                'data-search': 'on', 'id': 'situation_matrimoniale'}))
@@ -41,7 +56,7 @@ class PatientCreateForm(forms.ModelForm):
     genre = forms.ChoiceField(choices=Sexe_choices,
                               widget=forms.Select(
                                   attrs={'class': 'form-control form-control-lg form-control-outlined', }))
-    nationalite = forms.ChoiceField(choices=pays_choices,
+    nationalite = forms.ChoiceField(choices=nationalite_choices,
                                     widget=forms.Select(
                                         attrs={
                                             'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
@@ -62,12 +77,15 @@ class PatientCreateForm(forms.ModelForm):
                                                 'id': 'outlined', }))
     employeur = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
-    pays = forms.ChoiceField(choices=pays_choices, widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
-               'id': 'pays'}))
-    ville = forms.ChoiceField(choices=villes_choices, widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
-               'id': 'ville'}))
+
+    pays = CountryField().formfield(
+        initial="CI",  # Set the default to Côte d'Ivoire
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                'data-search': 'on',
+                'id': 'pays'}))
+
     commune = forms.ChoiceField(choices=communes_et_quartiers_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'commune'}))
@@ -78,11 +96,19 @@ class PatientCreateForm(forms.ModelForm):
             'nom', 'prenoms', 'contact', 'situation_matrimoniale',
             'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
             'profession', 'nbr_enfants', 'groupe_sanguin', 'niveau_etude',
-            'employeur'
+            'employeur', 'commune',
         ]
-        widgets = {
-            'date_naissance': forms.DateInput(attrs={'type': 'date'}),
-        }
+        widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
+
+    def clean_contact(self):
+        contact = self.cleaned_data.get('contact')
+        try:
+            parsed_number = phonenumbers.parse(contact, 'CI')
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise ValidationError("Invalid phone number format.")
+        except phonenumbers.phonenumberutil.NumberParseException:
+            raise ValidationError("Invalid phone number.")
+        return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
 
 
 class AppointmentForm(forms.ModelForm):
@@ -334,6 +360,41 @@ class ExamenForm(forms.ModelForm):
     class Meta:
         model = Examen
         fields = ['analyses']
+
+
+class EchantillonForm(forms.ModelForm):
+    code_echantillon = forms.CharField(required=False,
+                                       widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    type = forms.ModelChoiceField(queryset=TypeEchantillon.objects.all(), required=False,
+                                  widget=forms.Select(attrs={'class': 'form-control form-control-lg '}))
+    cathegorie = forms.ModelChoiceField(queryset=CathegorieEchantillon.objects.all(), required=False,
+                                        widget=forms.Select(attrs={'class': 'form-control form-control-lg '}))
+
+    date_collect = forms.DateField(required=False,
+                                   widget=forms.DateInput(attrs={'class': 'form-control form-control-lg ', 'type':'date'}))
+    site_collect = forms.CharField(required=False,
+                                   widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+
+    status_echantillons = forms.CharField(required=False,
+                                          widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    storage_information = forms.CharField(required=False,
+                                          widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    storage_location = forms.CharField(required=False,
+                                       widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    storage_temperature = forms.CharField(required=False,
+                                          widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    volume = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+    expiration_date = forms.DateField(required=False,
+                                      widget=forms.DateInput(attrs={'class': 'form-control form-control-lg ','type':'date'}))
+
+    class Meta:
+        model = Echantillon
+        fields = [
+            'code_echantillon', 'type', 'cathegorie', 'date_collect', 'site_collect',
+            'status_echantillons', 'storage_information',
+            'storage_location', 'storage_temperature', 'volume',
+            'expiration_date'
+        ]
 
 
 class PrescriptionForm(forms.ModelForm):

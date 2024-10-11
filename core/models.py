@@ -11,6 +11,8 @@ from django.db import models
 from django.db.models import Max
 from django.utils.timezone import now
 from django_countries.fields import CountryField
+from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
+from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
 
@@ -50,6 +52,198 @@ def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
     return buffer
 
 
+nationalite_choices = [
+    ('Afghane', 'Afghane'),
+    ('Albanaise', 'Albanaise'),
+    ('Algérienne', 'Algérienne'),
+    ('Allemande', 'Allemande'),
+    ('Américaine', 'Américaine'),
+    ('Andorrane', 'Andorrane'),
+    ('Angolaise', 'Angolaise'),
+    ('Antiguaise-et-Barbudienne', 'Antiguaise-et-Barbudienne'),
+    ('Argentine', 'Argentine'),
+    ('Arménienne', 'Arménienne'),
+    ('Australienne', 'Australienne'),
+    ('Autrichienne', 'Autrichienne'),
+    ('Azerbaïdjanaise', 'Azerbaïdjanaise'),
+    ('Bahamienne', 'Bahamienne'),
+    ('Bahreïnienne', 'Bahreïnienne'),
+    ('Bangladaise', 'Bangladaise'),
+    ('Barbadiènne', 'Barbadiènne'),
+    ('Bélarusse', 'Bélarusse'),
+    ('Belge', 'Belge'),
+    ('Bélizienne', 'Bélizienne'),
+    ('Béninoise', 'Béninoise'),
+    ('Bhoutanaise', 'Bhoutanaise'),
+    ('Birmane', 'Birmane'),
+    ('Bolivienne', 'Bolivienne'),
+    ('Bosniaque', 'Bosniaque'),
+    ('Botswanéenne', 'Botswanéenne'),
+    ('Brésilienne', 'Brésilienne'),
+    ('Britannique', 'Britannique'),
+    ('Brunéienne', 'Brunéienne'),
+    ('Bulgare', 'Bulgare'),
+    ('Burkinabè', 'Burkinabè'),
+    ('Burundaise', 'Burundaise'),
+    ('Cambodgienne', 'Cambodgienne'),
+    ('Camerounaise', 'Camerounaise'),
+    ('Canadienne', 'Canadienne'),
+    ('Cap-Verdienne', 'Cap-Verdienne'),
+    ('Centrafricaine', 'Centrafricaine'),
+    ('Chilienne', 'Chilienne'),
+    ('Chinoise', 'Chinoise'),
+    ('Chypriote', 'Chypriote'),
+    ('Colombienne', 'Colombienne'),
+    ('Comorienne', 'Comorienne'),
+    ('Congolaise (Congo-Brazzaville)', 'Congolaise (Congo-Brazzaville)'),
+    ('Congolaise (Congo-Kinshasa)', 'Congolaise (Congo-Kinshasa)'),
+    ('Costaricaine', 'Costaricaine'),
+    ('Croate', 'Croate'),
+    ('Cubaine', 'Cubaine'),
+    ('Danoise', 'Danoise'),
+    ('Djiboutienne', 'Djiboutienne'),
+    ('Dominicaine', 'Dominicaine'),
+    ('Dominicain(e)', 'Dominicain(e)'),
+    ('Égyptienne', 'Égyptienne'),
+    ('Émirienne', 'Émirienne'),
+    ('Équatorienne', 'Équatorienne'),
+    ('Érythréenne', 'Érythréenne'),
+    ('Espagnole', 'Espagnole'),
+    ('Estonienne', 'Estonienne'),
+    ('Éthiopienne', 'Éthiopienne'),
+    ('Fidjienne', 'Fidjienne'),
+    ('Finlandaise', 'Finlandaise'),
+    ('Française', 'Française'),
+    ('Gabonaise', 'Gabonaise'),
+    ('Gambienne', 'Gambienne'),
+    ('Géorgienne', 'Géorgienne'),
+    ('Ghanéenne', 'Ghanéenne'),
+    ('Grenadienne', 'Grenadienne'),
+    ('Guatémaltèque', 'Guatémaltèque'),
+    ('Guinéenne', 'Guinéenne'),
+    ('Guinéenne (Guinée-Bissau)', 'Guinéenne (Guinée-Bissau)'),
+    ('Guyanienne', 'Guyanienne'),
+    ('Haïtienne', 'Haïtienne'),
+    ('Hellénique (Greque)', 'Hellénique (Greque)'),
+    ('Hondurienne', 'Hondurienne'),
+    ('Hongroise', 'Hongroise'),
+    ('Indienne', 'Indienne'),
+    ('Indonésienne', 'Indonésienne'),
+    ('Irakienne', 'Irakienne'),
+    ('Iranienne', 'Iranienne'),
+    ('Irlandaise', 'Irlandaise'),
+    ('Islandaise', 'Islandaise'),
+    ('Israélienne', 'Israélienne'),
+    ('Italienne', 'Italienne'),
+    ('Ivoirienne', 'Ivoirienne'),
+    ('Jamaïcaine', 'Jamaïcaine'),
+    ('Japonaise', 'Japonaise'),
+    ('Jordanienne', 'Jordanienne'),
+    ('Kazakhe', 'Kazakhe'),
+    ('Kényane', 'Kényane'),
+    ('Kirghize', 'Kirghize'),
+    ('Kiribatienne', 'Kiribatienne'),
+    ('Koweïtienne', 'Koweïtienne'),
+    ('Laotienne', 'Laotienne'),
+    ('Lettone', 'Lettone'),
+    ('Libanaise', 'Libanaise'),
+    ('Libérienne', 'Libérienne'),
+    ('Libyenne', 'Libyenne'),
+    ('Liechtensteinoise', 'Liechtensteinoise'),
+    ('Lituanienne', 'Lituanienne'),
+    ('Luxembourgeoise', 'Luxembourgeoise'),
+    ('Macédonienne', 'Macédonienne'),
+    ('Malaisienne', 'Malaisienne'),
+    ('Malawienne', 'Malawienne'),
+    ('Maldivienne', 'Maldivienne'),
+    ('Malgache', 'Malgache'),
+    ('Malienne', 'Malienne'),
+    ('Maltaise', 'Maltaise'),
+    ('Marocaine', 'Marocaine'),
+    ('Maréchalienne', 'Maréchalienne'),
+    ('Mauricienne', 'Mauricienne'),
+    ('Mauritanienne', 'Mauritanienne'),
+    ('Mexicaine', 'Mexicaine'),
+    ('Micronésienne', 'Micronésienne'),
+    ('Moldave', 'Moldave'),
+    ('Monégasque', 'Monégasque'),
+    ('Mongole', 'Mongole'),
+    ('Monténégrine', 'Monténégrine'),
+    ('Mozambicaine', 'Mozambicaine'),
+    ('Namibienne', 'Namibienne'),
+    ('Nauruane', 'Nauruane'),
+    ('Népalaise', 'Népalaise'),
+    ('Nicaraguayenne', 'Nicaraguayenne'),
+    ('Nigérienne', 'Nigérienne'),
+    ('Nigériane', 'Nigériane'),
+    ('Norvégienne', 'Norvégienne'),
+    ('Néo-Zélandaise', 'Néo-Zélandaise'),
+    ('Omanaise', 'Omanaise'),
+    ('Ougandaise', 'Ougandaise'),
+    ('Ouzbèke', 'Ouzbèke'),
+    ('Pakistanaise', 'Pakistanaise'),
+    ('Palaosienne', 'Palaosienne'),
+    ('Palestinienne', 'Palestinienne'),
+    ('Panaméenne', 'Panaméenne'),
+    ('Papouane-Néo-Guinéenne', 'Papouane-Néo-Guinéenne'),
+    ('Paraguayenne', 'Paraguayenne'),
+    ('Néerlandaise', 'Néerlandaise'),
+    ('Péruvienne', 'Péruvienne'),
+    ('Philippine', 'Philippine'),
+    ('Polonaise', 'Polonaise'),
+    ('Portugaise', 'Portugaise'),
+    ('Qatarienne', 'Qatarienne'),
+    ('Roumaine', 'Roumaine'),
+    ('Russe', 'Russe'),
+    ('Rwandaise', 'Rwandaise'),
+    ('Saint-Christophoro-Névicienne', 'Saint-Christophoro-Névicienne'),
+    ('Saint-Lucienne', 'Saint-Lucienne'),
+    ('Saint-Marinaise', 'Saint-Marinaise'),
+    ('Saint-Vincentaise-et-Grenadine', 'Saint-Vincentaise-et-Grenadine'),
+    ('Salomonaise', 'Salomonaise'),
+    ('Salvadorienne', 'Salvadorienne'),
+    ('Samoane', 'Samoane'),
+    ('Santoméenne', 'Santoméenne'),
+    ('Saoudienne', 'Saoudienne'),
+    ('Sénégalaise', 'Sénégalaise'),
+    ('Serbe', 'Serbe'),
+    ('Seychelloise', 'Seychelloise'),
+    ('Sierra-Léonaise', 'Sierra-Léonaise'),
+    ('Singapourienne', 'Singapourienne'),
+    ('Slovaque', 'Slovaque'),
+    ('Slovène', 'Slovène'),
+    ('Somalienne', 'Somalienne'),
+    ('Soudanaise', 'Soudanaise'),
+    ('Sud-Africaine', 'Sud-Africaine'),
+    ('Sud-Soudanaise', 'Sud-Soudanaise'),
+    ('Sri-Lankaise', 'Sri-Lankaise'),
+    ('Suédoise', 'Suédoise'),
+    ('Suisse', 'Suisse'),
+    ('Surinamaise', 'Surinamaise'),
+    ('Swazie', 'Swazie'),
+    ('Syrienne', 'Syrienne'),
+    ('Tadjike', 'Tadjike'),
+    ('Tanzanienne', 'Tanzanienne'),
+    ('Tchadienne', 'Tchadienne'),
+    ('Tchèque', 'Tchèque'),
+    ('Thaïlandaise', 'Thaïlandaise'),
+    ('Timoraise', 'Timoraise'),
+    ('Togolaise', 'Togolaise'),
+    ('Tonguienne', 'Tonguienne'),
+    ('Trinidadienne', 'Trinidadienne'),
+    ('Tunisienne', 'Tunisienne'),
+    ('Turkmène', 'Turkmène'),
+    ('Turque', 'Turque'),
+    ('Tuvaluane', 'Tuvaluane'),
+    ('Ukrainienne', 'Ukrainienne'),
+    ('Uruguayenne', 'Uruguayenne'),
+    ('Vanuatuane', 'Vanuatuane'),
+    ('Vénézuélienne', 'Vénézuélienne'),
+    ('Vietnamienne', 'Vietnamienne'),
+    ('Yéménite', 'Yéménite'),
+    ('Zambienne', 'Zambienne'),
+    ('Zimbabwéenne', 'Zimbabwéenne')
+]
 pays_choices = [
     ('Cote-d-Ivoire', 'Côte d\'Ivoire'),
     ('Afghanistan', 'Afghanistan'),
@@ -439,86 +633,98 @@ Sexe_choices = [
     ('Femme', 'Femme'),
 
 ]
-communes_et_quartiers_choices = [
 
+communes_et_quartiers_choices = [
     ('Abobo', 'Abobo'),
     ('Adjamé', 'Adjamé'),
+    ('Aboisso', 'Aboisso'),
+    ('Abengourou', 'Abengourou'),
+    ('Adzopé', 'Adzopé'),
+    ('Agboville', 'Agboville'),
+    ('Agboville', 'Agboville'),
     ('Anyama', 'Anyama'),
-    ('Attécoubé', 'Attécoubé',),
+    ('Attécoubé', 'Attécoubé'),
+    ('Bongouanou', 'Bongouanou'),
+    ('Bondoukou', 'Bondoukou'),
+    ('Bouaflé', 'Bouaflé'),
+    ('Bouaké', 'Bouaké'),
+    ('Bouna', 'Bouna'),
+    ('Bonoua', 'Bonoua'),
     ('Cocody', 'Cocody'),
-    ('Koumassi', 'Koumassi'),
-    ('Marcory', 'Marcory'),
-    ('Plateau', 'Plateau'),
-    ('Port-Bouët', 'Port-Bouët'),
-    ('Treichville', 'Treichville'),
-    ('Yopougon', 'Yopougon'),
-    ('Belleville', 'Belleville'),
-    ('Djebonoua', 'Djebonoua'),
-    ('Koko', 'Koko'),
-    ('Nimbo', 'Nimbo'),
-    ('Air France', 'Air France'),
-    ('Gonfreville', 'Gonfreville'),
-    ('Zone industrielle', 'zone industrielle'),
-    ('Dar Es Salam', 'Dar Es Salam'),
-    ('Commerce', 'Commerce'),
-    ('Orly', 'Orly'),
-    ('Sopim', 'Sopim'),
-    ('Quartier Kennedy', 'uartier Kennedy'),
-    ('Garage', 'Garage'),
-    ('Gbaloubré', 'Gbaloubré'),
-    ('Tazibouo', 'Tazibouo'),
-    ('Bel-Air', 'Bel-Air'),
-    ('Kokrenou', 'Kokrenou'),
-    ('Nanan', 'Nanan'),
-    ('Assabou', 'Assabou'),
-    ('Dioulabougou', 'Dioulabougou'),
-    ('Morofé', 'Morofé'),
-    ('Kossou', 'Kossou'),
-    ('Cité', 'Cité'),
-    ('Bardot', 'Bardot'),
-    ('Lac', 'Lac'),
-    ('Sébato', 'Sébato'),
+    ('Daloa', 'Daloa'),
+    ('Divo', 'Divo'),
     ('Grand-Bassam', 'Grand-Bassam'),
-    ('Petit Paris', 'Petit Paris'),
-    ('Sassandra', 'Sassandra'),
-    ('Kôkô', 'Kôkô'),
-    ('Togoniéré', 'Togoniéré'),
-    ('Soba', 'Soba'),
-    ('Haoussabougou', 'Haoussabougou'),
-    ('Zaguinasso', 'Zaguinasso'),
-    ('Belleville', 'Belleville'),
-    ('Libreville', 'Libreville'),
-    ('Domoraud', 'Domoraud'),
-    ('Koko', 'Koko'),
-    ('Douane', 'Douane'),
-    ('Grand Gbapleu', 'Grand Gbapleu'),
-    ('Petit Gbapleu', 'Petit Gbapleu'),
+    ('Grand-Lahou', 'Grand-Lahou'),
+    ('Guiglo', 'Guiglo'),
+    ('Korhogo', 'Korhogo'),
+    ('Man', 'Man'),
+    ('San Pedro', 'San Pedro'),
+    ('San Pédro', 'San Pédro'),
+    ('Séguéla', 'Séguéla'),
+    ('Sinfra', 'Sinfra'),
+    ('Soubré', 'Soubré'),
+    ('Tanda', 'Tanda'),
+    ('Tabou', 'Tabou'),
+    ('Tingrela', 'Tingrela'),
+    ('Yamoussoukro', 'Yamoussoukro'),
+    ('Yopougon', 'Yopougon'),
+    ('Bingerville', 'Bingerville'),
+    ('Daloa', 'Daloa'),
+    ('Tiassalé', 'Tiassalé'),
+    ('Akan', 'Akan'),
+    ('Dimbokro', 'Dimbokro'),
+    ('Gagnoa', 'Gagnoa'),
+    ('Dabou', 'Dabou'),
+    ('Lakota', 'Lakota'),
+    ('Katiola', 'Katiola'),
+    ('Mankono', 'Mankono'),
+    ('Niakara', 'Niakara'),
+    ('Ouangolodougou', 'Ouangolodougou'),
+    ('Oumé', 'Oumé'),
+    ('Tiebissou', 'Tiebissou'),
+    ('Danané', 'Danané'),
+    ('Odienné', 'Odienné'),
+    ('Tiapoum', 'Tiapoum'),
+    ('Bounoua', 'Bounoua'),
+    ('Bouaflé', 'Bouaflé'),
+    ('Bingerville', 'Bingerville'),
+    ('Kouassi-Datékro', 'Kouassi-Datékro'),
+    ('Zuenoula', 'Zuenoula'),
+    ('Ferkessedougou', 'Ferkessedougou'),
+    ('Dabakala', 'Dabakala'),
+    ('Tiebissou', 'Tiebissou'),
+    ('Bingerville', 'Bingerville'),
+    ('Moussoukoro', 'Moussoukoro'),
+    ('Zouan-Hounien', 'Zouan-Hounien'),
+    ('Vavoua', 'Vavoua'),
+    ('Sikensi', 'Sikensi'),
+    ('Bouna', 'Bouna'),
+    ('Oberlin', 'Oberlin'),
+    ('Bongouanou', 'Bongouanou'),
+    ('Bocanda', 'Bocanda'),
+    ('Kani', 'Kani'),
+    ('Brobo', 'Brobo'),
+    ('Prikro', 'Prikro'),
+    ('Niakara', 'Niakara'),
+    ('Dabou', 'Dabou'),
+    ('Katiola', 'Katiola'),
+    ('Kouibly', 'Kouibly'),
     ('Sakassou', 'Sakassou'),
-    ('Lonkoua', 'Lonkoua'),
-    ('Konankro', 'Konankro'),
-    ('Gremian', 'Gremian'),
-    ('Guessiguié', 'Guessiguié'),
-    ('Papara', 'Papara'),
-    ('Abobo PK18', 'Abobo PK18'),
-    ('Belle Ville', 'Belle Ville'),
-    ('Zimbo', 'Zimbo'),
-    ('Kobroko', 'Kobroko'),
-    ('Anokoi-Kouté', 'Anokoi-Kouté'),
-    ('Ahoué', 'Ahoué'),
-    ('Samanké', 'Samanké'),
-    ('Garahio', 'Garahio'),
-    ('Sérihio', 'Sérihio'),
-    ('Kpapékou', 'Kpapékou'),
-    ('Libreville', 'Libreville'),
-    ('Gnagbodougnoa', 'Gnagbodougnoa'),
-    ('Guibéroua', 'Guibéroua'),
-    ('Ouragahio', 'Ouragahio'),
-    ('Autre', 'Autre')
+    ('Tengrela', 'Tengrela'),
+    ('Bouaflé', 'Bouaflé'),
+    ('Gagnoa', 'Gagnoa'),
+    ('Mankono', 'Mankono'),
+    ('Oumé', 'Oumé'),
+    ('Grand Lahou', 'Grand Lahou'),
+    ('Ouangolodougou', 'Ouangolodougou'),
+    ('Kouassi-Kouassikro', 'Kouassi-Kouassikro'),
+    ('Sassandra', 'Sassandra'),
+    ('Autre', 'Autre'),
 ]
 
 
 def get_random_code() -> str:
-    return str(datetime.date.today().year)[2:] + '-' + str(random.randint(0000, 9999))
+    return str(datetime.date.today().year)[2:]  + str(random.randint(0000, 9999))
 
 
 def get_incremental_code() -> str:
@@ -526,8 +732,8 @@ def get_incremental_code() -> str:
     current_year_short = str(current_year)[2:]
 
     # Get the latest patient code for the current year
-    latest_patient = Patient.objects.filter(code_patient__startswith=current_year_short).aggregate(Max('code_patient'))[
-        'code_patient__max']
+    latest_patient = Patient.objects.filter(code_vih__startswith=current_year_short).aggregate(Max('code_vih'))[
+        'code_vih__max']
 
     if latest_patient:
         # Extract the numeric part and increment it
@@ -547,18 +753,28 @@ def qlook():
     return qlook
 
 
+# class Localite(models.Model):
+#     nom = models.CharField(max_length=255)
+#     code = models.CharField(max_length=50, null=True, blank=True)  # Si des codes spécifiques existent
+#     type = models.CharField(max_length=50, null=True, blank=True)  # Par exemple, ville, commune, village
+#     region = models.CharField(max_length=255, null=True, blank=True)  # Si applicable
+#     geojson = models.JSONField(null=True, blank=True, )
+#
+#     def __str__(self):
+#         return self.nom
+
+
 # Create your models here.
 class Location(models.Model):
     contry = CountryField()
     ville = models.CharField(max_length=225, null=True, blank=True)
     commune = models.CharField(max_length=225, null=True, blank=True)
     quartier = models.CharField(max_length=225, null=True, blank=True)
-    latitude = models.CharField(max_length=225, null=True, blank=True)
-    longitude = models.CharField(max_length=225, null=True, blank=True)
-    current_locatiom = models.BooleanField(default=False)
+    geojson = models.JSONField(null=True, blank=True)
+    current_location = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.ville
+        return f"{self.commune}, {self.contry}"
 
 
 class TimestampedModel(models.Model):
@@ -569,6 +785,9 @@ class TimestampedModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return self.created_at
 
 
 class Service(models.Model):
@@ -643,10 +862,10 @@ class Employee(models.Model):
         )
 
 
-class Patient(TimestampedModel):
+class Patient(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    code_patient = models.CharField(max_length=100, blank=True, unique=True)
-    code_vih = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    code_patient = models.CharField(max_length=100, default=get_random_code, unique=True)
+    code_vih = models.CharField(max_length=100, default=get_incremental_code, unique=True)
     nom = models.CharField(max_length=225)
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
@@ -663,7 +882,20 @@ class Patient(TimestampedModel):
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
     avatar = models.ImageField(null=True, blank=True)
     localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    cascontact = models.ManyToManyField('self')
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    details = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        # permissions = (
+        #     ('view_patient', 'Can view patient'),
+        #     ('edit_patient', 'Can edit patient'),
+        #     ('delete_patient', 'Can delete patient'),
+        # )
 
     @property
     def services_passed(self):
@@ -674,16 +906,9 @@ class Patient(TimestampedModel):
         all_services = Service.objects.filter(id__in=all_service_ids)
         return all_services
 
-    def __str__(self):
-        return f"{self.nom} {self.prenoms}"
-
-    # def save(self, *args, **kwargs):
-    #     if self.code_patient == '':
-    #         self.code_patient = get_random_code()
-    #     super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
-        # if not self.code_vih:
-        #     self.code_vih = get_incremental_code()
+        if not self.code_vih:
+            self.code_vih = get_incremental_code()
         if not self.code_patient:
             self.code_patient = self.generate_numeric_uuid()
         if not self.avatar:
@@ -720,8 +945,16 @@ class Patient(TimestampedModel):
     def latest_constante(self):
         return self.constantes.order_by('-created_at').first()
 
-    class Meta:
-        ordering = ['-created_at']
-
     def __str__(self):
-        return f'{self.prenoms} {self.nom}'
+        # Ensure nom and prenoms are not None, using default values if necessary
+        prenoms = self.prenoms if self.prenoms else "Inconnu"
+        nom = self.nom if self.nom else "Inconnu"
+        return f'{prenoms} {nom} '
+
+
+class PatientUserObjectPermission(UserObjectPermissionBase):
+    content_object = models.ForeignKey(Patient, on_delete=models.CASCADE)
+
+
+class PatientGroupObjectPermission(GroupObjectPermissionBase):
+    content_object = models.ForeignKey(Patient, on_delete=models.CASCADE)

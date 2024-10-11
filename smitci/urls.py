@@ -25,84 +25,96 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ConsultationSidaDetailView, ConsultationSidaListView, create_symptome_and_update_consultation, Antecedents_create, \
     Allergies_create, Examens_create, Conseils_add, Rendezvous_create, Protocoles_create, symptome_delete, \
     ActiviteListView, Constantes_create, hospitalisation_send_create, patient_list_view, \
-    mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf
+    mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
+    ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
+    delete_test_rapide_vih, delete_examen, ConstanteUpdateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('schedule/', include('schedule.urls')),
-    path("unicorn/", include("django_unicorn.urls")),
-    path('patients/', patient_list_view, name='patient-list'),
+                  path('admin/', admin.site.urls),
+                  path('accounts/', include('allauth.urls')),
+                  path('schedule/', include('schedule.urls')),
+                  path("unicorn/", include("django_unicorn.urls")),
+                  path('patients/', patient_list_view, name='patient-list'),
 
-    path('pharmacy/', include('pharmacy.urls')),
+                  path('pharmacy/', include('pharmacy.urls')),
 
-    path('hospitalisation/', include('hospitalisation.urls')),
+                  path('hospitalisation/', include('hospitalisation.urls')),
 
-    path('laboratoire/', include('laboratory.urls')),
-    path('tinymce/', include('tinymce.urls')),
+                  path('laboratoire/', include('laboratory.urls')),
+                  path('tinymce/', include('tinymce.urls')),
 
-    path('', HomePageView.as_view(), name='home'),
-    path('listePatient/', PatientListView.as_view(), name='glogal_search'),
-    path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
-    # path('patient/<int:patient_id>/service/<int:service_id>/', service_detail_view, name='service_detail'),
+                  path('', HomePageView.as_view(), name='home'),
+                  path('listePatient/', PatientListView.as_view(), name='global_search'),
+                  path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
+                  # path('patient/<int:patient_id>/service/<int:service_id>/', service_detail_view, name='service_detail'),
 
+                  path('Patientadd/', PatientCreateView.as_view(), name='add_patient'),
 
-    path('Patientadd/', PatientCreateView.as_view(), name='add_patient'),
+                  path('salle_attente/', SalleAttenteListView.as_view(), name='attente'),
 
-    path('salle_attente/', SalleAttenteListView.as_view(), name='attente'),
+                  path('rendez-vous/', RendezVousListView.as_view(), name='appointment_list'),
+                  path('rendez-vous/<int:pk>', RendezVousDetailView.as_view(), name='appointment_detail'),
 
-    path('rendez-vous/', RendezVousListView.as_view(), name='appointment_list'),
-    path('rendez-vous/<int:pk>', RendezVousDetailView.as_view(), name='appointment_detail'),
+                  # Consultation
+                  path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
 
+                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih, name='delete_test_rapide_vih'),
 
-    # Consultation
-    path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
-    path('hospitalisation/<int:consultation_id>/<int:patient_id>', mark_consultation_as_hospitalised, name='mark_hospitalisation'),
+                  path('hospitalisation/<int:consultation_id>/<int:patient_id>', mark_consultation_as_hospitalised,
+                       name='mark_hospitalisation'),
 
-    path('hospitalized/<int:consultations_id>/<int:patient_id>', hospitalisation_send_create, name='send_hospitalisation'),
+                  path('hospitalized/<int:consultations_id>/<int:patient_id>', hospitalisation_send_create,
+                       name='send_hospitalisation'),
 
-    path('consultation/<int:patient_id>/<int:rdv_id>', consultation_send_create, name='send_consultation'),
-    path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
-    path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
+                  path('consultation/<int:patient_id>/<int:rdv_id>', consultation_send_create,
+                       name='send_consultation'),
+                  path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
+                  path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
 
-    path('service/<str:serv>/<str:acty>/<int:acty_id>', ActiviteListView.as_view(), name='service_activity_list'),
+                  path('consultations/', ConsultationListView.as_view(), name='consultation_list'),
+                  path('consultations/<int:pk>/', ConsultationDetailView.as_view(), name='consultation_detail'),
+                  path('consultations/<int:pk>/modifier/', ConsultationUpdateView.as_view(),
+                       name='consultation_update'),
+                  path('consultations/<int:pk>/supprimer/', ConsultationDeleteView.as_view(),
+                       name='consultation_delete'),
 
-    path('symptomes/create/<int:consultation_id>', create_symptome_and_update_consultation, name='create_symptomes'),
-    path('Antecedents_create/create/<int:consultation_id>', Antecedents_create, name='Antecedents_create'),
+                  path('service/<str:serv>/<str:acty>/<int:acty_id>', ActiviteListView.as_view(),
+                       name='service_activity_list'),
 
-    path('enquete_create/<int:consultation_id>', enquete_create, name='enquete_create'),
-    path('Allergies_create/create/<int:consultation_id>', Allergies_create, name='Allergies_create'),
-    path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
-    path('Conseils_add/create/<int:consultation_id>', Conseils_add, name='Conseils_add'),
-    path('Rendezvous_create/create/<int:consultation_id>', Rendezvous_create, name='Rendezvous_create'),
-    path('Protocoles_create/create/<int:consultation_id>', Protocoles_create, name='Protocoles_create'),
+                  path('symptomes/create/<int:consultation_id>', create_symptome_and_update_consultation,
+                       name='create_symptomes'),
+                  path('Antecedents_create/create/<int:consultation_id>', Antecedents_create,
+                       name='Antecedents_create'),
 
-    path('symptome_delete/<int:consultation_id>/<int:symp>', symptome_delete, name='symptome_delete'),
+                  path('enquete_create/<int:consultation_id>', enquete_create, name='enquete_create'),
+                  path('Allergies_create/create/<int:consultation_id>', Allergies_create, name='Allergies_create'),
+                  path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
 
-    path('constantes/<int:patient_id>', Constantes_create, name='ajouter_constantes'),
+                  path('delete_examen/<int:examen_id>/create/<int:consultation_id>', delete_examen, name='Examens_delete'),
 
-    path('consultation_print/<int:patient_id> <int:consultation_id>', create_consultation_pdf, name='telecharger_consultations'),
-    # path('constantes/<int:patient_id>', ConstanteCreateView.as_view(), name='ajouter_constantes'),
+                  path('Conseils_add/create/<int:consultation_id>', Conseils_add, name='Conseils_add'),
+                  path('Rendezvous_create/create/<int:consultation_id>', Rendezvous_create, name='Rendezvous_create'),
+                  path('Protocoles_create/create/<int:consultation_id>', Protocoles_create, name='Protocoles_create'),
 
-    path('appointments/new/', views.appointment_create, name='appointment_create'),
+                  path('symptome_delete/<int:consultation_id>/<int:symp>', symptome_delete, name='symptome_delete'),
 
-    # path('appointments/new/', views.appointment_create, name='appointment_create'),
+                  path('constantes/<int:patient_id>', Constantes_create, name='ajouter_constantes'),
 
-    path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
+                  path('consultation_print/<int:patient_id> <int:consultation_id>', create_consultation_pdf,
+                       name='telecharger_consultations'),
+                  # path('constantes/<int:patient_id>', ConstanteCreateView.as_view(), name='ajouter_constantes'),
 
-    path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
+                  path('appointments/new/', views.appointment_create, name='appointment_create'),
 
-    path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(),name='service_content_detail'),
+                  # path('appointments/new/', views.appointment_create, name='appointment_create'),
 
+                  path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
 
+                  path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
 
+                  path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
+                  path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),
 
-
-
-
-
-
-
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -27,7 +27,6 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         context['demande_hospi_nbr'] = demande_hospi_nbr
         context['demande_hospi_form'] = HospitalizationSendForm()
 
-
         return context
 
 

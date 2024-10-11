@@ -17,7 +17,6 @@ from django.contrib import staticfiles
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -27,16 +26,16 @@ SECRET_KEY = 'django-insecure-toc#mdj)1snmjab-u(nw%25x^u%7f&vix@n7*@$$d^x0fl-!99
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com','www.smitci.com', 'http://smitci.com', '*']
-CSRF_TRUSTED_ORIGINS = ['https://smitci.com','http://smitci.com']
+ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'http://smitci.com', '*']
+CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'http://smitci.com']
 CORS_ALLOWED_ORIGINS = [
-    'https://smitci.com', 'smitci.com','www.smitci.com', 'https://smitci.com'
+    'https://smitci.com', 'smitci.com', 'www.smitci.com', 'https://smitci.com'
 ]
-
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,11 +55,26 @@ INSTALLED_APPS = [
     'tinymce',
     'django_countries',
     'schedule',
+
     'django_extensions',
     'django_unicorn',
     'core',
     'import_export',
+    'django_filters',
+    'guardian',
+    "phonenumber_field",
+
 ]
+
+ASGI_APPLICATION = "smitci.asgi.application"
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Authentification classique
+    # `allauth` specific authentication methods, such as login by email
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'guardian.backends.ObjectPermissionBackend',  # Backend de permissions Guardian
+
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -100,7 +114,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'smitci.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 # local
@@ -110,34 +123,48 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #         'NAME': BASE_DIR / 'smit.sqlite3',
 #     }
 # }
-
-#prod
-
+# local one
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'smitci',
+        'USER': 'postgres',
+        'PASSWORD': 'weddingLIFE18',
+        'HOST': 'localhost',
+        'PORT': '5433',
     }
 }
+#prod
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
+#         'NAME': os.environ.get('DATABASE_NAME'),
+#         'USER': os.environ.get('DATABASE_USER'),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_HOST'),
+#         'PORT': os.environ.get('DATABASE_PORT'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
+PHONENUMBER_DB_FORMAT="NATIONAL"
+PHONENUMBER_DEFAULT_FORMAT="E164"
+
+
 
 LOGOUT_REDIRECT_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
 
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
-
-]
+# AUTHENTICATION_BACKENDS = [
+#     # Needed to login by username in Django admin, regardless of `allauth`
+#     'django.contrib.auth.backends.ModelBackend',
+#
+#     # `allauth` specific authentication methods, such as login by email
+#     'allauth.account.auth_backends.AuthenticationBackend',
+#
+# ]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -153,7 +180,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+#gdal-config --libs >---commande linux ou mac os
 
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 LANGUAGES = [
     ('fr', 'Français'),
     ('en', 'English'),
@@ -174,13 +204,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+SCHEDULER_ADMIN = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, 'components')
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
@@ -190,7 +223,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # TINYMCE_DEFAULT_CONFIG = {
 #     'height': 360,

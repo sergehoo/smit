@@ -17,7 +17,7 @@ from simple_history.models import HistoricalRecords
 from tinymce.models import HTMLField
 
 from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices
-from pharmacy.models import Medicament, Molecule
+from pharmacy.models import Medicament, Molecule, RendezVous
 
 # from pharmacy.models import Medication
 RAPID_HIV_TEST_TYPES = [
@@ -33,6 +33,14 @@ RAPID_HIV_TEST_TYPES = [
     ('Geenius™ HIV 1/2 Confirmatory Assay', 'Geenius™ HIV 1/2 Confirmatory Assay'),
     # Ajoutez d'autres types si nécessaire
 ]
+
+
+def request_number():
+    WordStack = ['S', 'M', 'I', 'T', 'C', '', 'I']
+    random_str = random.choice(WordStack)
+    current_date = datetime.datetime.now().strftime("%Y%m%d")
+    traking = (random_str + str(random.randrange(0, 9999, 1)) + current_date)
+    return traking
 
 
 class Appointment(models.Model):
@@ -132,7 +140,8 @@ class MaladieOpportuniste(models.Model):
 
 class EnqueteVih(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='enquetevihs', null=True, blank=True)
-    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='enqueteconsultation', null=True, blank=True)
+    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='enqueteconsultation',
+                                     null=True, blank=True)
     antecedents = models.ManyToManyField(MaladieOpportuniste, related_name='antecedents_vih')
     prophylaxie_antiretrovirale = models.BooleanField(default=False)
     prophylaxie_type = models.CharField(max_length=255, null=True, blank=True)
@@ -225,17 +234,19 @@ class Analyse(models.Model):
 
 
 class Examen(models.Model):
-    # request_number = models.CharField(default=request_number, max_length=100, unique=True)
+    request_number = models.CharField(default=request_number, max_length=100, unique=True)
     patients_requested = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="patients")
+    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='examen_for_consultation')
     number = models.CharField(blank=True, null=True, max_length=300)
     delivered_by = models.CharField(blank=True, null=True, max_length=300)
     delivered_contact = models.CharField(blank=True, null=True, max_length=300)
     delivered_services = models.CharField(blank=True, null=True, max_length=300)
     date = models.DateField(blank=True, null=True)
-    analyses = models.ManyToManyField('Analyse', blank=True, verbose_name="Type d'analyse")
+    analyses = models.ForeignKey('Analyse', on_delete=models.CASCADE, blank=True, verbose_name="Type d'analyse")
     accepted = models.BooleanField(default=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    history = HistoricalRecords()
+
+    # history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.analyses} for {self.patients_requested} on {self.created_at}"
@@ -245,7 +256,6 @@ class TestRapideVIH(models.Model):
     RESULTAT_CHOICES = [
         ('POSITIF', 'Positif'),
         ('NEGATIF', 'Négatif'),
-        ('INDETERMINE', 'Indéterminé'),
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='tests_rapides_vih')
@@ -459,9 +469,51 @@ class WaitingRoom(models.Model):
         return f"{self.patient.nom} - {self.arrival_time}"
 
 
+class TraitementARV(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='traitements_arv')
+    regime = models.CharField(max_length=255, help_text="Schéma thérapeutique ARV.")
+    date_debut = models.DateField(help_text="Date de début du traitement ARV.")
+    date_fin = models.DateField(blank=True, null=True, help_text="Date de fin du traitement si applicable.")
+    adherence = models.CharField(max_length=20, choices=[
+        ('Bonne', 'Bonne'),
+        ('Moyenne', 'Moyenne'),
+        ('Faible', 'Faible')
+    ], default='Bonne', help_text="Niveau d'adhérence au traitement.")
+
+    def __str__(self):
+        return f"Traitement ARV {self.regime} pour {self.patient}"
+
+class FicheSuiviClinique(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
+    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='fichemedecinsuivi')
+    date_consultation = models.DateField(help_text="Date de la consultation.")
+    heure_consultation = models.TimeField(help_text="Heure de la consultation.", blank=True, null=True)
+    observations_cliniques = models.TextField(blank=True, null=True, help_text="Observations cliniques du médecin.")
+    poids = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Poids du patient en kg.")
+    taille = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Taille du patient en cm.")
+    pression_arterielle = models.CharField(max_length=20, blank=True, null=True, help_text="Exemple : 120/80 mmHg")
+    temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True, help_text="Température corporelle en °C.")
+    recommandations = models.TextField(blank=True, null=True, help_text="Recommandations du médecin pour le patient.")
+    prochaine_consultation = models.DateField(blank=True, null=True, help_text="Date de la prochaine consultation prévue.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Consultation de {self.patient} avec {self.medecin} le {self.date_consultation}"
 class Suivi(models.Model):
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_suivi", null=True,
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="suiviactivitepat", null=True,
                                  blank=True, )
+    services = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True,
+                                 related_name='servicesuivipat')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="suivimedecin")
+    fichesuivie = models.ForeignKey(FicheSuiviClinique, on_delete=models.CASCADE, related_name='suivisfiche')
+    traitement = models.ForeignKey(TraitementARV, on_delete=models.CASCADE, related_name='suivispatient', null=True,blank=True)
+    rdvconsult = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='suivierdvconsult',null=True,blank=True)
+    rdvpharmacie = models.ForeignKey(RendezVous, on_delete=models.CASCADE, related_name='suivierdvpharma',null=True,blank=True)
+
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.services}"
 
 
 class Hospitalization(models.Model):

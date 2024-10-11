@@ -26,7 +26,7 @@
                                         </a>
                                     </li><!-- .nk-menu-item -->
                                     <li class="nk-menu-item">
-                                        <a href="{% url 'glogal_search' %}" class="nk-menu-link">
+                                        <a href="{% url 'global_search' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-search"></em></span>
                                             <span class="nk-menu-text">Recherche</span>
                                             <span class="nk-menu-badge badge-danger">{{ patient_nbr }}</span>
@@ -43,13 +43,13 @@
                                              <span class="nk-menu-badge badge-danger">{{ apointments_nbr }}</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
-                                    <li class="nk-menu-item">
-                                        <a href="#" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><i class="fa-solid fa-truck-medical"></i></span>
-                                            <span class="nk-menu-text">Urgence</span>
-                                             <span class="nk-menu-badge badge-danger">00</span>
-                                        </a>
-                                    </li><!-- .nk-menu-item -->
+{#                                    <li class="nk-menu-item">#}
+{#                                        <a href="#" class="nk-menu-link">#}
+{#                                            <span class="nk-menu-icon"><i class="fa-solid fa-truck-medical"></i></span>#}
+{#                                            <span class="nk-menu-text">Urgence</span>#}
+{#                                             <span class="nk-menu-badge badge-danger">00</span>#}
+{#                                        </a>#}
+{#                                    </li><!-- .nk-menu-item -->#}
                                     <li class="nk-menu-item">
                                         <a href="{% url 'appointment_list' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
@@ -58,6 +58,19 @@
                                         </a>
                                     </li><!-- .nk-menu-item -->
 <hr>
+                                  <li class="nk-menu-heading">
+                                        <h6 class="overline-title text-primary-alt">Consultation</h6>
+                                    </li><!-- .nk-menu-heading -->
+                                    <li class="nk-menu-item">
+                                        <a href="{% url 'consultation_list' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><i class="fa-solid fa-bed-pulse"></i></span>
+                                            <span class="nk-menu-text">Liste Consultations</span>
+                                             <span class="nk-menu-badge badge-danger">{{ consul_nbr }}</span>
+                                        </a>
+                                    </li><!-- .nk-menu-item -->
+
+<hr>
+
                                     <li class="nk-menu-heading">
                                         <h6 class="overline-title text-primary-alt">Hospitalisation</h6>
                                     </li><!-- .nk-menu-heading -->
@@ -74,10 +87,23 @@
                                             <span class="nk-menu-text">Unités</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
+                                    <li class="nk-menu-item has-sub">
+                                        <a href="#" class="nk-menu-link nk-menu-toggle">
+                                            <span class="nk-menu-icon"><i class="fa-solid fa-gears"></i></span>
+                                            <span class="nk-menu-text">Parametres</span>
+                                        </a><ul class="nk-menu-sub">
+
+
+                                            <li class="nk-menu-item"><a href="aside.html" class="nk-menu-link"><i class=" fa-solid fa-flask-vial mr-3"></i> <span class="nk-menu-text">Analyses</span></a></li>
+                                            <li class="nk-menu-item"><a href="base.html" class="nk-menu-link"><i class=" fa-solid fa-tools mr-3"></i> <span class="nk-menu-text">Kits</span></a></li>
+
+                                        <!-- .nk-menu-sub -->     </ul>
+                                    </li>
+
 <hr>
 
                                     <li class="nk-menu-heading">
-                                        <h6 class="overline-title text-primary-alt">Services</h6>
+                                        <h6 class="overline-title text-primary-alt">Spécialités</h6>
                                     </li><!-- .nk-menu-heading -->
                                     {% for maladie in services %}
 {#                                    <li class="nk-menu-item">#}
@@ -107,26 +133,38 @@
                                         <h6 class="overline-title text-primary-alt">Laboratoire</h6>
                                     </li><!-- .nk-menu-heading -->
                                     <li class="nk-menu-item">
-                                        <a href="html/index.html" class="nk-menu-link">
+                                        <a href="{% url 'echantillons_list' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><i class="fa-solid fa-vial"></i></span>
                                             <span class="nk-menu-text">Prélèvements</span>
                                              <span class="nk-menu-badge badge-danger">00</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
                                     <li class="nk-menu-item">
-                                        <a href="html/index.html" class="nk-menu-link">
+                                        <a href="{% url 'examen_list' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><i class="fa-solid fa-flask-vial"></i></span>
-                                            <span class="nk-menu-text">Analyses en cours</span>
-                                             <span class="nk-menu-badge badge-danger">00</span>
+                                            <span class="nk-menu-text">Demande d'Analyse</span>
+                                            <span class="nk-menu-badge badge-danger">00</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
-                                     <li class="nk-menu-item">
-                                        <a href="html/index.html" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><i class="fa-solid fa-bars"></i></span>
-                                            <span class="nk-menu-text">Analyses terminées</span>
-                                             <span class="nk-menu-badge badge-danger">00</span>
-                                        </a>
-                                    </li><!-- .nk-menu-item -->
+
+{#                                    <li class="nk-menu-item">#}
+{#                                        <a href="{% url 'resultatsexam' %}" class="nk-menu-link">#}
+{#                                            <span class="nk-menu-icon"><i class="fa-solid fa-bars"></i></span>#}
+{#                                            <span class="nk-menu-text">Resultats d'Analyses</span>#}
+{#                                            <span class="nk-menu-badge badge-danger">30</span>#}
+{#                                        </a>#}
+{#                                    </li><!-- .nk-menu-item -->#}
+
+                                <li class="nk-menu-item has-sub">
+                                        <a href="#" class="nk-menu-link nk-menu-toggle">
+                                            <span class="nk-menu-icon"><i class="fa-solid fa-gears"></i></span>
+                                            <span class="nk-menu-text">Parametres</span>
+                                        </a><ul class="nk-menu-sub">
+                                            <li class="nk-menu-item"><a href="aside.html" class="nk-menu-link"><i class=" fa-solid fa-flask-vial mr-3"></i> <span class="nk-menu-text">Analyses</span></a></li>
+                                            <li class="nk-menu-item"><a href="base.html" class="nk-menu-link"><i class=" fa-solid fa-tools mr-3"></i> <span class="nk-menu-text">Kits</span></a></li>
+
+                                        <!-- .nk-menu-sub -->     </ul>
+                                    </li>
 <hr>
                                      <li class="nk-menu-heading">
                                         <h6 class="overline-title text-primary-alt">Pharmacie</h6>
@@ -138,19 +176,39 @@
                                              <span class="nk-menu-badge badge-danger">00</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
-                                   <li class="nk-menu-item">
-                                        <a href="html/index.html" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><i class="fa-solid fa-calendar-check"></i></span>
+
+
+                                <li class="nk-menu-item has-sub">
+                                        <a href="#" class="nk-menu-link nk-menu-toggle">
+                                            <span class="nk-menu-icon"><i class="fa-solid fa-gears"></i></span>
                                             <span class="nk-menu-text">Rendez-vous</span>
-                                             <span class="nk-menu-badge badge-danger">00</span>
-                                        </a>
-                                    </li><!-- .nk-menu-item -->
+                                        </a><ul class="nk-menu-sub">
+
+
+                                            <li class="nk-menu-item"><a href="#" class="nk-menu-link"><i class=" fa-solid fa-flask-vial mr-3"></i> <span class="nk-menu-text">Cette Semaine</span></a></li>
+                                            <li class="nk-menu-item"><a href="base.html" class="nk-menu-link"><i class=" fa-solid fa-tools mr-3"></i> <span class="nk-menu-text">Le mois Prochains</span></a></li>
+                                            <li class="nk-menu-item"><a href="{% url 'appointment_pharmacie' %}" class="nk-menu-link"><i class=" fa-solid fa-tools mr-3"></i> <span class="nk-menu-text">Toutes les periodes</span></a></li>
+
+                                        <!-- .nk-menu-sub -->     </ul>
+                                    </li>
                                     <li class="nk-menu-item">
                                         <a href="html/index.html" class="nk-menu-link">
                                             <span class="nk-menu-icon"><i class="fa-solid fa-archive"></i></span>
                                             <span class="nk-menu-text">Gestion Stock</span>
                                         </a>
                                     </li><!-- .nk-menu-item -->
+                                <li class="nk-menu-item has-sub">
+                                        <a href="#" class="nk-menu-link nk-menu-toggle">
+                                            <span class="nk-menu-icon"><i class="fa-solid fa-gears"></i></span>
+                                            <span class="nk-menu-text">Parametres</span>
+                                        </a><ul class="nk-menu-sub">
+
+
+                                            <li class="nk-menu-item"><a href="pharmacie.html" class="nk-menu-link"><i class=" fa-solid fa-flask-vial mr-3"></i> <span class="nk-menu-text">Ajouts medicaments</span></a></li>
+                                            <li class="nk-menu-item"><a href="rdv.html" class="nk-menu-link"><i class=" fa-solid fa-tools mr-3"></i> <span class="nk-menu-text">Ajouts molecules</span></a></li>
+
+                                        <!-- .nk-menu-sub -->     </ul>
+                                    </li>
 
 
                                 </ul><!-- .nk-menu -->

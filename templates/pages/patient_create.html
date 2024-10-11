@@ -23,38 +23,57 @@
 
                 <div class="nk-block">
                     <div class="card card-bordered card-stretch">
+                     <form method="post">
+                                {% csrf_token %}
                         <div class="card-inner-group">
-                        <form method="post">
-            {% csrf_token %}
-            <div class="row m-4">
-                {% for field in form %}
-                <div class="col-4 col-md-3 mb-3 ">
 
-                    <label for="{{ field.label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
+                                <div class="row m-4">
+                                    {% for field in form %}
+                                        <div class="col-4 col-md-3 mb-3">
+                                            <label for="{{ field.id_for_label }}"
+                                                   class="form-label">{{ field.label }}</label>
+                                            {{ field }}
 
-                    {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            <div class="col-md-12 float-right mb-10">
-            <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
-            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
-            </div>
-            </div>
+                                            {% if field.help_text %}
+                                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                                <div class="text-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                    <!-- New Commune Field -->
+{#                                    <div class="col-4 col-md-3 mb-3" id="new_commune_group" style="display: none;">#}
+{#                                        <label for="id_new_commune" class="form-label">Ajouter une nouvelle#}
+{#                                            commune</label>#}
+{#                                        {{ form.new_commune }}#}
+{#                                        {% if form.new_commune.help_text %}#}
+{#                                            <small class="form-text text-muted">{{ form.new_commune.help_text }}</small>#}
+{#                                        {% endif %}#}
+{#                                        {% for error in form.new_commune.errors %}#}
+{#                                            <div class="text-danger">{{ error }}</div>#}
+{#                                        {% endfor %}#}
+{#                                    </div>#}
+                                </div>
 
-        </form>
+                        <!-- .card-inner-group -->
 
-
-                                    </div><!-- .card-inner-group -->
                                 </div><!-- .card -->
+
+                     <div class="mb-10">
+                                <button type="submit" class="btn btn-primary mb-5 mr-5 float-right">
+                                    <i class="fa-solid fa-floppy-disk mr-2"> </i> Enregistrer
+                                </button>
+                                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right">
+                                    <i class="fa-solid fa-cancel mr-2"> </i> Annuler
+                                </button>
+
+                            </div>
+                      </form>
                             </div><!-- .nk-block -->
                         </div>
                     </div>
+                </div>
                 </div>
 
 

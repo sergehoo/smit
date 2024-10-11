@@ -52,9 +52,7 @@
                 <div class="nk-header nk-header-fixed is-light">
                     <div class="container-fluid">
                         <div class="nk-header-wrap">
-                            <div class="nk-menu-trigger d-xl-none ml-n1">
-                                <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu"><em class="icon ni ni-menu"></em></a>
-                            </div>
+
                             <div class="nk-header-brand d-xl-none">
                                 <a href="#" class="logo-link">
                                     <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
@@ -78,7 +76,7 @@
                         <div class="nk-footer-wrap">
                             <div class="nk-footer-copyright"> &copy; 2022 KENEYA by <a href="https://afriqconsulting.com" target="_blank">AFRIQCONSULTING</a>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -134,28 +132,60 @@
 {% endfor %}
 {% endif %}
 
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-    const darkSwitch = document.querySelector('.dark-switch');
-    const body = document.body;
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const darkSwitch = document.querySelector('.dark-switch');
+            const body = document.body;
 
-    // Check if the dark mode is enabled in localStorage
-    if (localStorage.getItem('dark-mode') === 'enabled') {
-        body.classList.add('dark-mode');
-    }
+            // Check if the dark mode is enabled in localStorage
+            if (localStorage.getItem('dark-mode') === 'enabled') {
+                body.classList.add('dark-mode');
+            }
 
-    // Toggle dark mode
-    darkSwitch.addEventListener('click', () => {
-        if (body.classList.contains('dark-mode')) {
-            body.classList.remove('dark-mode');
-            localStorage.setItem('dark-mode', 'disabled');
-        } else {
-            body.classList.add('dark-mode');
-            localStorage.setItem('dark-mode', 'enabled');
-        }
-    });
-});
-</script>
+            // Toggle dark mode
+            darkSwitch.addEventListener('click', () => {
+                if (body.classList.contains('dark-mode')) {
+                    body.classList.remove('dark-mode');
+                    localStorage.setItem('dark-mode', 'disabled');
+                } else {
+                    body.classList.add('dark-mode');
+                    localStorage.setItem('dark-mode', 'enabled');
+                }
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+ 
+
+    <script>
+        var input = document.querySelector("#phone");
+        var iti = window.intlTelInput(input, {
+            nationalMode: true,
+            initialCountry: "ci", // Set default to Côte d'Ivoire
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const communeSelect = document.getElementById('id_commune');
+            const newCommuneGroup = document.getElementById('new_commune_group');
+
+            communeSelect.addEventListener('change', function () {
+                if (this.value === 'Autre') {
+                    newCommuneGroup.style.display = 'block';  // Show the new commune field
+                } else {
+                    newCommuneGroup.style.display = 'none';  // Hide the new commune field
+                }
+            });
+
+            // Optional: Reset the form and hide new_commune when resetting
+            document.querySelector('button[type="reset"]').addEventListener('click', function () {
+                newCommuneGroup.style.display = 'none';
+            });
+        });
+    </script>
 </body>
 
 </html>

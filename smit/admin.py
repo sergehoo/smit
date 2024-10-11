@@ -4,10 +4,12 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from core.models import Location
+from laboratory.models import Echantillon
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     ServiceSubActivity, Consultation, EtapeProtocole, Protocole, Evaluation, Molecule, Allergies, \
-    AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste
+    AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
+    Suivi
 
 
 # Register your models here.
@@ -15,6 +17,11 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Echantillon)
+class EchantillonAdmin(admin.ModelAdmin):
     pass
 
 
@@ -108,6 +115,17 @@ class MedicamentAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Suivi)
+class SuiviAdmin(admin.ModelAdmin):
+    list_display = ['activite']
+
+
+# @admin.register(Localite)
+# class LocaliteAdmin(admin.ModelAdmin):
+#     list_display = ('nom', 'code', 'type', 'region')
+#     search_fields = ('nom',)
+
+
 class EmployeeResource(resources.ModelResource):
 
     def before_import_row(self, row, **kwargs):
@@ -175,11 +193,10 @@ class PatientResource(resources.ModelResource):
                   'groupe_sanguin', 'niveau_etude', 'employeur', 'created_by', 'avatar', 'localite', 'status')
 
 
+@admin.register(Patient)
 class PatientAdmin(ImportExportModelAdmin):
     resource_class = PatientResource
-
-
-admin.site.register(Patient, PatientAdmin)
+    list_display = ('code_patient', 'code_vih', 'nom', 'prenoms')
 
 
 class TestRapideVIHAdmin(ImportExportModelAdmin):

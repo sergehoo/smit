@@ -308,7 +308,7 @@
                                             <button type="button" class="btn btn-info mr-5 btn-icon btn-round" ><em class="icon ni ni-download-cloud "></em></button>
                                         </div>
                                         <div class="card-inner text-black-70">
-                                            <table class="table table-responsive">
+                                            <table class="table ">
                                                 <th>Titre</th>
                                                 <th style="text-align: right">Date de debut</th>
                                                 <th style="text-align: right">Action</th>
@@ -316,10 +316,9 @@
                                                     <tr>
                                                         <td>{{ symptome.nom }}</td>
                                                         <td style="text-align: right">{{ symptome.date_debut }}</td>
-                                                        <td style="text-align: right"><a
-                                                                href="{% url 'symptome_delete' symp=symptome.id consultation_id=consultationsdupatient.id %}"
-                                                                class="btn btn-outline-light"><i
-                                                                class="fa-solid fa-trash-alt"></i></a></td>
+                                                        <td style="text-align: right">
+                                                            <a href="{% url 'symptome_delete' symp=symptome.id consultation_id=consultationsdupatient.id %}" class="btn btn-outline-light btn-xs"><i class="fa-solid fa-trash-alt"></i></a>
+                                                        </td>
                                                     </tr>
                                                 {% empty %}
                                                     <tr>
@@ -341,7 +340,7 @@
                                                     data-target="#testdepistage"><em class="icon ni ni-plus-circle-fill"></em></button>
                                         </div>
                                         <div class="card-inner text-black-70">
-                                          <table class="table table-responsive">
+                                          <table class="table">
                                               <thead>
                                               <th>Date</th>
                                               <th>Type</th>
@@ -363,7 +362,8 @@
 
                                               </td>
                                               <td>
-                                                  <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
+                                                  <a class="btn btn-outline-danger  btn-icon btn-round btn-xs mr-1"  href="{% url 'delete_test_rapide_vih' test_id=test.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-trash  "></em></a>
+                                                  <a class="btn btn-outline-info  btn-icon btn-round btn-xs mr-1"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud "></em></a>
 
                                               </td>
 
@@ -380,14 +380,19 @@
                             <div class="col-12 col-md-12 mb-5">
                                     <div class="card text-black-100 border">
 
-                                        <div class="card-header">Enquete VIH   <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
-
+                                        <div class="card-header">Enquete VIH  
+                                            {% if not consultationsdupatient.enqueteconsultation.exists %}
+                                            {% else %}
+                                            <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
+                                            {% endif %}
+                                        {% if not consultationsdupatient.enqueteconsultation.exists %}
                                             <button type="button" class="btn btn-dark  btn-icon btn-round float-right" data-toggle="modal"
                                                     data-target="#Antecedents"><em
                                                     class="icon ni ni-plus-circle-fill"></em></button>
+                                        {% endif %}
                                         </div>
                                         <div class="card-inner text-black-70">
-                                            <table class="table table-responsive">
+                                            <table class="table">
     <thead>
         <tr>
 
@@ -459,22 +464,36 @@
                                 <div class="col-6 col-md-6 mb-5">
                                     <div class="card text-black-100 border">
 
-                                            <div class="card-header">Examens <button type="button" class="btn btn-dark  btn-icon btn-round float-right" data-toggle="modal" data-target="#rendezvous"> <em class="icon ni ni-plus-circle-fill"></em></button>
+                                            <div class="card-header">Examens <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a><button type="button" class="btn btn-dark  btn-icon btn-round float-right" data-toggle="modal" data-target="#rendezvous"> <em class="icon ni ni-plus-circle-fill"></em></button>
                                     </div>
                                             <div class="card-inner text-black-70">
-                                            <table class="table table-responsive">
+                                            <table class="table">
                                             <thead>
                                             <th>Titre</th>
-                                            <th>Date de debut</th>
+                                            <th>Date</th>
+                                            <th>Statut</th>
                                             <th>Action</th>
                                             </thead>
                                             <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>2</td>
-                                                <td>                                            <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
-</td>
-                                            </tr>
+                                             {% for examen in consultationsdupatient.examen_for_consultation.all %}
+                                             <tr>
+{#                                             {% for analyse in examen.analyses.all %}#}
+{#                                                <td>analyse1</td>#}
+{##}
+{##}
+{#                                                <td><a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a></td>#}
+{#                                             {% endfor %}#}
+
+                                             <td>{{ examen.analyses }}</td>
+                                             <td>{{ examen.created_at }}</td>
+                                             <td>status</td>
+                                             <td>
+                                                 <a class="btn btn-outline-danger  btn-icon btn-round mr-5"  href="{% url 'Examens_delete' examen_id=examen.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-trash ml-10 "></em></a>
+                                             </td>
+
+                                                 </tr>
+                                             {% endfor %}
+
                                             </tbody>
 
                                             </table>
@@ -484,24 +503,33 @@
 </div>
                                  <div class="col-6 col-md-6 mb-5">
                                     <div class="card text-black-100 border">
-                                        <div class="card-header">Prélèvement
+                                        <div class="card-header">Prélèvement                                                         <a class="btn btn-outline-info  btn-icon btn-round mr-5" href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
+
                                             <button type="button" class="btn btn-dark  btn-icon btn-round float-right" data-toggle="modal" data-target="#diagnosis"><em class="icon ni ni-plus-circle-fill"></em></button>
                                         </div>
                                         <div class="card-inner text-black-70">
-                                                <table class="table table-responsive">
-                                            <thead>
-                                            <th>Titre</th>
-                                            <th>Date de debut</th>
-                                            <th>Action</th>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>2</td>
-                                                <td>                                           <a class="btn btn-outline-info  btn-icon btn-round mr-5"  href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-download-cloud ml-10 "></em></a>
-</td>
-                                            </tr>
-                                            </tbody>
+                                            <table class="table">
+                                                <thead>
+                                                <th>Code </th>
+                                                <th>Type </th>
+                                                <th>Date</th>
+                                                <th>Statut</th>
+                                                <th>Action</th>
+                                                </thead>
+                                                <tbody>
+                                                 {% for preleve in consultationsdupatient.echantillon_for_consultation.all %}
+                                                <tr>
+
+                                                    <td>{{ preleve.code_echantillon }}</td>
+                                                    <td>{{ preleve.type }}</td>
+                                                    <td>{{ preleve.created_at }}</td>
+                                                    <td>{{ preleve.status_echantillons }}</td>
+                                                    <td>
+                                                        <a class="btn btn-outline-danger  btn-icon btn-round mr-5" href="{% url 'delete_echantillon' echantillon_id=preleve.id consultation_id=consultationsdupatient.id%}"><em class="icon ni ni-trash ml-10 "></em></a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                                </tbody>
 
                                             </table>
                                         </div>
@@ -561,13 +589,13 @@
                                                 <em class="icon ni ni-cross"></em>
                                             </a>
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Diagnostiques</h5>
+                                                <h5 class="modal-title">Prélèvements</h5>
                                             </div>
-                                            <form method="post" action="">
+                                            <form method="post" action="{% url 'create_echantillon' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="fiagnosique">
-                                                        {% for form in formconsult %}
+                                                        {% for form in prelevement_form %}
                                                             <div class="row">
                                                                 <div class="col-lg-12 col-sm-12 mb-3">
                                                                     <div class="form-group">
@@ -800,36 +828,36 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="modal fade" tabindex="-1" id="Examens">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                                                <em class="icon ni ni-cross"></em>
-                                            </a>
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Examen physique</h5>
-                                            </div>
-
-                                            <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}"
-                                                  method="post">
-                                                {% csrf_token %}
-                                                <div class="modal-body">
-                                                    {{ examen_form }}            </div>
-                                                <div class="modal-footer bg-light">
-                                                    <div class="col-md-12 float-right mb-10">
-                                                        <button type="submit" class="btn btn-primary mb-10 float-right">
-                                                            <i class="fa-solid fa-floppy-disk"> </i> Enregistrer
-                                                        </button>
-                                                        <button type="reset"
-                                                                class="btn btn-secondary mb-10 mr-5 float-right"><i
-                                                                class="fa-solid fa-floppy-disk"> </i> Annuler
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
+{#                                <div class="modal fade" tabindex="-1" id="Examens">#}
+{#                                    <div class="modal-dialog" role="document">#}
+{#                                        <div class="modal-content">#}
+{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                                <em class="icon ni ni-cross"></em>#}
+{#                                            </a>#}
+{#                                            <div class="modal-header">#}
+{#                                                <h5 class="modal-title">Examen physique</h5>#}
+{#                                            </div>#}
+{##}
+{#                                            <form action="{% url 'Examens_create' consultation_id=consultationsdupatient.id %}"#}
+{#                                                  method="post">#}
+{#                                                {% csrf_token %}#}
+{#                                                <div class="modal-body">#}
+{#                                                    {{ examen_form }}            </div>#}
+{#                                                <div class="modal-footer bg-light">#}
+{#                                                    <div class="col-md-12 float-right mb-10">#}
+{#                                                        <button type="submit" class="btn btn-primary mb-10 float-right">#}
+{#                                                            <i class="fa-solid fa-floppy-disk"> </i> Enregistrer#}
+{#                                                        </button>#}
+{#                                                        <button type="reset"#}
+{#                                                                class="btn btn-secondary mb-10 mr-5 float-right"><i#}
+{#                                                                class="fa-solid fa-floppy-disk"> </i> Annuler#}
+{#                                                        </button>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </form>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
                                 <div class="modal fade" tabindex="-1" id="conseils">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -870,7 +898,7 @@
                                                 <h5 class="modal-title">Examens</h5>
                                             </div>
 
-                                            <form action="{% url 'Allergies_create' consultation_id=consultationsdupatient.id %}"
+                                            <form action="{% url 'Examens_create' consultation_id=consultationsdupatient.id %}"
                                                   method="post">
                                                 {% csrf_token %}
                                                 <div class="modal-body">

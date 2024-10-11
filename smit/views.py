@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 
 import qrcode
 from django.conf import settings
@@ -9,7 +9,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import request, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, CreateView, DetailView
+from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
+from django_filters.views import FilterView
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import landscape, A4
@@ -19,12 +20,14 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus.tables import TableStyle, Table
 from six import BytesIO
 
-from core.models import Location
+from core.models import communes_et_quartiers_choices, Location
+from pharmacy.models import RendezVous
+from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
-    ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm
+    ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
-    Hospitalization, Suivi, TestRapideVIH, EnqueteVih
+    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen
 
 
 # Create your views here.
@@ -108,6 +111,7 @@ def consultation_send_create(request, patient_id, rdv_id):
             consultation = form.save(commit=False)
             consultation.patient = patient
             consultation.created_by = request.user.employee
+            consultation.status = 'Scheduled'
 
             # Ensure 'service' is correctly handled
             service = form.cleaned_data['service']
@@ -216,7 +220,6 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     c.drawString(0.4 * cm, height - 7 * cm, "(LABNO)")  # Texte à gauche
     c.drawString(0.4 * cm, height - 7.5 * cm, "(NOMSERV)")  # Texte à gauche
     c.drawString(0.4 * cm, height - 8 * cm, "(SERVICE)")  # Texte à gauche
-
 
     # Position de départ pour le formulaire
     y_position = height - 6 * cm
@@ -418,6 +421,7 @@ def Antecedents_create(request, consultation_id):
 @login_required
 def enquete_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
+
     if request.method == 'POST':
         form = EnqueteVihForm(request.POST)
         if form.is_valid():
@@ -425,15 +429,37 @@ def enquete_create(request, consultation_id):
             enquete.patient = consultation.patient
             enquete.consultation = consultation
             enquete.save()
-            messages.success(request, 'Enquête VIH créée avec succès!')
+            # Si le formulaire contient des ManyToMany fields, il faut les sauvegarder après le save initial
+            form.save_m2m()
 
+            messages.success(request, 'Enquête VIH créée avec succès!')
             return redirect('detail_consultation', pk=consultation.id)
         else:
             messages.error(request, 'Erreur lors de la création de l\'Enquête.')
     else:
-        form = AntecedentsMedicauxForm()
+        form = EnqueteVihForm()
+
     return redirect('detail_consultation', pk=consultation.id)
 
+
+# def enquete_create(request, consultation_id):
+#     consultation = get_object_or_404(Consultation, id=consultation_id)
+#     if request.method == 'POST':
+#         form = EnqueteVihForm(request.POST)
+#         if form.is_valid():
+#             enquete = form.save(commit=False)
+#             enquete.patient = consultation.patient
+#             enquete.consultation = consultation
+#             enquete.save()
+#             messages.success(request, 'Enquête VIH créée avec succès!')
+#
+#             return redirect('detail_consultation', pk=consultation.id)
+#         else:
+#             messages.error(request, 'Erreur lors de la création de l\'Enquête.')
+#     else:
+#         form = AntecedentsMedicauxForm()
+#     return redirect('detail_consultation', pk=consultation.id)
+#
 
 @login_required
 def Allergies_create(request, consultation_id):
@@ -463,6 +489,7 @@ def Examens_create(request, consultation_id):
         if form.is_valid():
             examen = form.save(commit=False)
             examen.patients_requested = consultation.patient
+            examen.consultation = consultation
             examen.save()
             consultation.examens = examen
             consultation.save()
@@ -591,17 +618,19 @@ def patient_list_view(request):
     return render(request, 'pages/patient_list_view.html')
 
 
-class PatientListView(LoginRequiredMixin, ListView):
+class PatientListView(LoginRequiredMixin, FilterView):
     model = Patient
     template_name = "pages/global_search.html"
     context_object_name = "patients"
     paginate_by = 10
     ordering = ['-id']
+    filterset_class = PatientFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        patient_nbr = Patient.objects.all().count()
-        context['patient_nbr'] = patient_nbr
+        # patient_nbr = Patient.objects.all().count()
+        context['resultfiltre'] = self.object_list.count()
+        context['filter'] = self.get_filterset(self.filterset_class)
 
         return context
 
@@ -628,8 +657,7 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
     model = Patient
     form_class = PatientCreateForm
     template_name = "pages/patient_create.html"
-    success_url = reverse_lazy(
-        'glogal_search')  # Assurez-vous de remplacer 'nom_de_la_vue_de_liste_des_factures' par le nom correct de votre vue de liste des factures
+    success_url = reverse_lazy('global_search')  # Ensure 'global_search' points to your desired view
 
     def form_valid(self, form):
         nom = form.cleaned_data['nom'].upper()
@@ -646,17 +674,23 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
             messages.error(self.request, 'Un patient avec ce contact existe déjà.')
             return self.form_invalid(form)
 
-        # Sauvegarder l'objet Patient
+        # new_commune = form.cleaned_data['new_commune'].strip()
+
+        # Check if the new commune is not in the existing choices
+        # if new_commune and not Location.objects.filter(commune=new_commune).exists():
+        #     Location.objects.create(commune=new_commune)
+        # Optionally, you can update the choice list dynamically
+
+        # Save the Patient object
         self.object = form.save()
 
-        # Gérer les informations de localisation
-        localite_data = {
+        # Handle the Location information
+        location_data = {
             'contry': form.cleaned_data['pays'],
-            'ville': form.cleaned_data['ville'],
             'commune': form.cleaned_data['commune']
         }
-        localite, created = Location.objects.get_or_create(**localite_data)
-        self.object.localite = localite
+        location_instance, created = Location.objects.get_or_create(**location_data)
+        self.object.localite = location_instance
         self.object.save()
 
         messages.success(self.request, 'Patient créé avec succès!')
@@ -871,6 +905,42 @@ class ActiviteListView(ListView):
         return [template_map.get((serv, acty), 'pages/services/servicecontent_detail.html')]
 
 
+class ConstanteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Constante
+    form_class = ConstantesForm
+    template_name = "pages/constantes/constntes_form.html"
+    success_url = reverse_lazy('attente')
+
+
+class ConsultationListView(ListView):
+    model = Consultation
+    template_name = 'consultations/consultation_list.html'  # Chemin vers votre template
+    context_object_name = 'consultations'
+    ordering = ['-consultation_date']
+    paginate_by = 10
+
+
+class ConsultationDetailView(DetailView):
+    model = Consultation
+    template_name = 'consultations/consultation_detail.html'
+    context_object_name = 'consultation'
+
+
+class ConsultationUpdateView(UpdateView):
+    model = Consultation
+    form_class = ConsultationForm
+    template_name = 'consultations/consultation_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('consultation_detail', kwargs={'pk': self.object.pk})
+
+
+class ConsultationDeleteView(DeleteView):
+    model = Consultation
+    template_name = 'consultations/consultation_confirm_delete.html'
+    success_url = reverse_lazy('consultation_list')
+
+
 class ConsultationSidaListView(LoginRequiredMixin, ListView):
     model = Consultation
     template_name = "pages/services/consultation_VIH.html"
@@ -897,6 +967,32 @@ def test_rapide_vih_create(request, consultation_id):
     return redirect('detail_consultation', pk=consultation.id)
 
 
+def delete_test_rapide_vih(request, test_id, consultation_id):
+    # Récupérer l'objet TestRapideVIH avec l'id fourni
+    test_rapide = get_object_or_404(TestRapideVIH, id=test_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+
+    # Vérifie que la requête est bien une requête POST (pour éviter les suppressions accidentelles)
+
+    test_rapide.delete()
+    messages.success(request, 'Le test rapide VIH a été supprimé avec succès.')
+    # Redirection après suppression (à personnaliser selon vos besoins)
+    return redirect('detail_consultation', pk=consultation.id)
+
+
+def delete_examen(request, examen_id, consultation_id):
+    # Récupérer l'objet TestRapideVIH avec l'id fourni
+    examen = get_object_or_404(Examen, id=examen_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+
+    # Vérifie que la requête est bien une requête POST (pour éviter les suppressions accidentelles)
+
+    examen.delete()
+    messages.success(request, 'L\'examen a été supprimé avec succès.')
+    # Redirection après suppression (à personnaliser selon vos besoins)
+    return redirect('detail_consultation', pk=consultation.id)
+
+
 # def test_rapide_vih_update(request, pk):
 #     test = get_object_or_404(TestRapideVIH, pk=pk)
 #     if request.method == 'POST':
@@ -907,6 +1003,42 @@ def test_rapide_vih_create(request, consultation_id):
 #     else:
 #         form = TestRapideVIHForm(instance=test)
 #     return render(request, 'test_rapide_vih_form.html', {'form': form})
+
+def create_recurrent_appointments(rdv):
+    """Génère des rendez-vous récurrents basés sur les paramètres de récurrence"""
+    current_date = rdv.date
+    end_date = rdv.recurrence_end_date
+
+    # Déterminer l'intervalle de récurrence
+    if rdv.recurrence == 'Weekly':
+        interval = timedelta(weeks=1)
+    elif rdv.recurrence == 'Monthly':
+        interval = timedelta(weeks=4)
+    elif rdv.recurrence == 'Quarterly':
+        interval = timedelta(weeks=12)
+    elif rdv.recurrence == 'Semi-Annual':
+        interval = timedelta(weeks=26)
+    elif rdv.recurrence == 'Annual':
+        interval = timedelta(weeks=52)
+    else:
+        return  # Pas de récurrence
+
+    # Générer les rendez-vous jusqu'à la date de fin de récurrence
+    while current_date < end_date:
+        current_date += interval
+        RendezVous.objects.create(
+            patient=rdv.patient,
+            service=rdv.service,
+            doctor=rdv.doctor,
+            calendar=rdv.calendar,
+            event=rdv.event,
+            date=current_date,
+            time=rdv.time,
+            reason=rdv.reason,
+            status='Scheduled',
+            created_by=rdv.created_by,
+            recurrence='None'  # Pas de récurrence pour les rendez-vous générés automatiquement
+        )
 
 
 class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
@@ -926,6 +1058,7 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['EnqueteVihForm'] = EnqueteVihForm()
         context['hospit_form'] = HospitalizationSendForm()
         context['depistage_form'] = TestRapideVIHForm()
+        context['prelevement_form'] = EchantillonForm()
 
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
