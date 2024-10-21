@@ -31,7 +31,7 @@ class TypeAntecedentAdmin(admin.ModelAdmin):
 
 
 # Appeler la fonction lors du démarrage de l'administration
-add_default_antecedents()
+# add_default_antecedents()
 
 
 @admin.register(UniteHospitalisation)
