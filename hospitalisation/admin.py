@@ -13,21 +13,21 @@ class TypeAntecedentAdmin(admin.ModelAdmin):
 
 
 # Pré-enregistrement des types d'antécédents s'ils n'existent pas déjà
-def add_default_antecedents():
-    antecedents_type = [
-        'Antécédents médicaux personnels',
-        'Antécédents familiaux',
-        'Antécédents chirurgicaux',
-        'Antécédents gynécologiques et obstétricaux',
-        'Antécédents médicamenteux',
-        'Antécédents psychologiques',
-        'Antécédents sociaux',
-        'Antécédents obstétricaux'
-    ]
-
-    for antecedent in antecedents_type:
-        if not TypeAntecedent.objects.filter(nom=antecedent).exists():
-            TypeAntecedent.objects.create(nom=antecedent)
+# def add_default_antecedents():
+#     antecedents_type = [
+#         'Antécédents médicaux personnels',
+#         'Antécédents familiaux',
+#         'Antécédents chirurgicaux',
+#         'Antécédents gynécologiques et obstétricaux',
+#         'Antécédents médicamenteux',
+#         'Antécédents psychologiques',
+#         'Antécédents sociaux',
+#         'Antécédents obstétricaux'
+#     ]
+#
+#     for antecedent in antecedents_type:
+#         if not TypeAntecedent.objects.filter(nom=antecedent).exists():
+#             TypeAntecedent.objects.create(nom=antecedent)
 
 
 # Appeler la fonction lors du démarrage de l'administration
