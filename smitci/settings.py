@@ -135,7 +135,6 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #     }
 # }
 #prod
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
