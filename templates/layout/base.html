@@ -1,27 +1,25 @@
 {% load static %}
 {% load unicorn %}
 <!DOCTYPE html>
-<html lang="zxx" class="js">
+<html lang="fr-FR" class="js">
 
 <head>
     <base href="../">
     <meta charset="utf-8">
     <meta name="author" content="afriqconsulting">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <meta name="description" content="KENEYA, Systeme de Gestion des hopitaux.">
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     <!-- Page Title  -->
-    <title>SMIT | KENEYA-H OSPITAL</title>
+    <title>SMIT | KENEYA- Hospital Ressources Management</title>
     <!-- StyleSheets  -->
     <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css"> -->
-
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
-    <script src="{% static 'tinymce/tinymce.min.js' %}"></script>  
-    {% unicorn_scripts %}
+    <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
     <script>
         tinymce.init({
             selector: 'textarea',
@@ -37,6 +35,8 @@
                       bullist numlist outdent indent | removeformat | help'
         });
     </script>
+    {% unicorn_scripts %}
+
 </head>
 
 <body class="nk-body bg-white has-sidebar ">
@@ -186,6 +186,7 @@
             });
         });
     </script>
+ 
 </body>
 
 </html>

@@ -267,12 +267,44 @@
                             Imprimer</a>
 
 
-                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
-                           class="btn btn-outline-danger float-right mr-5"
-                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i
-                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>
+{#                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"#}
+{#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
+{#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
+                        <a href="" data-toggle="modal" data-target="#hospitalisationreq"
+                           class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-bed-pulse mr-1"></i>
+                            Hospitaliser ?</a>
 
-                         <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
+                        <!-- Modal Content Code -->
+                        <div class="modal fade" tabindex="-1" id="hospitalisationreq">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content ">
+                                    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                        <em class="icon ni ni-cross"></em>
+                                    </a>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Hospitalisation Patients
+                                            {{ consultationsdupatient.patient }}</h5>
+                                    </div>
+                                    <form action="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}" method="POST" enctype="application/x-www-form-urlencoded">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+
+                                            {{ hospit_request }}
+                                        </div>
+                                        <div class="modal-footer bg-light ">
+                                            <span class="sub-text">Hospitalisation Patient {{ consultationsdupatient.patient.code_patient }}</span>
+                                            <div class="col-lg-3 float-right">
+                                                <button class="btn btn-primary" type="submit">Envoyer</button>
+                                            </div>
+
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
                            class="btn btn-outline-secondary float-right mr-5"
                            onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i
                                 class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>

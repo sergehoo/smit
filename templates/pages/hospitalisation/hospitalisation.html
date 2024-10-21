@@ -9,146 +9,165 @@
                 {% if demande_hospi %}
                     <div class="container-xl wide-lg">
                     <h4>Liste des demandes d'hospitalisation en attente de validation</h4>
-                    <div class="card card-bordered bg-secondary-dim card-preview">
+                    <div class="card card-bordered bg-danger-dim card-preview">
                         <table class="table table-tranx">
-                                            <thead>
-                                                <tr class="tb-tnx-head">
-                                                    <th class="tb-tnx-id"><span class="">#</span></th>
-                                                    <th class="tb-tnx-info">
+                            <thead>
+                            <tr class="tb-tnx-head">
+                                <th class="tb-tnx-id"><span class="">#</span></th>
+                                <th class="tb-tnx-info">
                                                         <span class="tb-tnx-desc d-none d-sm-inline-block">
                                                             <span>Patient</span>
                                                         </span>
-                                                        <span class="tb-tnx-date d-md-inline-block d-none">
+                                    <span class="tb-tnx-date d-md-inline-block d-none">
                                                             <span class="d-md-none"></span>
                                                             <span class="d-none d-md-block">
                                                                 <span> Date de demande </span>
-                                                                <span>Etat</span>
+
                                                             </span>
                                                         </span>
-                                                    </th>
-                                                    <th class="tb-tnx-amount is-alt">
-                                                        <span class="tb-tnx-total">Service</span>
-                                                        <span class="tb-tnx-status d-none d-md-inline-block">Status</span>
-                                                    </th>
-                                                    <th class="tb-tnx-action">
-                                                        <span>&nbsp;</span>
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for demande in demande_hospi.all %}
-                                                <tr class="tb-tnx-item">
-                                                    <td class="tb-tnx-id">
-                                                        <a href="#"><span>#{{ demande.id  }}</span></a>
-                                                    </td>
-                                                    <td class="tb-tnx-info">
-                                                        <div class="tb-tnx-desc">
-                                                            <span class="title">{{ demande.patient }}</span>
-                                                        </div>
-                                                        <div class="tb-tnx-date">
-                                                            <span class="date">{{ demande.requested_at }}</span>
-                                                            <span class="date">{{  demande.commentaires }}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="tb-tnx-amount is-alt">
-                                                        <div class="tb-tnx-total">
-                                                            <span class="amount">{{ demande.services }}</span>
-                                                        </div>
-                                                        <div class="tb-tnx-status"><span class="badge badge-dot badge-secondary">{{ demande.status }}</span></div>
-                                                    </td>
-                                                    <td class="tb-tnx-action">
-                                                        <div class="dropdown">
-                                                            <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                <ul class="link-list-plain">
-                                                                    <li><a href="#" data-toggle="modal" data-target="#hospivalide{{ demande.id }}">Accepter</a></li>
-                                                                    <li><a href="#" data-toggle="modal" data-target="#hospitransfert">Transferer</a></li>
-                                                                    <li><a href="#" data-toggle="modal" data-target="#hospirejet">Rejeter</a></li>
-                                                                </ul>
+                                </th>
+                                <th class="tb-tnx-amount is-alt">
+                                    <span class="tb-tnx-total">Service</span>
+                                    <span class="tb-tnx-status d-none d-md-inline-block">Status</span>
+                                </th>
+                                <th class="tb-tnx-action">
+                                    <span>Action</span>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for demande in demande_hospi.all %}
+                                <tr class="tb-tnx-item">
+                                    <td class="tb-tnx-id">
+                                        <a href="#"><span>#{{ demande.id }}</span></a>
+                                    </td>
+                                    <td class="tb-tnx-info">
+                                        <div class="tb-tnx-desc">
+                                            <span class="title">{{ demande.patient }}</span>
+                                        </div>
+                                        <div class="tb-tnx-date">
+                                            <span class="date">{{ demande.requested_at }}</span>
+
+                                        </div>
+                                    </td>
+                                    <td class="tb-tnx-amount is-alt">
+                                        <div class="tb-tnx-total">
+                                            <span class="amount">{{ demande.services }}</span>
+                                        </div>
+                                        <div class="tb-tnx-status"><span
+                                                class="badge badge-dot badge-secondary">{{ demande.status }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="tb-tnx-action">
+                                        <div class="dropdown">
+                                            <a class="text-soft dropdown-toggle btn btn-icon btn-trigger"
+                                               data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
+                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
+                                                <ul class="link-list-plain">
+                                                    <li><a href="#" data-toggle="modal"
+                                                           data-target="#hospivalide{{ demande.id }}">Accepter</a></li>
+                                                    <li><a href="#" data-toggle="modal" data-target="#hospitransfert">Transferer</a>
+                                                    </li>
+                                                    <li><a href="#" data-toggle="modal" data-target="#hospirejet">Rejeter</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <div class="modal fade" tabindex="-1" id="hospivalide{{ demande.id }}">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmer en
+                                                    hospitalisation {{ demande.services }} ?</h5>
+                                            </div>
+
+                                            <form method="post"
+                                                  action="{% url 'send_hospitalisation' consultations_id=demande.id patient_id=demande.patient.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+
+
+                                                    {% for form_field in demande_hospi_form %}
+                                                        <div class="row">
+                                                            <div class="col-lg-12 col-sm-12 mb-3">
+
+                                                                <label for="{{ form_field.id_for_label }}">{{ form_field.label }}</label>
+                                                                {{ form_field }}
+
                                                             </div>
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            <div class="modal fade" tabindex="-1" id="hospivalide{{ demande.id }}">
-                                <div class="modal-dialog" role="document">
-<div class="modal-content">
-    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-        <em class="icon ni ni-cross"></em>
-    </a>
-    <div class="modal-header">
-        <h5 class="modal-title">Confirmer en hospitalisation {{ demande.services }} ?</h5>
-    </div>
+                                                    {% endfor %}
+                                                </div>
 
-    <form method="post" action="{% url 'send_hospitalisation' consultations_id=demande.id patient_id=demande.patient.id %}">
-        {% csrf_token %}
-        <div class="modal-body">
+                                                <div class="modal-footer bg-light">
+                                                    <div class="col-md-12 float-right mb-10">
+                                                        <button type="submit" class="btn btn-primary mb-10 float-right">
+                                                            <i class="fa-solid fa-floppy-disk"> </i> Enregistrer
+                                                        </button>
+                                                        <button type="reset"
+                                                                class="btn btn-secondary mb-10 mr-5 float-right"><i
+                                                                class="fa-solid fa-floppy-disk"> </i> Annuler
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
 
+                                </div>
+                                <div class="modal fade" tabindex="-1" id="hospitransfert">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modal Title</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
+                                                    similique earum necessitatibus nesciunt! Quia id expedita asperiores
+                                                    voluptatem odit quis fugit sapiente assumenda sunt voluptatibus
+                                                    atque facere autem, omnis explicabo.</p>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <span class="sub-text">Modal Footer Text</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" tabindex="-1" id="hospirejet">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modal Title</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
+                                                    similique earum necessitatibus nesciunt! Quia id expedita asperiores
+                                                    voluptatem odit quis fugit sapiente assumenda sunt voluptatibus
+                                                    atque facere autem, omnis explicabo.</p>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <span class="sub-text">Modal Footer Text</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
 
-                {% for form_field in demande_hospi_form %}
-                    <div class="row">
-                        <div class="col-lg-12 col-sm-12 mb-3">
+                            <!-- Modal Content Code -->
 
-                                  <label for="{{ form_field.id_for_label }}">{{ form_field.label }}</label>
-                                {{ form_field }}
-
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-    
-        <div class="modal-footer bg-light">
-            <div class="col-md-12 float-right mb-10">
-                <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
-                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
-            </div>
-        </div>
-    </form>
-</div>
-</div>
-
-                            </div>
-                                            <div class="modal fade" tabindex="-1" id="hospitransfert">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Modal Title</h5>
-            </div>
-            <div class="modal-body">
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem similique earum necessitatibus nesciunt! Quia id expedita asperiores voluptatem odit quis fugit sapiente assumenda sunt voluptatibus atque facere autem, omnis explicabo.</p>
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Modal Footer Text</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                            <div class="modal fade" tabindex="-1" id="hospirejet">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Modal Title</h5>
-            </div>
-            <div class="modal-body">
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem similique earum necessitatibus nesciunt! Quia id expedita asperiores voluptatem odit quis fugit sapiente assumenda sunt voluptatibus atque facere autem, omnis explicabo.</p>
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Modal Footer Text</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                            {% endfor %}
-
-<!-- Modal Content Code -->
-
-                                            </tbody>
-                                        </table>
+                            </tbody>
+                        </table>
                     </div>
 
                         <!--- fin du Tableau de validation des hospi--->
@@ -348,37 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <div class="nk-tb-col"><span class="sub-text">Status</span></div>
 
                                                     <div class="nk-tb-col nk-tb-col-tools text-right">
-                                                        <div class="dropdown">
-                                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                <ul class="link-tidy sm no-bdr">
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="bl">
-                                                                            <label class="custom-control-label" for="bl">Balance</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="ph">
-                                                                            <label class="custom-control-label" for="ph">Phone</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="vri">
-                                                                            <label class="custom-control-label" for="vri">Verified</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="st">
-                                                                            <label class="custom-control-label" for="st">Status</label>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
+                                                      <span class="sub-text">Action</span>
                                                     </div>
                                                 </div><!-- .nk-tb-item -->
 
@@ -386,17 +375,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col tb-col-md">
                                                         <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
-                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img src="{% static 'images/gift/alert.gif' %}" width="20"/></a> </span>
+                                                          {% if patient.patient.latest_constante %}
+                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img data-toggle="tooltip" data-placement="top" title="Constantes du :{{ patient.patient.latest_constante.created_at }} par {{ patient.patient.latest_constante.created_by }}" src="{% static 'images/gift/livre-medical.gif' %}" width="20"/></a> </span>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="nk-tb-col">
                                                         <div class="user-card">
                                                             <div class="user-name">
-                                                                <span class="tb-lead" data-toggle="tooltip" data-placement="top" title="{{ patient.admission_date }}"><i class="fa-solid fa-arrow-up"></i> {{ patient.admission_date|naturalday }}</span>
+                                                                <span class="tb-lead" data-toggle="tooltip" data-placement="top" title="{{ patient.admission_date }}"><em class="icon ni ni-arrow-up-right text-primary"></em> {{ patient.admission_date|naturalday }}</span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-sm">
-                                                        <span data-toggle="tooltip" data-placement="top" title="{{ patient.discharge_date }}"><i class="fa-solid fa-arrow-down"></i> {{ patient.discharge_date|naturaltime  }}</span>
+                                                        {% if patient.discharge_date is none %}
+                                                            <small >Aucune sortie enregistrée</small>
+                                                        {% else %}
+                                                            <span data-toggle="tooltip" data-placement="top"
+                                                                  title="{{ patient.discharge_date }}"><em
+                                                                    class="icon ni ni-arrow-down-right"></em> {{ patient.discharge_date|naturaltime }}</span>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
                                                         <span><i class="fa-solid fa-virus"></i>{{ patient.activite.service }}</span>
@@ -411,30 +408,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     </div>
                                                     <div class="nk-tb-col nk-tb-col-tools">
                                                         <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="{% url 'detail_consultation' patient.pk %}" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Consulter">
-                                                                     <i class="fa-solid fa-edit fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Envoyer en Hospitalisation">
-                                                                    <i class="fa-solid fa-bed-pulse fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Retirer de la liste">
-                                                                    <i class="fa-solid fa-trash-alt fa-xl"></i>
-                                                                </a>
-                                                            </li>
+
                                                             <li>
                                                                 <div class="drodown">
                                                                     <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <ul class="link-list-opt no-bdr">
                                                                             <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier </span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
+                                                                        
                                                                             <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
+                                                                            <li><a href="{% url 'hospitalisationdetails' patient.pk %}"><em class="icon ni ni-file-check"></em><span>Detail de l'Hospitalisation</span></a></li>
                                                                             <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
                                                                             <li><a href="#"><em class="icon ni ni-na"></em><span>Suspend User</span></a></li>
                                                                         </ul>
@@ -515,11 +498,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </tr>
                                 </thead>
                                 <tbody>
-
-
-
-
-
                                 <tr>
                                     <td class="tb-col-os">Tension systolique</td>
                                     <td class="tb-col-ip">
@@ -673,7 +651,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             </div>
             <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
+                <span class="sub-text">Enregistres par  {{ patient.patient.latest_constante.created_by }}  | Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
             </div>
         </div>
     </div>

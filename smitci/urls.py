@@ -17,6 +17,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import path, include
 
 from smit import views
@@ -32,6 +33,9 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('accounts/', include('allauth.urls')),
+                  path('accounts/signup/', lambda request: redirect('/')),
+                  # Redirection vers la page d'accueil ou autre page
+
                   path('schedule/', include('schedule.urls')),
                   path("unicorn/", include("django_unicorn.urls")),
                   path('patients/', patient_list_view, name='patient-list'),
@@ -42,6 +46,7 @@ urlpatterns = [
 
                   path('laboratoire/', include('laboratory.urls')),
                   path('tinymce/', include('tinymce.urls')),
+
 
                   path('', HomePageView.as_view(), name='home'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),

@@ -1,3 +1,4 @@
+import datetime
 import os
 from datetime import date, timedelta
 
@@ -25,7 +26,8 @@ from pharmacy.models import RendezVous
 from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
-    ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm
+    ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
+    HospitalizationForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen
 
@@ -315,19 +317,44 @@ def hospitalisation_send_create(request, consultations_id, patient_id):
     return redirect('hospitalisation')
 
 
+# @login_required
+# def mark_consultation_as_hospitalised(request, consultation_id, patient_id):
+#     consultation = get_object_or_404(Consultation, pk=consultation_id)
+#     consultation.hospitalised = 1
+#     consultation.requested_at = date.today()
+#     consultation.save()
+#     messages.success(request, 'La demandena ete transmise avec succes!')
+#
+#     # Rediriger vers une vue appropriée après la mise à jour
+#     # Par exemple, rediriger vers la page des détails du patient ou une liste de consultations
+#     return redirect('detail_consultation', pk=consultation.pk)
+#
 @login_required
 def mark_consultation_as_hospitalised(request, consultation_id, patient_id):
     consultation = get_object_or_404(Consultation, pk=consultation_id)
-    consultation.hospitalised = 1
-    consultation.requested_at = date.today()
-    consultation.save()
-    messages.success(request, 'La demandena ete transmise avec succes!')
 
-    # Rediriger vers une vue appropriée après la mise à jour
-    # Par exemple, rediriger vers la page des détails du patient ou une liste de consultations
+    if request.method == 'POST':
+        form = HospitalizationForm(request.POST)
+        if form.is_valid():
+            hospitalization = form.save(commit=False)
+            hospitalization.consultation = consultation
+            hospitalization.admission_date = date.today()
+            hospitalization.patient_id = patient_id
+            hospitalization.save()
+
+            # Mark the consultation as hospitalized
+            consultation.hospitalised = True
+            consultation.requested_at = date.today()
+            consultation.save()
+
+            messages.success(request, 'La demande a été transmise avec succès!')
+            return redirect('detail_consultation', pk=consultation.pk)
+        else:
+            messages.error(request, 'Il y a eu une erreur dans le formulaire.')
+    else:
+        form = HospitalizationForm()
+
     return redirect('detail_consultation', pk=consultation.pk)
-
-
 @login_required
 def appointment_update(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
@@ -650,6 +677,13 @@ class PatientDetailView(LoginRequiredMixin, DetailView):
             services_with_consultations.append((service, consultations))
 
         context['services_with_consultations'] = services_with_consultations
+
+        # Récupérer les éléments liés au patient
+        context["consultations"] = patient.consultation_set.all().order_by('-created_at')
+        context["hospitalizations"] = patient.hospitalized.all().order_by('-created_at')
+        context["appointments"] = patient.appointment_set.all().order_by('-created_at')
+        context["suivis"] = patient.suivimedecin.all()
+
         return context
 
 
@@ -1057,6 +1091,7 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['conseils_form'] = ConseilsForm()
         context['EnqueteVihForm'] = EnqueteVihForm()
         context['hospit_form'] = HospitalizationSendForm()
+        context['hospit_request'] = HospitalizationForm()
         context['depistage_form'] = TestRapideVIHForm()
         context['prelevement_form'] = EchantillonForm()
 

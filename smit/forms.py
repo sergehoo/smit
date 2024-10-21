@@ -8,11 +8,13 @@ from django_countries.fields import CountryField
 from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
-    professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices
+    professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
+    Patient_statut_choices
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
-    Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste
+    Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
+    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif
 
 school_level = [
     ('Primaire', 'Primaire'),
@@ -142,10 +144,15 @@ class AppointmentForm(forms.ModelForm):
 
 
 class HospitalizationForm(forms.ModelForm):
+    reason_for_admission = forms.CharField(label='Raison de l\'hospitalisation', widget=TinyMCE(
+        attrs={'cols': 5, 'rows': 5, 'class': 'tinymce-basic form-control', 'type': 'textarea'}))
+    status = forms.ChoiceField(choices=Patient_statut_choices, label='Status du Patient', widget=forms.Select(
+        attrs={'class': 'form-control statid form-control-xl select2 form-select ', 'data-search': 'on',
+               'id': 'statid'}))
+
     class Meta:
         model = Hospitalization
-        fields = ['patient', 'doctor', 'admission_date', 'discharge_date', 'room', 'bed', 'reason_for_admission',
-                  'status']
+        fields = ['reason_for_admission', 'status']
         widgets = {
             'admission_date': forms.DateInput(attrs={'type': 'date'}),
             'discharge_date': forms.DateInput(attrs={'type': 'date'}),
@@ -179,7 +186,7 @@ class ConstantesForm(forms.ModelForm):
     class Meta:
         model = Constante
         fields = '__all__'
-        exclude = ('patient', 'created_by', 'created_at', 'updated_at', 'imc')
+        exclude = ('patient', 'created_by', 'created_at', 'updated_at', 'imc', 'hospitalisation')
 
 
 class ConsultationSendForm(forms.ModelForm):
@@ -371,7 +378,8 @@ class EchantillonForm(forms.ModelForm):
                                         widget=forms.Select(attrs={'class': 'form-control form-control-lg '}))
 
     date_collect = forms.DateField(required=False,
-                                   widget=forms.DateInput(attrs={'class': 'form-control form-control-lg ', 'type':'date'}))
+                                   widget=forms.DateInput(
+                                       attrs={'class': 'form-control form-control-lg ', 'type': 'date'}))
     site_collect = forms.CharField(required=False,
                                    widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
 
@@ -385,7 +393,8 @@ class EchantillonForm(forms.ModelForm):
                                           widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
     volume = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
     expiration_date = forms.DateField(required=False,
-                                      widget=forms.DateInput(attrs={'class': 'form-control form-control-lg ','type':'date'}))
+                                      widget=forms.DateInput(
+                                          attrs={'class': 'form-control form-control-lg ', 'type': 'date'}))
 
     class Meta:
         model = Echantillon
@@ -434,3 +443,78 @@ class ProtocolesForm(forms.ModelForm):
     class Meta:
         model = Examen
         fields = ['nom', 'descriptif']
+
+
+class ConstanteForm(forms.ModelForm):
+    class Meta:
+        model = Constante
+        fields = ['tension_systolique', 'tension_diastolique', 'frequence_cardiaque', 'frequence_respiratoire',
+                  'temperature', 'saturation_oxygene', 'glycemie', 'poids', 'taille', 'pouls']
+        widgets = {
+            'tension_systolique': forms.NumberInput(attrs={'class': 'form-control'}),
+            'tension_diastolique': forms.NumberInput(attrs={'class': 'form-control'}),
+            'frequence_cardiaque': forms.NumberInput(attrs={'class': 'form-control'}),
+            'frequence_respiratoire': forms.NumberInput(attrs={'class': 'form-control'}),
+            'temperature': forms.NumberInput(attrs={'class': 'form-control'}),
+            'saturation_oxygene': forms.NumberInput(attrs={'class': 'form-control'}),
+            'glycemie': forms.NumberInput(attrs={'class': 'form-control'}),
+            'poids': forms.NumberInput(attrs={'class': 'form-control'}),
+            'taille': forms.NumberInput(attrs={'class': 'form-control'}),
+            'pouls': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class PrescriptionForm(forms.ModelForm):
+    class Meta:
+        model = Prescription
+        fields = ['patient', 'doctor', 'medication', 'quantity', 'status']
+        widgets = {
+            'patient': forms.Select(attrs={'class': 'form-control'}),
+            'doctor': forms.Select(attrs={'class': 'form-control'}),
+            'medication': forms.Select(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class SigneFonctionnelForm(forms.ModelForm):
+    class Meta:
+        model = SigneFonctionnel
+        fields = ['nom', 'valeure']
+        widgets = {
+            'nom': forms.TextInput(attrs={'class': 'form-control'}),
+            'valeure': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class IndicateurBiologiqueForm(forms.ModelForm):
+    class Meta:
+        model = IndicateurBiologique
+        fields = ['globules_blancs', 'hemoglobine', 'plaquettes', 'crp', 'glucose_sanguin']
+        widgets = {
+            'globules_blancs': forms.NumberInput(attrs={'class': 'form-control'}),
+            'hemoglobine': forms.NumberInput(attrs={'class': 'form-control'}),
+            'plaquettes': forms.NumberInput(attrs={'class': 'form-control'}),
+            'crp': forms.NumberInput(attrs={'class': 'form-control'}),
+            'glucose_sanguin': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class IndicateurFonctionnelForm(forms.ModelForm):
+    class Meta:
+        model = IndicateurFonctionnel
+        fields = ['mobilite', 'conscience', 'debit_urinaire']
+        widgets = {
+            'mobilite': forms.Select(attrs={'class': 'form-control'}),
+            'conscience': forms.Select(attrs={'class': 'form-control'}),
+            'debit_urinaire': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+class IndicateurSubjectifForm(forms.ModelForm):
+    class Meta:
+        model = IndicateurSubjectif
+        fields = ['bien_etre']
+        widgets = {
+            'bien_etre': forms.Select(attrs={'class': 'form-control'}),
+        }

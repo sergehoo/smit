@@ -1,0 +1,848 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+
+        <div class="container-xl wide-lg">
+
+            <div class="nk-content-body">
+
+                <div class="nk-block-head nk-block-head-sm ">
+                    <div class="row rounded" style="height: 200px;background-repeat: no-repeat; background-image: url('{% static 'images/hospitalization.png' %}')">
+                        <div class="nk-block-between">
+
+                            <div class="nk-block-head-content">
+                                <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation
+                                    Patient</h1>
+
+                                <div class="nk-block-des">
+                                    <h2 class="ml-5"> {{ hospitalisationdetail.patient }}</h2>
+                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span></h6>
+{#                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ hospitalisationdetail.patient.code_vih }}</span></h6>#}
+
+                                </div>
+                            </div><!-- .nk-block-head-content -->
+
+                        </div>
+                    </div><!-- .nk-block-between -->
+
+                    <div class="mt-2">
+                        <a href="#" data-toggle="modal" data-target="#constanteover"
+                           class="btn btn-outline-primary mr-4"><em class="icon ni ni-note-add"></em>Constantes</a>
+
+                        <div class="modal fade" tabindex="-1" id="constanteover">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                        <em class="icon ni ni-cross"></em>
+                                    </a>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Overview des constante du Patient : <span
+                                                class="text-primary">{{ hospitalisationdetaildupatient.patient }}</span>
+                                        </h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="nk-block card card-bordered">
+
+                                            {% if hospitalisationdetaildupatient.patient.latest_constante %}
+                                                <h4>Deniere constante enregistrée le
+                                                    : {{ hospitalisationdetaildupatient.patient.latest_constante.created_at }} </h4>
+                                                <table class="table table-responsive">
+                                                    <thead class="thead-light">
+                                                    <tr>
+                                                        <th class="tb-col-os"><span class="overline-title">Libélé <span
+                                                                class="d-sm-none">/ IP</span></span>
+                                                        </th>
+                                                        <th class="tb-col-ip"><span
+                                                                class="overline-title">Valeure</span></th>
+                                                        <th class="tb-col-time"><span
+                                                                class="overline-title">Observation</span></th>
+
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+
+                                                    <tr>
+                                                        <td class="tb-col-os">Tension systolique</td>
+                                                        <td class="tb-col-ip">
+                                                            <span class="sub-text">{{ hospitalisationdetaildupatient.patient.latest_constante.tension_systolique }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+                                                            {% if hospitalisationdetaildupatient.patient.latest_constante.tension_systolique < 90 or hospitalisationdetaildupatient.patient.latest_constante.tension_systolique > 140 %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Tension diastolique</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.tension_diastolique }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.tension_diastolique < 60 or hospitalisationdetail.patient.latest_constante.tension_diastolique > 90 %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
+                                                            {% endif %}</td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Frequence cardiaque</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_cardiaque }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.frequence_cardiaque < 60 or hospitalisationdetail.patient.latest_constante.frequence_cardiaque > 100 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Frequence respiratoire</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_respiratoire }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+                                                            {% if hospitalisationdetail.patient.latest_constante.frequence_respiratoire < 12 or hospitalisationdetail.patient.latest_constante.frequence_respiratoire  > 20 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Temperature</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.temperature }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.temperature < 36 or hospitalisationdetail.patient.latest_constante.temperature > 37.5 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Saturation oxygene</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.saturation_oxygene }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.saturation_oxygene < 95 or hospitalisationdetail.patient.latest_constante.saturation_oxygene > 100 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">Glycemie</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.glycemie }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.glycemie < 70 or hospitalisationdetail.patient.latest_constante.glycemie > 140 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">poids</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.poids }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">taille</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.taille }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
+                                                                <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">pouls</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.pouls }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
+                                                                <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="tb-col-os">IMC</td>
+                                                        <td class="tb-col-ip"><span
+                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.imc }}</span>
+                                                        </td>
+                                                        <td class="tb-col-time">
+
+                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
+                                                                <span class="sub-text"><i
+                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                                            {% else %}
+                                                                <span class="sub-text font-italic"><i
+                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            {% else %}
+                                                Pas de constantes enregistrées
+                                            {% endif %}
+                                        </div>
+
+
+                                    </div>
+                                    <div class="modal-footer bg-light">
+                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ hospitalisationdetail.patient.code_patient }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
+                           class="btn btn-outline-primary mr-4"><em class="icon ni ni-folder"></em>Dossier</a>
+                        <a href="#" class="btn btn-outline-lighter float-right"><em class="icon ni ni-printer"></em>
+                            Imprimer</a>
+
+
+{#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
+{#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
+{#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
+                        {% if hospitalisationdetail.discharge_date %}
+                            <span  class="h4 float-right mr-5" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">Patient Sorti  {{ hospitalisationdetail.discharge_date|naturaltime }}</span>
+                            {% else %}
+                        <a href="" data-toggle="modal" data-target="#hospitalisationout"
+                           class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-sign-out mr-1"></i>
+                            Sortir ?</a>
+                    {% endif %}
+
+                        <!-- Modal Content Code -->
+                       <div class="modal fade" tabindex="-1" id="hospitalisationout">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content ">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Hospitalisation Patient: {{ hospitalisationdetail.patient }}</h5>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="discharge_date">Date de sortie</label>
+                        <input type="date" class="form-control" id="discharge_date" name="discharge_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="discharge_reason">Raison de sortie</label>
+                        <textarea class="form-control" id="discharge_reason" name="discharge_reason" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Statut du patient</label>
+                        <select class="form-control" id="status" name="status" required>
+                            <option value="Sortie">Sortie</option>
+                            <option value="Gueris-EXEA">Gueris-EXEA</option>
+                            <option value="Transféré-TRANSF">Transféré-TRANSF</option>
+                            <option value="SCAM">SCAM</option>
+                            <option value="EVADE">EVADE</option>
+                            <option value="DCD">DCD</option>
+                            <!-- Add other status options if needed -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
+{#                           class="btn btn-outline-secondary float-right mr-5"#}
+{#                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
+{#                                class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>#}
+
+
+
+                    </div>
+
+
+                </div><!-- .nk-block-head -->
+
+                <div class="nk-block">
+                    <div class="card card-bordered card-stretch">
+                        <div class="card-inner-group">
+                            <blockquote class="blockquote text-center">
+                                  {% if hospitalisationdetail.discharge_date %}
+                                      {% else %}
+                                <img src="{% static 'images/hospitalization-2.gif' %}" height="200">
+                                {% endif %}
+                                <p class="mb-0">Admis en hospitalisation le <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>      <footer class="blockquote-footer">{{ hospitalisationdetail.reason }}</footer></p>
+{% if hospitalisationdetail.discharge_date %}
+                                      
+ <p class="mb-0">Sortie de l' hospitalisation le <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>      <footer class="blockquote-footer">{{ hospitalisationdetail.discharge_reason }}</footer></p>
+{% else %}
+{% endif %}
+                            </blockquote>
+                            <hr>
+                            <!-- Indicateurs Cliniques -->
+                            <div class="row m-4">
+
+                                <h3 class="text-muted"> Indicateurs Cliniques </h3>
+
+                                <div class="row col-12">
+                                    <!-- Constantes Card -->
+                                    <div class="col-6 col-md-6 mb-5">
+                                        <div class="card text-black-100 border">
+                                            <div class="card-header">
+                                                Constantes
+                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="#"><em
+                                                        class="icon ni ni-download-cloud ml-10"></em></a>
+                                                <button type="button"
+                                                        class="btn btn-dark btn-icon btn-round float-right"
+                                                        data-toggle="modal" data-target="#constanteModal">
+                                                    <em class="icon ni ni-plus-circle-fill"></em>
+                                                </button>
+                                            </div>
+                                            <div class="card-inner text-black-70">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Constantes</th>
+                                                        <th>Date</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% if constantes %}
+                                                        {% for constante in constantes %}
+                                                            <tr>
+                                                                <td>
+                                    <span class="badge badge-dark">
+                                        Tension: {{ constante.tension_systolique }} / {{ constante.tension_diastolique }} mmHg
+                                    </span><br>
+                                                                    <span class="badge badge-dark">Température: {{ constante.temperature }} °C</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge badge-dark">{{ constante.created_at|date:"d/m/Y" }}</span>
+                                                                </td>
+                                                                <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="{% url 'export_constante_pdf' hospitalisationdetail.id %}"><em
+                                                class="icon ni ni-download-cloud ml-10"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <tr>
+                                                            <td colspan="3"
+                                                                style="font-style: italic; text-align: center"
+                                                                class="text-white">
+                                                                Aucune donnée enregistrée
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Prescription Card -->
+                                    <div class="col-6 col-md-6 mb-5">
+                                        <div class="card text-black-100 border">
+                                            <div class="card-header">
+                                                Prescriptions
+                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="#"><em
+                                                        class="icon ni ni-download-cloud ml-10"></em></a>
+                                                <button type="button"
+                                                        class="btn btn-dark btn-icon btn-round float-right"
+                                                        data-toggle="modal" data-target="#prescriptionModal">
+                                                    <em class="icon ni ni-plus-circle-fill"></em>
+                                                </button>
+                                            </div>
+                                            <div class="card-inner text-black-70">
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Médicament</th>
+                                                        <th>Date</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% if prescriptions %}
+                                                        {% for prescription in prescriptions %}
+                                                            <tr>
+                                                                <td>
+                                                                    <span class="badge badge-dark">{{ prescription.medication.name }}</span><br>
+                                                                    <span class="badge badge-dark">Quantité: {{ prescription.quantity }}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge badge-dark">{{ prescription.created_at|date:"d/m/Y" }}</span>
+                                                                </td>
+                                                                <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="#"><em
+                                                class="icon ni ni-download-cloud ml-10"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <tr>
+                                                            <td colspan="3"
+                                                                style="font-style: italic; text-align: center"
+                                                                class="text-white">
+                                                                Aucune donnée enregistrée
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Constante Form Modal -->
+                                    <div class="modal fade" id="constanteModal" tabindex="-1"
+                                         aria-labelledby="constanteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="constanteModalLabel">Ajouter
+                                                        Constante</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post"
+                                                          action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                        {% csrf_token %}
+                                                        {{ constante_form.as_p }}
+                                                        <button type="submit" class="btn btn-primary">Save
+                                                            Constante
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Indicateurs Biologiques -->
+
+                                <div class="row m-4">
+
+                                    <h3 class="text-muted"> Indicateurs Biologiques </h3>
+
+                                    <div class="row col-12">
+                                        <!-- Indicateur Biologique Card -->
+                                        <div class="col-6 col-md-6 mb-5">
+                                            <div class="card text-black-100 border">
+                                                <div class="card-header">
+                                                    Indicateurs Biologiques
+                                                    <button type="button"
+                                                            class="btn btn-dark btn-icon btn-round float-right"
+                                                            data-toggle="modal"
+                                                            data-target="#indicateurBiologiqueModal">
+                                                        <em class="icon ni ni-plus-circle-fill"></em>
+                                                    </button>
+                                                </div>
+                                                <div class="card-inner text-black-70">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Indicateurs</th>
+                                                            <th>Date</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% if indicateurs_biologiques %}
+                                                            {% for indicateur in indicateurs_biologiques %}
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="badge badge-dark">Globules Blancs: {{ indicateur.globules_blancs }}</span><br>
+                                                                        <span class="badge badge-dark">Hémoglobine: {{ indicateur.hemoglobine }}</span>
+                                                                    </td>
+                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
+                                                                    <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="3"
+                                                                    style="font-style: italic; text-align: center"
+                                                                    class="text-white">
+                                                                    Aucune donnée enregistrée
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                                <!-- Indicateurs  Fonctionnels  -->
+                                <div class="row m-4">
+
+                                    <h3 class="text-muted"> Indicateurs Fonctionnels </h3>
+
+                                    <div class="row col-12">
+                                        <!-- Signe Fonctionnel Card -->
+                                        <!-- Indicateur Fonctionnel Card -->
+                                        <div class="col-6 col-md-6 mb-5">
+                                            <div class="card text-black-100 border">
+                                                <div class="card-header">
+                                                    Indicateurs Fonctionnels
+                                                    <button type="button"
+                                                            class="btn btn-dark btn-icon btn-round float-right"
+                                                            data-toggle="modal"
+                                                            data-target="#indicateurFonctionnelModal">
+                                                        <em class="icon ni ni-plus-circle-fill"></em>
+                                                    </button>
+                                                </div>
+                                                <div class="card-inner text-black-70">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Indicateurs</th>
+                                                            <th>Date</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% if indicateurs_fonctionnels %}
+                                                            {% for indicateur in indicateurs_fonctionnels %}
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="badge badge-dark">Mobilité: {{ indicateur.mobilite }}</span><br>
+                                                                        <span class="badge badge-dark">Conscience: {{ indicateur.conscience }}</span><br>
+                                                                        <span class="badge badge-dark">Débit urinaire: {{ indicateur.debit_urinaire }} L</span>
+                                                                    </td>
+                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
+                                                                    <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="3"
+                                                                    style="font-style: italic; text-align: center"
+                                                                    class="text-white">
+                                                                    Aucune donnée enregistrée
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-6 mb-5">
+                                            <div class="card text-black-100 border">
+                                                <div class="card-header">
+                                                    Signe Fonctionnel
+                                                    <button type="button"
+                                                            class="btn btn-dark btn-icon btn-round float-right"
+                                                            data-toggle="modal" data-target="#signeFonctionnelModal">
+                                                        <em class="icon ni ni-plus-circle-fill"></em>
+                                                    </button>
+                                                </div>
+                                                <div class="card-inner text-black-70">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Nom</th>
+                                                            <th>Valeure</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% if signe_fonctionnel %}
+                                                            {% for signe in signe_fonctionnel %}
+                                                                <tr>
+                                                                    <td>{{ signe.nom }}</td>
+                                                                    <td>{{ signe.valeure }}</td>
+                                                                    <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="3"
+                                                                    style="font-style: italic; text-align: center"
+                                                                    class="text-white">
+                                                                    Aucune donnée enregistrée
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <!-- Indicateurs   Subjectifs  -->
+                                <div class="row m-4">
+
+                                    <h3 class="text-muted"> Indicateurs Subjectifs </h3>
+
+                                    <div class="row col-12">
+                                        <!-- Indicateur Subjectif Card -->
+                                        <div class="col-6 col-md-6 mb-5">
+                                            <div class="card text-black-100 border">
+                                                <div class="card-header">
+                                                    Indicateurs Subjectifs
+                                                    <button type="button"
+                                                            class="btn btn-dark btn-icon btn-round float-right"
+                                                            data-toggle="modal" data-target="#indicateurSubjectifModal">
+                                                        <em class="icon ni ni-plus-circle-fill"></em>
+                                                    </button>
+                                                </div>
+                                                <div class="card-inner text-black-70">
+                                                    <table class="table">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>Bien-être</th>
+                                                            <th>Date</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% if indicateurs_subjectifs %}
+                                                            {% for indicateur in indicateurs_subjectifs %}
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="badge badge-dark">Bien-être: {{ indicateur.bien_etre }} / 10</span>
+                                                                    </td>
+                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
+                                                                    <td>
+                                    <span>
+                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-eye"></em></a>
+                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                                class="icon ni ni-trash-fill"></em></a>
+                                    </span>
+                                                                    </td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <tr>
+                                                                <td colspan="3"
+                                                                    style="font-style: italic; text-align: center"
+                                                                    class="text-white">
+                                                                    Aucune donnée enregistrée
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <!-- Indicateurs  de Complications  -->
+                            <div class="row m-4">
+
+                                <h3 class="text-muted"> Indicateurs de Complications </h3>
+
+                                <div class="row col-12">
+
+                                </div>
+
+
+                            </div>
+                            <!-- Indicateurs  de Traitement  -->
+                            <div class="row m-4">
+
+                                <h3 class="text-muted"> Indicateurs de Traitement </h3>
+
+                                <div class="row col-12">
+
+                                </div>
+
+
+                            </div>
+                            <!-- Indicateurs  de Sortie  -->
+                            <div class="row m-4">
+
+                                <h3 class="text-muted"> Indicateurs de Sortie (Critères de décharge) </h3>
+
+                                <div class="row col-12">
+
+                                </div>
+
+
+                            </div>
+                        </div><!-- .card-inner-group -->
+                    </div><!-- .card -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let formIdx = {{ symptomes_forms|length }};
+            document.getElementById('add-symptome').addEventListener('click', function () {
+                const newForm = document.createElement('div');
+                newForm.className = 'row';
+                const formHtml = `<div class="col-lg-6 col-sm-12 mb-3">
+<div class="form-group">
+<label class="form-label" for="id_symptomes-${formIdx}-nom">Nom</label>
+<input type="text" name="nom[]" maxlength="255" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-nom">
+</div>
+                              </div>
+                              <div class="col-lg-6 col-sm-12 mb-3">
+                                <div class="form-group">
+                                    <label class="form-label" for="id_symptomes-${formIdx}-date_debut">Date début</label>
+                                    <input type="date" name="date_debut[]" class="form-control form-control-lg" required id="id_symptomes-${formIdx}-date_debut">
+                                </div>
+                              </div>`;
+                newForm.innerHTML = formHtml;
+                document.getElementById('symptomes-forms').appendChild(newForm);
+                formIdx++;
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var booleanTypePairs = [
+            { checkbox: 'prophylaxie_antiretrovirale', typeField: 'prophylaxie_type' },
+            { checkbox: 'traitement_antiretrovirale', typeField: 'traitement_type' },
+            { checkbox: 'dernier_regime_antiretrovirale', typeField: 'dernier_regime_antiretrovirale_type' },
+            { checkbox: 'traitement_prophylactique_cotrimoxazole', typeField: 'traitement_prophylactique_cotrimoxazole_type' },
+        ];
+
+        function toggleTypeField(checkboxId, typeFieldId) {
+            var checkbox = document.getElementById(checkboxId);
+            var typeField = document.getElementById(typeFieldId);
+
+            if (checkbox && typeField) {
+                if (checkbox.checked) {
+                    typeField.closest('.form-group').style.display = 'block';
+                } else {
+                    typeField.closest('.form-group').style.display = 'none';
+                }
+            }
+        }
+
+        booleanTypePairs.forEach(function(pair) {
+            toggleTypeField(pair.checkbox, pair.typeField);
+
+            document.getElementById(pair.checkbox).addEventListener('change', function() {
+                toggleTypeField(pair.checkbox, pair.typeField);
+            });
+        });
+    });
+</script>
+{% endblock %}

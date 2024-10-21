@@ -42,7 +42,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(Constante)
 class ConstanteAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'patient', 'created_at', 'hospitalisation']
 
 
 @admin.register(Consultation)

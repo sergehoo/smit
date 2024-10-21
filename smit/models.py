@@ -1,6 +1,7 @@
 import datetime
 import io
 import random
+import uuid
 
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
@@ -34,8 +35,27 @@ RAPID_HIV_TEST_TYPES = [
     # Ajoutez d'autres types si nécessaire
 ]
 
+antecedents_type = [
+    ('Antécédents médicaux personnels', 'Antécédents médicaux personnels'),
+    ('Antécédents familiaux', 'Antécédents familiaux'),
+    ('Antécédents chirurgicaux', 'Antécédents chirurgicaux'),
+    ('Antécédents gynécologiques et obstétricaux', 'Antécédents gynécologiques et obstétricaux'),
+    ('Antécédents médicamenteux', 'Antécédents médicamenteux'),
+    ('Antécédents psychologiques', 'Antécédents psychologiques'),
+    ('Antécédents sociaux', 'Antécédents sociaux'),
+    ('Antécédents obstétricaux', 'Antécédents obstétricaux')
+]
+
 
 def request_number():
+    WordStack = ['S', 'M', 'I', 'T', 'C', '', 'I']
+    random_str = random.choice(WordStack)
+    current_date = datetime.datetime.now().strftime("%Y%m%d")
+    traking = (random_str + str(random.randrange(0, 9999, 1)) + current_date)
+    return traking
+
+
+def consult_number():
     WordStack = ['S', 'M', 'I', 'T', 'C', '', 'I']
     random_str = random.choice(WordStack)
     current_date = datetime.datetime.now().strftime("%Y%m%d")
@@ -174,9 +194,17 @@ class EnqueteVih(models.Model):
         return f"Antecedents Medicaux for {self.patient.nom} on {self.created_at}"
 
 
+class TypeAntecedent(models.Model):
+    nom = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.nom
+
+
 class AntecedentsMedicaux(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     nom = models.CharField(max_length=255, null=True, blank=True)
+    type = models.ForeignKey(TypeAntecedent, on_delete=models.SET_NULL, null=True, blank=True)
     descriptif = models.CharField(max_length=255, null=True, blank=True)
     date_debut = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -276,8 +304,8 @@ class TestRapideVIH(models.Model):
 
 
 class Consultation(models.Model):
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_consultations",
-                                 null=True, blank=True, )
+    numeros = models.CharField(default=consult_number, max_length=300, unique=True)
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_consultations",null=True, blank=True, )
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     constante = models.ForeignKey('Constante', on_delete=models.SET_NULL, null=True, blank=True,
                                   related_name='patientconstantes')
@@ -314,6 +342,8 @@ class Consultation(models.Model):
 
 class Constante(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="constantes")
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiconstantes",
+                                        null=True, blank=True)
     tension_systolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle systolique")
     tension_diastolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle diastolique")
     frequence_cardiaque = models.IntegerField(null=True, blank=True, verbose_name="Fréquence cardiaque")
@@ -483,34 +513,45 @@ class TraitementARV(models.Model):
     def __str__(self):
         return f"Traitement ARV {self.regime} pour {self.patient}"
 
+
 class FicheSuiviClinique(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
-    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='fichemedecinsuivi')
+    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='fichemedecinsuivi')
     date_consultation = models.DateField(help_text="Date de la consultation.")
     heure_consultation = models.TimeField(help_text="Heure de la consultation.", blank=True, null=True)
     observations_cliniques = models.TextField(blank=True, null=True, help_text="Observations cliniques du médecin.")
-    poids = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Poids du patient en kg.")
-    taille = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Taille du patient en cm.")
+    poids = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
+                                help_text="Poids du patient en kg.")
+    taille = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
+                                 help_text="Taille du patient en cm.")
     pression_arterielle = models.CharField(max_length=20, blank=True, null=True, help_text="Exemple : 120/80 mmHg")
-    temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True, help_text="Température corporelle en °C.")
+    temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True,
+                                      help_text="Température corporelle en °C.")
     recommandations = models.TextField(blank=True, null=True, help_text="Recommandations du médecin pour le patient.")
-    prochaine_consultation = models.DateField(blank=True, null=True, help_text="Date de la prochaine consultation prévue.")
+    prochaine_consultation = models.DateField(blank=True, null=True,
+                                              help_text="Date de la prochaine consultation prévue.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Consultation de {self.patient} avec {self.medecin} le {self.date_consultation}"
+
+
 class Suivi(models.Model):
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="suiviactivitepat", null=True,
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="suiviactivitepat",
+                                 null=True,
                                  blank=True, )
     services = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True,
                                  related_name='servicesuivipat')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="suivimedecin")
     fichesuivie = models.ForeignKey(FicheSuiviClinique, on_delete=models.CASCADE, related_name='suivisfiche')
-    traitement = models.ForeignKey(TraitementARV, on_delete=models.CASCADE, related_name='suivispatient', null=True,blank=True)
-    rdvconsult = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='suivierdvconsult',null=True,blank=True)
-    rdvpharmacie = models.ForeignKey(RendezVous, on_delete=models.CASCADE, related_name='suivierdvpharma',null=True,blank=True)
-
+    traitement = models.ForeignKey(TraitementARV, on_delete=models.CASCADE, related_name='suivispatient', null=True,
+                                   blank=True)
+    rdvconsult = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='suivierdvconsult', null=True,
+                                   blank=True)
+    rdvpharmacie = models.ForeignKey(RendezVous, on_delete=models.CASCADE, related_name='suivierdvpharma', null=True,
+                                     blank=True)
 
     def __str__(self):
         return f"{self.patient.nom} - {self.services}"
@@ -523,7 +564,8 @@ class Hospitalization(models.Model):
     doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hospitaliza_doctor')
     admission_date = models.DateTimeField()
     discharge_date = models.DateTimeField(null=True, blank=True)
-    room = models.CharField(max_length=100)
+    discharge_reason = models.CharField(max_length=700, null=True, blank=True)
+    room = models.CharField(max_length=500)
     bed = models.ForeignKey('LitHospitalisation', on_delete=models.SET_NULL, null=True, blank=True)
     reason_for_admission = models.TextField()
     status = models.CharField(max_length=50, choices=Patient_statut_choices, null=True, blank=True)
@@ -532,6 +574,63 @@ class Hospitalization(models.Model):
 
     def __str__(self):
         return f"{self.patient.nom} - {self.admission_date}"
+
+
+class SigneFonctionnel(models.Model):
+    nom = models.CharField(max_length=255, unique=True)
+    valeure = models.CharField(choices=[('oui', 'oui'), ('non', 'non')], max_length=255)
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.SET_NULL, related_name='signefonctionnels',
+                                        null=True, blank=True)
+
+    def __str__(self):
+        return self.nom
+
+
+class IndicateurBiologique(models.Model):
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,
+                                        related_name='indicateurs_biologiques')
+    date = models.DateField(default=datetime.date.today)
+
+    globules_blancs = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    hemoglobine = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    plaquettes = models.IntegerField(null=True, blank=True)
+    crp = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    glucose_sanguin = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"Indicateurs biologiques pour {self.hospitalisation.patient.nom} le {self.date}"
+
+
+class IndicateurFonctionnel(models.Model):
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,
+                                        related_name='indicateurs_fonctionnels')
+    date = models.DateField(default=datetime.date.today)
+
+    mobilite = models.CharField(max_length=50, null=True, blank=True, choices=[
+        ('indépendant', 'Indépendant'),
+        ('assisté', 'Assisté'),
+        ('immobile', 'Immobile')
+    ])
+    conscience = models.CharField(max_length=50, null=True, blank=True, choices=[
+        ('alerte', 'Alerte'),
+        ('somnolent', 'Somnolent'),
+        ('inconscient', 'Inconscient')
+    ])
+    debit_urinaire = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Litres")
+
+    def __str__(self):
+        return f"Indicateurs fonctionnels pour {self.hospitalisation.patient.nom} le {self.date}"
+
+
+class IndicateurSubjectif(models.Model):
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,
+                                        related_name='indicateurs_subjectifs')
+    date = models.DateField(default=datetime.date.today)
+
+    bien_etre = models.IntegerField(null=True, blank=True, choices=[(i, i) for i in range(0, 11)])
+
+    def __str__(self):
+        return f"Indicateurs subjectifs pour {self.hospitalisation.patient.nom} le {self.date}"
 
 
 class UniteHospitalisation(models.Model):

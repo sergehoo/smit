@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Constantes PDF</title>
+</head>
+<body>
+    <h1>Constantes for Hospitalisation: {{ hospitalisation.id }}</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Tension Systolique</th>
+                <th>Tension Diastolique</th>
+                <th>Température</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for constante in constantes %}
+            <tr>
+                <td>{{ constante.tension_systolique }}</td>
+                <td>{{ constante.tension_diastolique }}</td>
+                <td>{{ constante.temperature }} °C</td>
+                <td>{{ constante.created_at|date:"d/m/Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

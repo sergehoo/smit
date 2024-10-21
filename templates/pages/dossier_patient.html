@@ -1,5 +1,6 @@
 {% extends 'layout/base.html' %}
 {% load static %}
+{% load humanize %}
 {% block content %}
 <div class="nk-content nk-content-fluid">
 
@@ -30,26 +31,57 @@
                             </div><!-- .nk-block-head -->
                             <div class="nk-block">
 {#                                      debut du nav#}
+{#                                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link active" data-toggle="tab" href="#tabItem0"><em#}
+{#                                                class="icon ni ni-user-circle"></em><span>Personnel</span></a>#}
+{#                                    </li>#}
+{#                                    {% for service in patientsdetail.services_passed %}#}
+{#                                        <li class="nav-item">#}
+{#                                            <a class="nav-link" data-toggle="tab" href="#tabItem{{ service.id }}"><em#}
+{#                                                    class="icon ni ni-repeat"></em><span>{{ service.nom }}</span></a>#}
+{#                                        </li>#}
+{##}
+{#                                    {% endfor %}#}
+{#                                    <li class="nav-item nav-item-trigger d-xxl-none">#}
+{#                                        <a href="#" class="toggle btn btn-icon btn-trigger" data-target="userAside"><em#}
+{#                                                class="icon ni ni-user-list-fill"></em></a>#}
+{#                                    </li>#}
+{# </ul>#}
+
+
+                                <!-- .nav-tabs -->
                                 <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">
                                     <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#tabItem0"><em
-                                                class="icon ni ni-user-circle"></em><span>Personnel</span></a>
+                                        <a class="nav-link active" data-toggle="tab" href="#tabPersonal">
+                                            <em class="icon ni ni-user"></em><span>Personal Infos</span>
+                                        </a>
                                     </li>
-                                    {% for service in patientsdetail.services_passed %}
-                                        <li class="nav-item">
-                                            <a class="nav-link" data-toggle="tab" href="#tabItem{{ service.id }}"><em
-                                                    class="icon ni ni-repeat"></em><span>{{ service.nom }}</span></a>
-                                        </li>
-
-                                    {% endfor %}
-                                    <li class="nav-item nav-item-trigger d-xxl-none">
-                                        <a href="#" class="toggle btn btn-icon btn-trigger" data-target="userAside"><em
-                                                class="icon ni ni-user-list-fill"></em></a>
+                                    <li class="nav-item">
+                                        <a class="nav-link " data-toggle="tab" href="#tabConsultations">
+                                            <em class="icon ni ni-repeat"></em><span>Consultations</span>
+                                        </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#tabHospitalizations">
+                                            <em class="icon ni ni-home"></em><span>Hospitalisations</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#tabAppointments">
+                                            <em class="icon ni ni-calendar"></em><span>Rendez-vous</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="tab" href="#tabSuivis">
+                                            <em class="icon ni ni-user-check"></em><span>Suivis</span>
+                                        </a>
+                                    </li>
+                                </ul>
 
-                                </ul><!-- .nav-tabs -->
                                 <div class="tab-content">
-                                    <div class="tab-pane active" id="tabItem0">
+                                    <!-- Tab Peronal Info -->
+                                    <div class="tab-pane fade show active" id="tabPersonal">
 
                                         <div class="nk-block">
                                             <div class="nk-block-head">
@@ -215,42 +247,336 @@
                                             </div><!-- .bq-note -->
                                         </div><!-- .nk-block -->
                                     </div>
-                                    {% for service, consultations in services_with_consultations %}
-                                        <div class="tab-pane" id="tabItem{{ service.id }}">
-                                            <h4>{{ service.nom }}</h4>
-                                            {% if consultations %}
-                                                {% for consultation in consultations %}
-                                                    <div>
-                                                        <h5>Consultation {{ consultation.id }}</h5>
-                                                        <p>Constante: {{ consultation.constante }}</p>
-                                                        <p>Examens: {{ consultation.examens }}</p>
-                                                        <p>Symptômes:</p>
-                                                        <ul>
-                                                            {% for symptome in consultation.symptomes.all %}
-                                                                <li>{{ symptome.nom }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                        <p>Antécédents Médicaux:</p>
-                                                        <ul>
-                                                            {% for antecedent in consultation.antecedentsMedicaux.all %}
-                                                                <li>{{ antecedent.nom }}</li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                        <p>Allergies:</p>
-                                                        <ul>
-                                                            {% for allergie in consultation.allergies.all %}
-                                                                <li>{{ allergie.titre }}</li>
-                                                            {% endfor %}
-                                                        </ul>
+
+                                    <!-- Tab Consultations -->
+                                    <div class="tab-pane fade" id="tabConsultations">
+
+                                       <div id="accordion" class="accordion">
+    {% for consultation in consultations %}
+        <div class="accordion-item">
+            <a href="#"
+               class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"
+               data-toggle="collapse"
+               data-target="#accordion-item-{{ consultation.id }}">
+                <h6 data-toggle="tooltip" data-placement="left"
+                    title="{{ consultation.consultation_date|naturaltime }}"
+                    class="title">
+                    Consultation du {{ consultation.consultation_date }}
+                    | {{ consultation.reason|truncatewords:25 }}
+                </h6>
+                <span class="accordion-icon"></span>
+            </a>
+            <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
+                 id="accordion-item-{{ consultation.id }}"
+                 data-parent="#accordion">
+                <div class="accordion-inner">
+                    <h5>Détails de la Consultation {{ consultation.num }}</h5>
+
+                    <p><strong>Date :</strong> {{ consultation.consultation_date|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Raison :</strong> {{ consultation.reason|default:"Non spécifiée" }}</p>
+
+                    <p><strong>Constante :</strong>
+                        {% if consultation.constante %}
+                            {{ consultation.constante }}
+                        {% else %}
+                            Aucune constante enregistrée.
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Examens :</strong>
+                        {% if consultation.examens %}
+                            {{ consultation.examens }}
+                        {% else %}
+                            Aucun examen associé.
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Symptômes :</strong></p>
+                    <ul>
+                        {% for symptome in consultation.symptomes.all %}
+                            <li>{{ symptome.nom }}</li>
+                        {% empty %}
+                            <li>Aucun symptôme enregistré.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <p><strong>Antécédents Médicaux :</strong></p>
+                    <ul>
+                        {% for antecedent in consultation.antecedentsMedicaux.all %}
+                            <li>{{ antecedent.nom }}</li>
+                        {% empty %}
+                            <li>Aucun antécédent médical.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <p><strong>Allergies :</strong></p>
+                    <ul>
+                        {% for allergie in consultation.allergies.all %}
+                            <li>{{ allergie.titre }}</li>
+                        {% empty %}
+                            <li>Aucune allergie enregistrée.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <p><strong>Diagnostic :</strong></p>
+                    <div>
+                        {{ consultation.diagnosis|safe }}
+                    </div>
+
+                    <p><strong>Commentaires :</strong></p>
+                    <div>
+                        {{ consultation.commentaires|safe }}
+                    </div>
+
+                    <p><strong>Médecin :</strong>
+                        {% if consultation.doctor %}
+                            {{ consultation.doctor.username }}
+                        {% else %}
+                            Non attribué.
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Status :</strong> {{ consultation.get_status_display|default:"Non défini" }}</p>
+
+                    <p><strong>Service de Suivi :</strong>
+                        {% if consultation.suivi %}
+                            {{ consultation.suivi.nom }}
+                        {% else %}
+                            Aucun service de suivi.
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Créé par :</strong>
+                        {% if consultation.created_by %}
+                            {{ consultation.created_by.username }}
+                        {% else %}
+                            Créateur inconnu.
+                        {% endif %}
+                    </p>
+
+                    <p><strong>Créé le :</strong> {{ consultation.created_at|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Mis à jour le :</strong> {{ consultation.updated_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>Aucune consultation disponible pour ce patient.</p>
+    {% endfor %}
+</div>
+
+
+
+                                    </div>
+
+                                    <!-- Tab Hospitalisations -->
+                                    <div class="tab-pane fade" id="tabHospitalizations">
+                                        <div id="accordion-hospitalization" class="accordion">
+                                            {% for hospitalization in hospitalizations %}
+                                                <div class="accordion-item">
+                                                    <a href="#"
+                                                       class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}"
+                                                       data-toggle="collapse"
+                                                       data-target="#accordion-item-hosp-{{ hospitalization.id }}">
+                                                        <h6 class="title">
+                                                            Hospitalisation du {{ hospitalization.admission_date|date:"d/m/Y" }}  
+                                                            | Chambre : {{ hospitalization.bed.nom }}-{{ hospitalization.bed.box }}
+                                                            | {% if hospitalization.discharge_date %} <span class="badge badge-outline-primary"> Sortie le :  {{ hospitalization.discharge_date|date:"d/m/Y" }} | Motif :{{ hospitalization.discharge_reason }} {% endif %}</span>
+                                                        </h6>
+                                                        <span class="accordion-icon"></span>
+                                                    </a>
+                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
+                                                         id="accordion-item-hosp-{{ hospitalization.id }}"
+                                                         data-parent="#accordion-hospitalization">
+                                                        <div class="accordion-inner">
+                                                            <h5>Détails de
+                                                                l'Hospitalisation {{ hospitalization.id }}</h5>
+
+                                                            <p><strong>Patient
+                                                                :</strong> {{ hospitalization.patient.nom }}</p>
+
+                                                            <p><strong>Activité :</strong>
+                                                                {% if hospitalization.activite %}
+                                                                    {{ hospitalization.activite.nom }}
+                                                                {% else %}
+                                                                    Non spécifiée
+                                                                {% endif %}
+                                                            </p>
+
+                                                            <p><strong>Médecin :</strong>
+                                                                {% if hospitalization.doctor %}
+                                                                    {{ hospitalization.doctor.username }}
+                                                                {% else %}
+                                                                    Non attribué
+                                                                {% endif %}
+                                                            </p>
+
+                                                            <p><strong>Date d'Admission
+                                                                :</strong> {{ hospitalization.admission_date|date:"d/m/Y H:i" }}
+                                                            </p>
+
+                                                            <p><strong>Date de Sortie :</strong>
+                                                                {% if hospitalization.discharge_date %}
+                                                                    {{ hospitalization.discharge_date|date:"d/m/Y H:i" }}
+                                                                {% else %}
+                                                                    Toujours hospitalisé
+                                                                {% endif %}
+                                                            </p>
+
+                                                            <p><strong>Motif d'Admission
+                                                                :</strong> {{ hospitalization.reason_for_admission }}
+                                                            </p>
+
+                                                            <p><strong>Motif de Sortie :</strong>
+                                                                {% if hospitalization.discharge_reason %}
+                                                                    {{ hospitalization.discharge_reason }}
+                                                                {% else %}
+                                                                    Non spécifié
+                                                                {% endif %}
+                                                            </p>
+
+                                                            <p><strong>Statut
+                                                                :</strong> {{ hospitalization.get_status_display }}</p>
+
+                                                            <p><strong>Lit :</strong>
+                                                                {% if hospitalization.bed %}
+                                                                    {{ hospitalization.bed.nom }}
+                                                                {% else %}
+                                                                    Aucun lit attribué
+                                                                {% endif %}
+                                                            </p>
+
+                                                            <p><strong>Créé le
+                                                                :</strong> {{ hospitalization.created_at|date:"d/m/Y H:i" }}
+                                                            </p>
+                                                            <p><strong>Mis à jour le
+                                                                :</strong> {{ hospitalization.updated_at|date:"d/m/Y H:i" }}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                {% endfor %}
-                                            {% else %}
-                                                <p>Aucune consultation pour ce service.</p>
-                                            {% endif %}
+                                                </div>
+                                            {% empty %}
+                                                <p>Aucune hospitalisation disponible pour ce patient.</p>
+                                            {% endfor %}
                                         </div>
-                                    {% endfor %}
 
 
+                                    </div>
+
+                                    <!-- Tab Rendez-vous -->
+                                    <div class="tab-pane fade" id="tabAppointments">
+                                        <h5>Rendez-vous</h5>
+                                        <ul>
+                                            {% for appointment in appointments %}
+                                                <li>
+                                                    {{ appointment.date }} à {{ appointment.time }} -
+                                                    {{ appointment.reason }} ({{ appointment.status }})
+                                                </li>
+                                            {% empty %}
+                                                <p>Aucun rendez-vous disponible.</p>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+
+                                    <!-- Tab Suivis -->
+                                    <div class="tab-pane fade" id="tabSuivis">
+                                        <h5>Suivis</h5>
+                                        <ul>
+                                            {% for suivi in suivis %}
+                                                <li>
+                                                    Activité : {{ suivi.activite.nom }} -
+                                                    Service : {{ suivi.services.nom }}
+                                                </li>
+                                            {% empty %}
+                                                <p>Aucun suivi disponible.</p>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+
+
+
+{#                                    {% for service, consultations in services_with_consultations %}#}
+{#    <div class="tab-pane" id="tabItem{{ service.id }}">#}
+{#        {% if consultations %}#}
+{#            {% for consultation in consultations %}#}
+{#                <div>#}
+{#                    <h5>Consultation {{ consultation.id }}</h5>#}
+{#                    <div>#}
+{#                        <strong>Constante:</strong> {{ consultation.constante }}<br>#}
+{#                        <strong>Examens:</strong> {{ consultation.examens }}<br>#}
+{#                        <strong>Symptômes:</strong>#}
+{#                        <ul>#}
+{#                            {% for symptome in consultation.symptomes.all %}#}
+{#                                <li>{{ symptome.nom }}</li>#}
+{#                            {% endfor %}#}
+{#                        </ul>#}
+{#                        <strong>Antécédents Médicaux:</strong>#}
+{#                        <ul>#}
+{#                            {% for antecedent in consultation.antecedentsMedicaux.all %}#}
+{#                                <li>{{ antecedent.nom }}</li>#}
+{#                            {% endfor %}#}
+{#                        </ul>#}
+{#                        <strong>Allergies:</strong>#}
+{#                        <ul>#}
+{#                            {% for allergie in consultation.allergies.all %}#}
+{#                                <li>{{ allergie.titre }}</li>#}
+{#                            {% endfor %}#}
+{#                        </ul>#}
+{#                        <strong>Docteur:</strong> {{ consultation.doctor }}<br>#}
+{#                        <strong>Date de Consultation:</strong> {{ consultation.consultation_date }}<br>#}
+{#                        <strong>Raison:</strong> {{ consultation.reason }}<br>#}
+{#                        <strong>Diagnostic:</strong> {{ consultation.diagnosis }}<br>#}
+{#                        <strong>Commentaires:</strong> {{ consultation.commentaires }}<br>#}
+{#                        <strong>Statut:</strong> {{ consultation.status }}<br>#}
+{#                        <strong>Hospitalisé:</strong> {{ consultation.hospitalised }}<br>#}
+{#                        <strong>Créé par:</strong> {{ consultation.created_by }}<br>#}
+{#                        <strong>Créé le:</strong> {{ consultation.created_at }}<br>#}
+{#                        <strong>Mis à jour le:</strong> {{ consultation.updated_at }}<br>#}
+{#                    </div>#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        {% else %}#}
+{#            <p>Aucune consultation pour ce service.</p>#}
+{#        {% endif %}#}
+{#    </div>#}
+{#{% endfor %}#}
+
+
+{#                                    {% for service, consultations in services_with_consultations %}#}
+{#                                        <div class="tab-pane" id="tabItem{{ service.id }}">#}
+{#                                            <h4>{{ service.nom }}</h4>#}
+{#                                            {% if consultations %}#}
+{#                                                {% for consultation in consultations %}#}
+{#                                                    <div>#}
+{#                                                        <h5>Consultation {{ consultation.id }}</h5>#}
+{#                                                        <p>Constante: {{ consultation.constante }}</p>#}
+{#                                                        <p>Examens: {{ consultation.examens }}</p>#}
+{#                                                        <p>Symptômes:</p>#}
+{#                                                        <ul>#}
+{#                                                            {% for symptome in consultation.symptomes.all %}#}
+{#                                                                <li>{{ symptome.nom }}</li>#}
+{#                                                            {% endfor %}#}
+{#                                                        </ul>#}
+{#                                                        <p>Antécédents Médicaux:</p>#}
+{#                                                        <ul>#}
+{#                                                            {% for antecedent in consultation.antecedentsMedicaux.all %}#}
+{#                                                                <li>{{ antecedent.nom }}</li>#}
+{#                                                            {% endfor %}#}
+{#                                                        </ul>#}
+{#                                                        <p>Allergies:</p>#}
+{#                                                        <ul>#}
+{#                                                            {% for allergie in consultation.allergies.all %}#}
+{#                                                                <li>{{ allergie.titre }}</li>#}
+{#                                                            {% endfor %}#}
+{#                                                        </ul>#}
+{#                                                    </div>#}
+{#                                                {% endfor %}#}
+{#                                            {% else %}#}
+{#                                                <p>Aucune consultation pour ce service.</p>#}
+{#                                            {% endif %}#}
+{#                                        </div>#}
+{#                                    {% endfor %}#}
+                                
                                 </div>
                             </div>
                             <!-- .card-aside-wrap -->
