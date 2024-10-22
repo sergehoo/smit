@@ -46,7 +46,7 @@ services:
     restart: always
     environment:
       - POSTGRES_USER=ogah
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=NEWdimension_MAC@24
       - POSTGRES_DB=smitci
       - PG_DATA=/data
     volumes:
