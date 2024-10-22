@@ -45,52 +45,52 @@ def create_user_for_patient(sender, instance, created, **kwargs):
         instance.save()
 
 
-@receiver(post_migrate)
-def add_default_signes_fonctionnels(sender, **kwargs):
-    signes_fonctionnels = [
-        'Douleure abdominales',
-        'Douleur thoraciques',
-        'Fièvre',
-        'Dyspnée',
-        'Toux sèche',
-        'Toux grasse',
-        'Fatigue',
-        'Dispnée',
-        'Expectorations',
-        'Hémoptysie',
-        'Nausées',
-        'Insommnie',
-        'Hypersonnie',
-        'Purit cutané',
-        'Purit vaginal',
-        'Ecoulement vaginal',
-        'Asthénie',
-        'Brûlures mictionnelles',
-        'vomissements',
-        'Perte d’appétit',
-        'Perte de connaissance ',
-        'Dysphagie',
-        'Convulsions',
-        'Constipation',
-        'Diarrhée',
-        'Oligurie',
-        'Anurie',
-        'Vertiges',
-        'Céphalées',
-        'Palpitations',
-        'Paresthésies',
-        'Troubles du sommeil',
-        'Saignements',
-        'Ictère',
-        'Otalgie',
-        'Otorrhée',
-        'Rhinorrhée',
-        'Œdèmes',
-        'Épistaxis antérieure',
-        'Épistaxis postérieure ',
-        'Conjonctives ',
-        'Etat de conscience '
-    ]
-
-    for signe in signes_fonctionnels:
-        SigneFonctionnel.objects.get_or_create(nom=signe)
+# @receiver(post_migrate)
+# def add_default_signes_fonctionnels(sender, **kwargs):
+#     signes_fonctionnels = [
+#         'Douleure abdominales',
+#         'Douleur thoraciques',
+#         'Fièvre',
+#         'Dyspnée',
+#         'Toux sèche',
+#         'Toux grasse',
+#         'Fatigue',
+#         'Dispnée',
+#         'Expectorations',
+#         'Hémoptysie',
+#         'Nausées',
+#         'Insommnie',
+#         'Hypersonnie',
+#         'Purit cutané',
+#         'Purit vaginal',
+#         'Ecoulement vaginal',
+#         'Asthénie',
+#         'Brûlures mictionnelles',
+#         'vomissements',
+#         'Perte d’appétit',
+#         'Perte de connaissance ',
+#         'Dysphagie',
+#         'Convulsions',
+#         'Constipation',
+#         'Diarrhée',
+#         'Oligurie',
+#         'Anurie',
+#         'Vertiges',
+#         'Céphalées',
+#         'Palpitations',
+#         'Paresthésies',
+#         'Troubles du sommeil',
+#         'Saignements',
+#         'Ictère',
+#         'Otalgie',
+#         'Otorrhée',
+#         'Rhinorrhée',
+#         'Œdèmes',
+#         'Épistaxis antérieure',
+#         'Épistaxis postérieure ',
+#         'Conjonctives ',
+#         'Etat de conscience '
+#     ]
+#
+#     for signe in signes_fonctionnels:
+#         SigneFonctionnel.objects.get_or_create(nom=signe)
