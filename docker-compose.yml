@@ -12,9 +12,9 @@ services:
       - ./.env
     restart: always
     depends_on:
-      - smitDB
+      - smitbase
 
-  smitDB:
+  smitbase:
     image: postgis/postgis:16-3.4
     platform: linux/amd64
     restart: always
