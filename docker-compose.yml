@@ -12,16 +12,16 @@ services:
       - ./.env
     restart: always
     depends_on:
-      - smitbase
+      - smitDB
 
-  smitbase:
+  smitDB:
     image: postgis/postgis:16-3.4
     platform: linux/amd64
     restart: always
     environment:
       - POSTGRES_USER=ogah
       - POSTGRES_PASSWORD=NEWdimension_MAC@24
-      - POSTGRES_DB=infestieuse
+      - POSTGRES_DB=smitci
       - PG_DATA=/data
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -30,8 +30,8 @@ services:
     image: nginx:latest
     container_name: smit-nginx
     ports:
-      - "8080:80"
-      - "9443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./certs:/etc/nginx/certs
