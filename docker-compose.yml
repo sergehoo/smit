@@ -21,14 +21,14 @@ services:
     environment:
       - POSTGRES_USER=ogah
       - POSTGRES_PASSWORD=NEWdimension_MAC@24
-      - POSTGRES_DB=smit
+      - POSTGRES_DB=smitci
       - PG_DATA=/data
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   nginxsmit:
     image: nginx:latest
-    container_name: smit-nginx-proxy
+    container_name: smit-nginx
     ports:
       - "8080:80"
       - "9443:443"
