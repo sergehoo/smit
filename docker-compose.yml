@@ -21,7 +21,7 @@ services:
     environment:
       - POSTGRES_USER=ogah
       - POSTGRES_PASSWORD=NEWdimension_MAC@24
-      - POSTGRES_DB=smitci
+      - POSTGRES_DB=infestieuse
       - PG_DATA=/data
     volumes:
       - pgdata:/var/lib/postgresql/data
