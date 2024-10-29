@@ -48,9 +48,6 @@
 #  static_volume:
 #  media_volume:
 #  logs_volume:
-
-version: '3.8'
-
 services:
   smitweb:
     build:
