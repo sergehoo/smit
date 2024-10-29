@@ -15,7 +15,7 @@ RUN apt-get update && \
     gcc \
     python3-distutils \
     python3-setuptools \
-    python3-pip \
+    python3-dev \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
