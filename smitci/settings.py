@@ -22,33 +22,45 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-toc#mdj)1snmjab-u(nw%25x^u%7f&vix@n7*@$$d^x0fl-!99'
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['154.56.60.195', 'smitci.com', 'www.smitci.com', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='154.56.60.195,https://smitci.com,https://www.smitci.com',
-                              cast=lambda v: [s.strip() for s in v.split(',')])
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='154.56.60.195,https://smitci.com,https://www.smitci.com',
-                              cast=lambda v: [s.strip() for s in v.split(',')])
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'static/logs', 'error.log'),  # Adjusted path
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
+ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'http://smitci.com', '*']
+CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'http://smitci.com']
+CORS_ALLOWED_ORIGINS = [
+    'https://smitci.com', 'smitci.com', 'www.smitci.com', 'https://smitci.com'
+]
+
+
+# SECRET_KEY = config('SECRET_KEY')
+# DEBUG = config('DEBUG', default=False, cast=bool)
+# ALLOWED_HOSTS = ['154.56.60.195', 'smitci.com', 'www.smitci.com', 'localhost', '127.0.0.1']
+# CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='154.56.60.195,https://smitci.com,https://www.smitci.com',
+#                               cast=lambda v: [s.strip() for s in v.split(',')])
+# CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='154.56.60.195,https://smitci.com,https://www.smitci.com',
+#                               cast=lambda v: [s.strip() for s in v.split(',')])
+#
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': 'ERROR',
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'static/logs', 'error.log'),  # Adjusted path
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'ERROR',
+#             'propagate': True,
+#         },
+#     },
+# }
+
 
 # Application definition
 
@@ -145,11 +157,11 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': config('DATABASE_NAME'),
-#         'USER': config('DATABASE_USER'),
-#         'PASSWORD': config('DATABASE_PASSWORD'),
-#         'HOST': config('DATABASE_HOST', default='localhost'),  # valeur par défaut pour les tests locaux
-#         'PORT': config('DATABASE_PORT', default='5432')
+#         'NAME': 'smitci',
+#         'USER': 'postgres',
+#         'PASSWORD': 'weddingLIFE18',
+#         'HOST': 'localhost',
+#         'PORT': '5433',
 #     }
 # }
 #prod
@@ -166,8 +178,9 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-PHONENUMBER_DB_FORMAT = "NATIONAL"
-PHONENUMBER_DEFAULT_FORMAT = "E164"
+PHONENUMBER_DB_FORMAT="NATIONAL"
+PHONENUMBER_DEFAULT_FORMAT="E164"
+
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 ACCOUNT_ADAPTER = 'core.account_adapter.NoNewUsersAccountAdapter'
@@ -217,12 +230,12 @@ TINYMCE_DEFAULT_CONFIG = {
     "width": "960px",
     "menubar": "file edit view insert format tools table help",
     "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
-               "fullscreen insertdatetime media table paste code help wordcount spellchecker",
+    "fullscreen insertdatetime media table paste code help wordcount spellchecker",
     "toolbar": "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft "
-               "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
-               "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
-               "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
-               "a11ycheck ltr rtl | showcomments addcomment code",
+    "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
+    "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
+    "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
+    "a11ycheck ltr rtl | showcomments addcomment code",
     "custom_undo_redo_levels": 10,
     "language": "es_ES",  # To force a specific language instead of the Django current language.
 }
@@ -299,3 +312,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # }
 
 
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = config('EMAIL_HOST')
+# EMAIL_PORT = config('EMAIL_PORT', cast=int)
+# EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+# EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+# DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
