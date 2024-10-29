@@ -135,7 +135,7 @@ class PatientCreateForm(forms.ModelForm):
                                widget=forms.Select(
                                    attrs={
                                        'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-                                       'data-search': 'on', 'id': 'nationalite'}))
+                                       'data-search': 'on', 'id': 'ethnie'}))
     profession = forms.ChoiceField(choices=professions_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'profession'}))
