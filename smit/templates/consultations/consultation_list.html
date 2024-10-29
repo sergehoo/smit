@@ -137,10 +137,7 @@
                                                                                 class="icon ni ni-more-h"></em></a>
                                                                         <div class="dropdown-menu dropdown-menu-right">
                                                                             <ul class="link-list-opt no-bdr">
-                                                                                <li>
-                                                                                    <a href="{% url 'detail_patient' consultation.patient.pk %}"><em
-                                                                                            class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a>
-                                                                                </li>
+
                                                                                 <li class="divider"></li>
                                                                                 {% if consultation.patient.latest_constante %}
                                                                                     <li>
@@ -152,11 +149,21 @@
                                                                                     <a href="{% url 'detail_consultation' consultation.pk %}"><em
                                                                                             class="fa fa-edit mr-1"></em><span>Consulter</span></a>
                                                                                 </li>
-                                                                                <li><a href="#"><em
-                                                                                        class="fa fa-bed-pulse mr-1"></em><span>Hospitaliser</span></a>
+
+                                                                                <li>
+{#                                                                                    <a href="{% url 'delete_consult' consultation_id=consultation.id %}"><em#}
+{#                                                                                            class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a>#}
+                                                                                    <form method="post" action="{% url 'delete_consult' consultation_id=consultation.id %}">
+                                                                                        {% csrf_token %}
+                                                                                        <button type="submit" class="btn-icon form-control "> <em class="fa fa-delete-left mr-1"></em>
+                                                                                           <span>Retirer de la liste</span></button>
+
+                                                                                    </form>
                                                                                 </li>
-                                                                                <li><a href="#"><em
-                                                                                        class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a>
+                                                                            <hr>
+                                                                            <li>
+                                                                                    <a href="{% url 'detail_patient' consultation.patient.pk %}"><em
+                                                                                            class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a>
                                                                                 </li>
                                                                             </ul>
                                                                         </div>

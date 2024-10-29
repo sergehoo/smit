@@ -44,7 +44,6 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="nk-block card card-bordered">
-
                                             {% if hospitalisationdetaildupatient.patient.latest_constante %}
                                                 <h4>Deniere constante enregistrée le
                                                     : {{ hospitalisationdetaildupatient.patient.latest_constante.created_at }} </h4>
@@ -262,65 +261,65 @@
                                 </div>
                             </div>
                         </div>
-
                         <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
                            class="btn btn-outline-primary mr-4"><em class="icon ni ni-folder"></em>Dossier</a>
-                        <a href="#" class="btn btn-outline-lighter float-right"><em class="icon ni ni-printer"></em>
-                            Imprimer</a>
-
-
+                        <a href="#" class="btn btn-outline-lighter float-right"><em class="icon ni ni-printer"></em>Imprimer</a>
 {#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
 {#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
 {#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
                         {% if hospitalisationdetail.discharge_date %}
-                            <span  class="h4 float-right mr-5" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">Patient Sorti  {{ hospitalisationdetail.discharge_date|naturaltime }}</span>
-                            {% else %}
-                        <a href="" data-toggle="modal" data-target="#hospitalisationout"
-                           class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-sign-out mr-1"></i>
-                            Sortir ?</a>
-                    {% endif %}
+                            <span class="h4 float-right mr-5" data-toggle="tooltip"
+                                  title="{{ hospitalisationdetail.discharge_date }}">Patient Sorti {{ hospitalisationdetail.discharge_date|naturaltime }}</span>
+                        {% else %}
+                            <a href="" data-toggle="modal" data-target="#hospitalisationout"
+                               class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-sign-out mr-1"></i>Sortir ?</a>
+                        {% endif %}
 
                         <!-- Modal Content Code -->
-                       <div class="modal fade" tabindex="-1" id="hospitalisationout">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content ">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Hospitalisation Patient: {{ hospitalisationdetail.patient }}</h5>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="discharge_date">Date de sortie</label>
-                        <input type="date" class="form-control" id="discharge_date" name="discharge_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="discharge_reason">Raison de sortie</label>
-                        <textarea class="form-control" id="discharge_reason" name="discharge_reason" rows="4" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Statut du patient</label>
-                        <select class="form-control" id="status" name="status" required>
-                            <option value="Sortie">Sortie</option>
-                            <option value="Gueris-EXEA">Gueris-EXEA</option>
-                            <option value="Transféré-TRANSF">Transféré-TRANSF</option>
-                            <option value="SCAM">SCAM</option>
-                            <option value="EVADE">EVADE</option>
-                            <option value="DCD">DCD</option>
-                            <!-- Add other status options if needed -->
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                        <div class="modal fade" tabindex="-1" id="hospitalisationout">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content ">
+                                    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                        <em class="icon ni ni-cross"></em>
+                                    </a>
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Hospitalisation
+                                            Patient: {{ hospitalisationdetail.patient }}</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST"
+                                              action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="discharge_date">Date de sortie</label>
+                                                <input type="date" class="form-control" id="discharge_date"
+                                                       name="discharge_date" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="discharge_reason">Raison de sortie</label>
+                                                <textarea class="form-control" id="discharge_reason"
+                                                          name="discharge_reason" rows="4" required></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="status">Statut du patient</label>
+                                                <select class="form-control" id="status" name="status" required>
+                                                    <option value="Sortie">Sortie</option>
+                                                    <option value="Gueris-EXEA">Gueris-EXEA</option>
+                                                    <option value="Transféré-TRANSF">Transféré-TRANSF</option>
+                                                    <option value="SCAM">SCAM</option>
+                                                    <option value="EVADE">EVADE</option>
+                                                    <option value="DCD">DCD</option>
+                                                    <!-- Add other status options if needed -->
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-{#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
+                        {#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
 {#                           class="btn btn-outline-secondary float-right mr-5"#}
 {#                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
 {#                                class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>#}
@@ -350,12 +349,21 @@
                             <hr>
                             <!-- Indicateurs Cliniques -->
                             <div class="row m-4">
+<h3 class="text-muted"> Indicateurs Cliniques </h3>
 
-                                <h3 class="text-muted"> Indicateurs Cliniques </h3>
+                                <div class="row col-12">
+
+
+{#                                    <canvas id="constantesChart" width="400" height="200"></canvas>#}
+                                     <div class="col-xl-12" id="constantesChart"></div>
+
+
+                                </div>
 
                                 <div class="row col-12">
                                     <!-- Constantes Card -->
-                                    <div class="col-6 col-md-6 mb-5">
+                                    <!-- Tableau des constantes -->
+                                    <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
                                                 Constantes
@@ -373,31 +381,37 @@
                                                     <tr>
                                                         <th>Constantes</th>
                                                         <th>Date</th>
+                                                        <th>Medecin</th>
                                                         <th>Actions</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     {% if constantes %}
                                                         {% for constante in constantes %}
-                                                            <tr>
+                                                            <tr class="{% if forloop.counter > 3 %}constante-data d-none{% endif %}">
                                                                 <td>
-                                    <span class="badge badge-dark">
-                                        Tension: {{ constante.tension_systolique }} / {{ constante.tension_diastolique }} mmHg
-                                    </span><br>
-                                                                    <span class="badge badge-dark">Température: {{ constante.temperature }} °C</span>
+                                <span class="badge badge-outline-dark">
+                                    Tension: {{ constante.tension_systolique }} ts / {{ constante.tension_diastolique }} td - mmHg
+                                </span><br>
+                                                                    <span class="badge badge-outline-dark">Température | {{ constante.temperature }} °C</span>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="badge badge-dark">{{ constante.created_at|date:"d/m/Y" }}</span>
+                                                                    <span >{{ constante.created_at }}</span>
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    <span >{{ constante.patient }}</span>
                                                                 </td>
                                                                 <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="{% url 'export_constante_pdf' hospitalisationdetail.id %}"><em
-                                                class="icon ni ni-download-cloud ml-10"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
+                                <span>
+                                    <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                            class="icon ni ni-eye"></em></a>
+                                    <a class="btn btn-outline-info btn-icon btn-round btn-xs"
+                                       href="{% url 'export_constante_pdf' hospitalisationdetail.id %}"><em
+                                            class="icon ni ni-download-cloud ml-10"></em></a>
+                                    <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                            class="icon ni ni-trash-fill"></em></a>
+                                </span>
                                                                 </td>
                                                             </tr>
                                                         {% endfor %}
@@ -412,11 +426,81 @@
                                                     {% endif %}
                                                     </tbody>
                                                 </table>
+                                                <!-- Bouton pour afficher plus ou moins de données -->
+                                                {% if constantes|length > 3 %}
+                                                    <div class="text-center mt-3">
+                                                        <button id="toggleButtonConstantes" class="btn btn-secondary">
+                                                            Voir plus
+                                                        </button>
+                                                    </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- JavaScript pour le tableau des constantes -->
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const toggleButtonConstantes = document.getElementById('toggleButtonConstantes');
+                                            const constanteDataRows = document.querySelectorAll('.constante-data');
+                                            let isExpandedConstantes = false;
+
+                                            toggleButtonConstantes.addEventListener('click', function () {
+                                                if (isExpandedConstantes) {
+                                                    constanteDataRows.forEach(row => row.classList.add('d-none'));
+                                                    toggleButtonConstantes.textContent = 'Voir plus';
+                                                } else {
+                                                    constanteDataRows.forEach(row => row.classList.remove('d-none'));
+                                                    toggleButtonConstantes.textContent = 'Voir moins';
+                                                }
+                                                isExpandedConstantes = !isExpandedConstantes;
+                                            });
+                                        });
+                                    </script>
+
+                                  <!-- Constante Form Modal -->
+                                    <div class="modal fade" id="constanteModal" tabindex="-1"
+                                         aria-labelledby="constanteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="constanteModalLabel">Nouvelles
+                                                        Constante</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close">X
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in constante_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label"
+                                                                                   for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">
+                                                                Enregistrer
+                                                            </button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Prescription Card -->
-                                    <div class="col-6 col-md-6 mb-5">
+                                    <!-- Tableau des prescriptions -->
+                                    <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
                                                 Prescriptions
@@ -433,36 +517,44 @@
                                                     <thead>
                                                     <tr>
                                                         <th>Médicament</th>
+                                                        <th>Quantité</th>
                                                         <th>Date</th>
+                                                        <th>Medecin</th>
                                                         <th>Actions</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     {% if prescriptions %}
                                                         {% for prescription in prescriptions %}
-                                                            <tr>
+                                                            <tr class="{% if forloop.counter > 5 %}prescription-data d-none{% endif %}">
                                                                 <td>
-                                                                    <span class="badge badge-dark">{{ prescription.medication.name }}</span><br>
-                                                                    <span class="badge badge-dark">Quantité: {{ prescription.quantity }}</span>
+                                                                    <span class="badge badge-dark">{{ prescription.medication.nom }}</span><br>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="badge badge-dark">{{ prescription.created_at|date:"d/m/Y" }}</span>
+                                                                    <span class="badge badge-outline-secondary"> {{ prescription.quantity }}</span>
                                                                 </td>
                                                                 <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="#"><em
-                                                class="icon ni ni-download-cloud ml-10"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
+                                                                    <span>{{ prescription.created_at }}</span>
+                                                                </td>
+                                                                
+                                                                <td>
+                                                                    <span>{{ prescription.patient }}</span>
+                                                                </td>
+                                                                <td>
+                                <span>
+                                    <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
+                                            class="icon ni ni-eye"></em></a>
+                                    <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="#"><em
+                                            class="icon ni ni-download-cloud ml-10"></em></a>
+                                    <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
+                                            class="icon ni ni-trash-fill"></em></a>
+                                </span>
                                                                 </td>
                                                             </tr>
                                                         {% endfor %}
                                                     {% else %}
                                                         <tr>
-                                                            <td colspan="3"
+                                                            <td colspan="4"
                                                                 style="font-style: italic; text-align: center"
                                                                 class="text-white">
                                                                 Aucune donnée enregistrée
@@ -471,39 +563,74 @@
                                                     {% endif %}
                                                     </tbody>
                                                 </table>
+                                                <!-- Bouton pour afficher plus ou moins de données -->
+                                                {% if prescriptions|length > 5 %}
+                                                    <div class="text-center mt-3">
+                                                        <button id="toggleButtonPrescriptions"
+                                                                class="btn btn-secondary">Voir plus
+                                                        </button>
+                                                    </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
 
+                                    <!-- JavaScript pour le tableau des prescriptions -->
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            const toggleButtonPrescriptions = document.getElementById('toggleButtonPrescriptions');
+                                            const prescriptionDataRows = document.querySelectorAll('.prescription-data');
+                                            let isExpandedPrescriptions = false;
 
-                                    <!-- Constante Form Modal -->
-                                    <div class="modal fade" id="constanteModal" tabindex="-1"
-                                         aria-labelledby="constanteModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
+                                            toggleButtonPrescriptions.addEventListener('click', function () {
+                                                if (isExpandedPrescriptions) {
+                                                    prescriptionDataRows.forEach(row => row.classList.add('d-none'));
+                                                    toggleButtonPrescriptions.textContent = 'Voir plus';
+                                                } else {
+                                                    prescriptionDataRows.forEach(row => row.classList.remove('d-none'));
+                                                    toggleButtonPrescriptions.textContent = 'Voir moins';
+                                                }
+                                                isExpandedPrescriptions = !isExpandedPrescriptions;
+                                            });
+                                        });
+                                    </script>
+
+                                    <!-- Prescriptions Form Modal -->
+                                    <div class="modal fade" id="prescriptionModal" tabindex="-1"
+                                         aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="constanteModalLabel">Ajouter
-                                                        Constante</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
+                                                    <h5 class="modal-title" id="prescriptionModalLabel">Nouvelles Constante</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form method="post"
-                                                          action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                        {% csrf_token %}
-                                                        {{ constante_form.as_p }}
-                                                        <button type="submit" class="btn btn-primary">Save
-                                                            Constante
-                                                        </button>
-                                                    </form>
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in prescription_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                 </div>
-
-
+                            </div>
                                 <!-- Indicateurs Biologiques -->
 
                                 <div class="row m-4">
@@ -512,14 +639,11 @@
 
                                     <div class="row col-12">
                                         <!-- Indicateur Biologique Card -->
-                                        <div class="col-6 col-md-6 mb-5">
+                                        <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Biologiques
-                                                    <button type="button"
-                                                            class="btn btn-dark btn-icon btn-round float-right"
-                                                            data-toggle="modal"
-                                                            data-target="#indicateurBiologiqueModal">
+                                                    <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#indicateurbiologiqueformModal">
                                                         <em class="icon ni ni-plus-circle-fill"></em>
                                                     </button>
                                                 </div>
@@ -553,9 +677,7 @@
                                                             {% endfor %}
                                                         {% else %}
                                                             <tr>
-                                                                <td colspan="3"
-                                                                    style="font-style: italic; text-align: center"
-                                                                    class="text-white">
+                                                                <td colspan="3" style="font-style: italic; text-align: center" class="text-white">
                                                                     Aucune donnée enregistrée
                                                                 </td>
                                                             </tr>
@@ -565,12 +687,46 @@
                                                 </div>
                                             </div>
                                         </div>
+                                     <!-- Indicateur Form Modal -->
+                                    <div class="modal fade" id="indicateurbiologiqueformModal" tabindex="-1"
+                                         aria-labelledby="indicateurbiologiqueformModalModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="indicateurbiologiqueformModalModalLabel">Indicateurs biologique</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in indicateur_biologique_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
 
                                     </div>
 
 
                                 </div>
-                                <!-- Indicateurs  Fonctionnels  -->
+                            <!-- Indicateurs  Fonctionnels  -->
                                 <div class="row m-4">
 
                                     <h3 class="text-muted"> Indicateurs Fonctionnels </h3>
@@ -595,6 +751,7 @@
                                                         <tr>
                                                             <th>Indicateurs</th>
                                                             <th>Date</th>
+                                                            <th>Medecin</th>
                                                             <th>Actions</th>
                                                         </tr>
                                                         </thead>
@@ -608,6 +765,7 @@
                                                                         <span class="badge badge-dark">Débit urinaire: {{ indicateur.debit_urinaire }} L</span>
                                                                     </td>
                                                                     <td>{{ indicateur.date|date:"d/m/Y" }}</td>
+                                                                     <td>{{ indicateur.patient}}</td>
                                                                     <td>
                                     <span>
                                         <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
@@ -632,6 +790,40 @@
                                                 </div>
                                             </div>
                                         </div>
+                                      <!-- Indicateur Fonctionnel Modal -->
+                                    <div class="modal fade" id="indicateurFonctionnelModal" tabindex="-1"
+                                         aria-labelledby="indicateurFonctionnelModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="indicateurFonctionnelModalLabel">Indicateurs Fonctionnels </h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in indicateur_fonctionnel_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                         <div class="col-6 col-md-6 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
@@ -648,6 +840,7 @@
                                                         <tr>
                                                             <th>Nom</th>
                                                             <th>Valeure</th>
+                                                            <th>Medecin</th>
                                                             <th>Actions</th>
                                                         </tr>
                                                         </thead>
@@ -657,6 +850,7 @@
                                                                 <tr>
                                                                     <td>{{ signe.nom }}</td>
                                                                     <td>{{ signe.valeure }}</td>
+                                                                    <td>{{ signe.patient }}</td>
                                                                     <td>
                                     <span>
                                         <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
@@ -681,12 +875,45 @@
                                                 </div>
                                             </div>
                                         </div>
+                                      <!-- Signes Fonctionnel Form Modal -->
+                                    <div class="modal fade" id="signeFonctionnelModal" tabindex="-1"
+                                         aria-labelledby="signeFonctionnelModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="signeFonctionnelModalLabel">Nouvelles Constante</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in indicateur_fonctionnel_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
 
                                     </div>
 
 
                                 </div>
-
                                 <!-- Indicateurs   Subjectifs  -->
                                 <div class="row m-4">
 
@@ -694,7 +921,7 @@
 
                                     <div class="row col-12">
                                         <!-- Indicateur Subjectif Card -->
-                                        <div class="col-6 col-md-6 mb-5">
+                                        <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Subjectifs
@@ -745,39 +972,163 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                     <!-- Subjectif Fonctionnel Form Modal -->
+                                    <div class="modal fade" id="indicateurSubjectifModal" tabindex="-1"
+                                         aria-labelledby="indicateurSubjectifModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="indicateurSubjectifModalLabel">Indicateurs Subjectifs</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in indicateur_subjectif_form %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    </div>
+                                </div>
+
+
+                            <!-- Indicateurs  de Complications & de Traitement  -->
+
+                            <div class="row m-4">
+
+                                <h3 class="text-muted"> Indicateurs de Complications & de Traitement  </h3>
+
+                                <div class="row col-12">
+                                    <div class="col-12 col-md-12 mb-5">
+                                        <div class="card text-black-100 border">
+                                            <div class="card-header">
+                                                Indicateurs Autres
+                                                <button type="button"
+                                                        class="btn btn-dark btn-icon btn-round float-right"
+                                                        data-toggle="modal" data-target="#indicateurautresModal">
+                                                    <em class="icon ni ni-plus-circle-fill"></em>
+                                                </button>
+                                            </div>
+                                            <div class="card-inner text-black-70">
+                                                <h2 class="mb-4">Liste des Indicateurs d'Hospitalisation</h2>
+                                                <table class="table table-bordered table-responsive">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Niveau de Douleur</th>
+                                                        <th>État de Conscience</th>
+                                                        <th>Réponse au Traitement</th>
+                                                        <th>Effets Secondaires</th>
+                                                        <th>Observance</th>
+                                                        <th>Équilibre Électrolytique</th>
+                                                        <th>Fonction Rénale</th>
+                                                        <th>Fonction Hépatique</th>
+                                                        <th>Signes Vitaux Stables</th>
+                                                        <th>Douleur Contrôlée</th>
+                                                        <th>Capacité Fonctionnelle</th>
+                                                        <th>État Mental Stable</th>
+                                                        <th>Plan de Suivi</th>
+                                                        <th>Date de Création</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for indicator in indicators %}
+                                                        <tr>
+                                                            <td>{{ indicator.pain_level }}</td>
+                                                            <td>{{ indicator.get_mental_state_display }}</td>
+                                                            <td>{{ indicator.treatment_response }}</td>
+                                                            <td>{{ indicator.side_effects }}</td>
+                                                            <td>{{ indicator.compliance|yesno:"Oui,Non" }}</td>
+                                                            <td>{{ indicator.electrolytes_balance }}</td>
+                                                            <td>{{ indicator.renal_function }}</td>
+                                                            <td>{{ indicator.hepatic_function }}</td>
+                                                            <td>{{ indicator.stable_vitals|yesno:"Oui,Non" }}</td>
+                                                            <td>{{ indicator.pain_controlled|yesno:"Oui,Non" }}</td>
+                                                            <td>{{ indicator.functional_ability|yesno:"Oui,Non" }}</td>
+                                                            <td>{{ indicator.mental_stability|yesno:"Oui,Non" }}</td>
+                                                            <td>{{ indicator.follow_up_plan }}</td>
+                                                            <td>{{ indicator.created_at|date:"d/m/Y H:i" }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
 
                             </div>
-                            <!-- Indicateurs  de Complications  -->
-                            <div class="row m-4">
 
-                                <h3 class="text-muted"> Indicateurs de Complications </h3>
+                        <div class="modal fade" id="indicateurautresModal" tabindex="-1" aria-labelledby="indicateurautresModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="indicateurautresModalLabel">Indicateurs autres</h5>
+                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                            {% csrf_token %}
+                                                            <div class="row">
+                                                                {% for field in autresindicatorsform %}
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                            <div class="form-control-wrap">
+                                                                                {{ field }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
+                                                        </form>
+                                                    </div>
 
-                                <div class="row col-12">
-
-                                </div>
-
-
-                            </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                             <!-- Indicateurs  de Traitement  -->
-                            <div class="row m-4">
 
-                                <h3 class="text-muted"> Indicateurs de Traitement </h3>
-
-                                <div class="row col-12">
-
-                                </div>
-
-
-                            </div>
                             <!-- Indicateurs  de Sortie  -->
                             <div class="row m-4">
 
                                 <h3 class="text-muted"> Indicateurs de Sortie (Critères de décharge) </h3>
-
+{#<pre>{{ discharge_criteria }}</pre>#}
                                 <div class="row col-12">
+                                    <div class="col-12 col-md-12 mb-5">
+                                        <div class="card text-black-100 border">
+                                            <div class="card-header">
+                                                Indicateurs de Sortie - Aide à la Décision
+                                            </div>
+                                            <div class="card-inner text-black-70">
+
+                                                <div id="dischargeChart"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
 
                                 </div>
 
@@ -789,6 +1140,198 @@
             </div>
         </div>
     </div>
+    <script>
+    // Préparer les données pour ApexCharts
+    const labels = [
+        {% for constante in constantes %}
+            "{{ constante.created_at|date:'Y-m-d H:i' }}",
+        {% endfor %}
+    ];
+
+    const temperatureData = [
+        {% for constante in constantes %}
+            {{ constante.temperature|default:"null" }},
+        {% endfor %}
+    ];
+
+    const heartRateData = [
+        {% for constante in constantes %}
+            {{ constante.frequence_cardiaque|default:"null" }},
+        {% endfor %}
+    ];
+
+    const respiratoryRateData = [
+        {% for constante in constantes %}
+            {{ constante.frequence_respiratoire|default:"null" }},
+        {% endfor %}
+    ];
+
+    const oxygenSaturationData = [
+        {% for constante in constantes %}
+            {{ constante.saturation_oxygene|default:"null" }},
+        {% endfor %}
+    ];
+
+    // Configuration du graphique ApexCharts
+    const options = {
+        chart: {
+            type: 'line',
+            height: 350,
+            zoom: {
+                enabled: true
+            }
+        },
+        series: [
+            {
+                name: 'Température (°C)',
+                data: temperatureData
+            },
+            {
+                name: 'Fréquence Cardiaque (bpm)',
+                data: heartRateData
+            },
+            {
+                name: 'Fréquence Respiratoire (rpm)',
+                data: respiratoryRateData
+            },
+            {
+                name: 'Saturation en Oxygène (%)',
+                data: oxygenSaturationData
+            }
+        ],
+        xaxis: {
+            categories: labels,
+            title: {
+                text: 'Date et Heure'
+            },
+            type: 'datetime'
+        },
+        yaxis: {
+            title: {
+                text: 'Valeurs des Constantes Vitales'
+            },
+            min: 0
+        },
+        title: {
+            text: 'Évolution des Constantes Vitales du Patient',
+            align: 'center'
+        },
+        tooltip: {
+            x: {
+                format: 'dd MMM yyyy HH:mm'
+            }
+        }
+    };
+
+    // Initialisation du graphique
+    const chart = new ApexCharts(document.querySelector("#constantesChart"), options);
+    chart.render();
+</script>
+{#    <script>#}
+{#        // Préparez les données pour Chart.js#}
+{#        const labels = [#}
+{#            {% for constante in constantes %}#}
+{#                "{{ constante.created_at|date:'Y-m-d H:i' }}",#}
+{#            {% endfor %}#}
+{#        ];#}
+{##}
+{#        const temperatureData = [#}
+{#            {% for constante in constantes %}#}
+{#                {{ constante.temperature|default:"null" }},#}
+{#            {% endfor %}#}
+{#        ];#}
+{##}
+{#        const heartRateData = [#}
+{#            {% for constante in constantes %}#}
+{#                {{ constante.frequence_cardiaque|default:"null" }},#}
+{#            {% endfor %}#}
+{#        ];#}
+{##}
+{#        const respiratoryRateData = [#}
+{#            {% for constante in constantes %}#}
+{#                {{ constante.frequence_respiratoire|default:"null" }},#}
+{#            {% endfor %}#}
+{#        ];#}
+{##}
+{#        const oxygenSaturationData = [#}
+{#            {% for constante in constantes %}#}
+{#                {{ constante.saturation_oxygene|default:"null" }},#}
+{#            {% endfor %}#}
+{#        ];#}
+{##}
+{#        // Configuration du graphique Chart.js#}
+{#        const data = {#}
+{#            labels: labels,#}
+{#            datasets: [#}
+{#                {#}
+{#                    label: 'Température (°C)',#}
+{#                    data: temperatureData,#}
+{#                    borderColor: 'rgba(255, 99, 132, 1)',#}
+{#                    backgroundColor: 'rgba(255, 99, 132, 0.2)',#}
+{#                    fill: false,#}
+{#                },#}
+{#                {#}
+{#                    label: 'Fréquence Cardiaque (bpm)',#}
+{#                    data: heartRateData,#}
+{#                    borderColor: 'rgba(54, 162, 235, 1)',#}
+{#                    backgroundColor: 'rgba(54, 162, 235, 0.2)',#}
+{#                    fill: false,#}
+{#                },#}
+{#                {#}
+{#                    label: 'Fréquence Respiratoire (rpm)',#}
+{#                    data: respiratoryRateData,#}
+{#                    borderColor: 'rgba(75, 192, 192, 1)',#}
+{#                    backgroundColor: 'rgba(75, 192, 192, 0.2)',#}
+{#                    fill: false,#}
+{#                },#}
+{#                {#}
+{#                    label: 'Saturation en Oxygène (%)',#}
+{#                    data: oxygenSaturationData,#}
+{#                    borderColor: 'rgba(255, 206, 86, 1)',#}
+{#                    backgroundColor: 'rgba(255, 206, 86, 0.2)',#}
+{#                    fill: false,#}
+{#                },#}
+{#            ]#}
+{#        };#}
+{##}
+{#        const config = {#}
+{#            type: 'line',#}
+{#            data: data,#}
+{#            options: {#}
+{#                responsive: true,#}
+{#                plugins: {#}
+{#                    legend: {#}
+{#                        position: 'top',#}
+{#                    },#}
+{#                    title: {#}
+{#                        display: true,#}
+{#                        text: 'Évolution des Constantes Vitales du Patient'#}
+{#                    }#}
+{#                },#}
+{#                scales: {#}
+{#                    x: {#}
+{#                        title: {#}
+{#                            display: true,#}
+{#                            text: 'Date et Heure'#}
+{#                        }#}
+{#                    },#}
+{#                    y: {#}
+{#                        title: {#}
+{#                            display: true,#}
+{#                            text: 'Valeurs'#}
+{#                        },#}
+{#                        beginAtZero: true#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        };#}
+{##}
+{#        // Initialisation du graphique#}
+{#        const constantesChart = new Chart(#}
+{#            document.getElementById('constantesChart'),#}
+{#            config#}
+{#        );#}
+{#    </script>#}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let formIdx = {{ symptomes_forms|length }};
@@ -813,6 +1356,69 @@
             });
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dischargeCriteria = {{ discharge_criteria|safe }};
+
+        const options = {
+            chart: {
+                type: 'bar',
+                height: 350
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    distributed: true,  // This makes each bar individually colorable
+                    colors: {
+                        ranges: [
+                            { from: 1, to: 1, color: '#4CAF50' }, // Vert pour "Atteint"
+                            { from: 0, to: 0, color: '#F44336' }  // Rouge pour "Non Atteint"
+                        ]
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val === 1 ? "Atteint" : "Non Atteint";
+                },
+                style: {
+                    colors: ['#000']
+                }
+            },
+            series: [{
+                name: 'Critère de décharge',
+                data: [
+                    dischargeCriteria.stable_vitals || 0,
+                    dischargeCriteria.pain_controlled || 0,
+                    dischargeCriteria.functional_ability || 0,
+                    dischargeCriteria.mental_stability || 0,
+                    dischargeCriteria.follow_up_plan || 0
+                ]
+            }],
+            xaxis: {
+                categories: [
+                    "Signes vitaux stables",
+                    "Douleur contrôlée",
+                    "Capacité fonctionnelle",
+                    "État mental stable",
+                    "Plan de suivi post-hospitalisation"
+                ]
+            },
+            tooltip: {
+                enabled: true,
+                y: {
+                    formatter: function (val) {
+                        return val === 1 ? "Atteint" : "Non Atteint";
+                    }
+                }
+            }
+        };
+
+        const chart = new ApexCharts(document.querySelector("#dischargeChart"), options);
+        chart.render();
+    });
+</script>
 
     <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {

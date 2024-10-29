@@ -305,7 +305,8 @@ class TestRapideVIH(models.Model):
 
 class Consultation(models.Model):
     numeros = models.CharField(default=consult_number, max_length=300, unique=True)
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_consultations",null=True, blank=True, )
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_consultations",
+                                 null=True, blank=True, )
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     constante = models.ForeignKey('Constante', on_delete=models.SET_NULL, null=True, blank=True,
                                   related_name='patientconstantes')
@@ -559,8 +560,7 @@ class Suivi(models.Model):
 
 class Hospitalization(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='hospitalized')
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_hospitalied",
-                                 null=True, blank=True, )
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_hospitalied", null=True, blank=True, )
     doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hospitaliza_doctor')
     admission_date = models.DateTimeField()
     discharge_date = models.DateTimeField(null=True, blank=True)
@@ -631,6 +631,48 @@ class IndicateurSubjectif(models.Model):
 
     def __str__(self):
         return f"Indicateurs subjectifs pour {self.hospitalisation.patient.nom} le {self.date}"
+
+
+class HospitalizationIndicators(models.Model):
+    # Indicateurs de Complications
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE, related_name='indicateurs_autres', null=True, blank=True, )
+    temperature = models.FloatField(null=True, blank=True, help_text="Température en degrés Celsius")
+    heart_rate = models.IntegerField(null=True, blank=True, help_text="Fréquence cardiaque (bpm)")
+    respiratory_rate = models.IntegerField(null=True, blank=True, help_text="Fréquence respiratoire (rpm)")
+    blood_pressure = models.CharField(max_length=20, null=True, blank=True, help_text="Tension artérielle (ex : 120/80 mmHg)")
+    pain_level = models.IntegerField(null=True, blank=True, help_text="Niveau de douleur sur une échelle de 1 à 10")
+    mental_state = models.CharField(max_length=20,
+        choices=[
+            ('clair', 'Clair'),
+            ('confusion', 'Confusion'),
+            ('somnolent', 'Somnolent'),
+        ],
+        null=True,
+        blank=True,
+        help_text="État de conscience du patient"
+    )
+
+    # Indicateurs de Traitement
+    treatment_response = models.TextField(null=True, blank=True, help_text="Réponse du patient au traitement")
+    side_effects = models.TextField(null=True, blank=True, help_text="Effets secondaires observés")
+    compliance = models.BooleanField(default=False, help_text="Observance du traitement")
+    electrolytes_balance = models.CharField(max_length=50, null=True, blank=True, help_text="Équilibre électrolytique")
+    renal_function = models.CharField(max_length=50, null=True, blank=True, help_text="État de la fonction rénale")
+    hepatic_function = models.CharField(max_length=50, null=True, blank=True, help_text="État de la fonction hépatique")
+
+    # Indicateurs de Sortie (Critères de décharge)
+    stable_vitals = models.BooleanField(default=False, help_text="Les signes vitaux sont-ils stables?")
+    pain_controlled = models.BooleanField(default=False, help_text="La douleur est-elle contrôlée?")
+    functional_ability = models.BooleanField(default=False, help_text="Capacité fonctionnelle atteinte?")
+    mental_stability = models.BooleanField(default=False, help_text="État mental stable?")
+    follow_up_plan = models.TextField(null=True, blank=True, help_text="Plan de suivi post-hospitalisation")
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Indicateurs d'hospitalisation pour patient {self.id} - {self.created_at.strftime('%Y-%m-%d')}"
 
 
 class UniteHospitalisation(models.Model):

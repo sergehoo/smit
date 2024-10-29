@@ -32,11 +32,11 @@ def generate_unique_code_barre():
 class Medicament(models.Model):
     codebarre = models.CharField(max_length=150, unique=True, default=generate_unique_code_barre,
                                  help_text="Code unique pour le médicament")  # Pour l'identification par code-barre
-    nom = models.CharField(max_length=255)
+    nom = models.CharField(max_length=255, null=True, blank=True,)
     dosage = models.CharField(max_length=50, null=True, blank=True, help_text="Ex: 500mg, 20mg/ml")
-    description = models.TextField()
-    stock = models.PositiveIntegerField()
-    date_expiration = models.DateField()
+    description = models.TextField( null=True, blank=True,)
+    stock = models.PositiveIntegerField( null=True, blank=True,)
+    date_expiration = models.DateField( null=True, blank=True,)
     categorie = models.ForeignKey(CathegorieMolecule, on_delete=models.SET_NULL, null=True, blank=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.SET_NULL, null=True, blank=True)
     molecules = models.ManyToManyField(Molecule)

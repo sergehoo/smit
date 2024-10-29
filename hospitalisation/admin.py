@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospitalisation, LitHospitalisation, \
-    TypeAntecedent, SigneFonctionnel
+    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators
 
 
 # Register your models here.
@@ -9,7 +9,12 @@ from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospita
 
 @admin.register(TypeAntecedent)
 class TypeAntecedentAdmin(admin.ModelAdmin):
-    list_display = ['nom']
+    list_display = (['nom'])
+
+
+@admin.register(HospitalizationIndicators)
+class HospitalizationIndicatorsAdmin(admin.ModelAdmin):
+    list_display = (['hospitalisation'])
 
 
 # Pré-enregistrement des types d'antécédents s'ils n'existent pas déjà

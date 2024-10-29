@@ -12,9 +12,10 @@ from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
 
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
-    IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm
+    IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
+    HospitalizationIndicatorsForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
-    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif
+    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators
 
 
 def render_to_pdf(template_src, context_dict={}):
@@ -147,20 +148,41 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        hospitalization = self.get_object()
+        # Récupérer l'enregistrement des indicateurs pour cette hospitalisation
+        indicators = hospitalization.indicateurs_autres.last()
+        # Préparer les données pour chaque indicateur de sortie
+        if indicators:
+            context['discharge_criteria'] = {
+                'stable_vitals': 1 if indicators.stable_vitals else 0,
+                'pain_controlled': 1 if indicators.pain_controlled else 0,
+                'functional_ability': 1 if indicators.functional_ability else 0,
+                'mental_stability': 1 if indicators.mental_stability else 0,
+                'follow_up_plan': 1 if bool(indicators.follow_up_plan) else 0,  # Vérifie si le plan de suivi existe
+            }
+        else:
+            context['discharge_criteria'] = {}
         # Add forms to context
         context['constante_form'] = ConstanteForm()
-        context['prescription_form'] = PrescriptionForm()
+        context['prescription_form'] = PrescriptionHospiForm()
         context['signe_fonctionnel_form'] = SigneFonctionnelForm()
         context['indicateur_biologique_form'] = IndicateurBiologiqueForm()
         context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
         context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
+        context['autresindicatorsform'] = HospitalizationIndicatorsForm()
 
         context['constantes'] = Constante.objects.filter(hospitalisation=self.object)
+        # Retrieve related 'Constante' data for the current hospitalization
+        context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
+
         context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient)
         context['signe_fonctionnel'] = SigneFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_biologique'] = IndicateurBiologique.objects.filter(hospitalisation=self.object)
         context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
+        context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
+
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -175,6 +197,8 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         if constante_form.is_valid():
             constante = constante_form.save(commit=False)
             constante.hospitalisation = hospitalisation
+            constante.patient = hospitalisation.patient
+            constante.created_by = request.user.employee
             constante.save()
             messages.success(request, "Constante saved successfully.")
             return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))

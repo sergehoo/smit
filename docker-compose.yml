@@ -1,18 +1,5 @@
 services:
 
-#  smitweb:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - 1909:8000  # port du server : port de l'application
-#    volumes:
-#      - .:/smitci-app/
-#    env_file:
-#      - ./.env
-#    restart: always
-#    depends_on:
-#      - smitDB
   smitweb:
     build:
       context: .
@@ -29,17 +16,6 @@ services:
     depends_on:
       - smitDB
 
-#  smitDB:
-#    image: postgis/postgis:16-3.4
-#    platform: linux/amd64
-#    restart: always
-#    environment:
-#      - POSTGRES_USER=ogah
-#      - POSTGRES_PASSWORD=NEWdimension_MAC@24
-#      - POSTGRES_DB=smitci
-#      - PG_DATA=/data
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
 
   smitDB:
     image: postgis/postgis:16-3.4
@@ -78,8 +54,8 @@ services:
       - 1910:8080
     environment:
       - ADMINER_DEFAULT_SERVER=smitDB
-    networks:
-      - smitci_default
+#    networks:
+#      - smit_default
 
 networks:
   smitci_default:

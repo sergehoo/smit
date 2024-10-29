@@ -14,13 +14,82 @@ from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillo
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
-    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif
+    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators
 
 school_level = [
+    ('Inconnu', 'Inconnu'),
+    ('Non-scolarisé', 'Non-scolarisé'),
     ('Primaire', 'Primaire'),
     ('Secondaire', 'Secondaire'),
     ('Universitaire', 'Universitaire'),
 
+]
+ethnic_groups = [
+    # AKAN Group
+    ('Abbey', 'Abbey'),
+    ('Abidji', 'Abidji'),
+    ('Abron', 'Abron'),
+    ('Abouré', 'Abouré'),
+    ('Ega', 'Ega'),
+    ('Agni', 'Agni'),
+    ('Ahizi', 'Ahizi'),
+    ('Adjoukrou', 'Adjoukrou'),
+    ('Alladian', 'Alladian'),
+    ('N’zima', 'N’zima'),
+    ('Attié', 'Attié'),
+    ('Avikam', 'Avikam'),
+    ('Ayahou', 'Ayahou'),
+    ('Baoulé', 'Baoulé'),
+    ('Brignan', 'Brignan'),
+    ('Ebrié', 'Ebrié'),
+    ('Ehotilé', 'Ehotilé'),
+    ('Elomouin', 'Elomouin'),
+    ('Essouma', 'Essouma'),
+    ('Gwa', 'Gwa'),
+    ('M’batto', 'M’batto'),
+    ('Yowrè', 'Yowrè'),
+    # GOUR Group
+    ('Birifor', 'Birifor'),
+    ('Camara', 'Camara'),
+    ('Degha', 'Degha'),
+    ('Djafolo', 'Djafolo'),
+    ('Djimini', 'Djimini'),
+    ('Djamala', 'Djamala'),
+    ('Gbin', 'Gbin'),
+    ('Koulango', 'Koulango'),
+    ('Lobi', 'Lobi'),
+    ('Lohon', 'Lohon'),
+    ('Lohron', 'Lohron'),
+    ('Tagbana', 'Tagbana'),
+    ('Ténéwéré', 'Ténéwéré'),
+    ('Tiembara', 'Tiembara'),
+    ('Nafara', 'Nafara'),
+    ('Niarafolo', 'Niarafolo'),
+    ('Samassogo', 'Samassogo'),
+    ('Sénoufo', 'Sénoufo'),
+    # MANDE Group
+    ('Gouro', 'Gouro'),
+    ('Koyata', 'Koyata'),
+    ('Mahou', 'Mahou'),
+    ('Malinké', 'Malinké'),
+    ('Mangoro', 'Mangoro'),
+    ('Nomou', 'Nomou'),
+    ('Toura', 'Toura'),
+    ('Wan', 'Wan'),
+    ('Yacouba', 'Yacouba'),
+    # KROU Group
+    ('Bakwe', 'Bakwe'),
+    ('Bété', 'Bété'),
+    ('Dida', 'Dida'),
+    ('Gagou', 'Gagou'),
+    ('Godié', 'Godié'),
+    ('Guéré', 'Guéré'),
+    ('Kouzié', 'Kouzié'),
+    ('Kroumen', 'Kroumen'),
+    ('Neyo', 'Neyo'),
+    ('Niaboua', 'Niaboua'),
+    ('Wini', 'Wini'),
+    ('Wobè', 'Wobè')
 ]
 
 
@@ -33,9 +102,8 @@ class ConsultationForm(forms.ModelForm):
 
 
 class PatientCreateForm(forms.ModelForm):
-    nom = forms.CharField(
-        widget=forms.TextInput(
-            attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
+    nom = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
     prenoms = forms.CharField(
         widget=forms.TextInput(
             attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'prenom', }))
@@ -63,6 +131,11 @@ class PatientCreateForm(forms.ModelForm):
                                         attrs={
                                             'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                                             'data-search': 'on', 'id': 'nationalite'}))
+    ethnie = forms.ChoiceField(choices=ethnic_groups,
+                               widget=forms.Select(
+                                   attrs={
+                                       'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                       'data-search': 'on', 'id': 'nationalite'}))
     profession = forms.ChoiceField(choices=professions_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'profession'}))
@@ -91,6 +164,8 @@ class PatientCreateForm(forms.ModelForm):
     commune = forms.ChoiceField(choices=communes_et_quartiers_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'commune'}))
+    code_vih = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Code VIH', }))
 
     class Meta:
         model = Patient
@@ -464,7 +539,7 @@ class ConstanteForm(forms.ModelForm):
         }
 
 
-class PrescriptionForm(forms.ModelForm):
+class PrescriptionHospiForm(forms.ModelForm):
     class Meta:
         model = Prescription
         fields = ['patient', 'doctor', 'medication', 'quantity', 'status']
@@ -518,3 +593,167 @@ class IndicateurSubjectifForm(forms.ModelForm):
         widgets = {
             'bien_etre': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+class HospitalizationIndicatorsForm(forms.ModelForm):
+    # temperature = forms.FloatField(
+    #     widget=forms.NumberInput(attrs={'class': 'form-control'}),
+    #     label="Température (°C)",
+    #     required=False
+    # )
+    # heart_rate = forms.IntegerField(
+    #     widget=forms.NumberInput(attrs={'class': 'form-control'}),
+    #     label="Fréquence cardiaque (bpm)",
+    #     required=False
+    # )
+    # respiratory_rate = forms.IntegerField(
+    #     widget=forms.NumberInput(attrs={'class': 'form-control'}),
+    #     label="Fréquence respiratoire (rpm)",
+    #     required=False
+    # )
+    # blood_pressure = forms.CharField(
+    #     widget=forms.TextInput(attrs={'class': 'form-control'}),
+    #     label="Tension artérielle (mmHg)",
+    #     required=False
+    # )
+    pain_level = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'type': 'number'}),
+        label="Niveau de douleur (1 à 10)",
+        required=False
+    )
+    mental_state = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        choices=[('clair', 'Clair'), ('confusion', 'Confusion'), ('somnolent', 'Somnolent')],
+        label="État de conscience",
+        required=False
+    )
+
+    treatment_response = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Réponse au traitement",
+        required=False
+    )
+    side_effects = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Effets secondaires",
+        required=False
+    )
+    compliance = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label="Observance du traitement",
+        required=False
+    )
+    electrolytes_balance = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Équilibre électrolytique",
+        required=False
+    )
+    renal_function = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Fonction rénale",
+        required=False
+    )
+    hepatic_function = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Fonction hépatique",
+        required=False
+    )
+
+    stable_vitals = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label="Signes vitaux stables",
+        required=False
+    )
+    pain_controlled = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label="Douleur contrôlée",
+        required=False
+    )
+    functional_ability = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label="Capacité fonctionnelle",
+        required=False
+    )
+    mental_stability = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={'class': 'form-control'}),
+        label="État mental stable",
+        required=False
+    )
+    follow_up_plan = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Plan de suivi post-hospitalisation",
+        required=False
+    )
+
+    class Meta:
+        model = HospitalizationIndicators
+        fields = '__all__'
+        exclude = ('hospitalisation',
+                   'temperature',
+                   'heart_rate',
+                   'respiratory_rate',
+                   'blood_pressure',
+                   )
+# class HospitalizationIndicatorsForm(forms.Form):
+#     # Indicateurs de Complications
+#     temperature = forms.FloatField(
+#         widget=forms.IntegerField(attrs={'class': 'form-control'}, label="Température (°C)", required=False))
+#     heart_rate = forms.IntegerField(label="Fréquence cardiaque (bpm)", required=False)
+#     respiratory_rate = forms.IntegerField(label="Fréquence respiratoire (rpm)", required=False)
+#     blood_pressure = forms.CharField(label="Tension artérielle (mmHg)", required=False)
+#     pain_level = forms.IntegerField(label="Niveau de douleur (1 à 10)", required=False)
+#     mental_state = forms.ChoiceField(
+#         label="État de conscience",
+#         choices=[('clair', 'Clair'), ('confusion', 'Confusion'), ('somnolent', 'Somnolent')],
+#         required=False
+#     )
+#
+#     # Indicateurs de Traitement
+#     treatment_response = forms.CharField(
+#         label="Réponse au traitement",
+#         widget=forms.Textarea(attrs={'rows': 3}),
+#         required=False
+#     )
+#     side_effects = forms.CharField(
+#         label="Effets secondaires",
+#         widget=forms.Textarea(attrs={'rows': 3}),
+#         required=False
+#     )
+#     compliance = forms.BooleanField(label="Observance du traitement", required=False)
+#     electrolytes_balance = forms.CharField(label="Équilibre électrolytique", required=False)
+#     renal_function = forms.CharField(label="Fonction rénale", required=False)
+#     hepatic_function = forms.CharField(label="Fonction hépatique", required=False)
+#
+#     # Indicateurs de Sortie (Critères de décharge)
+#     stable_vitals = forms.BooleanField(label="Signes vitaux stables", required=False)
+#     pain_controlled = forms.BooleanField(label="Douleur contrôlée", required=False)
+#     functional_ability = forms.BooleanField(label="Capacité fonctionnelle", required=False)
+#     mental_stability = forms.BooleanField(label="État mental stable", required=False)
+#     follow_up_plan = forms.CharField(
+#         label="Plan de suivi post-hospitalisation",
+#         widget=forms.Textarea(attrs={'rows': 3}),
+#         required=False
+#     )
+#
+#     class Meta:
+#         model = HospitalizationIndicators
+#         fields = '__All__'
+#         widgets = {
+#             'temperature': forms.NumberInput(attrs={'class': 'form-control'}),
+#             'heart_rate': forms.NumberInput(attrs={'class': 'form-control'}),
+#             'respiratory_rate': forms.NumberInput(attrs={'class': 'form-control'}),
+#             'blood_pressure': forms.TextInput(attrs={'class': 'form-control'}),
+#             'pain_level': forms.NumberInput(attrs={'class': 'form-control'}),
+#             'mental_state': forms.Select(attrs={'class': 'form-control'}),
+#             'treatment_response': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#             'side_effects': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#             'compliance': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#             'electrolytes_balance': forms.TextInput(attrs={'class': 'form-control'}),
+#             'renal_function': forms.TextInput(attrs={'class': 'form-control'}),
+#             'hepatic_function': forms.TextInput(attrs={'class': 'form-control'}),
+#             'stable_vitals': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#             'pain_controlled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#             'functional_ability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#             'mental_stability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+#             'follow_up_plan': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+#         }

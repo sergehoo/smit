@@ -5,7 +5,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/core/management/commands/generate_fake_hospy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/management/commands/import_patient.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/donnessmitpatients.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/logs/error.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/layout/notif_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/layout/notif_header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/toggleoption.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/toggleoption.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +79,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ogahserge/Documents/smitci/static/images/gift&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/ogahserge/Documents/smitci/core/management/commands&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -73,17 +96,17 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/static/images/gift" />
       <recent name="$PROJECT_DIR$/core/management/commands" />
+      <recent name="$PROJECT_DIR$/static/images/gift" />
       <recent name="$PROJECT_DIR$/static" />
       <recent name="$PROJECT_DIR$/core" />
       <recent name="$PROJECT_DIR$/static/images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/static" />
       <recent name="$PROJECT_DIR$/templates/pages/hospitalisation" />
       <recent name="$PROJECT_DIR$/smit/scripts" />
       <recent name="$PROJECT_DIR$/static/images" />
-      <recent name="$PROJECT_DIR$/static" />
     </key>
   </component>
   <component name="RunManager" selected="Django Server.smitci">
@@ -171,7 +194,11 @@
       <workItem from="1727900715934" duration="1338000" />
       <workItem from="1728089253113" duration="599000" />
       <workItem from="1728298596299" duration="48984000" />
-      <workItem from="1729354767136" duration="47787000" />
+      <workItem from="1729354767136" duration="54163000" />
+      <workItem from="1729637582601" duration="14376000" />
+      <workItem from="1729881266335" duration="585000" />
+      <workItem from="1729888999760" duration="595000" />
+      <workItem from="1729978781873" duration="37537000" />
     </task>
     <servers />
   </component>
@@ -194,23 +221,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>550</line>
+          <line>572</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>977</line>
+          <line>999</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smitci/urls.py</url>
-          <line>85</line>
+          <line>86</line>
           <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/smit/models.py</url>
-          <line>635</line>
-          <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pharmacy/views.py</url>
@@ -229,7 +251,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>30</line>
+          <line>31</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>

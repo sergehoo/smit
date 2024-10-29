@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Max
 from django.utils.timezone import now
 from django_countries.fields import CountryField
@@ -626,6 +626,7 @@ Goupe_sanguin_choices = [
     ('O-', 'O-'),
     ('AB+', 'AB+'),
     ('AB-', 'AB-'),
+    ('Inconnu', 'Inconnu'),
 ]
 
 Sexe_choices = [
@@ -724,27 +725,50 @@ communes_et_quartiers_choices = [
 
 
 def get_random_code() -> str:
-    return str(datetime.date.today().year)[2:]  + str(random.randint(0000, 9999))
+    return str(datetime.date.today().year)[2:] + str(random.randint(0000, 999999))
 
 
+# def get_incremental_code() -> str:
+#     current_year = datetime.date.today().year
+#     current_year_short = str(current_year)[2:]
+#
+#     # Get the latest patient code for the current year
+#     latest_patient = Patient.objects.filter(code_vih__startswith=current_year_short).aggregate(Max('code_vih'))[
+#         'code_vih__max']
+#
+#     if latest_patient:
+#         # Extract the numeric part and increment it
+#         latest_number = int(latest_patient.split('-')[1])
+#         new_number = latest_number + 1
+#     else:
+#         # If no patient for the current year, start with 1
+#         new_number = 1
+#
+#     # Format the new number with leading zeros
+#     new_code = f"{current_year_short}-{new_number:04d}"
+#     return new_code
+#
 def get_incremental_code() -> str:
     current_year = datetime.date.today().year
     current_year_short = str(current_year)[2:]
 
-    # Get the latest patient code for the current year
-    latest_patient = Patient.objects.filter(code_vih__startswith=current_year_short).aggregate(Max('code_vih'))[
-        'code_vih__max']
+    # Use a transaction to ensure atomicity and uniqueness
+    with transaction.atomic():
+        # Lock the table to prevent race conditions
+        latest_patient = Patient.objects.select_for_update().filter(code_vih__startswith=current_year_short
+                                                                    ).aggregate(Max('code_vih'))['code_vih__max']
 
-    if latest_patient:
-        # Extract the numeric part and increment it
-        latest_number = int(latest_patient.split('-')[1])
-        new_number = latest_number + 1
-    else:
-        # If no patient for the current year, start with 1
-        new_number = 1
+        if latest_patient:
+            # Extract the numeric part and increment it
+            latest_number = int(latest_patient.split('-')[1])
+            new_number = latest_number + 1
+        else:
+            # If no patient for the current year, start with 1
+            new_number = 1
 
-    # Format the new number with leading zeros
-    new_code = f"{current_year_short}-{new_number:04d}"
+        # Format the new number with leading zeros
+        new_code = f"{current_year_short}-{new_number:04d}"
+
     return new_code
 
 
@@ -871,17 +895,18 @@ class Patient(models.Model):
     contact = models.CharField(max_length=225)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
     lieu_naissance = models.CharField(max_length=200)
-    date_naissance = models.DateField()
+    date_naissance = models.DateField(null=True, blank=True)
     genre = models.CharField(max_length=10, choices=Sexe_choices)
     nationalite = models.CharField(max_length=200)
+    ethnie = models.CharField(null=True, blank=True, max_length=100)
     profession = models.CharField(max_length=100, null=True, blank=True)
-    nbr_enfants = models.PositiveIntegerField(default=0)
+    nbr_enfants = models.PositiveIntegerField(default=0,null=True, blank=True)
     groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
     niveau_etude = models.CharField(max_length=100, null=True, blank=True)
     employeur = models.CharField(max_length=100, null=True, blank=True)
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True)
-    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
     cascontact = models.ManyToManyField('self')
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

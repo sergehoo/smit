@@ -28,7 +28,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ActiviteListView, Constantes_create, hospitalisation_send_create, patient_list_view, \
     mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
-    delete_test_rapide_vih, delete_examen, ConstanteUpdateView
+    delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -47,7 +47,6 @@ urlpatterns = [
                   path('laboratoire/', include('laboratory.urls')),
                   path('tinymce/', include('tinymce.urls')),
 
-
                   path('', HomePageView.as_view(), name='home'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
                   path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
@@ -62,6 +61,8 @@ urlpatterns = [
 
                   # Consultation
                   path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
+
+                  path('consultation_delete/<int:consultation_id>', consultation_delete, name='delete_consult'),
 
                   path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih, name='delete_test_rapide_vih'),
 

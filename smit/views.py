@@ -426,6 +426,28 @@ def symptome_delete(request, symp, consultation_id):
 
 
 @login_required
+def consultation_delete(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    if request.method == 'POST':
+        consultation.delete()
+        messages.success(request, 'supprimer avec succès!')
+        return redirect('consultation_list')
+    return redirect('consultation_list')
+
+
+# @login_required
+# def consultation_delete(request, consultation_id):
+#     consultation = get_object_or_404(Consultation, id=consultation_id)
+#     if request.method == 'POST':
+#         consultation.delete()
+#         messages.success(request, 'Consultation supprimée avec succès!')
+#         return redirect('consultation_list')
+#
+#     # Ajouter une page de confirmation pour la suppression
+#     return redirect('consultation_list')
+
+
+@login_required
 def Antecedents_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
     if request.method == 'POST':

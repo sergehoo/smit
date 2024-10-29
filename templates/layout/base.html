@@ -6,9 +6,24 @@
 <head>
     <base href="../">
     <meta charset="utf-8">
-    <meta name="author" content="afriqconsulting">
+    <meta name="author" content="Afriq Consulting">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="KENEYA, Systeme de Gestion des hopitaux.">
+    <meta name="description" content="KENEYA, système de gestion des hôpitaux pour une gestion efficace des ressources hospitalières.">
+    <meta name="keywords" content="KENEYA, SMIT, gestion des hôpitaux, santé, Afriq Consulting, hospital management, ressources hospitalières, consultations, hospitalisations, gestion médicale">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#3b5d92">
+    <meta property="og:title" content="KENEYA - SMIT | Hospital Resources Management">
+    <meta property="og:description" content="Système complet pour la gestion des ressources hospitalières, conçu pour simplifier les opérations de santé.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com"> <!-- Remplacez par votre URL -->
+    <meta property="og:image" content="{% static 'images/keneya_preview.png' %}">
+    <meta property="og:locale" content="fr_FR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KENEYA - SMIT | Hospital Resources Management">
+    <meta name="twitter:description" content="Optimisez la gestion des ressources hospitalières avec KENEYA, développé par Afriq Consulting.">
+    <meta name="twitter:image" content="{% static 'images/keneya_preview.png' %}">
+
+   
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     <!-- Page Title  -->
@@ -16,9 +31,11 @@
     <!-- StyleSheets  -->
     <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css"> -->
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
     <script>
         tinymce.init({
@@ -40,153 +57,155 @@
 </head>
 
 <body class="nk-body bg-white has-sidebar ">
-    <div class="nk-app-root">
-        <!-- main @s -->
-        <div class="nk-main ">
-            <!-- sidebar @s -->
-           {% include 'layout/aside.html' %}
-            <!-- sidebar @e -->
-            <!-- wrap @s -->
-            <div class="nk-wrap ">
-                <!-- main header @s -->
-                <div class="nk-header nk-header-fixed is-light">
-                    <div class="container-fluid">
-                        <div class="nk-header-wrap">
+<div class="nk-app-root">
+    <!-- main @s -->
+    <div class="nk-main ">
+        <!-- sidebar @s -->
+        {% include 'layout/aside.html' %}
+        <!-- sidebar @e -->
+        <!-- wrap @s -->
+        <div class="nk-wrap ">
+            <!-- main header @s -->
+            <div class="nk-header nk-header-fixed is-light">
+                <div class="container-fluid">
+                    <div class="nk-header-wrap">
 
-                            <div class="nk-header-brand d-xl-none">
-                                <a href="#" class="logo-link">
-                                    <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
-                                    <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
-                                </a>
-                            </div><!-- .nk-header-brand -->
-                           {% include 'layout/notif_header.html' %}
-                           {% include 'layout/user_log.html' %}
-                        </div><!-- .nk-header-wrap -->
-                    </div><!-- .container-fliud -->
-                </div>
-                <!-- main header @e -->
-                <!-- content @s -->
-                {% block content %}
+                        <div class="nk-header-brand d-xl-none">
+                            <a href="#" class="logo-link">
+                                <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}"
+                                     srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
+                                <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}"
+                                     srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
+                            </a>
+                        </div><!-- .nk-header-brand -->
+                        {% include 'layout/notif_header.html' %}
+                        {#                           {% include 'layout/user_log.html' %}#}
+                    </div><!-- .nk-header-wrap -->
+                </div><!-- .container-fliud -->
+            </div>
+            <!-- main header @e -->
+            <!-- content @s -->
+            {% block content %}
 
-                {% endblock %}
-                <!-- content @e -->
-                <!-- footer @s -->
-                <div class="nk-footer">
-                    <div class="container-fluid">
-                        <div class="nk-footer-wrap">
-                            <div class="nk-footer-copyright"> &copy; 2022 KENEYA by <a href="https://afriqconsulting.com" target="_blank">AFRIQCONSULTING</a>
-                            </div>
-
+            {% endblock %}
+            <!-- content @e -->
+            <!-- footer @s -->
+            <div class="nk-footer">
+                <div class="container-fluid">
+                    <div class="nk-footer-wrap">
+                        <div class="nk-footer-copyright"> &copy; 2022 KENEYA by <a href="https://afriqconsulting.com"
+                                                                                   target="_blank">AFRIQCONSULTING</a>
                         </div>
+
                     </div>
                 </div>
-                <!-- footer @e -->
             </div>
-            <!-- wrap @e -->
+            <!-- footer @e -->
         </div>
-        <!-- main @e -->
+        <!-- wrap @e -->
     </div>
-    <!-- app-root @e -->
-    <!-- JavaScript -->
-    <script src="{% static 'assets/js/bundle.js' %}"></script>
-    <script src="{% static 'assets/js/scripts.js' %}"></script>
-    <script src="{% static 'assets/js/charts/gd-default.js' %}"></script>
+    <!-- main @e -->
+</div>
+<!-- app-root @e -->
+<!-- JavaScript -->
+<script src="{% static 'assets/js/bundle.js' %}"></script>
+<script src="{% static 'assets/js/scripts.js' %}"></script>
+<script src="{% static 'assets/js/charts/gd-default.js' %}"></script>
 {% if messages %}
-{% for message in messages %}
-{% if message.tags == 'success' %}
-<script type="text/javascript">
-    $(document).ready(function () {
-        Swal.fire({
-            title: "Félicitation ! ",
-            text: " {{ message }}",
-            icon: "success",
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    Swal.fire({
+                        title: "Félicitation ! ",
+                        text: " {{ message }}",
+                        icon: "success",
 
-        })
-    });
-</script>
-{% elif message.tags == 'warning' %}
-<script type="text/javascript">
-    $(document).ready(function () {
-        Swal.fire({
-            title: "Attention alert",
-            text: " {{ message }}",
-            icon: "warning",
+                    })
+                });
+            </script>
+        {% elif message.tags == 'warning' %}
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    Swal.fire({
+                        title: "Attention alert",
+                        text: " {{ message }}",
+                        icon: "warning",
 
-        })
-    });
-</script>
-{% elif message.tags == 'error' %}
-<script type="text/javascript">
+                    })
+                });
+            </script>
+        {% elif message.tags == 'error' %}
+            <script type="text/javascript">
 
-    $(document).ready(function () {
-        Swal.fire({
-            title: "Attention Erreur",
-            text: " {{ message }}",
-            icon: "error",
+                $(document).ready(function () {
+                    Swal.fire({
+                        title: "Attention Erreur",
+                        text: " {{ message }}",
+                        icon: "error",
 
-        })
+                    })
 
-    });
-</script>
+                });
+            </script>
+        {% endif %}
+    {% endfor %}
 {% endif %}
-{% endfor %}
-{% endif %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const darkSwitch = document.querySelector('.dark-switch');
-            const body = document.body;
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const darkSwitch = document.querySelector('.dark-switch');
+        const body = document.body;
 
-            // Check if the dark mode is enabled in localStorage
-            if (localStorage.getItem('dark-mode') === 'enabled') {
+        // Check if the dark mode is enabled in localStorage
+        if (localStorage.getItem('dark-mode') === 'enabled') {
+            body.classList.add('dark-mode');
+        }
+
+        // Toggle dark mode
+        darkSwitch.addEventListener('click', () => {
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('dark-mode', 'disabled');
+            } else {
                 body.classList.add('dark-mode');
+                localStorage.setItem('dark-mode', 'enabled');
             }
-
-            // Toggle dark mode
-            darkSwitch.addEventListener('click', () => {
-                if (body.classList.contains('dark-mode')) {
-                    body.classList.remove('dark-mode');
-                    localStorage.setItem('dark-mode', 'disabled');
-                } else {
-                    body.classList.add('dark-mode');
-                    localStorage.setItem('dark-mode', 'enabled');
-                }
-            });
         });
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    });
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 
- 
 
-    <script>
-        var input = document.querySelector("#phone");
-        var iti = window.intlTelInput(input, {
-            nationalMode: true,
-            initialCountry: "ci", // Set default to Côte d'Ivoire
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+<script>
+    var input = document.querySelector("#phone");
+    var iti = window.intlTelInput(input, {
+        nationalMode: true,
+        initialCountry: "ci", // Set default to Côte d'Ivoire
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const communeSelect = document.getElementById('id_commune');
+        const newCommuneGroup = document.getElementById('new_commune_group');
+
+        communeSelect.addEventListener('change', function () {
+            if (this.value === 'Autre') {
+                newCommuneGroup.style.display = 'block';  // Show the new commune field
+            } else {
+                newCommuneGroup.style.display = 'none';  // Hide the new commune field
+            }
         });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const communeSelect = document.getElementById('id_commune');
-            const newCommuneGroup = document.getElementById('new_commune_group');
 
-            communeSelect.addEventListener('change', function () {
-                if (this.value === 'Autre') {
-                    newCommuneGroup.style.display = 'block';  // Show the new commune field
-                } else {
-                    newCommuneGroup.style.display = 'none';  // Hide the new commune field
-                }
-            });
-
-            // Optional: Reset the form and hide new_commune when resetting
-            document.querySelector('button[type="reset"]').addEventListener('click', function () {
-                newCommuneGroup.style.display = 'none';
-            });
+        // Optional: Reset the form and hide new_commune when resetting
+        document.querySelector('button[type="reset"]').addEventListener('click', function () {
+            newCommuneGroup.style.display = 'none';
         });
-    </script>
- 
+    });
+</script>
+
 </body>
 
 </html>
