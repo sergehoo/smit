@@ -32,8 +32,8 @@ django-celery==3.1.17
 django-countries==7.6.1
 django-extensions==3.2.3
 django-filter==24.3
-django-geo==0.8
-django-guardian==2.4.0
+django-geo
+django-guardian
 django-humanize==0.1.2
 django-import-export==4.1.1
 django-js-asset==2.2.0
@@ -74,6 +74,7 @@ pandas==2.2.3
 phonenumbers==8.13.46
 pillow==10.4.0
 prompt_toolkit==3.0.47
+psycopg2==2.9.9
 psycopg2-binary==2.9.9
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
@@ -87,6 +88,7 @@ pypdf==5.0.1
 pypng==0.20220715.0
 python-bidi==0.6.3
 python-dateutil==2.9.0.post0
+python-decouple==3.8
 pytz==2024.1
 PyYAML==6.0.2
 qrcode==7.4.2
