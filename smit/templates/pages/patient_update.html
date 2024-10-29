@@ -1,0 +1,80 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+
+        <div class="container-xl wide-lg">
+
+            <div class="nk-content-body">
+
+                <div class="nk-block-head nk-block-head-sm "><div class="row rounded" style="height: 200px; background-image: url('{% static 'images/patient_add_banner1.png' %}')">
+                    <div class="nk-block-between">
+
+                        <div class="nk-block-head-content">
+                            <h1 class="nk-block-title page-title ml-20 center" style="color: black">Modification du patient</h1>
+                            <div class="nk-block-des text-soft">
+                                <p>{{ object.nom }} {{ object.prenoms }}</p>
+                            </div>
+                        </div><!-- .nk-block-head-content -->
+
+                             </div>
+                    </div><!-- .nk-block-between -->
+                </div><!-- .nk-block-head -->
+
+                <div class="nk-block">
+                    <div class="card card-bordered card-stretch">
+                     <form method="post">
+                                {% csrf_token %}
+                        <div class="card-inner-group">
+
+                                <div class="row m-4">
+                                    {% for field in form %}
+                                        <div class="col-4 col-md-3 mb-3">
+                                            <label for="{{ field.id_for_label }}"
+                                                   class="form-label">{{ field.label }}</label>
+                                            {{ field }}
+
+                                            {% if field.help_text %}
+                                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in field.errors %}
+                                                <div class="text-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                    <!-- New Commune Field -->
+{#                                    <div class="col-4 col-md-3 mb-3" id="new_commune_group" style="display: none;">#}
+{#                                        <label for="id_new_commune" class="form-label">Ajouter une nouvelle#}
+{#                                            commune</label>#}
+{#                                        {{ form.new_commune }}#}
+{#                                        {% if form.new_commune.help_text %}#}
+{#                                            <small class="form-text text-muted">{{ form.new_commune.help_text }}</small>#}
+{#                                        {% endif %}#}
+{#                                        {% for error in form.new_commune.errors %}#}
+{#                                            <div class="text-danger">{{ error }}</div>#}
+{#                                        {% endfor %}#}
+{#                                    </div>#}
+                                </div>
+
+                        <!-- .card-inner-group -->
+
+                                </div><!-- .card -->
+
+                     <div class="mb-10">
+                                <button type="submit" class="btn btn-primary mb-5 mr-5 float-right">
+                                    <i class="fa-solid fa-floppy-disk mr-2"> </i> Enregistrer
+                                </button>
+                                <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right">
+                                    <i class="fa-solid fa-cancel mr-2"> </i> Annuler
+                                </button>
+
+                            </div>
+                      </form>
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+
+{% endblock %}

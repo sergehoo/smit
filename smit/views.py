@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import request, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
@@ -355,6 +355,8 @@ def mark_consultation_as_hospitalised(request, consultation_id, patient_id):
         form = HospitalizationForm()
 
     return redirect('detail_consultation', pk=consultation.pk)
+
+
 @login_required
 def appointment_update(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
@@ -751,6 +753,46 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
 
         messages.success(self.request, 'Patient créé avec succès!')
         return redirect(self.success_url)
+
+
+class PatientUpdateView(LoginRequiredMixin, UpdateView):
+    model = Patient
+    form_class = PatientCreateForm
+    template_name = "pages/patient_update.html"
+
+    def get_success_url(self):
+        # Redirige vers une page de confirmation ou de détail du patient
+        return reverse('global_search')
+
+    def form_valid(self, form):
+        nom = form.cleaned_data['nom'].upper()
+        prenoms = form.cleaned_data['prenoms'].upper()
+        date_naissance = form.cleaned_data['date_naissance']
+        contact = form.cleaned_data['contact']
+
+        # Vérification des doublons pour les autres patients que celui en cours de modification
+        if Patient.objects.exclude(pk=self.object.pk).filter(
+                nom__iexact=nom, prenoms__iexact=prenoms, date_naissance=date_naissance
+        ).exists():
+            messages.error(self.request,
+                           'Un autre patient avec les mêmes nom, prénoms et date de naissance existe déjà.')
+            return self.form_invalid(form)
+
+        if Patient.objects.exclude(pk=self.object.pk).filter(contact=contact).exists():
+            messages.error(self.request, 'Un autre patient avec ce contact existe déjà.')
+            return self.form_invalid(form)
+
+        # Traitement de la localité
+        location_data = {
+            'contry': form.cleaned_data['pays'],
+            'commune': form.cleaned_data['commune']
+        }
+        location_instance, created = Location.objects.get_or_create(**location_data)
+        self.object.localite = location_instance
+        self.object.save()
+
+        messages.success(self.request, 'Informations du patient mises à jour avec succès!')
+        return redirect(self.get_success_url())
 
 
 class RendezVousListView(LoginRequiredMixin, ListView):

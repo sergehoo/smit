@@ -10,6 +10,7 @@ services:
       - .:/smitci-app/
       - static_volume:/smitci-app/static
       - media_volume:/smitci-app/media
+      - logs_volume:/smitci-app/static/logs  # Mount logs volume
     env_file:
       - ./.env
     restart: always
@@ -66,3 +67,4 @@ volumes:
     driver: local
   static_volume:
   media_volume:
+  logs_volume:

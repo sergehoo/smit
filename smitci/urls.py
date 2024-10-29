@@ -28,7 +28,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ActiviteListView, Constantes_create, hospitalisation_send_create, patient_list_view, \
     mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
-    delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete
+    delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -49,6 +49,7 @@ urlpatterns = [
 
                   path('', HomePageView.as_view(), name='home'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
+                  path('modifierPatient/<int:pk>', PatientUpdateView.as_view(), name='update_patient'),
                   path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
                   # path('patient/<int:patient_id>/service/<int:service_id>/', service_detail_view, name='service_detail'),
 

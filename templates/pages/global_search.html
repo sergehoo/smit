@@ -191,7 +191,7 @@
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <ul class="link-list-opt no-bdr">
                                                                             <li><a href="{% url 'detail_patient' patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
+                                                                            <li><a href="{% url 'update_patient' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Modifier</span></a></li>
                                                                             <li class="divider"></li>
                                                                             <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
                                                                             <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>

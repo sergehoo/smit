@@ -173,7 +173,7 @@ class PatientCreateForm(forms.ModelForm):
             'nom', 'prenoms', 'contact', 'situation_matrimoniale',
             'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
             'profession', 'nbr_enfants', 'groupe_sanguin', 'niveau_etude',
-            'employeur', 'commune',
+            'employeur', 'commune','code_vih'
         ]
         widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
 
@@ -235,25 +235,25 @@ class HospitalizationForm(forms.ModelForm):
 
 
 class ConstantesForm(forms.ModelForm):
-    tension_systolique = forms.IntegerField(widget=forms.NumberInput(
+    tension_systolique = forms.IntegerField(required=True,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '120 mmHg '}))
-    tension_diastolique = forms.IntegerField(widget=forms.NumberInput(
+    tension_diastolique = forms.IntegerField(required=True,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '80 mmHg'}))
-    frequence_cardiaque = forms.IntegerField(widget=forms.NumberInput(
+    frequence_cardiaque = forms.IntegerField(required=True,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '72 bpm'}))
-    frequence_respiratoire = forms.IntegerField(widget=forms.NumberInput(
+    frequence_respiratoire = forms.IntegerField(required=False,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '16'}))
-    temperature = forms.FloatField(
+    temperature = forms.FloatField(required=True,
         widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '37.3'}))
-    saturation_oxygene = forms.IntegerField(widget=forms.NumberInput(
+    saturation_oxygene = forms.IntegerField(required=False,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '98% SpO2'}))
-    glycemie = forms.FloatField(
+    glycemie = forms.FloatField(required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '5.8 mmol/L'}))
-    poids = forms.FloatField(
+    poids = forms.FloatField(required=True,
         widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '70.0 kg'}))
-    taille = forms.FloatField(
+    taille = forms.FloatField(required=True,
         widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '175 cm'}))
-    pouls = forms.FloatField(
+    pouls = forms.FloatField(required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
 
     # imc = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': 'glycemie'}))

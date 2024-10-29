@@ -888,8 +888,8 @@ class Employee(models.Model):
 
 class Patient(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    code_patient = models.CharField(max_length=100, default=get_random_code, unique=True)
-    code_vih = models.CharField(max_length=100, default=get_incremental_code, unique=True)
+    code_patient = models.CharField(max_length=100, unique=True)
+    code_vih = models.CharField(max_length=100, blank=True, unique=True)
     nom = models.CharField(max_length=225)
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
@@ -900,7 +900,7 @@ class Patient(models.Model):
     nationalite = models.CharField(max_length=200)
     ethnie = models.CharField(null=True, blank=True, max_length=100)
     profession = models.CharField(max_length=100, null=True, blank=True)
-    nbr_enfants = models.PositiveIntegerField(default=0,null=True, blank=True)
+    nbr_enfants = models.PositiveIntegerField(default=0, null=True, blank=True)
     groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
     niveau_etude = models.CharField(max_length=100, null=True, blank=True)
     employeur = models.CharField(max_length=100, null=True, blank=True)
@@ -935,7 +935,7 @@ class Patient(models.Model):
         if not self.code_vih:
             self.code_vih = get_incremental_code()
         if not self.code_patient:
-            self.code_patient = self.generate_numeric_uuid()
+            self.code_patient = self.get_incremental_code()
         if not self.avatar:
             name = f"{self.nom} {self.prenoms}"
             bg_color = (0, 122, 255) if self.genre == 'HOMME' else (0, 122, 255)
@@ -946,6 +946,29 @@ class Patient(models.Model):
     def generate_numeric_uuid(self):
         # Génère un UUID et convertit en une chaîne numérique de longueur 8
         return str(random.randint(10000000, 99999999))
+
+    def get_incremental_code(self) -> str:
+        current_year = datetime.date.today().year
+        current_year_short = str(current_year)[2:]
+
+        # Use a transaction to ensure atomicity and uniqueness
+        with transaction.atomic():
+            # Lock the table to prevent race conditions
+            latest_patient = Patient.objects.select_for_update().filter(code_vih__startswith=current_year_short
+                                                                        ).aggregate(Max('code_vih'))['code_vih__max']
+
+            if latest_patient:
+                # Extract the numeric part and increment it
+                latest_number = int(latest_patient.split('-')[1])
+                new_number = latest_number + 1
+            else:
+                # If no patient for the current year, start with 1
+                new_number = 1
+
+            # Format the new number with leading zeros
+            new_code = f"{current_year_short}-{new_number:04d}"
+
+        return new_code
 
     # Optionally, you can also use signals to handle the avatar generation
     # @receiver(post_save, sender=Patient)
