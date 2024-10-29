@@ -18,6 +18,10 @@ RUN apt-get update && \
     python3-dev \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+# Set GDAL environment variables
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
 
 RUN pip install --upgrade pip
 
