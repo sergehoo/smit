@@ -894,7 +894,7 @@ class Patient(models.Model):
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
-    lieu_naissance = models.CharField(max_length=200)
+    lieu_naissance = models.CharField(max_length=200,)
     date_naissance = models.DateField(null=True, blank=True)
     genre = models.CharField(max_length=10, choices=Sexe_choices)
     nationalite = models.CharField(max_length=200)

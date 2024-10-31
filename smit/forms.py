@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import phonenumbers
 from django import forms
@@ -138,58 +138,56 @@ class ConsultationForm(forms.ModelForm):
 
 
 class PatientCreateForm(forms.ModelForm):
-    nom = forms.CharField(widget=forms.TextInput(
+    nom = forms.CharField(required=True,widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
-    prenoms = forms.CharField(
+    prenoms = forms.CharField(required=True,
         widget=forms.TextInput(
             attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'prenom', }))
 
-    contact = forms.CharField(
+    contact = forms.CharField(required=True,
         widget=forms.TextInput(
             attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
                    'placeholder': '0701020304', 'id': 'phone'}))
 
-    situation_matrimoniale = forms.ChoiceField(choices=situation_matrimoniales_choices, widget=forms.Select(
+    situation_matrimoniale = forms.ChoiceField(required=True,choices=situation_matrimoniales_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                'data-search': 'on', 'id': 'situation_matrimoniale'}))
-    lieu_naissance = forms.ChoiceField(choices=villes_choices, widget=forms.Select(
+    lieu_naissance = forms.ChoiceField(required=True,choices=villes_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'outlined'}))
-    date_naissance = forms.DateField(
+    date_naissance = forms.DateField(required=True,
         widget=forms.DateInput(
             attrs={'class': 'form-control form-control-lg form-control-outlined', 'id': 'outlined',
                    'type': 'date'}))
-    genre = forms.ChoiceField(choices=Sexe_choices,
+    genre = forms.ChoiceField(required=True,choices=Sexe_choices,
                               widget=forms.Select(
                                   attrs={'class': 'form-control form-control-lg form-control-outlined', }))
-    nationalite = forms.ChoiceField(choices=nationalite_choices,
+    nationalite = forms.ChoiceField(required=True,choices=nationalite_choices,
                                     widget=forms.Select(
                                         attrs={
                                             'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                                             'data-search': 'on', 'id': 'nationalite'}))
-    ethnie = forms.ChoiceField(choices=ethnic_groups,
-                               widget=forms.Select(
-                                   attrs={
-                                       'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-                                       'data-search': 'on', 'id': 'ethnie'}))
-    profession = forms.ChoiceField(choices=professions_choices, widget=forms.Select(
+    ethnie = forms.ChoiceField(required=False,choices=ethnic_groups, widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+               'data-search': 'on', 'id': 'ethnie'}))
+    profession = forms.ChoiceField(required=False,choices=professions_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'profession'}))
 
-    nbr_enfants = forms.IntegerField(widget=forms.NumberInput(
+    nbr_enfants = forms.IntegerField(required=False,widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg number-spinner', 'value': '0', 'type': 'number'}))
 
-    groupe_sanguin = forms.ChoiceField(choices=Goupe_sanguin_choices, widget=forms.Select(
+    groupe_sanguin = forms.ChoiceField(required=False,choices=Goupe_sanguin_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'groupe_sanguin'}))
-    niveau_etude = forms.ChoiceField(choices=school_level,
+    niveau_etude = forms.ChoiceField(required=False,choices=school_level,
                                      widget=forms.Select(
                                          attrs={'class': 'form-control  form-control-lg form-control-outlined',
                                                 'id': 'outlined', }))
-    employeur = forms.CharField(widget=forms.TextInput(
+    employeur = forms.CharField(required=False,widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
 
-    pays = CountryField().formfield(
+    pays = CountryField().formfield(required=False,
         initial="CI",  # Set the default to Côte d'Ivoire
         widget=forms.Select(
             attrs={
@@ -197,10 +195,10 @@ class PatientCreateForm(forms.ModelForm):
                 'data-search': 'on',
                 'id': 'pays'}))
 
-    commune = forms.ChoiceField(choices=communes_et_quartiers_choices, widget=forms.Select(
+    commune = forms.ChoiceField(required=False, choices=communes_et_quartiers_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'commune'}))
-    code_vih = forms.CharField(widget=forms.TextInput(
+    code_vih = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Code VIH', }))
 
     class Meta:
@@ -223,6 +221,22 @@ class PatientCreateForm(forms.ModelForm):
             raise ValidationError("Invalid phone number.")
         return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
 
+    def clean_date_naissance(self):
+        date_naissance = self.cleaned_data.get('date_naissance')
+        today = datetime.today().date()
+
+        # Calculate the maximum and minimum valid birth dates
+        min_date_naissance = today - timedelta(days=365.25)  # Approximately 1 year ago
+        max_date_naissance = today - timedelta(days=365.25 * 120)  # Approximately 120 years ago
+
+        # Check if the date is outside the allowed range
+        if date_naissance > min_date_naissance:
+            raise ValidationError("La date de naissance doit être supérieure à 1 an.")
+        elif date_naissance < max_date_naissance:
+            raise ValidationError("La date de naissance doit être inférieure à 120 ans.")
+
+        return date_naissance
+
 
 class AppointmentForm(forms.ModelForm):
     patient = forms.ModelChoiceField(queryset=Patient.objects.all(), widget=forms.Select(
@@ -242,8 +256,8 @@ class AppointmentForm(forms.ModelForm):
     time = forms.TimeField(label='Heure du rendez-vous', widget=forms.TimeInput(
         attrs={'class': 'form-control form-control-lg ', 'type': 'time'}))
 
-    reason = forms.ChoiceField( choices=MotifRendezVous, required=False, label='Objet', widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on' }))
+    reason = forms.ChoiceField(choices=MotifRendezVous, required=False, label='Objet', widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on'}))
 
     class Meta:
         model = Appointment

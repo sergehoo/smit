@@ -911,7 +911,7 @@ class RendezVousConsultationUpdateView(LoginRequiredMixin, UpdateView):
     form_class = AppointmentUpdateForm
     template_name = "pages/appointments/appointment_update.html"
     context_object_name = "rendezvousupdate"
-    success_url = reverse_lazy('rendezvous')
+    success_url = reverse_lazy('appointment_list')
 
 
 class SalleAttenteListView(LoginRequiredMixin, ListView):
