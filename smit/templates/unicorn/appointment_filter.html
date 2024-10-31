@@ -1,0 +1,74 @@
+<div>
+    <!-- Filter options -->
+    <div class="filter-options">
+        <input type="text" placeholder="Rechercher par nom" wire:model.debounce.500ms="search_query" />
+
+        <select wire:model="selected_status">
+            <option value="">Tous les statuts</option>
+            <option value="Scheduled">En attente</option>
+            <option value="Completed">Reçu</option>
+            <option value="Cancelled">Annulé</option>
+        </select>
+
+        <select wire:model="selected_service">
+            <option value="">Tous les services</option>
+            {% for service in services %}
+            <option value="{{ service.id }}">{{ service.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select wire:model="date_filter">
+            <option value="all">Toutes les dates</option>
+            <option value="past">Passé</option>
+            <option value="today">Aujourd'hui</option>
+            <option value="upcoming">À venir</option>
+        </select>
+    </div>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Contact</th>
+                <th>Date</th>
+                <th>Heure</th>
+                <th>Service</th>
+                <th>Médecin</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.patient.name }}</td>
+                <td>{{ appointment.patient.contact }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.time }}</td>
+                <td>{{ appointment.service.name }}</td>
+                <td>{{ appointment.doctor.name }}</td>
+                <td>{{ appointment.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+<div>
+    <!-- Filter options and table here -->
+
+    <!-- Pagination Controls -->
+    <div>
+        <button wire:click="change_order('asc')">Asc</button>
+        <button wire:click="change_order('desc')">Desc</button>
+
+        <select wire:model="per_page" wire:change="change_per_page">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+
+        <button wire:click="previous_page" {% if page_number <= 1 %}disabled{% endif %}>Précédent</button>
+        <button wire:click="next_page" {% if page_number >= total_pages %}disabled{% endif %}>Suivant</button>
+    </div>
+</div>

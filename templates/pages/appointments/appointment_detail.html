@@ -1,0 +1,156 @@
+{% extends 'layout/base.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+<!-- wrap @s -->
+<div class="nk-wrap ">
+    <!-- main header @s -->
+    <div class="nk-header nk-header-fixed is-light">
+        <div class="container-fluid">
+
+        </div><!-- .container-fliud -->
+    </div>
+    <!-- main header @e -->
+    <!-- content @s -->
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- Détails du Rendez-vous en Tête -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between g-3">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Rendez-vous / <strong class="text-primary small">{{ rendezvousdetails.patient.nom }} {{ rendezvousdetails.patient.prenoms }}</strong></h3>
+                        <div class="nk-block-des text-soft">
+                            <ul class="list-inline">
+                                <li>ID du Rendez-vous : <span class="text-base">{{ rendezvousdetails.id }}</span></li>
+                                <li>Prévu pour : <span class="text-base">{{ rendezvousdetails.date }} {{ rendezvousdetails.time }}</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <a href="{% url 'appointment_list' %}" class="btn btn-outline-light bg-white d-none d-sm-inline-flex"><em class="icon ni ni-arrow-left"></em><span>Retour</span></a>
+                    </div>
+                </div>
+            </div><!-- .nk-block-head -->
+
+            <!-- Informations du Rendez-vous -->
+            <div class="nk-block">
+                <div class="row gy-5">
+                    <div class="col-lg-5">
+                        <div class="nk-block-head">
+                            <div class="nk-block-head-content">
+                                <h5 class="nk-block-title title">Informations sur le Rendez-vous</h5>
+                                <p>Date de soumission, statut, et autres détails.</p>
+                            </div>
+                        </div><!-- .nk-block-head -->
+                        <div class="card card-bordered">
+                            <ul class="data-list is-compact">
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Patient</div>
+                                        <div class="data-value">{{ rendezvousdetails.patient.nom }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Service</div>
+                                        <div class="data-value">{{ rendezvousdetails.service.nom }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Médecin</div>
+                                        <div class="data-value">{{ rendezvousdetails.doctor.nom }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Date</div>
+                                        <div class="data-value">{{ rendezvousdetails.date }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Heure</div>
+                                        <div class="data-value">{{ rendezvousdetails.time }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Statut</div>
+                                        <div class="data-value">
+                                            <span class="badge badge-dim badge-sm badge-outline-{{ rendezvousdetails.get_status_display|lower }}">{{ rendezvousdetails.get_status_display }}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Créé par</div>
+                                        <div class="data-value">{{ rendezvousdetails.created_by.nom }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Créé le</div>
+                                        <div class="data-value">{{ rendezvousdetails.created_at }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Mis à jour le</div>
+                                        <div class="data-value">{{ rendezvousdetails.updated_at }}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div><!-- .card -->
+                    </div><!-- .col -->
+
+                    <!-- Informations du Patient et Autres Informations -->
+                    <div class="col-lg-7">
+                        <div class="nk-block-head">
+                            <div class="nk-block-head-content">
+                                <h5 class="nk-block-title title">Informations du Patient et Autres</h5>
+                                <p>Informations de base, comme le nom, le contact et l'adresse.</p>
+                            </div>
+                        </div>
+                        <div class="card card-bordered">
+                            <ul class="data-list is-compact">
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Raison de la Consultation</div>
+                                        <div class="data-value">{{ rendezvousdetails.reason }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Contact du Patient</div>
+                                        <div class="data-value">{{ rendezvousdetails.patient.contact }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Email du Patient</div>
+                                        <div class="data-value">{{ rendezvousdetails.patient.email }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Événement du Calendrier</div>
+{#                                        <div class="data-value">{{ rendezvousdetails.event.name if rendezvousdetails.event else "Non Assigné" }}</div>#}
+                                    </div>
+                                </li>
+                            </ul>
+                        </div><!-- .card -->
+                    </div><!-- .col -->
+                </div><!-- .row -->
+            </div><!-- .nk-block -->
+        </div>
+    </div>
+</div>
+    <!-- content @e -->
+
+</div>
+<!-- wrap @e -->
+
+{% endblock content %}

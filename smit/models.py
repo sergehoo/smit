@@ -332,8 +332,7 @@ class Consultation(models.Model):
     requested_at = models.DateTimeField(blank=True, null=True, )
     motifrejet = models.CharField(max_length=300, blank=True, null=True, )
     validated_at = models.DateTimeField(blank=True, null=True, )
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,
-                                   related_name='consultation_creator')
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,related_name='consultation_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

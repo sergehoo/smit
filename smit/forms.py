@@ -91,6 +91,42 @@ ethnic_groups = [
     ('Wini', 'Wini'),
     ('Wobè', 'Wobè')
 ]
+MotifRendezVous = [
+    ('Aucun', 'Aucun'),
+    ('Suivi médical', 'Suivi médical'),
+    ('Consultation de routine', 'Consultation de routine'),
+    ('Bilan de santé', 'Bilan de santé'),
+    ('Consultation spécialisée', 'Consultation spécialisée'),
+    ('Suivi postopératoire', 'Suivi postopératoire'),
+    ('Suivi prénatal', 'Suivi prénatal'),
+    ('Suivi postnatal', 'Suivi postnatal'),
+    ('Planification familiale', 'Planification familiale'),
+    ('Évaluation psychologique', 'Évaluation psychologique'),
+    ('Rééducation', 'Rééducation'),
+    ('Examen d’imagerie', 'Examen d’imagerie'),
+    ('Examen de laboratoire', 'Examen de laboratoire'),
+    ('Renouvellement d’ordonnance', 'Renouvellement d’ordonnance'),
+    ('Consultation nutritionnelle', 'Consultation nutritionnelle'),
+    ('Contrôle hypertension', 'Contrôle hypertension'),
+    ('Suivi maladies chroniques', 'Suivi maladies chroniques'),
+    ('Prévention et conseils santé', 'Prévention et conseils santé'),
+    ('Conseils en bien-être', 'Conseils en bien-être'),
+    ('Évaluation gériatrique', 'Évaluation gériatrique'),
+    ('Évaluation de fertilité', 'Évaluation de fertilité'),
+    ('Suivi pédiatrique', 'Suivi pédiatrique'),
+    ('Accompagnement social', 'Accompagnement social'),
+    ('Consultation pour douleur chronique', 'Consultation pour douleur chronique'),
+    ('Examen préventif', 'Examen préventif'),
+    ('Entretien de santé mentale', 'Entretien de santé mentale'),
+    ('Évaluation orthopédique', 'Évaluation orthopédique'),
+    ('Suivi orthopédique', 'Suivi orthopédique'),
+    ('Dépistage', 'Dépistage'),
+    ('Test allergologique', 'Test allergologique'),
+    ('Test fonction respiratoire', 'Test fonction respiratoire'),
+    ('Examen cardio-vasculaire', 'Examen cardio-vasculaire'),
+    ('Consultation pour réadaptation', 'Consultation pour réadaptation'),
+    ('Autre', 'Autre'),
+]
 
 
 class ConsultationForm(forms.ModelForm):
@@ -173,7 +209,7 @@ class PatientCreateForm(forms.ModelForm):
             'nom', 'prenoms', 'contact', 'situation_matrimoniale',
             'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
             'profession', 'nbr_enfants', 'groupe_sanguin', 'niveau_etude',
-            'employeur', 'commune','code_vih'
+            'employeur', 'commune', 'code_vih'
         ]
         widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
 
@@ -196,7 +232,7 @@ class AppointmentForm(forms.ModelForm):
         attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on',
                'id': 'service'}))
 
-    doctor = forms.ModelChoiceField(queryset=Employee.objects.all(), widget=forms.Select(
+    doctor = forms.ModelChoiceField(queryset=Employee.objects.all(), label='Docteur', widget=forms.Select(
         attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on',
                'id': 'outlined'}))
 
@@ -206,12 +242,42 @@ class AppointmentForm(forms.ModelForm):
     time = forms.TimeField(label='Heure du rendez-vous', widget=forms.TimeInput(
         attrs={'class': 'form-control form-control-lg ', 'type': 'time'}))
 
-    reason = forms.CharField(required=False, label='Objet', widget=forms.TextInput(
-        attrs={'class': 'form-control form-control-lg ', 'id': 'outlined', }))
+    reason = forms.ChoiceField( choices=MotifRendezVous, required=False, label='Objet', widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on' }))
 
     class Meta:
         model = Appointment
         fields = ['patient', 'service', 'doctor', 'date', 'time', 'reason']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+
+class AppointmentUpdateForm(forms.ModelForm):
+    # patient = forms.ModelChoiceField(queryset=Patient.objects.all(), widget=forms.Select(
+    #     attrs={'class': 'form-control form-control-xl select2 form-select ', 'data-search': 'on',
+    #            'id': 'patient'}))
+    service = forms.ModelChoiceField(queryset=Service.objects.all(), widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on',
+               'id': 'service'}))
+
+    doctor = forms.ModelChoiceField(queryset=Employee.objects.all(), label='Docteur', widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on',
+               'id': 'outlined'}))
+
+    date = forms.DateField(label='Date du rendez-vous', widget=forms.DateInput(
+        attrs={'class': 'form-control form-control-lg', 'data-date-format': 'dd/mm/yyyy'}))
+
+    time = forms.TimeField(label='Heure du rendez-vous', widget=forms.TimeInput(
+        attrs={'class': 'form-control form-control-lg ', 'type': 'time'}))
+
+    reason = forms.ChoiceField(choices=MotifRendezVous, required=False, label='Objet', widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg  select2 form-select ', 'data-search': 'on'}))
+
+    class Meta:
+        model = Appointment
+        fields = ['service', 'doctor', 'date', 'time', 'reason']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time': forms.TimeInput(attrs={'type': 'time'}),
@@ -235,26 +301,31 @@ class HospitalizationForm(forms.ModelForm):
 
 
 class ConstantesForm(forms.ModelForm):
-    tension_systolique = forms.IntegerField(required=True,widget=forms.NumberInput(
+    tension_systolique = forms.IntegerField(required=True, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '120 mmHg '}))
-    tension_diastolique = forms.IntegerField(required=True,widget=forms.NumberInput(
+    tension_diastolique = forms.IntegerField(required=True, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '80 mmHg'}))
-    frequence_cardiaque = forms.IntegerField(required=True,widget=forms.NumberInput(
+    frequence_cardiaque = forms.IntegerField(required=True, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '72 bpm'}))
-    frequence_respiratoire = forms.IntegerField(required=False,widget=forms.NumberInput(
+    frequence_respiratoire = forms.IntegerField(required=False, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '16'}))
     temperature = forms.FloatField(required=True,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '37.3'}))
-    saturation_oxygene = forms.IntegerField(required=False,widget=forms.NumberInput(
+                                   widget=forms.NumberInput(
+                                       attrs={'class': 'form-control form-control-lg ', 'placeholder': '37.3'}))
+    saturation_oxygene = forms.IntegerField(required=False, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg ', 'placeholder': '98% SpO2'}))
     glycemie = forms.FloatField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '5.8 mmol/L'}))
+                                widget=forms.NumberInput(
+                                    attrs={'class': 'form-control form-control-lg ', 'placeholder': '5.8 mmol/L'}))
     poids = forms.FloatField(required=True,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '70.0 kg'}))
+                             widget=forms.NumberInput(
+                                 attrs={'class': 'form-control form-control-lg ', 'placeholder': '70.0 kg'}))
     taille = forms.FloatField(required=True,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '175 cm'}))
+                              widget=forms.NumberInput(
+                                  attrs={'class': 'form-control form-control-lg ', 'placeholder': '175 cm'}))
     pouls = forms.FloatField(required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
+                             widget=forms.NumberInput(
+                                 attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
 
     # imc = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': 'glycemie'}))
 

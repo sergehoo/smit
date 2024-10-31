@@ -28,7 +28,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ActiviteListView, Constantes_create, hospitalisation_send_create, patient_list_view, \
     mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
-    delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView
+    delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
+    RendezVousConsultationUpdateView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -58,7 +59,9 @@ urlpatterns = [
                   path('salle_attente/', SalleAttenteListView.as_view(), name='attente'),
 
                   path('rendez-vous/', RendezVousListView.as_view(), name='appointment_list'),
-                  path('rendez-vous/<int:pk>', RendezVousDetailView.as_view(), name='appointment_detail'),
+                  path('rendez-vous/detail/<int:pk>', RendezVousDetailView.as_view(), name='appointment_detail'),
+                  path('rendez-vous/update/<int:pk>', RendezVousConsultationUpdateView.as_view(), name='appointment_update'),
+                  path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
 
                   # Consultation
                   path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
@@ -115,9 +118,9 @@ urlpatterns = [
 
                   # path('appointments/new/', views.appointment_create, name='appointment_create'),
 
-                  path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
+                  # path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
 
-                  path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
+
 
                   path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
                   path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),

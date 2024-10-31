@@ -1,12 +1,14 @@
 import datetime
 import os
 from datetime import date, timedelta
-
+from datetime import datetime
 import qrcode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Avg
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.http import request, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
@@ -27,7 +29,7 @@ from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
-    HospitalizationForm
+    HospitalizationForm, AppointmentUpdateForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen
 
@@ -38,6 +40,89 @@ class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
     # form_class = LoginForm
     template_name = "pages/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_year = datetime.now().year
+
+        # Monthly patient count for trend graph
+        monthly_patient_counts = (
+            Patient.objects.filter(created_at__year=current_year)
+            .annotate(month=ExtractMonth('created_at'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        monthly_counts = [0] * 12
+        for entry in monthly_patient_counts:
+            monthly_counts[entry['month'] - 1] = entry['count']
+
+        # Patient Statistics
+        total_patients = Patient.objects.count()
+        total_patients_femme = Patient.objects.filter(genre='Femme').count()
+        total_patients_homme = Patient.objects.filter(genre='Homme').count()
+        patient_status_counts = Patient.objects.values('status').annotate(count=Count('status'))
+        average_age = Patient.objects.annotate(age=(datetime.now().year - ExtractYear('date_naissance'))).aggregate(Avg('age'))
+
+        # Service Utilization
+        consultation_by_service = Consultation.objects.values('services__nom').annotate(count=Count('id'))
+        top_services = Service.objects.annotate(total_use=Count('consultations')).order_by('-total_use')[:5]
+        recent_consultations = Consultation.objects.select_related('patient', 'services', 'doctor').order_by(
+            '-consultation_date')[:10]
+
+        # Appointments Summary
+        total_scheduled_appointments = Appointment.objects.filter(status='Scheduled').count()
+        appointment_status_counts = Appointment.objects.values('status').annotate(count=Count('status'))
+        upcoming_appointments = Appointment.objects.filter(date__gte=datetime.now()).order_by('date')[:10]
+
+        # Hospitalizations Overview
+        current_hospitalizations = Hospitalization.objects.filter(discharge_date__isnull=True).count()
+        hospitalizations_by_reason = Hospitalization.objects.values('reason_for_admission').annotate(count=Count('id'))
+        recent_hospitalizations = Hospitalization.objects.select_related('patient', 'doctor').order_by(
+            '-admission_date')[:10]
+
+        # Monthly Trends
+        monthly_consultations = (
+            Consultation.objects.filter(consultation_date__year=current_year)
+            .annotate(month=ExtractMonth('consultation_date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        monthly_appointments = (
+            Appointment.objects.filter(date__year=current_year)
+            .annotate(month=ExtractMonth('date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        consultation_counts = [0] * 12
+        appointment_counts = [0] * 12
+        for entry in monthly_consultations:
+            consultation_counts[entry['month'] - 1] = entry['count']
+        for entry in monthly_appointments:
+            appointment_counts[entry['month'] - 1] = entry['count']
+
+        context.update({
+            "monthly_counts": monthly_counts,
+            "total_patients": total_patients,
+            "total_patients_femme": total_patients_femme,
+            "total_patients_homme": total_patients_homme,
+            "patient_status_counts": patient_status_counts,
+            "average_age": average_age['age__avg'],
+            "consultation_by_service": consultation_by_service,
+            "top_services": top_services,
+            "recent_consultations": recent_consultations,
+            "total_scheduled_appointments": total_scheduled_appointments,
+            "appointment_status_counts": appointment_status_counts,
+            "upcoming_appointments": upcoming_appointments,
+            "current_hospitalizations": current_hospitalizations,
+            "hospitalizations_by_reason": hospitalizations_by_reason,
+            "recent_hospitalizations": recent_hospitalizations,
+            "consultation_counts": consultation_counts,
+            "appointment_counts": appointment_counts,
+        })
+        return context
 
     # # Call the parent class's dispatch method for normal view processing.
     #     return super().dispatch(request, *args, **kwargs)
@@ -802,6 +887,16 @@ class RendezVousListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     ordering = ['-date']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        rdv = Appointment.objects.all().count()
+        rdv_pending = Appointment.objects.filter(status='Scheduled').count()
+
+        context['rdvnumber'] = rdv
+        context['rdvpending'] = rdv_pending
+        return context
+
 
 class RendezVousDetailView(LoginRequiredMixin, DetailView):
     model = Appointment
@@ -809,6 +904,14 @@ class RendezVousDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "rendezvousdetails"
     paginate_by = 10
     ordering = ['-id']
+
+
+class RendezVousConsultationUpdateView(LoginRequiredMixin, UpdateView):
+    model = Appointment
+    form_class = AppointmentUpdateForm
+    template_name = "pages/appointments/appointment_update.html"
+    context_object_name = "rendezvousupdate"
+    success_url = reverse_lazy('rendezvousdetails')
 
 
 class SalleAttenteListView(LoginRequiredMixin, ListView):
@@ -949,7 +1052,7 @@ class ServiceContentDetailView(LoginRequiredMixin, DetailView):
 #         serv = self.kwargs['serv']
 #         acty = self.kwargs['acty']
 #         return [template_map.get((serv, acty), 'pages/services/servicecontent_detail.html')]
-class ActiviteListView(ListView):
+class ActiviteListView(LoginRequiredMixin, ListView):
     context_object_name = 'activities'
     ordering = ['created_at']
     paginate_by = 10
@@ -1010,7 +1113,7 @@ class ConstanteUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('attente')
 
 
-class ConsultationListView(ListView):
+class ConsultationListView(LoginRequiredMixin, ListView):
     model = Consultation
     template_name = 'consultations/consultation_list.html'  # Chemin vers votre template
     context_object_name = 'consultations'
@@ -1018,13 +1121,13 @@ class ConsultationListView(ListView):
     paginate_by = 10
 
 
-class ConsultationDetailView(DetailView):
+class ConsultationDetailView(LoginRequiredMixin, DetailView):
     model = Consultation
     template_name = 'consultations/consultation_detail.html'
     context_object_name = 'consultation'
 
 
-class ConsultationUpdateView(UpdateView):
+class ConsultationUpdateView(LoginRequiredMixin, UpdateView):
     model = Consultation
     form_class = ConsultationForm
     template_name = 'consultations/consultation_form.html'
@@ -1033,7 +1136,7 @@ class ConsultationUpdateView(UpdateView):
         return reverse_lazy('consultation_detail', kwargs={'pk': self.object.pk})
 
 
-class ConsultationDeleteView(DeleteView):
+class ConsultationDeleteView(LoginRequiredMixin, DeleteView):
     model = Consultation
     template_name = 'consultations/consultation_confirm_delete.html'
     success_url = reverse_lazy('consultation_list')

@@ -1,4 +1,6 @@
 {% extends 'layout/base.html' %}
+{% load unicorn %}
+{% unicorn 'appointment_filter' %}
 {% load humanize %}
 {% load static %}
 {% block content %}
@@ -10,7 +12,7 @@
                                     <div class="nk-block-head-content">
                                         <h3 class="nk-block-title page-title"> Liste des Rendez-vous </h3>
                                         <div class="nk-block-des text-soft">
-                                            <p>You have total 2,595 users.</p>
+                                            <p><span class="badge badge-outline-danger">{{ rdvpending }}</span> en attente sur <span class="badge badge-outline-dark"> {{ rdvnumber }}</span>   Rendez-vous</p>
                                         </div>
                                     </div><!-- .nk-block-head-content -->
                                     <div class="nk-block-head-content">
@@ -24,9 +26,10 @@
                                                             <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
                                                             <div class="dropdown-menu dropdown-menu-right">
                                                                 <ul class="link-list-opt no-bdr">
-                                                                    <li><a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a></li>
+
                                                                     <li><a href="{% url 'appointment_create' %}"><span>Rendez-vous</span></a></li>
-                                                                    <li><a href="#"><span>Consultation</span></a></li>
+                                                                    <li><a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a></li>
+
                                                                 </ul>
                                                             </div>
                                                         </div>
@@ -37,24 +40,25 @@
                                     </div><!-- .nk-block-head-content -->
                                 </div><!-- .nk-block-between -->
                             </div><!-- .nk-block-head -->
+
                             <div class="nk-block">
                                 <div class="card card-bordered card-stretch">
                                     <div class="card-inner-group">
+
                                         <div class="card-inner position-relative card-tools-toggle">
                                             <div class="card-title-group">
                                                 <div class="card-tools">
                                                     <div class="form-inline flex-nowrap gx-3">
                                                         <div class="form-wrap w-150px">
-                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Bulk Action">
-                                                                <option value="">Bulk Action</option>
-                                                                <option value="email">Send Email</option>
-                                                                <option value="group">Change Group</option>
-                                                                <option value="suspend">Suspend User</option>
-                                                                <option value="delete">Delete User</option>
+                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Filtrer">
+
+                                                                <option value="group">EN ATTENTE</option>
+                                                                <option value="email">ANNULER</option>
+                                                                <option value="group">RECU</option>
                                                             </select>
                                                         </div>
                                                         <div class="btn-wrap">
-                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
+                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light ">Filtrer</button></span>
                                                             <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
                                                         </div>
                                                     </div><!-- .form-inline -->
@@ -81,7 +85,7 @@
                                                                                 </a>
                                                                                 <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
                                                                                     <div class="dropdown-head">
-                                                                                        <span class="sub-title dropdown-title">Filter Users</span>
+                                                                                        <span class="sub-title dropdown-title">Filter</span>
                                                                                         <div class="dropdown">
                                                                                             <a href="#" class="btn btn-sm btn-icon">
                                                                                                 <em class="icon ni ni-more-h"></em>
@@ -93,7 +97,7 @@
                                                                                             <div class="col-6">
                                                                                                 <div class="custom-control custom-control-sm custom-checkbox">
                                                                                                     <input type="checkbox" class="custom-control-input" id="hasBalance">
-                                                                                                    <label class="custom-control-label" for="hasBalance"> Have Balance</label>
+                                                                                                    <label class="custom-control-label" for="hasBalance">Service</label>
                                                                                                 </div>
                                                                                             </div>
                                                                                             <div class="col-6">
@@ -104,24 +108,23 @@
                                                                                             </div>
                                                                                             <div class="col-6">
                                                                                                 <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Role</label>
+                                                                                                    <label class="overline-title overline-title-alt">Service</label>
                                                                                                     <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Role</option>
-                                                                                                        <option value="investor">Investor</option>
-                                                                                                        <option value="seller">Seller</option>
-                                                                                                        <option value="buyer">Buyer</option>
+                                                                                                        <option value="any">1</option>
+                                                                                                        <option value="investor">2</option>
+                                                                                                        <option value="seller">3</option>
+                                                                                                        <option value="buyer">4</option>
                                                                                                     </select>
                                                                                                 </div>
                                                                                             </div>
                                                                                             <div class="col-6">
                                                                                                 <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Status</label>
+                                                                                                    <label class="overline-title overline-title-alt">Date</label>
                                                                                                     <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Status</option>
-                                                                                                        <option value="active">Active</option>
-                                                                                                        <option value="pending">Pending</option>
-                                                                                                        <option value="suspend">Suspend</option>
-                                                                                                        <option value="deleted">Deleted</option>
+                                                                                                        <option value="any">Passé</option>
+                                                                                                        <option value="active">Aujourdhui</option>
+                                                                                                        <option value="pending">a venir</option>
+                                                                                                     
                                                                                                     </select>
                                                                                                 </div>
                                                                                             </div>
@@ -170,25 +173,27 @@
                                                 <div class="card-body">
                                                     <div class="search-content">
                                                         <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
+                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Recherche par nom">
                                                         <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
                                                     </div>
                                                 </div>
                                             </div><!-- .card-search -->
                                         </div><!-- .card-inner -->
+
+
                                         <div class="card-inner p-0">
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
-                                                    
+
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
                                                      <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Heure</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Service</span></div>
                                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Medecin</span></div>
-                                                   
+
                                                     <div class="nk-tb-col"><span class="sub-text">Status</span></div>
-                                                    
+
                                                     <div class="nk-tb-col nk-tb-col-tools text-right">
                                                         <div class="dropdown">
                                                             <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
@@ -228,7 +233,7 @@
                                                     <div class="nk-tb-col tb-col-md">
                                                         <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
                                                     </div>
-                                                    
+
                                                     <div class="nk-tb-col tb-col-lg">
                                                         <ul class="list-status">
                                                             <li><span><i class="fa-solid fa-phone"></i>{{ patient.patient.contact }}</span></li>
@@ -250,8 +255,8 @@
                                                     <div class="nk-tb-col tb-col-lg">
                                                         <span><i class="fa-solid fa-user-doctor"></i>{{ patient.doctor }}</span>
                                                     </div>
-                                                    
-                                                   
+
+
                                                     <div class="nk-tb-col">
                                                         {% if patient.status == 'Scheduled'%}
                                                         <span class="tb-status badge badge-dark">En attente</span>
@@ -269,32 +274,19 @@ Cancelled
                                                     </div>
                                                     <div class="nk-tb-col nk-tb-col-tools">
                                                         <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Wallet">
-                                                                    <em class="icon ni ni-wallet-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Send Email">
-                                                                    <em class="icon ni ni-mail-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Suspend">
-                                                                    <em class="icon ni ni-user-cross-fill"></em>
-                                                                </a>
-                                                            </li>
+
                                                             <li>
                                                                 <div class="drodown">
                                                                     <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                                     <div class="dropdown-menu dropdown-menu-right">
                                                                         <ul class="link-list-opt no-bdr">
-                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
+                                                                            <li><a href="{% url 'appointment_detail' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Detail</span></a></li>
+                                                                            <li><a href="{% url 'appointment_update' patient.pk %}"><em class="icon ni ni-shield-star"></em><span>Modifier</span></a></li>
+
                                                                             <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-na"></em><span>Suspend User</span></a></li>
+                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
+
+
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -314,7 +306,7 @@ Cancelled
                                                 {% else %}
                                                     <li class="page-item disabled"><span class="page-link">Prev</span></li>
                                                 {% endif %}
-                                                
+
                                                 {% for num in page_obj.paginator.page_range %}
                                                     {% if page_obj.number == num %}
                                                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -322,7 +314,7 @@ Cancelled
                                                         <li class="page-item"><a class="page-link" href="rendez-vous/?page={{ num }}">{{ num }}</a></li>
                                                     {% endif %}
                                                 {% endfor %}
-                                                
+
                                                 {% if page_obj.has_next %}
                                                     <li class="page-item"><a class="page-link" href="rendez-vous/?page={{ page_obj.next_page_number }}">Next</a></li>
                                                 {% else %}
@@ -332,7 +324,9 @@ Cancelled
                                         </div><!-- .card-inner -->
                                     </div><!-- .card-inner-group -->
                                 </div><!-- .card -->
-                            </div><!-- .nk-block -->
+                            </div>
+
+                            <!-- .nk-block -->
                         </div>
                     </div>
                 </div>
