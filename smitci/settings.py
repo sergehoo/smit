@@ -158,27 +158,27 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #     }
 # }
 # local one
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': 'smitci',
-#         'USER': 'postgres',
-#         'PASSWORD': 'weddingLIFE18',
-#         'HOST': 'localhost',
-#         'PORT': '5433',
-#     }
-# }
-# prod
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'smitci',
+        'USER': 'postgres',
+        'PASSWORD': 'weddingLIFE18',
+        'HOST': 'localhost',
+        'PORT': '5433',
     }
 }
+# prod
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
+#         'NAME': os.environ.get('DATABASE_NAME'),
+#         'USER': os.environ.get('DATABASE_USER'),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_HOST'),
+#         'PORT': os.environ.get('DATABASE_PORT'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -215,8 +215,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 #gdal-config --libs >---commande linux ou mac os
 
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 LANGUAGES = [
     ('fr', 'Français'),
     ('en', 'English'),

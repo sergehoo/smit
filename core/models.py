@@ -954,8 +954,9 @@ class Patient(models.Model):
         # Use a transaction to ensure atomicity and uniqueness
         with transaction.atomic():
             # Lock the table to prevent race conditions
-            latest_patient = Patient.objects.select_for_update().filter(code_vih__startswith=current_year_short
-                                                                        ).aggregate(Max('code_vih'))['code_vih__max']
+            latest_patient = Patient.objects.select_for_update().filter(
+                code_vih__startswith=current_year_short
+            ).aggregate(Max('code_vih'))['code_vih__max']
 
             if latest_patient:
                 # Extract the numeric part and increment it
@@ -966,9 +967,33 @@ class Patient(models.Model):
                 new_number = 1
 
             # Format the new number with leading zeros
-            new_code = f"{current_year_short}-{new_number:04d}"
+            random_digits = random.randint(100000, 999999)
+            new_code = f"{current_year_short}-{random_digits}"
 
         return new_code
+
+    # def get_incremental_code(self) -> str:
+    #     current_year = datetime.date.today().year
+    #     current_year_short = str(current_year)[2:]
+    #
+    #     # Use a transaction to ensure atomicity and uniqueness
+    #     with transaction.atomic():
+    #         # Lock the table to prevent race conditions
+    #         latest_patient = Patient.objects.select_for_update().filter(code_vih__startswith=current_year_short
+    #                                                                     ).aggregate(Max('code_vih'))['code_vih__max']
+    #
+    #         if latest_patient:
+    #             # Extract the numeric part and increment it
+    #             latest_number = int(latest_patient.split('-')[1])
+    #             new_number = latest_number + 1
+    #         else:
+    #             # If no patient for the current year, start with 1
+    #             new_number = 1
+    #
+    #         # Format the new number with leading zeros
+    #         new_code = f"{current_year_short}-{new_number:06d}"
+    #
+    #     return new_code
 
     # Optionally, you can also use signals to handle the avatar generation
     # @receiver(post_save, sender=Patient)
