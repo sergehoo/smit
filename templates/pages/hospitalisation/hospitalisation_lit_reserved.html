@@ -1,0 +1,20 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+                <div class="nk-content nk-content-fluid">
+
+      <div class="container mt-4">
+    <h2>Reservation du lit : <br> <span class="text-primary"> {{ bed.nom  }} {{ bed.box.nom  }} {{ bed.box.chambre.nom  }} {{ bed.box.chambre.unite.nom  }} </span> pour Hospitalisation</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Affecter le Patient</button>
+        <a href="{% url 'hospitalisation' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+                </div>
+
+
+{% endblock %}

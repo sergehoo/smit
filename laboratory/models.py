@@ -2,7 +2,6 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from core.models import Employee, Patient
-from smit.models import Examen, Consultation
 
 
 class CathegorieEchantillon(models.Model):
@@ -24,6 +23,7 @@ class TypeEchantillon(models.Model):
 
 
 class Echantillon(models.Model):
+    from smit.models import Examen, Consultation
     code_echantillon = models.CharField(null=True, blank=True, max_length=10)
     examen_demande = models.ForeignKey(Examen, null=True, blank=True, on_delete=models.CASCADE, related_name='examen_demandee')
     type = models.ForeignKey('TypeEchantillon', null=True, blank=True, on_delete=models.CASCADE)

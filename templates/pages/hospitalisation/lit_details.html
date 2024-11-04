@@ -1,0 +1,159 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+                <div class="nk-content nk-content-fluid">
+
+{#<div class="container mt-4">#}
+{#    <h2>Détails du Lit</h2>#}
+{#    <p><strong>Nom du Lit:</strong> {{ litdetail.nom }}</p>#}
+{#    <p><strong>Chambre:</strong> {{ litdetail.box.chambre }}</p>#}
+{#    <p><strong>Unité:</strong> {{ litdetail.box.chambre.unite }}</p>#}
+{#    <p><strong>Occuper:</strong> {% if litdetail.occuper %} Oui {% else %} Non {% endif %}</p>#}
+{#    <p><strong>En Réparation:</strong> {% if litdetail.is_out_of_service %} Oui {% else %} Non {% endif %}</p>#}
+{#    <p><strong>En Nettoyage:</strong> {% if litdetail.is_cleaning %} Oui {% else %} Non {% endif %}</p>#}
+{##}
+{#    {% if hospitalization %}#}
+{#        <h3>Détails de l'Hospitalisation</h3>#}
+{#        <p><strong>Date d'Admission:</strong> {{ hospitalization.admission_date }}</p>#}
+{#        <p><strong>Motif de l'Admission:</strong> {{ hospitalization.reason_for_admission }}</p>#}
+{#        <p><strong>Médecin:</strong> {{ hospitalization.doctor.get_full_name }}</p>#}
+{#        <p><strong>Statut:</strong> {{ hospitalization.get_status_display }}</p>#}
+{##}
+{#        <h3>Détails du Patient</h3>#}
+{#        <p><strong>Nom:</strong> {{ patient.nom }}</p>#}
+{#        <p><strong>Prénoms:</strong> {{ patient.prenoms }}</p>#}
+{#        <p><strong>Date de Naissance:</strong> {{ patient.date_naissance }}</p>#}
+{#        <p><strong>Contact:</strong> {{ patient.contact }}</p>#}
+{#    {% else %}#}
+{#        <p>Ce lit n'est pas actuellement occupé.</p>#}
+{#    {% endif %}#}
+{#</div>#}
+
+                <div class="nk-wrap">
+    <!-- main header @s -->
+    <!-- main header @e -->
+
+    <!-- content @s -->
+    <div class="nk-content nk-content-fluid">
+        <div class="container-xl wide-lg">
+            <div class="nk-content-body">
+                <div class="nk-block-head nk-block-head-sm">
+                    <div class="nk-block-between g-3">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title">Détails du Lit / <strong class="text-primary small">{{ litdetail.nom }}</strong></h3>
+                            <div class="nk-block-des text-soft">
+                                <ul class="list-inline">
+                                    <li>Chambre: <span class="text-base">{{ litdetail.box.chambre }}</span></li>
+                                    <li>Unité: <span class="text-base">{{ litdetail.box.chambre.unite }}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="nk-block-head-content">
+                            <a href="{% url 'hospi_unites' %}" class="btn btn-outline-light bg-white d-none d-sm-inline-flex">
+                                <em class="icon ni ni-arrow-left"></em><span>Retour</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nk-block">
+                    <div class="row gy-5">
+                        <div class="col-lg-5">
+                            <div class="nk-block-head">
+                                <div class="nk-block-head-content">
+                                    <h5 class="nk-block-title title">Informations du Lit</h5>
+                                    <p>Détails de l'occupation, statut, etc.</p>
+                                </div>
+                            </div>
+                            <div class="card card-bordered">
+                                <ul class="data-list is-compact">
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Occupé</div>
+                                            <div class="data-value">{% if litdetail.occuper %} Oui {% else %} Non {% endif %}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">En Réparation</div>
+                                            <div class="data-value">{% if litdetail.is_out_of_service %} Oui {% else %} Non {% endif %}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">En Nettoyage</div>
+                                            <div class="data-value">{% if litdetail.is_cleaning %} Oui {% else %} Non {% endif %}</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {% if hospitalization %}
+                        <div class="col-lg-7">
+                            <div class="nk-block-head">
+                                <div class="nk-block-head-content">
+                                    <h5 class="nk-block-title title">Détails de l'Hospitalisation</h5>
+                                    <p>Informations sur l'hospitalisation actuelle. </p>
+                                </div>
+                            </div>
+                            <div class="card card-bordered">
+                                <ul class="data-list is-compact">
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Patient</div>
+                                            <div class="data-value">{{ patient.nom }} {{ patient.prenoms }}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Médecin</div>
+                                            <div class="data-value">{{ hospitalization.doctor.get_full_name }}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Date d'Admission</div>
+                                            <div class="data-value">{{ hospitalization.admission_date|date:"d M, Y H:i" }}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Raison d'Admission</div>
+                                            <div class="data-value">{{ hospitalization.reason_for_admission }}</div>
+                                        </div>
+                                    </li>
+                                    <li class="data-item">
+                                        <div class="data-col">
+                                            <div class="data-label">Statut</div>
+                                            <div class="data-value">{{ hospitalization.get_status_display }}</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- content @e -->
+
+    <!-- footer @s -->
+    <div class="nk-footer">
+        <div class="container-fluid">
+            <div class="nk-footer-wrap">
+                <div class="nk-footer-copyright"> &copy; {{ now|date:"Y" }} DashLite. Template by <a href="https://softnio.com" target="_blank">Softnio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- footer @e -->
+</div>
+                </div>
+
+
+{% endblock %}

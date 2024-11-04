@@ -226,7 +226,7 @@ def consultation_send_create(request, patient_id, rdv_id):
     }
     return redirect('attente')
 
-
+@login_required
 def create_consultation_pdf(request, patient_id, consultation_id):
     # Récupérer la consultation et l'enquête VIH associée
     consultation = get_object_or_404(Consultation, id=consultation_id)
@@ -402,18 +402,6 @@ def hospitalisation_send_create(request, consultations_id, patient_id):
     return redirect('hospitalisation')
 
 
-# @login_required
-# def mark_consultation_as_hospitalised(request, consultation_id, patient_id):
-#     consultation = get_object_or_404(Consultation, pk=consultation_id)
-#     consultation.hospitalised = 1
-#     consultation.requested_at = date.today()
-#     consultation.save()
-#     messages.success(request, 'La demandena ete transmise avec succes!')
-#
-#     # Rediriger vers une vue appropriée après la mise à jour
-#     # Par exemple, rediriger vers la page des détails du patient ou une liste de consultations
-#     return redirect('detail_consultation', pk=consultation.pk)
-#
 @login_required
 def mark_consultation_as_hospitalised(request, consultation_id, patient_id):
     consultation = get_object_or_404(Consultation, pk=consultation_id)
@@ -522,18 +510,6 @@ def consultation_delete(request, consultation_id):
     return redirect('consultation_list')
 
 
-# @login_required
-# def consultation_delete(request, consultation_id):
-#     consultation = get_object_or_404(Consultation, id=consultation_id)
-#     if request.method == 'POST':
-#         consultation.delete()
-#         messages.success(request, 'Consultation supprimée avec succès!')
-#         return redirect('consultation_list')
-#
-#     # Ajouter une page de confirmation pour la suppression
-#     return redirect('consultation_list')
-
-
 @login_required
 def Antecedents_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
@@ -577,25 +553,6 @@ def enquete_create(request, consultation_id):
 
     return redirect('detail_consultation', pk=consultation.id)
 
-
-# def enquete_create(request, consultation_id):
-#     consultation = get_object_or_404(Consultation, id=consultation_id)
-#     if request.method == 'POST':
-#         form = EnqueteVihForm(request.POST)
-#         if form.is_valid():
-#             enquete = form.save(commit=False)
-#             enquete.patient = consultation.patient
-#             enquete.consultation = consultation
-#             enquete.save()
-#             messages.success(request, 'Enquête VIH créée avec succès!')
-#
-#             return redirect('detail_consultation', pk=consultation.id)
-#         else:
-#             messages.error(request, 'Erreur lors de la création de l\'Enquête.')
-#     else:
-#         form = AntecedentsMedicauxForm()
-#     return redirect('detail_consultation', pk=consultation.id)
-#
 
 @login_required
 def Allergies_create(request, consultation_id):
@@ -692,25 +649,6 @@ def Protocoles_create(request, consultation_id):
     return redirect('detail_consultation', pk=consultation.id)
 
 
-# @login_required
-# def create_appointment(request, patient_id):
-#     patient = get_object_or_404(Patient, id=patient_id)
-#     if request.method == 'POST':
-#         form = AppointmentForm(request.POST)
-#         if form.is_valid():
-#             calendar = Calendar.objects.get(name='appointments')
-#             event = Event.objects.create(
-#                 title='Appointment with {}'.format(patient.nom),
-#                 start=form.cleaned_data['start'],
-#                 end=form.cleaned_data['end'],
-#                 calendar=calendar
-#             )
-#             Appointment.objects.create(patient=patient, calendar=calendar, event=event, notes=form.cleaned_data['notes'])
-#             return redirect('appointment_list')
-#     else:
-#         form = AppointmentForm()
-#     return render(request, 'create_appointment.html', {'form': form, 'patient': patient})
-
 @login_required
 def Constantes_create(request, patient_id):
     patient = get_object_or_404(Patient, id=patient_id)
@@ -732,24 +670,7 @@ def Constantes_create(request, patient_id):
     return render(request, 'pages/constantes/constntes_form.html', {'form': form, 'patient': patient})
 
 
-# class ConstanteCreateView(LoginRequiredMixin, CreateView):
-#     model = Constante
-#     form_class = ConstantesForm
-#     template_name = "pages/constantes/constntes_form.html"
-#     success_url = reverse_lazy('attente')
-#
-#     def get_initial(self):
-#         patient_id = self.kwargs['patient_id']
-#         patient = get_object_or_404(Patient, id=patient_id)
-#         return {'patient': patient}
-#
-#     def form_valid(self, form):
-#         patient_id = self.kwargs['patient_id']
-#         patient = get_object_or_404(Patient, id=patient_id)
-#         form.instance.patient = patient
-#         form.instance.created_by = request.user.employee
-#         return super().form_valid(form)
-
+@login_required
 def patient_list_view(request):
     return render(request, 'pages/patient_list_view.html')
 
@@ -1147,7 +1068,7 @@ class ConsultationSidaListView(LoginRequiredMixin, ListView):
     template_name = "pages/services/consultation_VIH.html"
     context_object_name = "consultations_vih"
 
-
+@login_required
 def test_rapide_vih_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
     if request.method == 'POST':
@@ -1167,7 +1088,7 @@ def test_rapide_vih_create(request, consultation_id):
         messages.error(request, 'Le test a echoué!')
     return redirect('detail_consultation', pk=consultation.id)
 
-
+@login_required
 def delete_test_rapide_vih(request, test_id, consultation_id):
     # Récupérer l'objet TestRapideVIH avec l'id fourni
     test_rapide = get_object_or_404(TestRapideVIH, id=test_id)
@@ -1180,7 +1101,7 @@ def delete_test_rapide_vih(request, test_id, consultation_id):
     # Redirection après suppression (à personnaliser selon vos besoins)
     return redirect('detail_consultation', pk=consultation.id)
 
-
+@login_required
 def delete_examen(request, examen_id, consultation_id):
     # Récupérer l'objet TestRapideVIH avec l'id fourni
     examen = get_object_or_404(Examen, id=examen_id)
@@ -1204,7 +1125,7 @@ def delete_examen(request, examen_id, consultation_id):
 #     else:
 #         form = TestRapideVIHForm(instance=test)
 #     return render(request, 'test_rapide_vih_form.html', {'form': form})
-
+@login_required
 def create_recurrent_appointments(rdv):
     """Génère des rendez-vous récurrents basés sur les paramètres de récurrence"""
     current_date = rdv.date

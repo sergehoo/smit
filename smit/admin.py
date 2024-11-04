@@ -9,7 +9,8 @@ from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     ServiceSubActivity, Consultation, EtapeProtocole, Protocole, Evaluation, Molecule, Allergies, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
-    Suivi
+    Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
+    ComplicationsIndicators
 
 
 # Register your models here.
@@ -107,12 +108,39 @@ class ExamenAdmin(admin.ModelAdmin):
 
 @admin.register(Hospitalization)
 class HospitalizationAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'patient']
 
 
 @admin.register(Medicament)
 class MedicamentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['nom', 'dosage_form', 'dosage', 'unitdosage', 'fournisseur', 'categorie']
+    # list_editable = ['dosage']
+    # list_display_links = ['fournisseur']
+
+
+@admin.register(Prescription)
+class PrescriptionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'patient', 'medication']
+
+
+@admin.register(ComplicationsIndicators)
+class ComplicationsIndicatorsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'hospitalisation']
+
+
+@admin.register(IndicateurBiologique)
+class IndicateurBiologiqueAdmin(admin.ModelAdmin):
+    list_display = ['id', 'hospitalisation']
+
+
+@admin.register(IndicateurFonctionnel)
+class IndicateurFonctionnelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'hospitalisation']
+
+
+@admin.register(IndicateurSubjectif)
+class IndicateurSubjectifAdmin(admin.ModelAdmin):
+    list_display = ['id', 'hospitalisation']
 
 
 @admin.register(Suivi)

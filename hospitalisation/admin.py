@@ -57,7 +57,10 @@ class ChambreHospitalisation(admin.ModelAdmin):
 
 @admin.register(LitHospitalisation)
 class LitHospitalisation(admin.ModelAdmin):
-    list_display = (['nom', 'box', 'occuper', 'occupant'])
+    list_display = (['nom', 'box', 'occuper', 'occupant', 'reserved',
+                     'is_out_of_service',
+                     'is_cleaning',
+                     'status_changed_at'])
 
 
 @admin.register(SigneFonctionnel)

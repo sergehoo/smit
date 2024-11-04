@@ -6,6 +6,47 @@ from schedule.models import Calendar, Event
 
 from core.models import Patient, Service, Employee
 
+FORME_MEDICAMENT_CHOICES = [
+    ('Comprimé', 'Comprimé'),
+    ('Sirop', 'Sirop'),
+    ('Injection', 'Injection'),
+    ('Gélule', 'Gélule'),
+    ('Crème', 'Crème'),
+    ('Pommade', 'Pommade'),
+    ('Suppositoire', 'Suppositoire'),
+    ('Gouttes', 'Gouttes'),
+    ('Patch', 'Patch'),
+    ('Inhalateur', 'Inhalateur'),
+    ('Solution', 'Solution'),
+    ('Suspension', 'Suspension'),
+    ('Poudre', 'Poudre'),
+    ('Spray', 'Spray'),
+    ('Ovule', 'Ovule'),
+    ('Collyre', 'Collyre'),  # pour les yeux
+    ('Aérosol', 'Aérosol'),
+    ('Élixir', 'Élixir'),
+    ('Baume', 'Baume'),
+    ('Granulé', 'Granulé'),
+    ('Capsule', 'Capsule'),
+]
+
+UNITE_DOSAGE_CHOICES = [
+    ('mg', 'Milligramme (mg)'),
+    ('g', 'Gramme (g)'),
+    ('ml', 'Millilitre (ml)'),
+    ('L', 'Litre (L)'),
+    ('mcg', 'Microgramme (mcg)'),
+    ('UI', 'Unité Internationale (UI)'),
+    ('meq', 'Milliequivalent (mEq)'),
+    ('µL', 'Microlitre (µL)'),
+    ('µg', 'Microgramme (µg)'),
+    ('cm³', 'Centimètre Cube (cm³)'),
+    ('mL/kg', 'Millilitre par kilogramme (mL/kg)'),
+    ('mg/m²', 'Milligramme par mètre carré (mg/m²)'),
+    ('mg/kg', 'Milligramme par kilogramme (mg/kg)'),
+    ('g/L', 'Gramme par litre (g/L)'),
+]
+
 
 class CathegorieMolecule(models.Model):
     nom = models.CharField(max_length=255, null=True, blank=True)
@@ -32,18 +73,21 @@ def generate_unique_code_barre():
 class Medicament(models.Model):
     codebarre = models.CharField(max_length=150, unique=True, default=generate_unique_code_barre,
                                  help_text="Code unique pour le médicament")  # Pour l'identification par code-barre
-    nom = models.CharField(max_length=255, null=True, blank=True,)
-    dosage = models.CharField(max_length=50, null=True, blank=True, help_text="Ex: 500mg, 20mg/ml")
-    description = models.TextField( null=True, blank=True,)
-    stock = models.PositiveIntegerField( null=True, blank=True,)
-    date_expiration = models.DateField( null=True, blank=True,)
+    nom = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    dosage = models.IntegerField(null=True, blank=True)
+    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,
+                                  help_text="Ex: 500mg, 20mg/ml")
+    dosage_form = models.CharField(max_length=50, choices=FORME_MEDICAMENT_CHOICES, null=True, blank=True)
+    description = models.TextField(null=True, blank=True, )
+    stock = models.PositiveIntegerField(null=True, blank=True, )
+    date_expiration = models.DateField(null=True, blank=True, )
     categorie = models.ForeignKey(CathegorieMolecule, on_delete=models.SET_NULL, null=True, blank=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.SET_NULL, null=True, blank=True)
     molecules = models.ManyToManyField(Molecule)
     miniature = models.ImageField(upload_to="pharmacy/miniature", null=True, blank=True)
 
     def __str__(self):
-        return f'{self.nom}--{self.categorie}--{self.fournisseur}'
+        return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
 
 
 class MouvementStock(models.Model):
@@ -127,3 +171,7 @@ class Fournisseur(models.Model):
     adresse = models.TextField()
     contact = models.CharField(max_length=255)
     email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.nom}"
+

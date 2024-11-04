@@ -165,8 +165,8 @@
                                             <div id="accordion" class="accordion">
                                                 {% for hospi in unites.all %}
                                                     <div class="accordion-item">
-                                                        <a href="#" class="accordion-head" data-toggle="collapse" data-target="#accordion-item-1-{{  hospi.id }}">
-                                                            <h6 class="title">{{  hospi.nom }}</h6>
+                                                        <a href="#" class="accordion-head bg-dark" data-toggle="collapse" data-target="#accordion-item-1-{{  hospi.id }}">
+                                                            <h6 class="title text-white">{{  hospi.nom }}</h6>
                                                             <span class="accordion-icon"></span>
                                                         </a>
                                                         <div class="accordion-body collapse show" id="accordion-item-1-{{  hospi.id }}" data-parent="#accordion">
@@ -174,40 +174,193 @@
 
                                                                 <div class="row p-10">
                                                                     {% for chambre in hospi.chambres.all %}
-                                                                        <div class="col-lg-4 pl-5 pr-5">
-                                                                            <div class="row flex-lg-column">
-                                                                                <div class="row flex-lg-column text-center">{{  chambre.nom }}</div>
+                                                                        <div class="col-lg-4 pl-5 pr-5 bg-dark-dim card-bordered ml-5">
+                                                                            <div class="row flex-lg-column ">
+                                                                                <div class="row flex-lg-column text-center ">{{ chambre.nom }}</div>
                                                                                 {% for box in chambre.boxes.all %}
-                                                                                    <div class="row mt-3">
+                                                                                    <div class="row mt-5 card-bordered border-white ">
                                                                                         <div class="card-inner border">
                                                                                             <h6>{{ box.nom }}</h6>
 
                                                                                             <div class="d-flex flex-wrap example-border">
                                                                                                 {% for lit in box.lits.all %}
-                                                                                                    {% if lit.occuper is False %}
-                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="Libre"><img src="{% static 'images/hospital-bed.gif' %}">
-                                                                                                        <div class="nk-tb-col nk-tb-col-tools">
-                                                        <ul class="nk-tb-actions gx-2">
-                                                            <li>
-                                                                <div class="drodown">
-                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                                        <ul class="link-list-opt no-bdr">
-                                                                            <li><a href=""><em class="icon ni ni-eye"></em><span>Reserver </span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-lock-alt"></em><span>Mettre hors d'usage</span></a></li>
-                                                                            <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-swap-alt"></em><span>Mettre mode nettoyage</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-delete-fill"></em><span>Supprimer</span></a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+
+                                                                                                    {% if lit.occuper is False and lit.reserved_until %}
+                                                                                                        <!-- Reserved Bed (48-hour reservation) -->
+                                                                                                        <div class="border border-primary"
+                                                                                                             data-toggle="tooltip"
+                                                                                                             data-placement="top"
+                                                                                                             title="Réservé par {{ lit.reserved_by }}">
+                                                                                                            <img src="{% static 'images/manifestation.gif' %}">
+                                                                                                            <div class="nk-tb-col nk-tb-col-tools">
+                                                                                                                <ul class="nk-tb-actions gx-2">
+                                                                                                                    <li>
+                                                                                                                        <div class="drodown">
+                                                                                                                            <a href="#"
+                                                                                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
+                                                                                                                               data-toggle="dropdown">
+                                                                                                                                <em class="icon ni ni-more-h"></em>
+                                                                                                                            </a>
+                                                                                                                            <div class="dropdown-menu dropdown-menu-right">
+                                                                                                                                <ul class="link-list-opt no-bdr">
+                                                                                                                                    <li>
+                                                                                                                                        <a href="{% url 'release_bed' lit.id %}">
+                                                                                                                                            <em class="icon ni ni-unlock"></em><span>Libérer</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+
+                                                                                                                                      <li>
+                                                                                                                                        <a href="{% url 'hospitalisation_lit_reserved' lit_id=lit.id  %}">
+                                                                                                                                            <em class="icon ni ni-user"></em><span>Affecter Patient</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+                                                                                                                                </ul>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    </li>
+                                                                                                                </ul>
+                                                                                                            </div>
                                                                                                         </div>
-                                                                                                    {% else %}
-                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="{{ lit.occupant }}"><img src="{% static 'images/hospitalization.gif' %}"></div>
+
+                                                                                                    {% elif lit.occuper is False and lit.is_out_of_service is False and lit.is_cleaning is False %}
+                                                                                                        <!-- Free Bed -->
+                                                                                                        <div class="border border-primary"
+                                                                                                             data-toggle="tooltip"
+                                                                                                             data-placement="top"
+                                                                                                             title="Libre">
+                                                                                                            <img src="{% static 'images/hospital-bed.gif' %}">
+                                                                                                            <div class="nk-tb-col nk-tb-col-tools">
+                                                                                                                <ul class="nk-tb-actions gx-2">
+                                                                                                                    <li>
+                                                                                                                        <div class="drodown">
+                                                                                                                            <a href="#"
+                                                                                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
+                                                                                                                               data-toggle="dropdown">
+                                                                                                                                <em class="icon ni ni-more-h"></em>
+                                                                                                                            </a>
+                                                                                                                            <div class="dropdown-menu dropdown-menu-right">
+                                                                                                                                <ul class="link-list-opt no-bdr">
+                                                                                                                                    <li>
+                                                                                                                                        <a href="{% url 'reserve_bed' lit.id %}">
+                                                                                                                                            <em class="icon ni ni-eye"></em><span>Réserver</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+                                                                                                                                       <li>
+                                                                                                                                        <a href="{% url 'mark_as_cleaning' lit.id %}">
+                                                                                                                                            <em class="icon ni ni-swap-alt"></em><span>Mode nettoyage</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+
+                                                                                                                                    <li class="divider"></li>
+
+                                                                                                                                    <li>
+                                                                                                                                        <a href="{% url 'mark_as_out_of_service' lit.id %}">
+                                                                                                                                            <em class="icon ni ni-lock-alt"></em><span>Mettre hors d'usage</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+                                                                                                                                    <li>
+                                                                                                                                        <a href="{% url 'delete_bed' lit.id %}">
+                                                                                                                                            <em class="icon ni ni-delete-fill"></em><span>Supprimer</span>
+                                                                                                                                        </a>
+                                                                                                                                    </li>
+                                                                                                                                </ul>
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    </li>
+                                                                                                                </ul>
+                                                                                                            </div>
+                                                                                                        </div>
+
+                                                                                                    {% elif lit.occuper %}
+                                                                                                        <!-- Occupied Bed -->
+                                                                                                        <div class="border border-primary"
+                                                                                                             data-toggle="tooltip"
+                                                                                                             data-placement="top"
+                                                                                                             title="Occupé par {{ lit.occupant }}">
+
+
+                                                                                                        <a href="{% url 'litdetails' lit.pk %}"> <img src="{% static 'images/hospitalization.gif' %}"></a>
+                                                                                                      
+                                                                                                        </div>
+
+                                                                                                    {% elif lit.is_out_of_service %}
+                                                                                                        <div class="border border-primary"
+                                                                                                             data-toggle="tooltip"
+                                                                                                             data-placement="top"
+                                                                                                             title="Indisponible">
+                                                                                                            <img src="{% static 'images/panneau-dinterdiction.gif' %}">
+                                                                                                        </div>
+
+                                                                                                    {% elif lit.is_cleaning %}
+                                                                                                        <div class="border border-primary"
+                                                                                                             data-toggle="tooltip"
+                                                                                                             data-placement="top"
+                                                                                                             title="Nettoyage en cours ">
+                                                                                                            <img src="{% static 'images/brosse-de-nettoyage.gif' %}">
+                                                                                                            <p class="" >libre dans
+                                                                                                                <span class="badge badge-dark" id="countdown-{{ lit.id }}" ></span>
+{#                                                                                                                <span class="spinner-border text-primary" role="status"></span>#}
+
+                                                                                                            </p>
+
+
+                                                                                                            <script>
+                                                                                                                (function () {
+                                                                                                                    const countdownElement = document.getElementById('countdown-{{ lit.id }}');
+                                                                                                                    const bedStartKey = `cleaning_start_{{ lit.id }}`;
+
+                                                                                                                    // If no start time, set it to current time
+                                                                                                                    if (!localStorage.getItem(bedStartKey)) {
+                                                                                                                        localStorage.setItem(bedStartKey, Date.now());
+                                                                                                                    }
+
+                                                                                                                    // Calculate end time based on the stored start time
+                                                                                                                    const startTime = parseInt(localStorage.getItem(bedStartKey), 10);
+                                                                                                                    const endTime = startTime + 30 * 60 * 1000; // 20 minutes in milliseconds
+
+                                                                                                                    function updateCountdown() {
+                                                                                                                        const now = Date.now();
+                                                                                                                        const remainingTime = endTime - now;
+
+                                                                                                                        if (remainingTime <= 0) {
+                                                                                                                            countdownElement.innerText = "Libre";
+                                                                                                                            clearInterval(countdownInterval);
+                                                                                                                            localStorage.removeItem(bedStartKey); // Clear from storage
+
+                                                                                                                            // Send request to server to set is_cleaning to False
+                                                                                                                            fetch("{% url 'set_cleaning_false' lit.id %}", {
+                                                                                                                                method: "POST",
+                                                                                                                                headers: {
+                                                                                                                                    "X-CSRFToken": "{{ csrf_token }}",
+                                                                                                                                    "Content-Type": "application/json",
+                                                                                                                                },
+                                                                                                                            })
+                                                                                                                                .then(response => response.json())
+                                                                                                                                .then(data => {
+                                                                                                                                    console.log(data.message); // Confirm server response
+                                                                                                                                    location.reload(); // Refresh the page after countdown ends
+                                                                                                                                })
+                                                                                                                                .catch(error => console.error('Error:', error));
+
+                                                                                                                            return;
+                                                                                                                        }
+
+                                                                                                                        const minutes = Math.floor(remainingTime / (1000 * 60));
+                                                                                                                        const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                                                                                                                        countdownElement.innerText = `${minutes}m ${seconds}s`;
+                                                                                                                    }
+
+                                                                                                                    const countdownInterval = setInterval(updateCountdown, 1000);
+                                                                                                                    updateCountdown();  // Initial call to set the display
+                                                                                                                })();
+                                                                                                            </script>
+
+                                                                                                        </div>
+
+
                                                                                                     {% endif %}
+
+
                                                                                                 {% endfor %}
                                                                                             </div>
                                                                                         </div>
@@ -218,15 +371,11 @@
                                                                     {% endfor %}
 
 
+                                                                </div>
 
 
-
-
-              </div>
-
-
-            </div>
-      </div>
+                                                            </div>
+                                                        </div>
   </div>
 {% endfor %}
 </div>

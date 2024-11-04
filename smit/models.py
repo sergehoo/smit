@@ -46,6 +46,23 @@ antecedents_type = [
     ('Antécédents obstétricaux', 'Antécédents obstétricaux')
 ]
 
+POSOLOGY_CHOICES = [
+    ('Une fois par jour', 'Une fois par jour'),
+    ('Deux fois par jour', 'Deux fois par jour'),
+    ('Trois fois par jour', 'Trois fois par jour'),
+    ('Quatre fois par jour', 'Quatre fois par jour'),
+    ('Toutes les 4 heures', 'Toutes les 4 heures'),
+    ('Toutes les 6 heures', 'Toutes les 6 heures'),
+    ('Toutes les 8 heures', 'Toutes les 8 heures'),
+    ('Si besoin', 'Si besoin'),
+    ('Avant les repas', 'Avant les repas'),
+    ('Après les repas', 'Après les repas'),
+    ('Au coucher', 'Au coucher'),
+    ('Une fois par semaine', 'Une fois par semaine'),
+    ('Deux fois par semaine', 'Deux fois par semaine'),
+    ('Un jour sur deux', 'Un jour sur deux'),
+]
+
 
 def request_number():
     WordStack = ['S', 'M', 'I', 'T', 'C', '', 'I']
@@ -332,7 +349,8 @@ class Consultation(models.Model):
     requested_at = models.DateTimeField(blank=True, null=True, )
     motifrejet = models.CharField(max_length=300, blank=True, null=True, )
     validated_at = models.DateTimeField(blank=True, null=True, )
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,related_name='consultation_creator')
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True,
+                                   related_name='consultation_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -342,8 +360,7 @@ class Consultation(models.Model):
 
 class Constante(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="constantes")
-    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiconstantes",
-                                        null=True, blank=True)
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiconstantes",null=True, blank=True)
     tension_systolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle systolique")
     tension_diastolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle diastolique")
     frequence_cardiaque = models.IntegerField(null=True, blank=True, verbose_name="Fréquence cardiaque")
@@ -389,11 +406,13 @@ class Constante(models.Model):
 
     @property
     def pouls_status(self):
-        if self.pouls < 60:
+        if self.pouls is None:
+            return 'Non mesuré'
+        elif self.pouls < 60:
             return 'Bradycardie'
-        elif self.pouls >= 60 and self.pouls <= 100:
+        elif 60 <= self.pouls <= 100:
             return 'Normal'
-        elif self.pouls >= 101:
+        elif self.pouls > 100:
             return 'Tachycardie'
 
     @property
@@ -464,8 +483,11 @@ class Constante(models.Model):
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions')
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiprescriptions",
+                                        null=True, blank=True)
     medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    posology = models.CharField(max_length=350, choices=POSOLOGY_CHOICES, null=True, blank=True)
     prescribed_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=50, choices=[
         ('Pending', 'Pending'),
@@ -478,7 +500,7 @@ class Prescription(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.patient.nom} - {self.medication.name}"
+        return f"{self.patient.nom} - {self.medication.nom}"
 
 
 class WaitingRoom(models.Model):
@@ -559,13 +581,15 @@ class Suivi(models.Model):
 
 class Hospitalization(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='hospitalized')
-    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_hospitalied", null=True, blank=True, )
+    activite = models.ForeignKey(ServiceSubActivity, on_delete=models.CASCADE, related_name="acti_hospitalied",
+                                 null=True, blank=True, )
     doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hospitaliza_doctor')
     admission_date = models.DateTimeField()
     discharge_date = models.DateTimeField(null=True, blank=True)
     discharge_reason = models.CharField(max_length=700, null=True, blank=True)
     room = models.CharField(max_length=500)
-    bed = models.ForeignKey('LitHospitalisation', on_delete=models.SET_NULL, null=True, blank=True)
+    bed = models.ForeignKey('LitHospitalisation', related_name='lit_hospy', on_delete=models.SET_NULL, null=True,
+                            blank=True)
     reason_for_admission = models.TextField()
     status = models.CharField(max_length=50, choices=Patient_statut_choices, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -622,8 +646,7 @@ class IndicateurFonctionnel(models.Model):
 
 
 class IndicateurSubjectif(models.Model):
-    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,
-                                        related_name='indicateurs_subjectifs')
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,related_name='indicateurs_subjectifs')
     date = models.DateField(default=datetime.date.today)
 
     bien_etre = models.IntegerField(null=True, blank=True, choices=[(i, i) for i in range(0, 11)])
@@ -634,22 +657,24 @@ class IndicateurSubjectif(models.Model):
 
 class HospitalizationIndicators(models.Model):
     # Indicateurs de Complications
-    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE, related_name='indicateurs_autres', null=True, blank=True, )
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE, related_name='indicateurs_autres',
+                                        null=True, blank=True, )
     temperature = models.FloatField(null=True, blank=True, help_text="Température en degrés Celsius")
     heart_rate = models.IntegerField(null=True, blank=True, help_text="Fréquence cardiaque (bpm)")
     respiratory_rate = models.IntegerField(null=True, blank=True, help_text="Fréquence respiratoire (rpm)")
-    blood_pressure = models.CharField(max_length=20, null=True, blank=True, help_text="Tension artérielle (ex : 120/80 mmHg)")
+    blood_pressure = models.CharField(max_length=20, null=True, blank=True,
+                                      help_text="Tension artérielle (ex : 120/80 mmHg)")
     pain_level = models.IntegerField(null=True, blank=True, help_text="Niveau de douleur sur une échelle de 1 à 10")
     mental_state = models.CharField(max_length=20,
-        choices=[
-            ('clair', 'Clair'),
-            ('confusion', 'Confusion'),
-            ('somnolent', 'Somnolent'),
-        ],
-        null=True,
-        blank=True,
-        help_text="État de conscience du patient"
-    )
+                                    choices=[
+                                        ('clair', 'Clair'),
+                                        ('confusion', 'Confusion'),
+                                        ('somnolent', 'Somnolent'),
+                                    ],
+                                    null=True,
+                                    blank=True,
+                                    help_text="État de conscience du patient"
+                                    )
 
     # Indicateurs de Traitement
     treatment_response = models.TextField(null=True, blank=True, help_text="Réponse du patient au traitement")
@@ -672,6 +697,97 @@ class HospitalizationIndicators(models.Model):
 
     def __str__(self):
         return f"Indicateurs d'hospitalisation pour patient {self.id} - {self.created_at.strftime('%Y-%m-%d')}"
+
+
+class ComplicationsIndicators(models.Model):
+    # Constantes des valeurs de référence
+    SODIUM_NORMAL_RANGE = (135, 145)  # mmol/L
+    POTASSIUM_NORMAL_RANGE = (3.5, 5.0)  # mmol/L
+    CHLORURE_NORMAL_RANGE = (96, 106)  # mmol/L
+    CALCIUM_NORMAL_RANGE = (2.1, 2.6)  # mmol/L
+    MAGNESIUM_NORMAL_RANGE = (0.7, 1.1)  # mmol/L
+    PHOSPHATE_NORMAL_RANGE = (0.8, 1.5)  # mmol/L
+    CREATININE_NORMAL_RANGE_MALE = (60, 115)  # µmol/L
+    CREATININE_NORMAL_RANGE_FEMALE = (45, 105)  # µmol/L
+    BUN_NORMAL_RANGE = (7, 20)  # mg/dL
+    ALT_NORMAL_RANGE = (7, 56)  # U/L
+    AST_NORMAL_RANGE = (10, 40)  # U/L
+    BILIRUBINE_TOTAL_NORMAL_RANGE = (0.1, 1.2)  # mg/dL
+    ALBUMINE_NORMAL_RANGE = (3.5, 5.0)  # g/dL
+    ALP_NORMAL_RANGE = (44, 147)  # U/L
+
+    # Champs du modèle
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name='indicateurs_compliques',null=True, blank=True)
+    sodium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    potassium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    chlorure = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    calcium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    magnesium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    phosphate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    creatinine = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    bun = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    alt = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    ast = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    bilirubine_totale = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    albumine = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    alp = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Méthodes de vérification
+    def is_sodium_normal(self):
+        return self.SODIUM_NORMAL_RANGE[0] <= self.sodium <= self.SODIUM_NORMAL_RANGE[
+            1] if self.sodium is not None else None
+
+    def is_potassium_normal(self):
+        return self.POTASSIUM_NORMAL_RANGE[0] <= self.potassium <= self.POTASSIUM_NORMAL_RANGE[
+            1] if self.potassium is not None else None
+
+    def is_chlorure_normal(self):
+        return self.CHLORURE_NORMAL_RANGE[0] <= self.chlorure <= self.CHLORURE_NORMAL_RANGE[
+            1] if self.chlorure is not None else None
+
+    def is_calcium_normal(self):
+        return self.CALCIUM_NORMAL_RANGE[0] <= self.calcium <= self.CALCIUM_NORMAL_RANGE[
+            1] if self.calcium is not None else None
+
+    def is_magnesium_normal(self):
+        return self.MAGNESIUM_NORMAL_RANGE[0] <= self.magnesium <= self.MAGNESIUM_NORMAL_RANGE[
+            1] if self.magnesium is not None else None
+
+    def is_phosphate_normal(self):
+        return self.PHOSPHATE_NORMAL_RANGE[0] <= self.phosphate <= self.PHOSPHATE_NORMAL_RANGE[
+            1] if self.phosphate is not None else None
+
+    def is_creatinine_normal(self, gender):
+        # Utiliser la plage normale basée sur le sexe
+        if gender == 'male':
+            return self.CREATININE_NORMAL_RANGE_MALE[0] <= self.creatinine <= self.CREATININE_NORMAL_RANGE_MALE[
+                1] if self.creatinine is not None else None
+        else:
+            return self.CREATININE_NORMAL_RANGE_FEMALE[0] <= self.creatinine <= self.CREATININE_NORMAL_RANGE_FEMALE[
+                1] if self.creatinine is not None else None
+
+    def is_bun_normal(self):
+        return self.BUN_NORMAL_RANGE[0] <= self.bun <= self.BUN_NORMAL_RANGE[1] if self.bun is not None else None
+
+    def is_alt_normal(self):
+        return self.ALT_NORMAL_RANGE[0] <= self.alt <= self.ALT_NORMAL_RANGE[1] if self.alt is not None else None
+
+    def is_ast_normal(self):
+        return self.AST_NORMAL_RANGE[0] <= self.ast <= self.AST_NORMAL_RANGE[1] if self.ast is not None else None
+
+    def is_bilirubine_totale_normal(self):
+        return self.BILIRUBINE_TOTAL_NORMAL_RANGE[0] <= self.bilirubine_totale <= self.BILIRUBINE_TOTAL_NORMAL_RANGE[
+            1] if self.bilirubine_totale is not None else None
+
+    def is_albumine_normal(self):
+        return self.ALBUMINE_NORMAL_RANGE[0] <= self.albumine <= self.ALBUMINE_NORMAL_RANGE[
+            1] if self.albumine is not None else None
+
+    def is_alp_normal(self):
+        return self.ALP_NORMAL_RANGE[0] <= self.alp <= self.ALP_NORMAL_RANGE[1] if self.alp is not None else None
+
+    def __str__(self):
+        return f"Indicateurs de complications pour hospitalisation {self.hospitalisation.id}"
 
 
 class UniteHospitalisation(models.Model):
@@ -706,9 +822,95 @@ class LitHospitalisation(models.Model):
     nom = models.CharField(max_length=100, default='lit')
     occuper = models.BooleanField(default=False)
     occupant = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, blank=True)
+    reserved = models.BooleanField(default=False)
     reserved_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+    reserved_until = models.DateTimeField(null=True, blank=True)
+    is_out_of_service = models.BooleanField(default=False)
+    is_cleaning = models.BooleanField(default=False)
+    status_changed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f'{self.nom} - {self.box}--{self.box.chambre}--{self.box.chambre.unite}'
+        return f'{self.nom} - {self.box}--{self.box.chambre.unite}'
+
+    def reserve(self, employee):
+        """
+        Mark the bed as reserved by the given employee for 48 hours.
+        """
+        self.reserved_by = employee
+        self.reserved = True
+        self.reserved_until = timezone.now() + datetime.timedelta(hours=48)
+        self.occuper = False
+        self.is_out_of_service = False
+        self.is_cleaning = False
+        self.save()
+
+    def release_if_unoccupied(self):
+        """
+        Release the bed if it's reserved but unoccupied and the reservation has expired.
+        """
+        if self.reserved_until and timezone.now() > self.reserved_until and not self.occupant:
+            self.reserved_by = None
+            self.reserved_until = None
+            self.occuper = False
+            self.save()
+
+    def release_direct_unoccupied(self):
+        """
+        Release the bed if it's reserved but unoccupied and the reservation has expired.
+        """
+        if self.reserved_until and not self.occupant:
+            self.reserved_by = None
+            self.reserved_until = None
+            self.occuper = False
+            self.save()
+
+    def assign_patient(self, patient, employee):
+        """
+        Assign a patient to the bed only if the employee is the one who reserved it.
+        """
+        if self.reserved_by == employee and timezone.now() <= self.reserved_until:
+            self.occupant = patient
+            self.occuper = True
+            self.save()
+        else:
+            raise PermissionError("Only the reserving employee can assign a patient within the reservation period.")
+
+    def mark_as_out_of_service(self):
+        """
+        Mark the bed as out of service and set the timestamp.
+        """
+        self.is_out_of_service = True
+        self.occuper = False
+        self.occupant = None
+        self.reserved_by = None
+        self.reserved_until = None
+        self.status_changed_at = timezone.now()
+        self.save()
+
+    def mark_as_cleaning(self):
+        """
+        Mark the bed as in cleaning mode and set the timestamp.
+        """
+        self.is_cleaning = True
+        self.occuper = False
+        self.occupant = None
+        self.reserved_by = None
+        self.reserved_until = None
+        self.status_changed_at = timezone.now()
+        self.save()
+
+    def is_timer_expired(self):
+        """
+        Check if 20 minutes have passed since the bed was marked as out of service or cleaning.
+        """
+        if self.status_changed_at:
+            return timezone.now() >= self.status_changed_at + datetime.timedelta(minutes=20)
+        return False
+
+    def delete_bed(self):
+        """
+        Safely delete the bed from the database.
+        """
+        self.delete()
 
 #---- Partie Pharmacie

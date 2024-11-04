@@ -62,7 +62,6 @@
                                                     </thead>
                                                     <tbody>
 
-
                                                     <tr>
                                                         <td class="tb-col-os">Tension systolique</td>
                                                         <td class="tb-col-ip">
@@ -81,46 +80,38 @@
                                                     </tr>
                                                     <tr>
                                                         <td class="tb-col-os">Tension diastolique</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.tension_diastolique }}</span>
+                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.tension_diastolique }}</span>
                                                         </td>
                                                         <td class="tb-col-time">
 
                                                             {% if hospitalisationdetail.patient.latest_constante.tension_diastolique < 60 or hospitalisationdetail.patient.latest_constante.tension_diastolique > 90 %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
+                                                                <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
                                                             {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
+                                                                <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
                                                             {% endif %}</td>
 
                                                     </tr>
                                                     <tr>
                                                         <td class="tb-col-os">Frequence cardiaque</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_cardiaque }}</span>
+                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_cardiaque }}</span>
                                                         </td>
                                                         <td class="tb-col-time">
 
                                                             {% if hospitalisationdetail.patient.latest_constante.frequence_cardiaque < 60 or hospitalisationdetail.patient.latest_constante.frequence_cardiaque > 100 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                                                <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
                                                             {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
+                                                                <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
                                                             {% endif %}
                                                         </td>
 
                                                     </tr>
                                                     <tr>
                                                         <td class="tb-col-os">Frequence respiratoire</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_respiratoire }}</span>
+                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_respiratoire }}</span>
                                                         </td>
                                                         <td class="tb-col-time">
                                                             {% if hospitalisationdetail.patient.latest_constante.frequence_respiratoire < 12 or hospitalisationdetail.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                                                <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
                                                             {% else %}
                                                                 <span class="sub-text font-italic"><i
                                                                         class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
@@ -335,8 +326,8 @@
                     <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
                             <blockquote class="blockquote text-center">
-                                  {% if hospitalisationdetail.discharge_date %}
-                                      {% else %}
+                                {% if hospitalisationdetail.discharge_date %}
+                                  {% else %}
                                 <img src="{% static 'images/hospitalization-2.gif' %}" height="200">
                                 {% endif %}
                                 <p class="mb-0">Admis en hospitalisation le <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>      <footer class="blockquote-footer">{{ hospitalisationdetail.reason }}</footer></p>
@@ -398,9 +389,9 @@
                                                                 <td>
                                                                     <span >{{ constante.created_at }}</span>
                                                                 </td>
-                                                                
+
                                                                 <td>
-                                                                    <span >{{ constante.patient }}</span>
+                                                                    <span >{{ constante.created_by }}</span>
                                                                 </td>
                                                                 <td>
                                 <span>
@@ -500,15 +491,13 @@
 
                                     <!-- Prescription Card -->
                                     <!-- Tableau des prescriptions -->
+
                                     <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
                                                 Prescriptions
-                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="#"><em
-                                                        class="icon ni ni-download-cloud ml-10"></em></a>
-                                                <button type="button"
-                                                        class="btn btn-dark btn-icon btn-round float-right"
-                                                        data-toggle="modal" data-target="#prescriptionModal">
+                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="#"><em class="icon ni ni-download-cloud ml-10"></em></a>
+                                                <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#prescriptionModal">
                                                     <em class="icon ni ni-plus-circle-fill"></em>
                                                 </button>
                                             </div>
@@ -516,29 +505,75 @@
                                                 <table class="table">
                                                     <thead>
                                                     <tr>
-                                                        <th>Médicament</th>
-                                                        <th>Quantité</th>
+
+                                                        <th>Médicaments</th>
+                                                        <th>Quantités</th>
+                                                        <th>Posology</th>
                                                         <th>Date</th>
                                                         <th>Medecin</th>
                                                         <th>Actions</th>
+                                                        <th>Ordonnance</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
+
                                                     {% if prescriptions %}
                                                         {% for prescription in prescriptions %}
                                                             <tr class="{% if forloop.counter > 5 %}prescription-data d-none{% endif %}">
                                                                 <td>
-                                                                    <span class="badge badge-dark">{{ prescription.medication.nom }}</span><br>
+                                                                    {% if prescription.medication.dosage_form == 'Comprimé' %}
+    <img src="{% static 'images/comprimes.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Sirop' %}
+    <img src="{% static 'images/sirop.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Injection' %}
+    <img src="{% static 'images/seringue.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Gélule' %}
+    <img src="{% static 'images/gelules.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Crème' %}
+    <img src="{% static 'images/pommade.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Pommade' %}
+    <img src="{% static 'images/pommade.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Suppositoire' %}
+    <img src="{% static 'images/suppositoire.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Gouttes' %}
+    <img src="{% static 'images/goutte-deau.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Patch' %}
+    <img src="{% static 'images/patch.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Inhalateur' %}
+    <img src="{% static 'images/spray-de-peinture.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Solution' %}
+    <img src="{% static 'images/solution.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Suspension' %}
+    <img src="{% static 'images/suspension.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Poudre' %}
+    <img src="{% static 'images/poudre-de-talc.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Spray' %}
+    <img src="{% static 'images/spray-de-peinture.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Ovule' %}
+    <img src="{% static 'images/ovule.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Collyre' %}
+    <img src="{% static 'images/collyre.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Aérosol' %}
+    <img src="{% static 'images/aerosol.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Élixir' %}
+    <img src="{% static 'images/elixir.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Baume' %}
+    <img src="{% static 'images/baume.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Granulé' %}
+    <img src="{% static 'images/granule.png' %}" width="20">
+{% elif prescription.medication.dosage_form == 'Capsule' %}
+    <img src="{% static 'images/capsule.png' %}" width="20">
+{% endif %}
+                                                                    <span class="badge badge-dark">{{ prescription.medication }}</span><br>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="badge badge-outline-secondary"> {{ prescription.quantity }}</span>
+                                                                    <span class="badge badge-outline-secondary"> {{ prescription.quantity }} {{ prescription.medication.dosage_form }}(s)</span>
                                                                 </td>
+                                                                <td><span>{{ prescription.posology }}</span></td>
+                                                                <td><span>{{ prescription.created_at }}</span></td>
+
                                                                 <td>
-                                                                    <span>{{ prescription.created_at }}</span>
-                                                                </td>
-                                                                
-                                                                <td>
-                                                                    <span>{{ prescription.patient }}</span>
+                                                                    <span>{{ prescription.created_by }}</span>
                                                                 </td>
                                                                 <td>
                                 <span>
@@ -554,9 +589,7 @@
                                                         {% endfor %}
                                                     {% else %}
                                                         <tr>
-                                                            <td colspan="4"
-                                                                style="font-style: italic; text-align: center"
-                                                                class="text-white">
+                                                            <td colspan="4" style="font-style: italic; text-align: center" class="text-white">
                                                                 Aucune donnée enregistrée
                                                             </td>
                                                         </tr>
@@ -566,14 +599,14 @@
                                                 <!-- Bouton pour afficher plus ou moins de données -->
                                                 {% if prescriptions|length > 5 %}
                                                     <div class="text-center mt-3">
-                                                        <button id="toggleButtonPrescriptions"
-                                                                class="btn btn-secondary">Voir plus
+                                                        <button id="toggleButtonPrescriptions" class="btn btn-secondary">Voir plus
                                                         </button>
                                                     </div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                     </div>
+
 
                                     <!-- JavaScript pour le tableau des prescriptions -->
                                     <script>
@@ -601,7 +634,7 @@
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="prescriptionModalLabel">Nouvelles Constante</h5>
+                                                    <h5 class="modal-title" id="prescriptionModalLabel">Nouvelles Prescription</h5>
                                                     <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
                                                 </div>
                                                 <div class="modal-body">
@@ -609,8 +642,8 @@
                                                         <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
                                                             {% csrf_token %}
                                                             <div class="row">
-                                                                {% for field in prescription_form %}
-                                                                    <div class="col-md-6 mb-3">
+                                                                {% for field in prescription_hospi_form %}
+                                                                    <div class="col-md-4 mb-3">
                                                                         <div class="form-group">
                                                                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                                                             <div class="form-control-wrap">
@@ -640,6 +673,8 @@
                                     <div class="row col-12">
                                         <!-- Indicateur Biologique Card -->
                                         <div class="col-12 col-md-12 mb-5">
+                                        <div id="biological-chart"></div>
+                                        <div id="indicators-chart"></div>
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Biologiques
@@ -734,7 +769,9 @@
                                     <div class="row col-12">
                                         <!-- Signe Fonctionnel Card -->
                                         <!-- Indicateur Fonctionnel Card -->
-                                        <div class="col-6 col-md-6 mb-5">
+                                    <div class="col-12 col-md-12 mb-5"><div id="functional-chart"></div></div>
+
+                                        <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Fonctionnels
@@ -824,191 +861,14 @@
                                         </div>
                                     </div>
 
-                                        <div class="col-6 col-md-6 mb-5">
-                                            <div class="card text-black-100 border">
-                                                <div class="card-header">
-                                                    Signe Fonctionnel
-                                                    <button type="button"
-                                                            class="btn btn-dark btn-icon btn-round float-right"
-                                                            data-toggle="modal" data-target="#signeFonctionnelModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em>
-                                                    </button>
-                                                </div>
-                                                <div class="card-inner text-black-70">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Nom</th>
-                                                            <th>Valeure</th>
-                                                            <th>Medecin</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% if signe_fonctionnel %}
-                                                            {% for signe in signe_fonctionnel %}
-                                                                <tr>
-                                                                    <td>{{ signe.nom }}</td>
-                                                                    <td>{{ signe.valeure }}</td>
-                                                                    <td>{{ signe.patient }}</td>
-                                                                    <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <tr>
-                                                                <td colspan="3"
-                                                                    style="font-style: italic; text-align: center"
-                                                                    class="text-white">
-                                                                    Aucune donnée enregistrée
-                                                                </td>
-                                                            </tr>
-                                                        {% endif %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                      <!-- Signes Fonctionnel Form Modal -->
-                                    <div class="modal fade" id="signeFonctionnelModal" tabindex="-1"
-                                         aria-labelledby="signeFonctionnelModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="signeFonctionnelModalLabel">Nouvelles Constante</h5>
-                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="row">
-                                                                {% for field in indicateur_fonctionnel_form %}
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <div class="form-group">
-                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">
-                                                                                {{ field }}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
-                                                        </form>
-                                                    </div>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
 
 
                                     </div>
 
 
                                 </div>
-                                <!-- Indicateurs   Subjectifs  -->
-                                <div class="row m-4">
 
-                                    <h3 class="text-muted"> Indicateurs Subjectifs </h3>
-
-                                    <div class="row col-12">
-                                        <!-- Indicateur Subjectif Card -->
-                                        <div class="col-12 col-md-12 mb-5">
-                                            <div class="card text-black-100 border">
-                                                <div class="card-header">
-                                                    Indicateurs Subjectifs
-                                                    <button type="button"
-                                                            class="btn btn-dark btn-icon btn-round float-right"
-                                                            data-toggle="modal" data-target="#indicateurSubjectifModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em>
-                                                    </button>
-                                                </div>
-                                                <div class="card-inner text-black-70">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Bien-être</th>
-                                                            <th>Date</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% if indicateurs_subjectifs %}
-                                                            {% for indicateur in indicateurs_subjectifs %}
-                                                                <tr>
-                                                                    <td>
-                                                                        <span class="badge badge-dark">Bien-être: {{ indicateur.bien_etre }} / 10</span>
-                                                                    </td>
-                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
-                                                                    <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <tr>
-                                                                <td colspan="3"
-                                                                    style="font-style: italic; text-align: center"
-                                                                    class="text-white">
-                                                                    Aucune donnée enregistrée
-                                                                </td>
-                                                            </tr>
-                                                        {% endif %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                     <!-- Subjectif Fonctionnel Form Modal -->
-                                    <div class="modal fade" id="indicateurSubjectifModal" tabindex="-1"
-                                         aria-labelledby="indicateurSubjectifModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="indicateurSubjectifModalLabel">Indicateurs Subjectifs</h5>
-                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="row">
-                                                                {% for field in indicateur_subjectif_form %}
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <div class="form-group">
-                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">
-                                                                                {{ field }}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
-                                                        </form>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    </div>
-                                </div>
 
 
                             <!-- Indicateurs  de Complications & de Traitement  -->
@@ -1017,7 +877,25 @@
 
                                 <h3 class="text-muted"> Indicateurs de Complications & de Traitement  </h3>
 
+
                                 <div class="row col-12">
+                                     <div class="col-12">
+                                <div id="complications-chart"></div>
+                            </div>
+                                    <div class="col-3 col-md-3 mb-5">
+                                        <div id="mental-state-chart"></div>
+                                    </div>
+                                    <div class="col-3 col-md-3 mb-5">
+                                        <div id="electrolytes-balance-chart"></div>
+                                    </div>
+
+                                    <div class="col-3 col-md-3 mb-5">
+                                        <div id="renal-function-chart"></div>
+                                    </div>
+                                    <div class="col-3 col-md-3 mb-5">
+                                        <div id="hepatic-function-chart"></div>
+                                    </div>
+                                </div>
                                     <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
@@ -1094,9 +972,7 @@
                                                                     <div class="col-md-6 mb-3">
                                                                         <div class="form-group">
                                                                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">
-                                                                                {{ field }}
-                                                                            </div>
+                                                                            <div class="form-control-wrap">{{ field }}</div>
                                                                         </div>
                                                                     </div>
                                                                 {% endfor %}
@@ -1108,14 +984,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                            <!-- Indicateurs  de Traitement  -->
+                                    </div><!-- Indicateurs  de Traitement  -->
 
                             <!-- Indicateurs  de Sortie  -->
                             <div class="row m-4">
 
                                 <h3 class="text-muted"> Indicateurs de Sortie (Critères de décharge) </h3>
-{#<pre>{{ discharge_criteria }}</pre>#}
+
                                 <div class="row col-12">
                                     <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
@@ -1141,197 +1016,453 @@
         </div>
     </div>
     <script>
-    // Préparer les données pour ApexCharts
-    const labels = [
-        {% for constante in constantes %}
-            "{{ constante.created_at|date:'Y-m-d H:i' }}",
-        {% endfor %}
-    ];
+        // Données JSON pour les indicateurs et leurs plages
+        const chartData = JSON.parse('{{ lab_ink|escapejs }}');
 
-    const temperatureData = [
-        {% for constante in constantes %}
-            {{ constante.temperature|default:"null" }},
-        {% endfor %}
-    ];
+        // Extraire les valeurs pour la configuration des séries de données
+        const categories = chartData.indicators.map(indicator => indicator.name);
+        const seriesData = [
+            {
+                name: "Plage Normale",
+                data: chartData.indicators.map(indicator => indicator.normal_part)
+            },
+            {
+                name: "Valeur dans la Plage Normale",
+                data: chartData.indicators.map(indicator => indicator.within_range)
+            },
+            {
+                name: "Valeur Excédentaire/Déficitaire",
+                data: chartData.indicators.map(indicator => indicator.additional_part)
+            }
+        ];
 
-    const heartRateData = [
-        {% for constante in constantes %}
-            {{ constante.frequence_cardiaque|default:"null" }},
-        {% endfor %}
-    ];
+        // Configuration du graphique ApexCharts
+        const options = {
+            chart: {
+                type: 'bar',
+                height: 700,
+                stacked: true,
+            },
+            series: seriesData,
+            colors: ['#00E396', '#4CAF50', '#FF4560'], // Vert pour la plage normale, vert foncé pour la valeur dans la plage, rouge pour valeur hors norme
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    barHeight: '80%',
+                    dataLabels: {
+                        position: 'top'
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val, opts) {
+                    const indicator = chartData.indicators[opts.dataPointIndex];
+                    if (opts.seriesIndex === 2) {
+                        return indicator.additional_part ? `Excès: ${indicator.additional_part}` : '';
+                    } else if (opts.seriesIndex === 1) {
+                        return indicator.actual !== null ? `Actuel: ${indicator.actual}` : 'N/A';
+                    }
+                    return '';
+                },
+                offsetX: -6,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#304758']
+                }
+            },
+            xaxis: {
+                categories: categories,
+                title: {
+                    text: 'Valeurs'
+                }
+            },
+            title: {
+                text: 'Indicateurs de Complications et Seuils de Danger',
+                align: 'center'
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                y: {
+                    formatter: function (val, opts) {
+                        const indicator = chartData.indicators[opts.dataPointIndex];
+                        if (opts.seriesIndex === 2) {
+                            return `Excédent ou déficit: ${indicator.additional_part}`;
+                        }
+                        return `Actuel: ${indicator.actual}`;
+                    }
+                }
+            },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'left'
+            }
+        };
 
-    const respiratoryRateData = [
-        {% for constante in constantes %}
-            {{ constante.frequence_respiratoire|default:"null" }},
-        {% endfor %}
-    ];
+        // Rendu du graphique
+        const chart = new ApexCharts(document.querySelector("#indicators-chart"), options);
+        chart.render();
+    </script>
+    <script>
+        // Données JSON pour le graphique des indicateurs fonctionnels
+        const functionalData = JSON.parse('{{ functional_chart_data|escapejs }}');
 
-    const oxygenSaturationData = [
-        {% for constante in constantes %}
-            {{ constante.saturation_oxygene|default:"null" }},
-        {% endfor %}
-    ];
+        // Transformation des données qualitatives en valeurs numériques pour le graphique
+        const mobilityValues = functionalData.mobilite.map(mobility => {
+            if (mobility === "indépendant") return 3;
+            if (mobility === "assisté") return 2;
+            if (mobility === "immobile") return 1;
+            return null;
+        });
+
+        const consciousnessValues = functionalData.conscience.map(consciousness => {
+            if (consciousness === "alerte") return 3;
+            if (consciousness === "somnolent") return 2;
+            if (consciousness === "inconscient") return 1;
+            return null;
+        });
+
+        // Configuration du graphique ApexCharts
+        const functionalOptions = {
+            chart: {
+                type: 'bar',
+                height: 450
+            },
+            series: [
+                {
+                    name: 'Mobilité',
+                    data: mobilityValues
+                },
+                {
+                    name: 'Conscience',
+                    data: consciousnessValues
+                },
+                {
+                    name: 'Débit Urinaire (L)',
+                    data: functionalData.debit_urinaire
+                }
+            ],
+            xaxis: {
+                categories: functionalData.dates,
+                title: {
+                    text: 'Dates'
+                },
+                labels: {
+                    rotate: -45
+                }
+            },
+            yaxis: [
+                {
+                    title: {
+                        text: 'Niveau Mobilité et Conscience'
+                    },
+                    min: 0,
+                    max: 3,
+                    tickAmount: 3,
+                    labels: {
+                        formatter: function (value) {
+                            if (value === 3) return 'Indépendant / Alerte';
+                            if (value === 2) return 'Assisté / Somnolent';
+                            if (value === 1) return 'Immobile / Inconscient';
+                            return '';
+                        }
+                    }
+                },
+                {
+                    opposite: true,
+                    title: {
+                        text: 'Débit Urinaire (L)'
+                    },
+                    min: 0
+                }
+            ],
+            tooltip: {
+                shared: true,
+                intersect: false,
+            },
+            title: {
+                text: 'Évolution des Indicateurs Fonctionnels',
+                align: 'center'
+            }
+        };
+
+        // Rendu du graphique
+        const functionalChart = new ApexCharts(document.querySelector("#functional-chart"), functionalOptions);
+        functionalChart.render();
+    </script>
+    <script>
+    // Données JSON pour les indicateurs de complications
+    const complicationsData = JSON.parse('{{ complications_chart_data|escapejs }}');
+
+    // Transformation de l'état mental en valeurs numériques
+    const mentalStateValues = complicationsData.mental_state.map(state => {
+        if (state === "clair") return 3;
+        if (state === "confusion") return 2;
+        if (state === "somnolent") return 1;
+        return null;
+    });
 
     // Configuration du graphique ApexCharts
-    const options = {
+    const complicationsOptions = {
         chart: {
             type: 'line',
-            height: 350,
-            zoom: {
-                enabled: true
-            }
+            height: 450
         },
         series: [
             {
-                name: 'Température (°C)',
-                data: temperatureData
+                name: 'Niveau de Douleur',
+                data: complicationsData.pain_level
             },
             {
-                name: 'Fréquence Cardiaque (bpm)',
-                data: heartRateData
-            },
-            {
-                name: 'Fréquence Respiratoire (rpm)',
-                data: respiratoryRateData
-            },
-            {
-                name: 'Saturation en Oxygène (%)',
-                data: oxygenSaturationData
+                name: 'État Mental',
+                data: mentalStateValues
             }
         ],
         xaxis: {
-            categories: labels,
+            categories: complicationsData.dates,
             title: {
-                text: 'Date et Heure'
+                text: 'Dates'
             },
-            type: 'datetime'
+            labels: {
+                rotate: -45
+            }
         },
-        yaxis: {
-            title: {
-                text: 'Valeurs des Constantes Vitales'
+        yaxis: [
+            {
+                title: {
+                    text: 'Niveau de Douleur'
+                },
+                min: 0,
+                max: 10,
+                tickAmount: 10
             },
-            min: 0
+            {
+                opposite: true,
+                title: {
+                    text: 'État Mental'
+                },
+                min: 0,
+                max: 3,
+                tickAmount: 3,
+                labels: {
+                    formatter: function (value) {
+                        if (value === 3) return 'Clair';
+                        if (value === 2) return 'Confusion';
+                        if (value === 1) return 'Somnolent';
+                        return '';
+                    }
+                }
+            }
+        ],
+        tooltip: {
+            shared: true,
+            intersect: false,
         },
         title: {
-            text: 'Évolution des Constantes Vitales du Patient',
+            text: 'Évolution des Indicateurs de Complications',
             align: 'center'
-        },
-        tooltip: {
-            x: {
-                format: 'dd MMM yyyy HH:mm'
-            }
         }
     };
 
-    // Initialisation du graphique
-    const chart = new ApexCharts(document.querySelector("#constantesChart"), options);
-    chart.render();
+    // Rendu du graphique
+    const complicationsChart = new ApexCharts(document.querySelector("#complications-chart"), complicationsOptions);
+    complicationsChart.render();
 </script>
-{#    <script>#}
-{#        // Préparez les données pour Chart.js#}
-{#        const labels = [#}
-{#            {% for constante in constantes %}#}
-{#                "{{ constante.created_at|date:'Y-m-d H:i' }}",#}
-{#            {% endfor %}#}
-{#        ];#}
-{##}
-{#        const temperatureData = [#}
-{#            {% for constante in constantes %}#}
-{#                {{ constante.temperature|default:"null" }},#}
-{#            {% endfor %}#}
-{#        ];#}
-{##}
-{#        const heartRateData = [#}
-{#            {% for constante in constantes %}#}
-{#                {{ constante.frequence_cardiaque|default:"null" }},#}
-{#            {% endfor %}#}
-{#        ];#}
-{##}
-{#        const respiratoryRateData = [#}
-{#            {% for constante in constantes %}#}
-{#                {{ constante.frequence_respiratoire|default:"null" }},#}
-{#            {% endfor %}#}
-{#        ];#}
-{##}
-{#        const oxygenSaturationData = [#}
-{#            {% for constante in constantes %}#}
-{#                {{ constante.saturation_oxygene|default:"null" }},#}
-{#            {% endfor %}#}
-{#        ];#}
-{##}
-{#        // Configuration du graphique Chart.js#}
-{#        const data = {#}
-{#            labels: labels,#}
-{#            datasets: [#}
-{#                {#}
-{#                    label: 'Température (°C)',#}
-{#                    data: temperatureData,#}
-{#                    borderColor: 'rgba(255, 99, 132, 1)',#}
-{#                    backgroundColor: 'rgba(255, 99, 132, 0.2)',#}
-{#                    fill: false,#}
-{#                },#}
-{#                {#}
-{#                    label: 'Fréquence Cardiaque (bpm)',#}
-{#                    data: heartRateData,#}
-{#                    borderColor: 'rgba(54, 162, 235, 1)',#}
-{#                    backgroundColor: 'rgba(54, 162, 235, 0.2)',#}
-{#                    fill: false,#}
-{#                },#}
-{#                {#}
-{#                    label: 'Fréquence Respiratoire (rpm)',#}
-{#                    data: respiratoryRateData,#}
-{#                    borderColor: 'rgba(75, 192, 192, 1)',#}
-{#                    backgroundColor: 'rgba(75, 192, 192, 0.2)',#}
-{#                    fill: false,#}
-{#                },#}
-{#                {#}
-{#                    label: 'Saturation en Oxygène (%)',#}
-{#                    data: oxygenSaturationData,#}
-{#                    borderColor: 'rgba(255, 206, 86, 1)',#}
-{#                    backgroundColor: 'rgba(255, 206, 86, 0.2)',#}
-{#                    fill: false,#}
-{#                },#}
-{#            ]#}
-{#        };#}
-{##}
-{#        const config = {#}
-{#            type: 'line',#}
-{#            data: data,#}
-{#            options: {#}
-{#                responsive: true,#}
-{#                plugins: {#}
-{#                    legend: {#}
-{#                        position: 'top',#}
-{#                    },#}
-{#                    title: {#}
-{#                        display: true,#}
-{#                        text: 'Évolution des Constantes Vitales du Patient'#}
-{#                    }#}
-{#                },#}
-{#                scales: {#}
-{#                    x: {#}
-{#                        title: {#}
-{#                            display: true,#}
-{#                            text: 'Date et Heure'#}
-{#                        }#}
-{#                    },#}
-{#                    y: {#}
-{#                        title: {#}
-{#                            display: true,#}
-{#                            text: 'Valeurs'#}
-{#                        },#}
-{#                        beginAtZero: true#}
-{#                    }#}
-{#                }#}
-{#            }#}
-{#        };#}
-{##}
-{#        // Initialisation du graphique#}
-{#        const constantesChart = new Chart(#}
-{#            document.getElementById('constantesChart'),#}
-{#            config#}
-{#        );#}
-{#    </script>#}
+
+    <script>
+    // Données JSON pour les graphiques en camembert
+    const pieChartData = JSON.parse('{{ pie_chart_data|escapejs }}');
+
+    // Fonction de configuration et de rendu d'un graphique en camembert
+    function renderPieChart(elementId, seriesData, labels, title) {
+        const options = {
+            chart: {
+                type: 'donut',
+                height: 350
+            },
+            series: seriesData,
+            labels: labels,
+            title: {
+                text: title,
+                align: 'center'
+            }
+        };
+
+        const chart = new ApexCharts(document.querySelector(elementId), options);
+        chart.render();
+    }
+
+    // Données et rendu du graphique pour l'état mental
+    const mentalStateLabels = Object.keys(pieChartData.mental_state);
+    const mentalStateSeries = Object.values(pieChartData.mental_state);
+    renderPieChart("#mental-state-chart", mentalStateSeries, mentalStateLabels, "État Mental");
+
+    // Données et rendu du graphique pour l'équilibre électrolytique
+    const electrolytesBalanceLabels = Object.keys(pieChartData.electrolytes_balance);
+    const electrolytesBalanceSeries = Object.values(pieChartData.electrolytes_balance);
+    renderPieChart("#electrolytes-balance-chart", electrolytesBalanceSeries, electrolytesBalanceLabels, "Équilibre Électrolytique");
+
+    // Données et rendu du graphique pour la fonction rénale
+    const renalFunctionLabels = Object.keys(pieChartData.renal_function);
+    const renalFunctionSeries = Object.values(pieChartData.renal_function);
+    renderPieChart("#renal-function-chart", renalFunctionSeries, renalFunctionLabels, "Fonction Rénale");
+
+    // Données et rendu du graphique pour la fonction hépatique
+    const hepaticFunctionLabels = Object.keys(pieChartData.hepatic_function);
+    const hepaticFunctionSeries = Object.values(pieChartData.hepatic_function);
+    renderPieChart("#hepatic-function-chart", hepaticFunctionSeries, hepaticFunctionLabels, "Fonction Hépatique");
+</script>
+
+
+    <script>
+        // Données JSON pour le graphique des indicateurs biologiques
+        const biologicalData = JSON.parse('{{ chart_data|escapejs }}');
+
+        // Configuration du graphique des indicateurs biologiques
+        const biologicalOptions = {
+            chart: {
+                type: 'area',
+                height: 450
+            },
+            series: [
+                {
+                    name: 'Globules blancs',
+                    data: biologicalData.globules_blancs
+                },
+                {
+                    name: 'Hémoglobine',
+                    data: biologicalData.hemoglobine
+                },
+                {
+                    name: 'Plaquettes',
+                    data: biologicalData.plaquettes
+                },
+                {
+                    name: 'CRP',
+                    data: biologicalData.crp
+                },
+                {
+                    name: 'Glucose sanguin',
+                    data: biologicalData.glucose_sanguin
+                }
+            ],
+            xaxis: {
+                categories: biologicalData.dates,
+                title: {
+                    text: 'Dates'
+                },
+                labels: {
+                    rotate: -45
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Valeurs'
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+            },
+            title: {
+                text: 'Évolution des Indicateurs Biologiques',
+                align: 'center'
+            }
+        };
+
+        // Initialisation du graphique des indicateurs biologiques
+        const biologicalChart = new ApexCharts(document.querySelector("#biological-chart"), biologicalOptions);
+        biologicalChart.render();
+    </script>
+
+    <script>
+        // Données JSON pour le graphique des constantes vitales
+        const labels = [
+            {% for constante in constantes %}
+                "{{ constante.created_at|date:'Y-m-d H:i' }}",
+            {% endfor %}
+        ];
+
+        const temperatureData = [
+            {% for constante in constantes %}
+                {{ constante.temperature|default:"null" }},
+            {% endfor %}
+        ];
+
+        const heartRateData = [
+            {% for constante in constantes %}
+                {{ constante.frequence_cardiaque|default:"null" }},
+            {% endfor %}
+        ];
+
+        const respiratoryRateData = [
+            {% for constante in constantes %}
+                {{ constante.frequence_respiratoire|default:"null" }},
+            {% endfor %}
+        ];
+
+        const oxygenSaturationData = [
+            {% for constante in constantes %}
+                {{ constante.saturation_oxygene|default:"null" }},
+            {% endfor %}
+        ];
+
+        // Configuration du graphique des constantes vitales
+        const constantesOptions = {
+            chart: {
+                type: 'line',
+                height: 350,
+                zoom: {
+                    enabled: true
+                }
+            },
+            series: [
+                {
+                    name: 'Température (°C)',
+                    data: temperatureData
+                },
+                {
+                    name: 'Fréquence Cardiaque (bpm)',
+                    data: heartRateData
+                },
+                {
+                    name: 'Fréquence Respiratoire (rpm)',
+                    data: respiratoryRateData
+                },
+                {
+                    name: 'Saturation en Oxygène (%)',
+                    data: oxygenSaturationData
+                }
+            ],
+            xaxis: {
+                categories: labels,
+                title: {
+                    text: 'Date et Heure'
+                },
+                type: 'datetime'
+            },
+            yaxis: {
+                title: {
+                    text: 'Valeurs des Constantes Vitales'
+                },
+                min: 0
+            },
+            title: {
+                text: 'Évolution des Constantes Vitales du Patient',
+                align: 'center'
+            },
+            tooltip: {
+                x: {
+                    format: 'dd MMM yyyy HH:mm'
+                }
+            }
+        };
+
+        // Initialisation du graphique des constantes vitales
+        const constantesChart = new ApexCharts(document.querySelector("#constantesChart"), constantesOptions);
+        constantesChart.render();
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let formIdx = {{ symptomes_forms|length }};
@@ -1357,68 +1488,68 @@
         });
     </script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dischargeCriteria = {{ discharge_criteria|safe }};
+        document.addEventListener('DOMContentLoaded', function () {
+            const dischargeCriteria = {{ discharge_criteria|safe }};
 
-        const options = {
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    distributed: true,  // This makes each bar individually colorable
-                    colors: {
-                        ranges: [
-                            { from: 1, to: 1, color: '#4CAF50' }, // Vert pour "Atteint"
-                            { from: 0, to: 0, color: '#F44336' }  // Rouge pour "Non Atteint"
-                        ]
-                    }
-                }
-            },
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return val === 1 ? "Atteint" : "Non Atteint";
+            const options = {
+                chart: {
+                    type: 'bar',
+                    height: 350
                 },
-                style: {
-                    colors: ['#000']
-                }
-            },
-            series: [{
-                name: 'Critère de décharge',
-                data: [
-                    dischargeCriteria.stable_vitals || 0,
-                    dischargeCriteria.pain_controlled || 0,
-                    dischargeCriteria.functional_ability || 0,
-                    dischargeCriteria.mental_stability || 0,
-                    dischargeCriteria.follow_up_plan || 0
-                ]
-            }],
-            xaxis: {
-                categories: [
-                    "Signes vitaux stables",
-                    "Douleur contrôlée",
-                    "Capacité fonctionnelle",
-                    "État mental stable",
-                    "Plan de suivi post-hospitalisation"
-                ]
-            },
-            tooltip: {
-                enabled: true,
-                y: {
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        distributed: true,  // This makes each bar individually colorable
+                        colors: {
+                            ranges: [
+                                {from: 1, to: 1, color: '#4CAF50'}, // Vert pour "Atteint"
+                                {from: 0, to: 0, color: '#F44336'}  // Rouge pour "Non Atteint"
+                            ]
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
                     formatter: function (val) {
                         return val === 1 ? "Atteint" : "Non Atteint";
+                    },
+                    style: {
+                        colors: ['#000']
+                    }
+                },
+                series: [{
+                    name: 'Critère de décharge',
+                    data: [
+                        dischargeCriteria.stable_vitals || 0,
+                        dischargeCriteria.pain_controlled || 0,
+                        dischargeCriteria.functional_ability || 0,
+                        dischargeCriteria.mental_stability || 0,
+                        dischargeCriteria.follow_up_plan || 0
+                    ]
+                }],
+                xaxis: {
+                    categories: [
+                        "Signes vitaux stables",
+                        "Douleur contrôlée",
+                        "Capacité fonctionnelle",
+                        "État mental stable",
+                        "Plan de suivi post-hospitalisation"
+                    ]
+                },
+                tooltip: {
+                    enabled: true,
+                    y: {
+                        formatter: function (val) {
+                            return val === 1 ? "Atteint" : "Non Atteint";
+                        }
                     }
                 }
-            }
-        };
+            };
 
-        const chart = new ApexCharts(document.querySelector("#dischargeChart"), options);
-        chart.render();
-    });
-</script>
+            const chart = new ApexCharts(document.querySelector("#dischargeChart"), options);
+            chart.render();
+        });
+    </script>
 
     <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {

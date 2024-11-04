@@ -16,6 +16,23 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators
 
+POSOLOGY_CHOICES = [
+    ('Une fois par jour', 'Une fois par jour'),
+    ('Deux fois par jour', 'Deux fois par jour'),
+    ('Trois fois par jour', 'Trois fois par jour'),
+    ('Quatre fois par jour', 'Quatre fois par jour'),
+    ('Toutes les 4 heures', 'Toutes les 4 heures'),
+    ('Toutes les 6 heures', 'Toutes les 6 heures'),
+    ('Toutes les 8 heures', 'Toutes les 8 heures'),
+    ('Si besoin', 'Si besoin'),
+    ('Avant les repas', 'Avant les repas'),
+    ('Après les repas', 'Après les repas'),
+    ('Au coucher', 'Au coucher'),
+    ('Une fois par semaine', 'Une fois par semaine'),
+    ('Deux fois par semaine', 'Deux fois par semaine'),
+    ('Un jour sur deux', 'Un jour sur deux'),
+]
+
 school_level = [
     ('Inconnu', 'Inconnu'),
     ('Non-scolarisé', 'Non-scolarisé'),
@@ -138,62 +155,66 @@ class ConsultationForm(forms.ModelForm):
 
 
 class PatientCreateForm(forms.ModelForm):
-    nom = forms.CharField(required=True,widget=forms.TextInput(
+    nom = forms.CharField(required=True, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
     prenoms = forms.CharField(required=True,
-        widget=forms.TextInput(
-            attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'prenom', }))
+                              widget=forms.TextInput(
+                                  attrs={'class': 'form-control form-control-lg form-control-outlined',
+                                         'placeholder': 'prenom', }))
 
     contact = forms.CharField(required=True,
-        widget=forms.TextInput(
-            attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
-                   'placeholder': '0701020304', 'id': 'phone'}))
+                              widget=forms.TextInput(
+                                  attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
+                                         'placeholder': '0701020304', 'id': 'phone'}))
 
-    situation_matrimoniale = forms.ChoiceField(required=True,choices=situation_matrimoniales_choices, widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-               'data-search': 'on', 'id': 'situation_matrimoniale'}))
-    lieu_naissance = forms.ChoiceField(required=True,choices=villes_choices, widget=forms.Select(
+    situation_matrimoniale = forms.ChoiceField(required=True, choices=situation_matrimoniales_choices,
+                                               widget=forms.Select(
+                                                   attrs={
+                                                       'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                                       'data-search': 'on', 'id': 'situation_matrimoniale'}))
+    lieu_naissance = forms.ChoiceField(required=True, choices=villes_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'outlined'}))
     date_naissance = forms.DateField(required=True,
-        widget=forms.DateInput(
-            attrs={'class': 'form-control form-control-lg form-control-outlined', 'id': 'outlined',
-                   'type': 'date'}))
-    genre = forms.ChoiceField(required=True,choices=Sexe_choices,
+                                     widget=forms.DateInput(
+                                         attrs={'class': 'form-control form-control-lg form-control-outlined',
+                                                'id': 'outlined',
+                                                'type': 'date'}))
+    genre = forms.ChoiceField(required=True, choices=Sexe_choices,
                               widget=forms.Select(
                                   attrs={'class': 'form-control form-control-lg form-control-outlined', }))
-    nationalite = forms.ChoiceField(required=True,choices=nationalite_choices,
+    nationalite = forms.ChoiceField(required=True, choices=nationalite_choices,
                                     widget=forms.Select(
                                         attrs={
                                             'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                                             'data-search': 'on', 'id': 'nationalite'}))
-    ethnie = forms.ChoiceField(required=False,choices=ethnic_groups, widget=forms.Select(
+    ethnie = forms.ChoiceField(required=False, choices=ethnic_groups, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                'data-search': 'on', 'id': 'ethnie'}))
-    profession = forms.ChoiceField(required=False,choices=professions_choices, widget=forms.Select(
+    profession = forms.ChoiceField(required=False, choices=professions_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'profession'}))
 
-    nbr_enfants = forms.IntegerField(required=False,widget=forms.NumberInput(
+    nbr_enfants = forms.IntegerField(required=False, widget=forms.NumberInput(
         attrs={'class': 'form-control form-control-lg number-spinner', 'value': '0', 'type': 'number'}))
 
-    groupe_sanguin = forms.ChoiceField(required=False,choices=Goupe_sanguin_choices, widget=forms.Select(
+    groupe_sanguin = forms.ChoiceField(required=False, choices=Goupe_sanguin_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'groupe_sanguin'}))
-    niveau_etude = forms.ChoiceField(required=False,choices=school_level,
+    niveau_etude = forms.ChoiceField(required=False, choices=school_level,
                                      widget=forms.Select(
                                          attrs={'class': 'form-control  form-control-lg form-control-outlined',
                                                 'id': 'outlined', }))
-    employeur = forms.CharField(required=False,widget=forms.TextInput(
+    employeur = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
 
     pays = CountryField().formfield(required=False,
-        initial="CI",  # Set the default to Côte d'Ivoire
-        widget=forms.Select(
-            attrs={
-                'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                'data-search': 'on',
-                'id': 'pays'}))
+                                    initial="CI",  # Set the default to Côte d'Ivoire
+                                    widget=forms.Select(
+                                        attrs={
+                                            'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                                            'data-search': 'on',
+                                            'id': 'pays'}))
 
     commune = forms.ChoiceField(required=False, choices=communes_et_quartiers_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
@@ -356,6 +377,17 @@ class ConsultationSendForm(forms.ModelForm):
     class Meta:
         model = Consultation
         fields = ['service']
+
+
+class HospitalizationreservedForm(forms.ModelForm):
+    patient = forms.ModelChoiceField(queryset=Patient.objects.all(), label='Selectionnez le patien à affecter',
+                                     widget=forms.Select(
+                                         attrs={'class': 'form-control patid form-control-xl select2 form-select ',
+                                                'data-search': 'on', 'id': 'patid'}))
+
+    class Meta:
+        model = Hospitalization
+        fields = ['patient']
 
 
 class HospitalizationSendForm(forms.ModelForm):
@@ -606,6 +638,7 @@ class ProtocolesForm(forms.ModelForm):
 
 
 class ConstanteForm(forms.ModelForm):
+    form_type = forms.CharField(initial="constante", widget=forms.HiddenInput())
     class Meta:
         model = Constante
         fields = ['tension_systolique', 'tension_diastolique', 'frequence_cardiaque', 'frequence_respiratoire',
@@ -625,16 +658,47 @@ class ConstanteForm(forms.ModelForm):
 
 
 class PrescriptionHospiForm(forms.ModelForm):
+    form_type = forms.CharField(initial="prescription", widget=forms.HiddenInput())
+
     class Meta:
         model = Prescription
-        fields = ['patient', 'doctor', 'medication', 'quantity', 'status']
-        widgets = {
-            'patient': forms.Select(attrs={'class': 'form-control'}),
-            'doctor': forms.Select(attrs={'class': 'form-control'}),
-            'medication': forms.Select(attrs={'class': 'form-control'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
+        fields = ['medication', 'quantity', 'posology']
+        labels = {
+            'medication': 'Médicament',
+            'quantity': 'Quantité',
+            'posology': 'Posologie',
         }
+        widgets = {
+            'medication': forms.Select(
+                attrs={
+                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                    'data-search': 'on',
+                    'id': 'medication',
+                }
+            ),
+            'quantity': forms.NumberInput(
+                attrs={
+                    'class': 'form-control number-spinner',
+                    'value': '0',
+                    'placeholder': 'Entrez la quantité',
+                    'type': 'number'
+                }
+            ),
+            'posology': forms.Select(
+                attrs={
+                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                    'data-search': 'on',
+                    'id': 'posology'
+                }
+            ),
+            'form_type':forms.CharField(initial="prescription", widget=forms.HiddenInput())
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add an empty label as a placeholder for Select fields
+        self.fields['medication'].empty_label = "Sélectionnez un médicament"
+        self.fields['posology'].empty_label = "Sélectionnez la posologie"
 
 
 class SigneFonctionnelForm(forms.ModelForm):
@@ -648,6 +712,7 @@ class SigneFonctionnelForm(forms.ModelForm):
 
 
 class IndicateurBiologiqueForm(forms.ModelForm):
+    form_type = forms.CharField(initial="indicateur_biologique", widget=forms.HiddenInput())
     class Meta:
         model = IndicateurBiologique
         fields = ['globules_blancs', 'hemoglobine', 'plaquettes', 'crp', 'glucose_sanguin']
@@ -661,6 +726,8 @@ class IndicateurBiologiqueForm(forms.ModelForm):
 
 
 class IndicateurFonctionnelForm(forms.ModelForm):
+    form_type = forms.CharField(initial="indicateur_fonctionnel", widget=forms.HiddenInput())
+
     class Meta:
         model = IndicateurFonctionnel
         fields = ['mobilite', 'conscience', 'debit_urinaire']
@@ -681,6 +748,9 @@ class IndicateurSubjectifForm(forms.ModelForm):
 
 
 class HospitalizationIndicatorsForm(forms.ModelForm):
+    form_type = forms.CharField(initial="complication", widget=forms.HiddenInput())
+
+
     # temperature = forms.FloatField(
     #     widget=forms.NumberInput(attrs={'class': 'form-control'}),
     #     label="Température (°C)",
