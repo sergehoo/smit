@@ -167,6 +167,9 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         hospitalization = self.get_object()
 
+        # Initialiser labcompliq par défaut
+        labcompliq = {"indicators": []}
+
         complications = hospitalization.indicateurs_compliques.first()  # supposons une seule entrée
 
         # Si les complications existent, structure les données et les seuils
@@ -206,7 +209,6 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
                     additional_part = Decimal(0)
                     actual_within_range = Decimal(0)
                 else:
-                    # Calcule la partie de la barre dans la plage normale
                     actual = Decimal(actual)
                     if min_normal <= actual <= max_normal:
                         normal_part = actual - min_normal
