@@ -50,6 +50,15 @@
                                 <span class="nk-menu-badge bg-danger text-white">{{ apointments_nbr }}</span>
                             </a>
                         </li>
+
+                       <li class="nk-menu-item">
+                            <a href="{% url 'appointment_over' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><em class="icon ni ni-calendar-check"></em></span>
+                                <span class="nk-menu-text">Patients réçus</span>
+                                <span class="nk-menu-badge badge-danger">{{ appointments_all }}</span>
+                            </a>
+                        </li>
+
                         <li class="nk-menu-item">
                             <a href="{% url 'appointment_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
@@ -57,6 +66,8 @@
                                 <span class="nk-menu-badge badge-danger">{{ appointments_all }}</span>
                             </a>
                         </li>
+
+
 
                         <!-- Section Consultation -->
                         <li class="nk-menu-heading">
@@ -96,13 +107,13 @@
                             </a>
                             <ul class="nk-menu-sub">
                                 <li class="nk-menu-item">
-                                    <a href="aside.html" class="nk-menu-link">
+                                    <a href="#" class="nk-menu-link">
                                         <i class=" fa-solid fa-flask-vial mr-3"></i>
                                         <span class="nk-menu-text">Analyses</span>
                                     </a>
                                 </li>
                                 <li class="nk-menu-item">
-                                    <a href="base.html" class="nk-menu-link">
+                                    <a href="#" class="nk-menu-link">
                                         <i class=" fa-solid fa-tools mr-3"></i>
                                         <span class="nk-menu-text">Kits</span>
                                     </a>
@@ -158,6 +169,23 @@
                             <a href="{% url 'medicaments' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
                                 <span class="nk-menu-text">Médicaments</span>
+                            </a>
+                        </li>
+                    
+                      <!-- Section Parametres -->
+                        <li class="nk-menu-heading">
+                            <h6 class="overline-title text-primary-alt">Paramètres</h6>
+                        </li>
+                        <li class="nk-menu-item">
+                            <a href="{% url 'employee_list' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+                                <span class="nk-menu-text">Gestion des Employees</span>
+                            </a>
+                        </li>
+                    <li class="nk-menu-item">
+                            <a href="{% url 'user_role' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+                                <span class="nk-menu-text">Gestion des Rôles</span>
                             </a>
                         </li>
                     </ul>

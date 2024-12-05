@@ -1,0 +1,45 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load unicorn %}
+{% load group_permissions %}
+{% block content %}
+<div class="container mt-5">
+    <div class="nk-content nk-content-fluid">
+        <div class="nk-content-body">
+            <div class="nk-block-head nk-block-head-sm mb-4 text-center">
+                <h3 class="nk-block-title page-title text-primary">Gestion des Rôles Utilisateurs</h3>
+                <p class="text-muted">Liste et gestion des rôles des utilisateurs dans le système.</p>
+            </div>
+
+            <!-- Formulaire de suppression -->
+            <div class="card shadow-sm">
+                <div class="row no-gutters">
+                    <!-- Illustration -->
+
+                    <!-- Contenu -->
+                    <div class="col-lg-12 text-center">
+                        <div class="card-body text-center">
+                             <img src="{% static 'images/icons/help-desk.svg' %}" width="400px" class="img-fluid" alt="Suppression de rôle">
+                            <h4 class="card-title text-danger">Confirmer la Suppression</h4>
+                            <h4 class="card-text text-muted mb-5">
+                                Êtes-vous sûr de vouloir supprimer le rôle
+                                <strong class="text-danger">{{ object.name }}</strong> ?
+                                <br>Cette action est <strong>irréversible</strong>.
+                            </h4>
+                            <form method="post" class="d-inline-block">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-lg me-3">
+                                    <em class="icon ni ni-trash"></em> Supprimer
+                                </button>
+                                <a href="{% url 'user_role' %}" class="btn btn-secondary btn-lg ml-5">
+                                    <em class="icon ni ni-arrow-left "></em> Annuler
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

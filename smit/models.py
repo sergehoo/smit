@@ -372,6 +372,8 @@ class Constante(models.Model):
     taille = models.FloatField(null=True, blank=True, verbose_name="Taille")
     pouls = models.FloatField(null=True, blank=True, verbose_name="Pouls")
     imc = models.FloatField(null=True, blank=True, verbose_name="IMC", editable=False)
+    pb = models.FloatField(null=True, blank=True, verbose_name="Périmètre Braciale")
+
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='constantes_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -12,6 +12,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.http import request, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils.timezone import now
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
@@ -900,6 +901,37 @@ class SalleAttenteListView(LoginRequiredMixin, ListView):
     #     return context
 
 
+class PatientRecuListView(LoginRequiredMixin, ListView):
+    model = Appointment
+    template_name = "pages/appointments/patient_recu.html"
+    context_object_name = "recu"
+    paginate_by = 10
+    ordering = ['-time']
+
+    def get_queryset(self):
+        # Filtrer les rendez-vous passés
+        today = now().date()
+        current_time = now().time()
+        return Appointment.objects.filter(date__lt=today, status='Completed') | Appointment.objects.filter(
+            date=today, time__lt=current_time
+        ).order_by('-date', '-time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = now().date()
+
+        # Nombre de rendez-vous passés
+        appointments_past_nbr = self.get_queryset().count()
+
+        # Ajouter des données supplémentaires au contexte
+        context['salleattente_nbr'] = appointments_past_nbr
+        context['salleattente'] = self.get_queryset()
+        context['constanteform'] = ConstantesForm()
+        context['ConsultationSendForm'] = ConsultationSendForm()
+
+        return context
+
+
 class ServiceContentDetailView(LoginRequiredMixin, DetailView):
     model = ServiceSubActivity
     # template_name = "pages/services/servicecontent_detail.html"
@@ -1186,3 +1218,5 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
         return context
+
+

@@ -36,7 +36,7 @@ class ServiceAdmin(admin.ModelAdmin):
     pass
 
 
-# @admin.register(Employee)
+# @admin.register(EmployeeEmployee)
 # class EmployeeAdmin(admin.ModelAdmin):
 #     pass
 
@@ -155,7 +155,6 @@ class SuiviAdmin(admin.ModelAdmin):
 
 
 class EmployeeResource(resources.ModelResource):
-
     def before_import_row(self, row, **kwargs):
         # Créer l'utilisateur s'il n'existe pas
         username = row.get('user_username')
@@ -187,9 +186,12 @@ class EmployeeResource(resources.ModelResource):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     resource_class = EmployeeResource
+    list_display = ['qlook_id', 'user', 'gender',]
+    search_fields = ['qlook_id', 'user__username']
 
 
 admin.site.register(Employee, EmployeeAdmin)
+
 
 
 class PatientResource(resources.ModelResource):

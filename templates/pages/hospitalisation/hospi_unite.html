@@ -178,11 +178,11 @@
                                                                             <div class="row flex-lg-column ">
                                                                                 <div class="row flex-lg-column text-center ">{{ chambre.nom }}</div>
                                                                                 {% for box in chambre.boxes.all %}
-                                                                                    <div class="row mt-5 card-bordered border-white ">
+                                                                                    <div class="row mt-2 card-bordered border-white ">
                                                                                         <div class="card-inner border">
                                                                                             <h6>{{ box.nom }}</h6>
 
-                                                                                            <div class="d-flex flex-wrap example-border">
+                                                                                            <div class="d-flex  flex-wrap example-border">
                                                                                                 {% for lit in box.lits.all %}
 
                                                                                                     {% if lit.occuper is False and lit.reserved_until %}
@@ -192,8 +192,8 @@
                                                                                                              data-placement="top"
                                                                                                              title="Réservé par {{ lit.reserved_by }}">
                                                                                                             <img src="{% static 'images/manifestation.gif' %}">
-                                                                                                            <div class="nk-tb-col nk-tb-col-tools">
-                                                                                                                <ul class="nk-tb-actions gx-2">
+                                                                                                            
+                                                                                                                <ul style="margin-top: -15px" class="nk-tb-actions position-absolute ml-2 ">
                                                                                                                     <li>
                                                                                                                         <div class="drodown">
                                                                                                                             <a href="#"
@@ -219,25 +219,17 @@
                                                                                                                         </div>
                                                                                                                     </li>
                                                                                                                 </ul>
-                                                                                                            </div>
+                                                                                                            
                                                                                                         </div>
 
                                                                                                     {% elif lit.occuper is False and lit.is_out_of_service is False and lit.is_cleaning is False %}
                                                                                                         <!-- Free Bed -->
-                                                                                                        <div class="border border-primary"
-                                                                                                             data-toggle="tooltip"
-                                                                                                             data-placement="top"
-                                                                                                             title="Libre">
+                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="Libre">
                                                                                                             <img src="{% static 'images/hospital-bed.gif' %}">
-                                                                                                            <div class="nk-tb-col nk-tb-col-tools">
-                                                                                                                <ul class="nk-tb-actions gx-2">
+                                                                                                                <ul style="margin-top: -15px " class="nk-tb-actions position-absolute ml-2">
                                                                                                                     <li>
                                                                                                                         <div class="drodown">
-                                                                                                                            <a href="#"
-                                                                                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
-                                                                                                                               data-toggle="dropdown">
-                                                                                                                                <em class="icon ni ni-more-h"></em>
-                                                                                                                            </a>
+                                                                                                                            <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
                                                                                                                             <div class="dropdown-menu dropdown-menu-right">
                                                                                                                                 <ul class="link-list-opt no-bdr">
                                                                                                                                     <li>
@@ -268,39 +260,28 @@
                                                                                                                         </div>
                                                                                                                     </li>
                                                                                                                 </ul>
-                                                                                                            </div>
+
                                                                                                         </div>
 
                                                                                                     {% elif lit.occuper %}
                                                                                                         <!-- Occupied Bed -->
-                                                                                                        <div class="border border-primary"
-                                                                                                             data-toggle="tooltip"
-                                                                                                             data-placement="top"
-                                                                                                             title="Occupé par {{ lit.occupant }}">
-
+                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="Occupé par {{ lit.occupant }}">
 
                                                                                                         <a href="{% url 'litdetails' lit.pk %}"> <img src="{% static 'images/hospitalization.gif' %}"></a>
                                                                                                       
                                                                                                         </div>
 
                                                                                                     {% elif lit.is_out_of_service %}
-                                                                                                        <div class="border border-primary"
-                                                                                                             data-toggle="tooltip"
-                                                                                                             data-placement="top"
-                                                                                                             title="Indisponible">
+                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="Indisponible">
                                                                                                             <img src="{% static 'images/panneau-dinterdiction.gif' %}">
                                                                                                         </div>
 
                                                                                                     {% elif lit.is_cleaning %}
-                                                                                                        <div class="border border-primary"
-                                                                                                             data-toggle="tooltip"
-                                                                                                             data-placement="top"
-                                                                                                             title="Nettoyage en cours ">
+                                                                                                        <div class="border border-primary" data-toggle="tooltip" data-placement="top" title="Nettoyage en cours ">
                                                                                                             <img src="{% static 'images/brosse-de-nettoyage.gif' %}">
                                                                                                             <p class="" >libre dans
                                                                                                                 <span class="badge badge-dark" id="countdown-{{ lit.id }}" ></span>
 {#                                                                                                                <span class="spinner-border text-primary" role="status"></span>#}
-
                                                                                                             </p>
 
 

@@ -1,0 +1,560 @@
+{% extends 'layout/base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+                    <div class="container-xl wide-lg">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head nk-block-head-sm">
+                                <div class="nk-block-between">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title page-title"> Historique des  Patients réçus</h3>
+                                        <div class="nk-block-des text-soft">
+                                            <p>{{ salleattente_nbr }} Patient récu </p>
+                                        </div>
+                                    </div><!-- .nk-block-head-content -->
+                                    <div class="nk-block-head-content">
+                                       {% include 'layout/toggleoption.html' %}
+                                    </div><!-- .nk-block-head-content -->
+                                </div><!-- .nk-block-between -->
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+                                <div class="card card-bordered card-stretch">
+                                    <div class="card-inner-group">
+                                        <div class="card-inner position-relative card-tools-toggle">
+                                            <div class="card-title-group">
+                                                <div class="card-tools">
+                                                    <div class="form-inline flex-nowrap gx-3">
+                                                        <div class="form-wrap w-150px">
+                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Bulk Action">
+                                                                <option value="">Bulk Action</option>
+                                                                <option value="email">Send Email</option>
+                                                                <option value="group">Change Group</option>
+                                                                <option value="suspend">Suspend User</option>
+                                                                <option value="delete">Delete User</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="btn-wrap">
+                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
+                                                            <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
+                                                        </div>
+                                                    </div><!-- .form-inline -->
+                                                </div><!-- .card-tools -->
+                                                <div class="card-tools mr-n1">
+                                                    <ul class="btn-toolbar gx-1">
+                                                        <li>
+                                                            <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
+                                                        </li><!-- li -->
+                                                        <li class="btn-toolbar-sep"></li><!-- li -->
+                                                        <li>
+                                                            <div class="toggle-wrap">
+                                                                <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
+                                                                <div class="toggle-content" data-content="cardTools">
+                                                                    <ul class="btn-toolbar gx-1">
+                                                                        <li class="toggle-close">
+                                                                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-arrow-left"></em></a>
+                                                                        </li><!-- li -->
+                                                                        <li>
+                                                                            <div class="dropdown">
+                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                                                    <div class="dot dot-primary"></div>
+                                                                                    <em class="icon ni ni-filter-alt"></em>
+                                                                                </a>
+                                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
+                                                                                    <div class="dropdown-head">
+                                                                                        <span class="sub-title dropdown-title">Filter Users</span>
+                                                                                        <div class="dropdown">
+                                                                                            <a href="#" class="btn btn-sm btn-icon">
+                                                                                                <em class="icon ni ni-more-h"></em>
+                                                                                            </a>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="dropdown-body dropdown-body-rg">
+                                                                                        <div class="row gx-6 gy-3">
+                                                                                            <div class="col-6">
+                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                                    <input type="checkbox" class="custom-control-input" id="hasBalance">
+                                                                                                    <label class="custom-control-label" for="hasBalance"> Have Balance</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-6">
+                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                                    <input type="checkbox" class="custom-control-input" id="hasKYC">
+                                                                                                    <label class="custom-control-label" for="hasKYC"> KYC Verified</label>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label class="overline-title overline-title-alt">Role</label>
+                                                                                                    <select class="form-select form-select-sm">
+                                                                                                        <option value="any">Any Role</option>
+                                                                                                        <option value="investor">Investor</option>
+                                                                                                        <option value="seller">Seller</option>
+                                                                                                        <option value="buyer">Buyer</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-6">
+                                                                                                <div class="form-group">
+                                                                                                    <label class="overline-title overline-title-alt">Status</label>
+                                                                                                    <select class="form-select form-select-sm">
+                                                                                                        <option value="any">Any Status</option>
+                                                                                                        <option value="active">Active</option>
+                                                                                                        <option value="pending">Pending</option>
+                                                                                                        <option value="suspend">Suspend</option>
+                                                                                                        <option value="deleted">Deleted</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-12">
+                                                                                                <div class="form-group">
+                                                                                                    <button type="button" class="btn btn-secondary">Filter</button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="dropdown-foot between">
+                                                                                        <a class="clickable" href="#">Reset Filter</a>
+                                                                                        <a href="#">Save Filter</a>
+                                                                                    </div>
+                                                                                </div><!-- .filter-wg -->
+                                                                            </div><!-- .dropdown -->
+                                                                        </li><!-- li -->
+                                                                        <li>
+                                                                            <div class="dropdown">
+                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                                                    <em class="icon ni ni-setting"></em>
+                                                                                </a>
+                                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                                                                    <ul class="link-check">
+                                                                                        <li><span>Show</span></li>
+                                                                                        <li class="active"><a href="#">10</a></li>
+                                                                                        <li><a href="#">20</a></li>
+                                                                                        <li><a href="#">50</a></li>
+                                                                                    </ul>
+                                                                                    <ul class="link-check">
+                                                                                        <li><span>Order</span></li>
+                                                                                        <li class="active"><a href="#">DESC</a></li>
+                                                                                        <li><a href="#">ASC</a></li>
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div><!-- .dropdown -->
+                                                                        </li><!-- li -->
+                                                                    </ul><!-- .btn-toolbar -->
+                                                                </div><!-- .toggle-content -->
+                                                            </div><!-- .toggle-wrap -->
+                                                        </li><!-- li -->
+                                                    </ul><!-- .btn-toolbar -->
+                                                </div><!-- .card-tools -->
+                                            </div><!-- .card-title-group -->
+                                            <div class="card-search search-wrap" data-search="search">
+                                                <div class="card-body">
+                                                    <div class="search-content">
+                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
+                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
+                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+                                                    </div>
+                                                </div>
+                                            </div><!-- .card-search -->
+                                        </div><!-- .card-inner -->
+                                        <div class="card-inner p-0">
+                                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                                <div class="nk-tb-item nk-tb-head">
+
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Heure</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Service</span></div>
+                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Medecin</span></div>
+                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
+                                                    <div class="nk-tb-col"><span class="sub-text">Status</span></div>
+
+                                                    <div class="nk-tb-col nk-tb-col-tools text-right">
+                                                        <div class="dropdown">
+                                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
+                                                            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                                                <ul class="link-tidy sm no-bdr">
+                                                                    <li>
+                                                                        <div class="custom-control custom-control-sm custom-checkbox">
+                                                                            <input type="checkbox" class="custom-control-input" checked="" id="bl">
+                                                                            <label class="custom-control-label" for="bl">Balance</label>
+                                                                        </div>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="custom-control custom-control-sm custom-checkbox">
+                                                                            <input type="checkbox" class="custom-control-input" checked="" id="ph">
+                                                                            <label class="custom-control-label" for="ph">Phone</label>
+                                                                        </div>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="custom-control custom-control-sm custom-checkbox">
+                                                                            <input type="checkbox" class="custom-control-input" id="vri">
+                                                                            <label class="custom-control-label" for="vri">Verified</label>
+                                                                        </div>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="custom-control custom-control-sm custom-checkbox">
+                                                                            <input type="checkbox" class="custom-control-input" id="st">
+                                                                            <label class="custom-control-label" for="st">Status</label>
+                                                                        </div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div><!-- .nk-tb-item -->
+                                                {% for patient in recu %}
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col tb-col-md">
+                                                        <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
+                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
+                                                              {% if latest_constante.alert %}
+                                                              <img src="{% static 'images/gift/alert.gif' %}" width="20"/>
+                                                                  {% else %}
+                                                                  <i class="fa-solid fa-check-circle  "></i>
+                                                              {% endif %}
+
+                                                          </a> </span>
+
+                                                    </div>
+                                                    <div class="nk-tb-col">
+                                                        <div class="user-card">
+                                                            <div class="user-name">
+                                                                <span class="tb-lead"><i class="fa-solid fa-calendar-check"></i> {{ patient.date|naturalday }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col tb-col-sm">
+                                                        <span><i class="fa-solid fa-calendar-check"></i> {{ patient.time|naturaltime  }}</span>
+                                                    </div>
+                                                    <div class="nk-tb-col tb-col-md">
+                                                        <span><i class="fa-solid fa-virus"></i>{{ patient.service }}</span>
+                                                    </div>
+                                                    <div class="nk-tb-col tb-col-lg">
+                                                        <span><i class="fa-solid fa-user-doctor"></i>{{ patient.doctor }}</span>
+                                                    </div>
+                                                    <div class="nk-tb-col tb-col-lg">
+                                                        <ul class="list-status">
+                                                            <li><span><i class="fa-solid fa-phone"></i>{{ patient.patient.contact }}</span></li>
+                                                        </ul>
+                                                    </div>
+
+                                                    <div class="nk-tb-col">
+                                                      {% if patient.status == 'Scheduled'%}
+                                                        <span class="tb-status badge badge-dark">En attente</span>
+
+                                                            {% elif patient.status == 'Completed' %}
+                                                            <span class="tb-status badge badge-success">Recu</span>
+
+                                                            {% elif patient.status == 'Cancelled' %}
+                                                            <span class="tb-status badge badge-danger">Annuler</span>
+
+                                                            {% else %}
+
+Cancelled
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="nk-tb-col nk-tb-col-tools">
+                                                        <ul class="nk-tb-actions gx-2">
+                                                            <li class="nk-tb-action-hidden">
+                                                                <a href="{% url 'ajouter_constantes' patient_id=patient.patient.id %}" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Prise de Constantes">
+                                                                     <i class="fa-solid fa-notes-medical fa-xl"></i>
+                                                                </a>
+                                                            </li>
+                                                            <li class="nk-tb-action-hidden">
+                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="modal" data-target='#consultation{{ patient.patient.id }}' data-placement="top" title="Envoyer en consultation">
+                                                                    <i class="fa-solid fa-stethoscope fa-xl"></i>
+                                                                </a>
+                                                            </li>
+                                                            <li class="nk-tb-action-hidden">
+                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Retirer de la liste">
+                                                                    <i class="fa-solid fa-trash-alt fa-xl"></i>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <div class="drodown">
+                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
+                                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                                        <ul class="link-list-opt no-bdr">
+                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier </span></a></li>
+                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
+                                                                            <li class="divider"></li>
+                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
+                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
+                                                                            <li><a href="#"><em class="icon ni ni-na"></em><span>Suspend User</span></a></li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                <!-- Modal Trigger Code -->
+
+
+<!-- Modal Content Code -->
+
+    <div class="modal fade" tabindex="-1" id="consultation{{ patient.patient.id }}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Patient : <span class="text-primary">{{ patient.patient}}</span>   <span class="ml-20 text-gray">Confirmer la consultation pour le service {{ patient.service }}</span> </h5>
+
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'send_consultation' rdv_id=patient.id patient_id=patient.patient.id %}">
+            {% csrf_token %}
+            <div class="row m-4">
+                {% for field in ConsultationSendForm %}
+                <div class="col-4 col-md-12 mb-3 ">
+
+                    <label for="{{ field.label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            <div class="col-md-12 float-right mb-10">
+            <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
+            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
+            </div>
+            </div>
+                </form>
+
+
+            </div>
+            <div class="modal-footer bg-light">
+                <span class="">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+     <div class="modal fade" tabindex="-1" id="constanteover{{ patient.patient.id }}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Overview des constante du Patient : <span class="text-primary">{{ patient.patient}}</span> </h5>
+            </div>
+            <div class="modal-body">
+                <div class="nk-block card card-bordered">
+
+                     {% if patient.patient.latest_constante %}
+                     <h4>Deniere constante enregistrée le : {{ patient.patient.latest_constante.created_at }} </h4>
+                            <table class="table table-ulogs">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th class="tb-col-os"><span class="overline-title">Libélé <span class="d-sm-none">/ IP</span></span>
+                                    </th>
+                                    <th class="tb-col-ip"><span class="overline-title">Valeure</span></th>
+                                    <th class="tb-col-time"><span class="overline-title">Observation</span></th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+
+
+
+
+
+                                <tr>
+                                    <td class="tb-col-os">Tension systolique</td>
+                                    <td class="tb-col-ip">
+                                        <span class="">{{ patient.patient.latest_constante.tension_systolique }}</span>
+                                    </td>
+                                    <td class="tb-col-time">
+                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                            {% endif %}
+                                        </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Tension diastolique</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
+                                    <td class="tb-col-time">
+
+                                        {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
+                                            {% endif %}</td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Frequence cardiaque</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Frequence respiratoire</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
+                                    <td class="tb-col-time">
+                                         {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Temperature</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.temperature }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.temperature_status == 'Normal' %}
+                                             <span class=""><i class="fa-solid fa-thumbs-up text-primary"></i> Température normal</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"> <i class="fa-solid fa-circle-exclamation text-danger"></i> {{ patient.patient.latest_constante.temperature_status }}</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Saturation oxygene</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
+                                             <span class=""><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Glycemie</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.glycemie }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
+                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Poids</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.poids }}</span></td>
+                                    <td class="tb-col-time">
+
+
+                                             <span class="sub-text font-italic">RAS</span>
+
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">Taille</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.taille }}</span></td>
+                                    <td class="tb-col-time">
+
+
+                                             <span class="sub-text font-italic">RAS</span>
+
+                                    </td>
+
+                                </tr>
+                                    <tr>
+                                    <td class="tb-col-os">Pouls</td>
+                                    <td class="tb-col-ip"><span class="">{{ patient.patient.latest_constante.pouls }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.pouls_status == 'Normal' %}
+                                             <span class="sub-text"><i class="fa-solid fa-thumbs-up text-primary"></i> Poul Normal </span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"> <i class="fa fa-warning"></i>  {{ patient.patient.latest_constante.pouls_status }}</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td class="tb-col-os">IMC</td>
+                                    <td class="tb-col-ip"><span class="bold">{{ patient.patient.latest_constante.imc|floatformat:2 }}</span></td>
+                                    <td class="tb-col-time">
+
+                                         {% if patient.patient.latest_constante.imc_status == 'Normal' %}
+                                             <span class="sub-text">  <i class="fa-solid fa-thumbs-up text-primary"></i>  L'Indice max corporelle est normale</span>
+                                            {% else %}
+                                             <span class="sub-text font-italic"> <i class="fa-solid fa-circle-exclamation text-danger"></i>{{ patient.patient.latest_constante.imc_status }}</span>
+                                            {% endif %}
+                                    </td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+
+                    {% else %}
+                        Pas de constantes enregistrées
+                    {% endif %}
+                </div>
+
+
+            </div>
+            <div class="modal-footer bg-light">
+                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+                                                </div>
+                                                {% endfor %}
+
+
+                                            </div><!-- .nk-tb-list -->
+                                        </div><!-- .card-inner -->
+                                       <div class="card-inner">
+                                            <ul class="pagination justify-content-center justify-content-md-start">
+                                                {% if page_obj.has_previous %}
+                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                                {% endif %}
+
+                                                {% for num in page_obj.paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="salle_attente/?page={{ num }}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% if page_obj.has_next %}
+                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.next_page_number }}">Next</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div><!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+                                </div><!-- .card -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+{% endblock %}

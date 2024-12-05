@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 
 import phonenumbers
 from django import forms
+from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ValidationError
 from django_countries.fields import CountryField
 from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
-    Patient_statut_choices
+    Patient_statut_choices, Location
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
@@ -216,9 +217,12 @@ class PatientCreateForm(forms.ModelForm):
                                             'data-search': 'on',
                                             'id': 'pays'}))
 
-    commune = forms.ChoiceField(required=False, choices=communes_et_quartiers_choices, widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
-               'id': 'commune'}))
+    commune = forms.ModelChoiceField(
+        queryset=Location.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control select2', 'data-search': 'on'})
+    )
+
     code_vih = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Code VIH', }))
 
@@ -241,6 +245,22 @@ class PatientCreateForm(forms.ModelForm):
         except phonenumbers.phonenumberutil.NumberParseException:
             raise ValidationError("Invalid phone number.")
         return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
+
+    def clean_commune(self):
+        commune = self.cleaned_data.get('commune')
+        nouvelle_commune = self.cleaned_data.get('nouvelle_commune')
+
+        if not commune and not nouvelle_commune:
+            raise ValidationError("Veuillez sélectionner une commune ou en ajouter une nouvelle.")
+
+        if nouvelle_commune:
+            # Si une nouvelle commune est renseignée, elle est prioritaire
+            # Vous pouvez ajouter une logique pour enregistrer cette nouvelle commune dans votre base de données ici
+            # Exemple :
+            # Commune.objects.get_or_create(name=nouvelle_commune)
+            return nouvelle_commune
+
+        return commune
 
     def clean_date_naissance(self):
         date_naissance = self.cleaned_data.get('date_naissance')
@@ -639,6 +659,7 @@ class ProtocolesForm(forms.ModelForm):
 
 class ConstanteForm(forms.ModelForm):
     form_type = forms.CharField(initial="constante", widget=forms.HiddenInput())
+
     class Meta:
         model = Constante
         fields = ['tension_systolique', 'tension_diastolique', 'frequence_cardiaque', 'frequence_respiratoire',
@@ -691,7 +712,7 @@ class PrescriptionHospiForm(forms.ModelForm):
                     'id': 'posology'
                 }
             ),
-            'form_type':forms.CharField(initial="prescription", widget=forms.HiddenInput())
+            'form_type': forms.CharField(initial="prescription", widget=forms.HiddenInput())
         }
 
     def __init__(self, *args, **kwargs):
@@ -713,6 +734,7 @@ class SigneFonctionnelForm(forms.ModelForm):
 
 class IndicateurBiologiqueForm(forms.ModelForm):
     form_type = forms.CharField(initial="indicateur_biologique", widget=forms.HiddenInput())
+
     class Meta:
         model = IndicateurBiologique
         fields = ['globules_blancs', 'hemoglobine', 'plaquettes', 'crp', 'glucose_sanguin']
@@ -749,7 +771,6 @@ class IndicateurSubjectifForm(forms.ModelForm):
 
 class HospitalizationIndicatorsForm(forms.ModelForm):
     form_type = forms.CharField(initial="complication", widget=forms.HiddenInput())
-
 
     # temperature = forms.FloatField(
     #     widget=forms.NumberInput(attrs={'class': 'form-control'}),
@@ -849,6 +870,8 @@ class HospitalizationIndicatorsForm(forms.ModelForm):
                    'respiratory_rate',
                    'blood_pressure',
                    )
+
+
 # class HospitalizationIndicatorsForm(forms.Form):
 #     # Indicateurs de Complications
 #     temperature = forms.FloatField(
@@ -912,3 +935,80 @@ class HospitalizationIndicatorsForm(forms.ModelForm):
 #             'mental_stability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
 #             'follow_up_plan': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
 #         }
+
+class RoleForm(forms.ModelForm):
+    permissions = forms.ModelMultipleChoiceField(queryset=Permission.objects.all(), widget=forms.CheckboxSelectMultiple,
+                                                 required=False, label="Permissions disponibles", )
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le nom du rôle'}))
+
+    class Meta:
+        model = Group
+        fields = ['name', 'permissions']
+        labels = {'name': 'Nom du rôle', }
+
+    def get_permissions_grouped_by_model(self):
+        """Groupe les permissions par modèle (content_type)."""
+        grouped_permissions = {}
+        for permission in self.fields['permissions'].queryset:
+            model_name = permission.content_type.model
+            if model_name not in grouped_permissions:
+                grouped_permissions[model_name] = []
+            grouped_permissions[model_name].append(permission)
+        return grouped_permissions
+
+
+class AssignRoleForm(forms.Form):
+    role = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        required=True,
+        label="Rôle",
+    )
+
+
+class EmployeeCreateForm(forms.ModelForm):
+    # Champs pour l'utilisateur
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer votre nom d\'utilisateur'}),
+        max_length=150, label="Nom d'utilisateur")
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le nom'}), max_length=30,
+        label="Prénom")
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le prenom'}), max_length=30,
+        label="Nom")
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Entrer l\'adresse mail'}),
+        label="Email")
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le mot de passe'}),
+        label="Mot de passe")
+    role = forms.ModelChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), queryset=Group.objects.all(),
+                                  required=True, label="Rôle")
+
+    gender = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), choices=Sexe_choices,
+                               required=True, )
+    situation_matrimoniale = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}),
+                                               choices=situation_matrimoniales_choices, required=True, )
+
+    phone = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le numeros de Téléphone'}),
+        max_length=30, )
+
+    job_title = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le numeros de Téléphone'}),
+        max_length=30, )
+
+    class Meta:
+        model = Employee
+        fields = [
+            'username', 'first_name', 'last_name', 'email', 'password',
+            'gender', 'situation_matrimoniale', 'phone', 'job_title', 'role'
+        ]
+        labels = {
+            'gender': "Sexe",
+            'situation_matrimoniale': "Situation matrimoniale",
+            'phone': "Téléphone",
+            'job_title': "Titre du poste",
+            'role': "Rôle",
+        }

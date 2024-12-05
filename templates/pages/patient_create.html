@@ -81,5 +81,25 @@
                 </div>
                 </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const communeSelect = document.getElementById('commune');
+            const nouvelleCommuneInput = document.getElementById('nouvelle_commune');
 
+            // Masquer le champ "nouvelle commune" au chargement
+            if (nouvelleCommuneInput) {
+                nouvelleCommuneInput.style.display = 'none';
+            }
+
+            // Afficher le champ si "Autre" est sélectionné
+            communeSelect.addEventListener('change', function () {
+                if (this.value === '' || this.value === 'autre') {
+                    nouvelleCommuneInput.style.display = 'block';
+                } else {
+                    nouvelleCommuneInput.style.display = 'none';
+                    nouvelleCommuneInput.value = ''; // Réinitialiser le champ
+                }
+            });
+        });
+    </script>
 {% endblock %}

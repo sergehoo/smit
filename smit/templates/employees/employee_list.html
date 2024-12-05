@@ -1,0 +1,337 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load unicorn %}
+{% load group_permissions %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+        <div class="nk-content-body">
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">LISTE DES UTILISATEURS & ROLES</h3>
+                        <div class="nk-block-des text-soft">
+                            <p> Liste des Roles Utilisateurs </p>
+                        </div>
+                    </div><!-- .nk-block-head-content -->
+                    <div class="nk-block-head-content">
+
+                    <a class="btn btn-primary" href="{% url 'employee_create' %}">creer</a>
+
+                        <!-- Modal pour créer un rôle -->
+                        <div class="modal fade" id="createRoleModal" tabindex="-1" role="dialog"
+                             aria-labelledby="createRoleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="createRoleModalLabel">Créer un Nouveau Rôle</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form method="post" action="{% url 'role_create' %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <!-- Champ Nom du rôle -->
+                                            <div class="form-group">
+                                                <label for="id_name">Nom du rôle</label>
+                                                {{ rolesform.name }}
+                                            </div>
+
+                                            <!-- Accordéon pour les permissions -->
+                                            <div class="accordion" id="permissionsAccordion">
+                                                {% for model_name, permissions in grouped_permissions.items %}
+                                                    <div class="card">
+                                                        <div class="card-header" id="heading{{ forloop.counter }}">
+                                                            <h2 class="mb-0">
+                                                                <button class="btn btn-link btn-block text-left"
+                                                                        type="button" data-toggle="collapse"
+                                                                        data-target="#collapse{{ forloop.counter }}"
+                                                                        aria-expanded="true"
+                                                                        aria-controls="collapse{{ forloop.counter }}">
+                                                                    {{ model_name|title }}
+                                                                </button>
+                                                            </h2>
+                                                        </div>
+                                                        <div id="collapse{{ forloop.counter }}"
+                                                             class="collapse {% if forloop.first %}show{% endif %}"
+                                                             aria-labelledby="heading{{ forloop.counter }}"
+                                                             data-parent="#permissionsAccordion">
+                                                            <div class="card-body">
+                                                                {% for permission in permissions %}
+                                                                    <div class="custom-control custom-checkbox">
+                                                                        <input type="checkbox"
+                                                                               class="custom-control-input"
+                                                                               id="permission{{ permission.id }}"
+                                                                               name="permissions"
+                                                                               value="{{ permission.id }}">
+                                                                        <label class="custom-control-label"
+                                                                               for="permission{{ permission.id }}">
+                                                                            {{ permission.name }}
+                                                                        </label>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div><!-- .nk-block-head-content -->
+                </div><!-- .nk-block-between -->
+            </div><!-- .nk-block-head -->
+
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner position-relative card-tools-toggle">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-wrap w-150px">
+                                            <select class="form-select form-select-sm" data-search="off"
+                                                    data-placeholder="Bulk Action">
+                                                <option value="">Bulk Action</option>
+                                                <option value="email">Send Email</option>
+                                                <option value="group">Change Group</option>
+                                                <option value="suspend">Suspend User</option>
+                                                <option value="delete">Delete User</option>
+                                            </select>
+                                        </div>
+                                        <div class="btn-wrap">
+                                            <span class="d-none d-md-block"><button
+                                                    class="btn btn-dim btn-outline-light disabled">Apply</button></span>
+                                            <span class="d-md-none"><button
+                                                    class="btn btn-dim btn-outline-light btn-icon disabled"><em
+                                                    class="icon ni ni-arrow-right"></em></button></span>
+                                        </div>
+                                    </div><!-- .form-inline -->
+                                </div><!-- .card-tools -->
+                                <div class="card-tools mr-n1">
+                                    <ul class="btn-toolbar gx-1">
+                                        <li>
+                                            <a href="#" class="btn btn-icon search-toggle toggle-search"
+                                               data-target="search"><em class="icon ni ni-search"></em></a>
+                                        </li><!-- li -->
+                                        <li class="btn-toolbar-sep"></li><!-- li -->
+                                        <li>
+                                            <div class="toggle-wrap">
+                                                <a href="#" class="btn btn-icon btn-trigger toggle"
+                                                   data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
+                                                <div class="toggle-content" data-content="cardTools">
+                                                    <ul class="btn-toolbar gx-1">
+                                                        <li class="toggle-close">
+                                                            <a href="#" class="btn btn-icon btn-trigger toggle"
+                                                               data-target="cardTools"><em
+                                                                    class="icon ni ni-arrow-left"></em></a>
+                                                        </li><!-- li -->
+                                                        <li>
+                                                            <div class="dropdown">
+                                                                <a href="#"
+                                                                   class="btn btn-trigger btn-icon dropdown-toggle"
+                                                                   data-toggle="dropdown">
+                                                                    <div class="dot dot-primary"></div>
+                                                                    <em class="icon ni ni-filter-alt"></em>
+                                                                </a>
+                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
+                                                                    <div class="dropdown-head">
+                                                                        <span class="sub-title dropdown-title">Filter Users</span>
+                                                                        <div class="dropdown">
+                                                                            <a href="#" class="btn btn-sm btn-icon">
+                                                                                <em class="icon ni ni-more-h"></em>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="dropdown-body dropdown-body-rg">
+                                                                        <div class="row gx-6 gy-3">
+                                                                            <div class="col-6">
+                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                    <input type="checkbox"
+                                                                                           class="custom-control-input"
+                                                                                           id="hasBalance">
+                                                                                    <label class="custom-control-label"
+                                                                                           for="hasBalance"> Have
+                                                                                        Balance</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <div class="custom-control custom-control-sm custom-checkbox">
+                                                                                    <input type="checkbox"
+                                                                                           class="custom-control-input"
+                                                                                           id="hasKYC">
+                                                                                    <label class="custom-control-label"
+                                                                                           for="hasKYC"> KYC
+                                                                                        Verified</label>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <div class="form-group">
+                                                                                    <label class="overline-title overline-title-alt">Role</label>
+                                                                                    <select class="form-select form-select-sm">
+                                                                                        <option value="any">Any Role
+                                                                                        </option>
+                                                                                        <option value="investor">
+                                                                                            Investor
+                                                                                        </option>
+                                                                                        <option value="seller">Seller
+                                                                                        </option>
+                                                                                        <option value="buyer">Buyer
+                                                                                        </option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-6">
+                                                                                <div class="form-group">
+                                                                                    <label class="overline-title overline-title-alt">Status</label>
+                                                                                    <select class="form-select form-select-sm">
+                                                                                        <option value="any">Any Status
+                                                                                        </option>
+                                                                                        <option value="active">Active
+                                                                                        </option>
+                                                                                        <option value="pending">
+                                                                                            Pending
+                                                                                        </option>
+                                                                                        <option value="suspend">
+                                                                                            Suspend
+                                                                                        </option>
+                                                                                        <option value="deleted">
+                                                                                            Deleted
+                                                                                        </option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-12">
+                                                                                <div class="form-group">
+                                                                                    <button type="button"
+                                                                                            class="btn btn-secondary">
+                                                                                        Filter
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="dropdown-foot between">
+                                                                        <a class="clickable" href="#">Reset Filter</a>
+                                                                        <a href="#">Save Filter</a>
+                                                                    </div>
+                                                                </div><!-- .filter-wg -->
+                                                            </div><!-- .dropdown -->
+                                                        </li><!-- li -->
+                                                        <li>
+                                                            <div class="dropdown">
+                                                                <a href="#"
+                                                                   class="btn btn-trigger btn-icon dropdown-toggle"
+                                                                   data-toggle="dropdown">
+                                                                    <em class="icon ni ni-setting"></em>
+                                                                </a>
+                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                                                    <ul class="link-check">
+                                                                        <li><span>Show</span></li>
+                                                                        <li class="active"><a href="#">10</a></li>
+                                                                        <li><a href="#">20</a></li>
+                                                                        <li><a href="#">50</a></li>
+                                                                    </ul>
+                                                                    <ul class="link-check">
+                                                                        <li><span>Order</span></li>
+                                                                        <li class="active"><a href="#">DESC</a></li>
+                                                                        <li><a href="#">ASC</a></li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div><!-- .dropdown -->
+                                                        </li><!-- li -->
+                                                    </ul><!-- .btn-toolbar -->
+                                                </div><!-- .toggle-content -->
+                                            </div><!-- .toggle-wrap -->
+                                        </li><!-- li -->
+                                    </ul><!-- .btn-toolbar -->
+                                </div><!-- .card-tools -->
+                            </div><!-- .card-title-group -->
+                            <div class="card-search search-wrap" data-search="search">
+                                <div class="card-body">
+                                    <div class="search-content">
+                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em
+                                                class="icon ni ni-arrow-left"></em></a>
+                                        <input type="text" class="form-control border-transparent form-focus-none"
+                                               placeholder="Search by user or email">
+                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div><!-- .card-search -->
+                        </div><!-- .card-inner -->
+                        <div class="card-inner p-0">
+                            <table class="table table-bordered">
+                                <thead>
+                                <tr>
+                                    <th>Employé(s)</th>
+                                    <th>Fonction</th>
+                                    <th>Rôle(s)</th>
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for employee in employees %}
+                                    <tr>
+                                        <td>{{ employee.user.first_name }} {{ employee.user.last_name }}</td>
+                                        <td>{{ employee.job_title }} </td>
+                                        <td>
+                                            {% for group in employee.user.groups.all %}
+                                                <span class="badge badge-outline-primary">{{ group.name }}</span>
+                                                {% if not forloop.last %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                                                <a href="{% url 'employee_update' employee.id %}" class="btn btn-sm btn-warning"><i class="ni ni-update"></i></a>
+                                                                <a href="{% url 'employee_delete' employee.id %}" class="btn btn-sm btn-danger"><i class="ni ni-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div><!-- .nk-tb-list -->
+                        </div><!-- .card-inner -->
+                        <div class="card-inner">
+                            <ul class="pagination justify-content-center justify-content-md-start">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="employees/?page={{ page_obj.previous_page_number }}">Prev</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="employees/?page={{ num }}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item"><a class="page-link"
+                                                             href="employees/?page={{ page_obj.next_page_number }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                {% endif %}
+                            </ul>
+                        </div><!-- .card-inner -->
+                    </div><!-- .card-inner-group -->
+                </div><!-- .card -->
+            </div><!-- .nk-block -->
+        </div>
+
+{% endblock %}

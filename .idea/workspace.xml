@@ -5,10 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/core/management/commands/create_employee.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/employees/employee_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/employees/employee_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/roles/assign_role.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/roles/employee_confirm_delete.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/roles/role_confirm_delete.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/roles/role_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/roles/role_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templatetags/group_permissions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/images/medecin.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/usersmit.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/pages/appointments/patient_recu.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/logs/error.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/error.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospi_unite.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospi_unite.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/patient_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/patient_create.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/services/consultations_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/consultations_form.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,41 +71,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Django Server.smitci.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.smit-db: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ogahserge/Documents/smitci/static/images&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.smitci.executor": "Run",
+    "Docker.docker-compose.yml.smit-db: Compose Deployment.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/ogahserge/Documents/smitci/static",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite"
     ],
-    &quot;stardust.markdown.MarkdownSplitEditorSuppressor:keyList&quot;: []
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/static" />
       <recent name="$PROJECT_DIR$/static/images" />
+      <recent name="$PROJECT_DIR$/smit/templatetags" />
       <recent name="$PROJECT_DIR$/media" />
       <recent name="$PROJECT_DIR$/templates" />
-      <recent name="$PROJECT_DIR$/core/management/commands" />
-      <recent name="$PROJECT_DIR$/static/images/gift" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/smit/templatetags" />
       <recent name="$PROJECT_DIR$/templates/pages/hospitalisation" />
       <recent name="$PROJECT_DIR$/static" />
       <recent name="$PROJECT_DIR$/smit/scripts" />
@@ -179,7 +203,9 @@
       <workItem from="1729881266335" duration="585000" />
       <workItem from="1729888999760" duration="595000" />
       <workItem from="1729978781873" duration="142096000" />
-      <workItem from="1730895579843" duration="779000" />
+      <workItem from="1730895579843" duration="6779000" />
+      <workItem from="1731582058160" duration="37987000" />
+      <workItem from="1732306782412" duration="18915000" />
     </task>
     <servers />
   </component>
@@ -202,17 +228,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>616</line>
+          <line>617</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1065</line>
+          <line>1097</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smitci/urls.py</url>
-          <line>90</line>
+          <line>101</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -242,7 +268,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>438</line>
+          <line>440</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>

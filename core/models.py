@@ -2,11 +2,9 @@ import datetime
 import io
 import random
 import uuid
-
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-
 from django.db import models, transaction
 from django.db.models import Max
 from django.utils.timezone import now
@@ -479,7 +477,6 @@ Patient_statut_choices = [
     ('Ambulantoire', 'Ambulantoire'),
     ('Aucun', 'Aucun')
 ]
-
 villes_choices = [
     ('Abidjan', 'Abidjan'),
     ('Yamoussoukro', 'Yamoussoukro'),
@@ -632,7 +629,13 @@ Goupe_sanguin_choices = [
 Sexe_choices = [
     ('Homme', 'Homme'),
     ('Femme', 'Femme'),
+]
 
+type_localite_choices = [
+    ('Commune', 'Commune'),
+    ('Village', 'Village'),
+    ('Ville', 'Ville'),
+    ('Quartier', 'Quartier'),
 ]
 
 communes_et_quartiers_choices = [
@@ -652,6 +655,7 @@ communes_et_quartiers_choices = [
     ('Bouna', 'Bouna'),
     ('Bonoua', 'Bonoua'),
     ('Cocody', 'Cocody'),
+    ('Treichville', 'Treichville'),
     ('Daloa', 'Daloa'),
     ('Divo', 'Divo'),
     ('Grand-Bassam', 'Grand-Bassam'),
@@ -789,16 +793,6 @@ def qlook():
 
 
 # Create your models here.
-class Location(models.Model):
-    contry = CountryField()
-    ville = models.CharField(max_length=225, null=True, blank=True)
-    commune = models.CharField(max_length=225, null=True, blank=True)
-    quartier = models.CharField(max_length=225, null=True, blank=True)
-    geojson = models.JSONField(null=True, blank=True)
-    current_location = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.commune}, {self.contry}"
 
 
 class TimestampedModel(models.Model):
@@ -883,7 +877,44 @@ class Employee(models.Model):
             ("can_edit_employee", "Can edit employee"),
             ("can_create_employee", "Can create employee"),
             ("can_view_salary", "can view salary"),
+            ("can_view_employee", "can view employee"),
         )
+
+
+class PolesRegionaux(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name if self.name else "Unnamed Pole"
+
+
+class HealthRegion(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.name if self.name else "Unnamed Region"
+
+
+class DistrictSanitaire(models.Model):
+    nom = models.CharField(max_length=100, null=True, blank=True, )
+    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
+    geojson = models.JSONField(null=True, blank=True, )
+    previous_rank = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.nom}---->{self.region}'
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True)
+    population = models.CharField(max_length=100, null=True, blank=True)
+    source = models.CharField(max_length=255, null=True, blank=True)
+    district = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, null=True, blank=True, )
+
+    def __str__(self):
+        return f"{self.name} - {self.district}"
 
 
 class Patient(models.Model):
@@ -894,7 +925,7 @@ class Patient(models.Model):
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
-    lieu_naissance = models.CharField(max_length=200,)
+    lieu_naissance = models.CharField(max_length=200, )
     date_naissance = models.DateField(null=True, blank=True)
     genre = models.CharField(max_length=10, choices=Sexe_choices)
     nationalite = models.CharField(max_length=200)
@@ -911,7 +942,6 @@ class Patient(models.Model):
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
     details = models.JSONField(null=True, blank=True)
 
     class Meta:
@@ -1023,6 +1053,15 @@ class Patient(models.Model):
         prenoms = self.prenoms if self.prenoms else "Inconnu"
         nom = self.nom if self.nom else "Inconnu"
         return f'{prenoms} {nom} '
+
+
+class PatientAdresses(models.Model):
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
+    current = models.BooleanField(default=False)
+    staydate = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.location} - {self.current} ({self.staydate})"
 
 
 class PatientUserObjectPermission(UserObjectPermissionBase):
