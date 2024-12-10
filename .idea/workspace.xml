@@ -5,33 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/api/serializer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/api/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/api/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/management/commands/villes_communes_import.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/execute_prescription.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/components/medicament_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/components/medicament_search.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/unicorn/medicament_search.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/unicorn/medicament_search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/pages/pharmacy/medicament_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/pharmacy/medicament_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/logs/error.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/error.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/usersmit.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/static/usersmit.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -205,7 +181,7 @@
       <workItem from="1729978781873" duration="142096000" />
       <workItem from="1730895579843" duration="6779000" />
       <workItem from="1731582058160" duration="37987000" />
-      <workItem from="1732306782412" duration="60554000" />
+      <workItem from="1732306782412" duration="61505000" />
     </task>
     <servers />
   </component>

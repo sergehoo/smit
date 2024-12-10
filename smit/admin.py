@@ -16,11 +16,6 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
 # Register your models here.
 
 
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(Echantillon)
 class EchantillonAdmin(admin.ModelAdmin):
     pass
@@ -279,5 +274,18 @@ class DistrictSanitaireAdmin(ImportExportModelAdmin):
         ('Données géographiques', {
             'fields': ('geojson',),
             'classes': ('collapse',),  # Permet de cacher la section
+        }),
+    )
+
+
+@admin.register(Location)
+class LocationAdmin(ImportExportModelAdmin):
+    list_display = ('name', 'type', 'population', 'district')  # Colonnes affichées dans la liste
+    search_fields = ('name', 'district__nom')  # Recherche par nom et district
+    list_filter = ('type', 'district')  # Filtres par type et district
+    ordering = ('name',)  # Tri par nom
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'type', 'population', 'source', 'district')
         }),
     )
