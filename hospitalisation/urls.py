@@ -7,7 +7,7 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     export_constante_pdf, export_prescription_pdf, export_signe_fonctionnel_pdf, export_indicateur_biologique_pdf, \
     export_indicateur_fonctionnel_pdf, export_indicateur_subjectif_pdf, update_hospitalisation_discharge, reserve_bed, \
     release_bed, mark_as_out_of_service, mark_as_cleaning, delete_bed, set_cleaning_false, hospitalisation_lit_reserved, \
-    LitDetailView
+    LitDetailView, mark_execution_taken, delete_prescription
 from smitci import settings
 
 urlpatterns = [
@@ -40,6 +40,10 @@ urlpatterns = [
                   path('lit/<int:bed_id>/out_of_service/', mark_as_out_of_service, name='mark_as_out_of_service'),
                   path('lit/<int:bed_id>/cleaning/', mark_as_cleaning, name='mark_as_cleaning'),
                   path('lit/<int:bed_id>/delete/', delete_bed, name='delete_bed'),
+                  path('prescription/mark_taken/', mark_execution_taken, name='mark_execution_taken'),
+                  path('prescription/delete/<int:prescription_id>/', delete_prescription, name='delete_prescription'),
+
+                  # path('hospitalisation/<int:hospitalisation_id>prescription/<int:prescription_id>/execute/', execute_prescription, name='nurse_execute'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

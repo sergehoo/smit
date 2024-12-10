@@ -3,11 +3,11 @@ from django.urls import path
 
 from pharmacy.views import PharmacyListView, MedicamentDetailView, MedicamentCreateView, MedicamentUpdateView, \
     MedicamentDeleteView, MouvementStockListView, MouvementStockDetailView, MouvementStockCreateView, \
-    MouvementStockUpdateView, MouvementStockDeleteView, RendezVousListView
+    MouvementStockUpdateView, MouvementStockDeleteView, RendezVousListView, MedicamentListView
 from smitci import settings
 
 urlpatterns = [
-                  path('medicaments/', PharmacyListView.as_view(), name='medicaments'),
+                  path('medicaments/', MedicamentListView.as_view(), name='medicaments'),
                   path('medicaments/details/<int:pk>/', MedicamentDetailView.as_view(), name='medicaments-detail'),
                   path('medicaments/create', MedicamentCreateView.as_view(), name='medicaments-create'),
                   path('medicaments/update', MedicamentUpdateView.as_view(), name='medicaments-update'),

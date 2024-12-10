@@ -1,0 +1,66 @@
+<div class="container mt-4">
+    <h2>Tableau de Suivi des Prescriptions</h2>
+
+    <h3>Prescriptions en attente</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Patient</th>
+                <th>Type de Soin</th>
+                <th>Détails</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prescription in pending_prescriptions %}
+                <tr>
+                    <td>{{ prescription.patient.nom }}</td>
+                    <td>{{ prescription.care_type }}</td>
+                    <td>
+                        {% if prescription.medication %}
+                            Médicament : {{ prescription.medication.nom }}<br>
+                            Posologie : {{ prescription.posology }}
+                        {% else %}
+                            {{ prescription.details }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'execute_prescription' prescription.id %}" class="btn btn-primary">Exécuter</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Aucune prescription en attente.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Prescriptions exécutées</h3>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Patient</th>
+                <th>Type de Soin</th>
+                <th>Exécuté par</th>
+                <th>Date</th>
+                <th>Observations</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for execution in executed_prescriptions %}
+                <tr>
+                    <td>{{ execution.prescription.patient.nom }}</td>
+                    <td>{{ execution.prescription.care_type }}</td>
+                    <td>{{ execution.executed_by.username }}</td>
+                    <td>{{ execution.executed_at|date:"d/m/Y H:i" }}</td>
+                    <td>{{ execution.observations|default:"Aucune" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">Aucune exécution enregistrée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

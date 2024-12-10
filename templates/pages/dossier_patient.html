@@ -252,119 +252,128 @@
                                     <!-- Tab Consultations -->
                                     <div class="tab-pane fade" id="tabConsultations">
 
-                                       <div id="accordion" class="accordion">
-    {% for consultation in consultations %}
-        <div class="accordion-item">
-            <a href="#"
-               class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"
-               data-toggle="collapse"
-               data-target="#accordion-item-{{ consultation.id }}">
-                <h6 data-toggle="tooltip" data-placement="left"
-                    title="{{ consultation.consultation_date|naturaltime }}"
-                    class="title">
-                    Consultation du {{ consultation.consultation_date }}
-                    | {{ consultation.reason|truncatewords:25 }}
-                </h6>
-                <span class="accordion-icon"></span>
-            </a>
-            <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
-                 id="accordion-item-{{ consultation.id }}"
-                 data-parent="#accordion">
-                <div class="accordion-inner">
-                    <h5>Détails de la Consultation {{ consultation.num }}</h5>
+                                        <div id="accordion" class="accordion">
+                                            {% for consultation in consultations %}
+                                                <div class="accordion-item">
+                                                    <a href="#"
+                                                       class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"
+                                                       data-toggle="collapse"
+                                                       data-target="#accordion-item-{{ consultation.id }}">
+                                                        <h6 data-toggle="tooltip" data-placement="left"
+                                                            title="{{ consultation.consultation_date|naturaltime }}"
+                                                            class="title">
+                                                            Consultation du {{ consultation.consultation_date }}
+                                                            | {{ consultation.reason|truncatewords:25 }}
+                                                        </h6>
+                                                        <span class="accordion-icon"></span>
+                                                    </a>
+                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
+                                                         id="accordion-item-{{ consultation.id }}"
+                                                         data-parent="#accordion">
+                                                        <div class="accordion-inner">
+                                                            <h5>Détails de la Consultation {{ consultation.num }}</h5>
 
-                    <p><strong>Date :</strong> {{ consultation.consultation_date|date:"d/m/Y H:i" }}</p>
-                    <p><strong>Raison :</strong> {{ consultation.reason|default:"Non spécifiée" }}</p>
+                                                            <p><strong>Date
+                                                                :</strong> {{ consultation.consultation_date|date:"d/m/Y H:i" }}
+                                                            </p>
+                                                            <p><strong>Raison
+                                                                :</strong> {{ consultation.reason|default:"Non spécifiée" }}
+                                                            </p>
 
-                    <p><strong>Constante :</strong>
-                        {% if consultation.constante %}
-                            {{ consultation.constante }}
-                        {% else %}
-                            Aucune constante enregistrée.
-                        {% endif %}
-                    </p>
+                                                            <p><strong>Constante :</strong>
+                                                                {% if consultation.constante %}
+                                                                    {{ consultation.constante }}
+                                                                {% else %}
+                                                                    Aucune constante enregistrée.
+                                                                {% endif %}
+                                                            </p>
 
-                    <p><strong>Examens :</strong>
-                        {% if consultation.examens %}
-                            {{ consultation.examens }}
-                        {% else %}
-                            Aucun examen associé.
-                        {% endif %}
-                    </p>
+                                                            <p><strong>Examens :</strong>
+                                                                {% if consultation.examens %}
+                                                                    {{ consultation.examens }}
+                                                                {% else %}
+                                                                    Aucun examen associé.
+                                                                {% endif %}
+                                                            </p>
 
-                    <p><strong>Symptômes :</strong></p>
-                    <ul>
-                        {% for symptome in consultation.symptomes.all %}
-                            <li>{{ symptome.nom }}</li>
-                        {% empty %}
-                            <li>Aucun symptôme enregistré.</li>
-                        {% endfor %}
-                    </ul>
+                                                            <p><strong>Symptômes :</strong></p>
+                                                            <ul>
+                                                                {% for symptome in consultation.symptomes.all %}
+                                                                    <li>{{ symptome.nom }}</li>
+                                                                {% empty %}
+                                                                    <li>Aucun symptôme enregistré.</li>
+                                                                {% endfor %}
+                                                            </ul>
 
-                    <p><strong>Antécédents Médicaux :</strong></p>
-                    <ul>
-                        {% for antecedent in consultation.antecedentsMedicaux.all %}
-                            <li>{{ antecedent.nom }}</li>
-                        {% empty %}
-                            <li>Aucun antécédent médical.</li>
-                        {% endfor %}
-                    </ul>
+                                                            <p><strong>Antécédents Médicaux :</strong></p>
+                                                            <ul>
+                                                                {% for antecedent in consultation.antecedentsMedicaux.all %}
+                                                                    <li>{{ antecedent.nom }}</li>
+                                                                {% empty %}
+                                                                    <li>Aucun antécédent médical.</li>
+                                                                {% endfor %}
+                                                            </ul>
 
-                    <p><strong>Allergies :</strong></p>
-                    <ul>
-                        {% for allergie in consultation.allergies.all %}
-                            <li>{{ allergie.titre }}</li>
-                        {% empty %}
-                            <li>Aucune allergie enregistrée.</li>
-                        {% endfor %}
-                    </ul>
+                                                            <p><strong>Allergies :</strong></p>
+                                                            <ul>
+                                                                {% for allergie in consultation.allergies.all %}
+                                                                    <li>{{ allergie.titre }}</li>
+                                                                {% empty %}
+                                                                    <li>Aucune allergie enregistrée.</li>
+                                                                {% endfor %}
+                                                            </ul>
 
-                    <p><strong>Diagnostic :</strong></p>
-                    <div>
-                        {{ consultation.diagnosis|safe }}
-                    </div>
+                                                            <p><strong>Diagnostic :</strong></p>
+                                                            <div>
+                                                                {{ consultation.diagnosis|safe }}
+                                                            </div>
 
-                    <p><strong>Commentaires :</strong></p>
-                    <div>
-                        {{ consultation.commentaires|safe }}
-                    </div>
+                                                            <p><strong>Commentaires :</strong></p>
+                                                            <div>
+                                                                {{ consultation.commentaires|safe }}
+                                                            </div>
 
-                    <p><strong>Médecin :</strong>
-                        {% if consultation.doctor %}
-                            {{ consultation.doctor.username }}
-                        {% else %}
-                            Non attribué.
-                        {% endif %}
-                    </p>
+                                                            <p><strong>Médecin :</strong>
+                                                                {% if consultation.doctor %}
+                                                                    {{ consultation.doctor.username }}
+                                                                {% else %}
+                                                                    Non attribué.
+                                                                {% endif %}
+                                                            </p>
 
-                    <p><strong>Status :</strong> {{ consultation.get_status_display|default:"Non défini" }}</p>
+                                                            <p><strong>Status
+                                                                :</strong> {{ consultation.get_status_display|default:"Non défini" }}
+                                                            </p>
 
-                    <p><strong>Service de Suivi :</strong>
-                        {% if consultation.suivi %}
-                            {{ consultation.suivi.nom }}
-                        {% else %}
-                            Aucun service de suivi.
-                        {% endif %}
-                    </p>
+                                                            <p><strong>Service de Suivi :</strong>
+                                                                {% if consultation.suivi %}
+                                                                    {{ consultation.suivi.nom }}
+                                                                {% else %}
+                                                                    Aucun service de suivi.
+                                                                {% endif %}
+                                                            </p>
 
-                    <p><strong>Créé par :</strong>
-                        {% if consultation.created_by %}
-                            {{ consultation.created_by.username }}
-                        {% else %}
-                            Créateur inconnu.
-                        {% endif %}
-                    </p>
+                                                            <p><strong>Créé par :</strong>
+                                                                {% if consultation.created_by %}
+                                                                    {{ consultation.created_by.username }}
+                                                                {% else %}
+                                                                    Créateur inconnu.
+                                                                {% endif %}
+                                                            </p>
 
-                    <p><strong>Créé le :</strong> {{ consultation.created_at|date:"d/m/Y H:i" }}</p>
-                    <p><strong>Mis à jour le :</strong> {{ consultation.updated_at|date:"d/m/Y H:i" }}</p>
-                </div>
-            </div>
-        </div>
-    {% empty %}
-        <p>Aucune consultation disponible pour ce patient.</p>
-    {% endfor %}
-</div>
-
+                                                            <p><strong>Créé le
+                                                                :</strong> {{ consultation.created_at|date:"d/m/Y H:i" }}
+                                                            </p>
+                                                            <p><strong>Mis à jour le
+                                                                :</strong> {{ consultation.updated_at|date:"d/m/Y H:i" }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% empty %}
+                                                <p>Aucune consultation disponible pour ce patient.</p>
+                                            {% endfor %}
+                                        </div>
 
 
                                     </div>
@@ -374,14 +383,16 @@
                                         <div id="accordion-hospitalization" class="accordion">
                                             {% for hospitalization in hospitalizations %}
                                                 <div class="accordion-item">
-                                                    <a href="#"
-                                                       class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}"
-                                                       data-toggle="collapse"
-                                                       data-target="#accordion-item-hosp-{{ hospitalization.id }}">
+                                                    <a href="#" class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse" data-target="#accordion-item-hosp-{{ hospitalization.id }}">
                                                         <h6 class="title">
-                                                            Hospitalisation du {{ hospitalization.admission_date|date:"d/m/Y" }}  
-                                                            | Chambre : {{ hospitalization.bed.nom }}-{{ hospitalization.bed.box }}
-                                                            | {% if hospitalization.discharge_date %} <span class="badge badge-outline-primary"> Sortie le :  {{ hospitalization.discharge_date|date:"d/m/Y" }} | Motif :{{ hospitalization.discharge_reason }} {% endif %}</span>
+                                                            Hospitalisation
+                                                            du {{ hospitalization.admission_date|date:"d/m/Y" }}
+                                                            | Chambre
+                                                            : {{ hospitalization.bed }}-{{ hospitalization.bed.box }}
+                                                            | {% if hospitalization.discharge_date %}
+                                                            <span class="badge badge-outline-primary"> Sortie le :
+                                                            {{ hospitalization.discharge_date|date:"d/m/Y" }} | Motif :
+                                                            {{ hospitalization.discharge_reason }} {% endif %}</span>
                                                         </h6>
                                                         <span class="accordion-icon"></span>
                                                     </a>
@@ -389,69 +400,54 @@
                                                          id="accordion-item-hosp-{{ hospitalization.id }}"
                                                          data-parent="#accordion-hospitalization">
                                                         <div class="accordion-inner">
-                                                            <h5>Détails de
-                                                                l'Hospitalisation {{ hospitalization.id }}</h5>
+                                                            <!-- Détails de l'Hospitalisation -->
+                                    <h6>Détails de l'Hospitalisation</h6>
+                                    <p><strong>Chambre :</strong> {{ hospitalization.bed }}</p>
+                                    <p><strong>Médecin Responsable :</strong> {{ hospitalization.doctor.username|default:"Non attribué" }}</p>
+                                    <p><strong>Motif d'Admission :</strong> {{ hospitalization.reason_for_admission }}</p>
+                                    <p><strong>Statut :</strong> {{ hospitalization.get_status_display|default:"Non défini" }}</p>
 
-                                                            <p><strong>Patient
-                                                                :</strong> {{ hospitalization.patient.nom }}</p>
+                                    <!-- Indicateurs -->
+                                    <h6 class="mt-4">Indicateurs</h6>
+                                    <p><strong>Biologiques :</strong></p>
+                                    <ul>
+                                        {% for indicator in hospitalization.indicateurs_biologiques.all %}
+                                            <li>Globules Blancs : {{ indicator.globules_blancs }} | CRP : {{ indicator.crp }}</li>
+                                        {% empty %}
+                                            <li>Aucun indicateur biologique enregistré.</li>
+                                        {% endfor %}
+                                    </ul>
 
-                                                            <p><strong>Activité :</strong>
-                                                                {% if hospitalization.activite %}
-                                                                    {{ hospitalization.activite.nom }}
-                                                                {% else %}
-                                                                    Non spécifiée
-                                                                {% endif %}
-                                                            </p>
+                                    <p><strong>Fonctionnels :</strong></p>
+                                    <ul>
+                                        {% for indicator in hospitalization.indicateurs_fonctionnels.all %}
+                                            <li>Mobilité : {{ indicator.mobilite }} | Conscience : {{ indicator.conscience }}</li>
+                                        {% empty %}
+                                            <li>Aucun indicateur fonctionnel enregistré.</li>
+                                        {% endfor %}
+                                    </ul>
 
-                                                            <p><strong>Médecin :</strong>
-                                                                {% if hospitalization.doctor %}
-                                                                    {{ hospitalization.doctor.username }}
-                                                                {% else %}
-                                                                    Non attribué
-                                                                {% endif %}
-                                                            </p>
+                                    <p><strong>Subjectifs :</strong></p>
+                                    <ul>
+                                        {% for indicator in hospitalization.indicateurs_subjectifs.all %}
+                                            <li>Bien-Être : {{ indicator.bien_etre }}</li>
+                                        {% empty %}
+                                            <li>Aucun indicateur subjectif enregistré.</li>
+                                        {% endfor %}
+                                    </ul>
 
-                                                            <p><strong>Date d'Admission
-                                                                :</strong> {{ hospitalization.admission_date|date:"d/m/Y H:i" }}
-                                                            </p>
-
-                                                            <p><strong>Date de Sortie :</strong>
-                                                                {% if hospitalization.discharge_date %}
-                                                                    {{ hospitalization.discharge_date|date:"d/m/Y H:i" }}
-                                                                {% else %}
-                                                                    Toujours hospitalisé
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Motif d'Admission
-                                                                :</strong> {{ hospitalization.reason_for_admission }}
-                                                            </p>
-
-                                                            <p><strong>Motif de Sortie :</strong>
-                                                                {% if hospitalization.discharge_reason %}
-                                                                    {{ hospitalization.discharge_reason }}
-                                                                {% else %}
-                                                                    Non spécifié
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Statut
-                                                                :</strong> {{ hospitalization.get_status_display }}</p>
-
-                                                            <p><strong>Lit :</strong>
-                                                                {% if hospitalization.bed %}
-                                                                    {{ hospitalization.bed.nom }}
-                                                                {% else %}
-                                                                    Aucun lit attribué
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Créé le
-                                                                :</strong> {{ hospitalization.created_at|date:"d/m/Y H:i" }}
-                                                            </p>
-                                                            <p><strong>Mis à jour le
-                                                                :</strong> {{ hospitalization.updated_at|date:"d/m/Y H:i" }}
-                                                            </p>
+                                    <!-- Médicaments Prescrits -->
+                                    <h6 class="mt-4">Médicaments Prescrits</h6>
+                                    <ul>
+                                        {% for prescription in hospitalization.hospiprescriptions.all %}
+                                            <li>
+                                                <strong>{{ prescription.medication.nom }}</strong> - {{ prescription.quantity }} unité(s)
+                                                ({{ prescription.posology }})
+                                            </li>
+                                        {% empty %}
+                                            <li>Aucune prescription pour cette hospitalisation.</li>
+                                        {% endfor %}
+                                    </ul>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -459,10 +455,7 @@
                                                 <p>Aucune hospitalisation disponible pour ce patient.</p>
                                             {% endfor %}
                                         </div>
-
-
                                     </div>
-
                                     <!-- Tab Rendez-vous -->
                                     <div class="tab-pane fade" id="tabAppointments">
                                         <h5>Rendez-vous</h5>
@@ -496,7 +489,7 @@
 
 
 
-{#                                    {% for service, consultations in services_with_consultations %}#}
+{#   {% for service, consultations in services_with_consultations %}#}
 {#    <div class="tab-pane" id="tabItem{{ service.id }}">#}
 {#        {% if consultations %}#}
 {#            {% for consultation in consultations %}#}

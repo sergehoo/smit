@@ -15,6 +15,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse
+from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
@@ -25,7 +26,7 @@ from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm,
     HospitalizationIndicatorsForm, HospitalizationreservedForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
-    ComplicationsIndicators
+    ComplicationsIndicators, PrescriptionExecution
 
 
 def render_to_pdf(template_src, context_dict={}):
@@ -158,6 +159,91 @@ def update_hospitalisation_discharge(request, hospitalisation_id):
     return redirect('hospitalisationdetails', pk=hospitalization.id)
 
 
+# def nurse_dashboard(request):
+#     # Filtrer les prescriptions pour les patients hospitalisés avec statut "Pending"
+#     pending_prescriptions = Prescription.objects.filter(
+#         status='Pending',
+#         hospitalisation__isnull=False
+#     ).select_related('patient', 'medication', 'hospitalisation')
+#
+#     # Exécutions passées
+#     executed_prescriptions = PrescriptionExecution.objects.filter(
+#         executed_by=request.user
+#     ).select_related('prescription')
+#
+#     context = {
+#         'pending_prescriptions': pending_prescriptions,
+#         'executed_prescriptions': executed_prescriptions,
+#     }
+#     return render(request, 'nurse_dashboard.html', context)
+
+
+# def execute_prescription(request, hospitalisation_id, prescription_id):
+#     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+#     prescription = get_object_or_404(Prescription, id=prescription_id, hospitalisation=hospitalisation)
+#
+#     if request.method == 'POST':
+#         form = PrescriptionExecutionForm(request.POST)
+#         if form.is_valid():
+#             execution = form.save(commit=False)
+#             execution.prescription = prescription
+#             execution.executed_by = request.user
+#             execution.status = 'Administered'
+#             execution.save()
+#
+#             # Mettre à jour le statut de la prescription
+#             prescription.status = 'Administered'
+#             prescription.save()
+#
+#             return redirect('nurse_dashboard')  # Ou une autre vue pertinente
+#     else:
+#         form = PrescriptionExecutionForm()
+#
+#     return render(
+#         request,
+#         'pages/hospitalisation/execute_prescription.html',
+#         {'form': form, 'prescription': prescription, 'hospitalisation': hospitalisation}
+#     )
+def mark_execution_taken(request):
+    """
+    Vue pour marquer une exécution de prescription comme prise.
+    """
+    if request.method == "POST":
+        execution_id = request.POST.get("execution_id")
+
+        # Vérifier si l'ID est valide
+        execution = get_object_or_404(PrescriptionExecution, id=execution_id)
+
+        if execution.status != 'Pending':
+            messages.warning(request, "Cette exécution a déjà été marquée comme prise ou manquée.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        # Marquer l'exécution comme prise
+        execution.status = "Taken"
+        execution.executed_at = now()
+        execution.executed_by = request.user.employee  # Associer l'utilisateur qui a marqué l'exécution
+        execution.save()
+
+        messages.success(request, "Exécution marquée comme prise avec succès.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    # Retour en cas de méthode GET
+    messages.error(request, "Action non autorisée.")
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def delete_prescription(request, prescription_id):
+    """
+    Vue pour supprimer une prescription.
+    """
+    if request.method == "POST":
+        prescription = get_object_or_404(Prescription, id=prescription_id)
+        prescription.delete()
+        messages.success(request, "Prescription supprimée avec succès.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        messages.error(request, "Action non autorisée.")
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 class HospitalisationDetailView(LoginRequiredMixin, DetailView):
     model = Hospitalization
     template_name = "pages/hospitalisation/hospitalisation_details.html"
@@ -304,6 +390,8 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         else:
             context['discharge_criteria'] = {}
 
+
+
         # Add forms to context
         context['constante_form'] = ConstanteForm()
         context['prescription_hospi_form'] = PrescriptionHospiForm()
@@ -324,12 +412,36 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
 
         context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient)
+        context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization)
+
+        prescriptions = Prescription.objects.filter(hospitalisation=hospitalization)
+        executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions).order_by('scheduled_time')
+
+        # context['prescriptions'] = prescriptions
+        context['executions'] = executions
+
+        # context['prescription_execution_form'] = PrescriptionExecutionForm()
+
         context['signe_fonctionnel'] = SigneFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_biologique'] = IndicateurBiologique.objects.filter(hospitalisation=self.object)
         context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
         context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
 
+        # Récupérer toutes les exécutions liées à cette hospitalisation
+        executions = PrescriptionExecution.objects.filter(
+            prescription__hospitalisation=hospitalization
+        ).order_by('scheduled_time')
+
+        # Trouver la prochaine prise
+        next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
+
+        # Trouver la dernière prise manquée
+        # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
+        missed_executions = executions.filter(scheduled_time__lt=now(),status='Pending'
+        ).order_by('-scheduled_time')
+        context['next_execution'] = next_execution
+        context['missed_executions'] = missed_executions
         return context
 
     def post(self, request, *args, **kwargs):
@@ -358,7 +470,9 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
             prescription.patient = hospitalisation.patient
             prescription.hospitalisation = hospitalisation
             prescription.created_by = request.user.employee
+            prescription.status = "Pending"
             prescription.save()
+            prescription.generate_executions()
             messages.success(request, "Prescription saved successfully.")
             return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
 

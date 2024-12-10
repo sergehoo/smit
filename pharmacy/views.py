@@ -1,6 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from pharmacy.models import Medicament, CathegorieMolecule, Molecule, MouvementStock, StockAlert, Commande, \
@@ -91,6 +93,9 @@ class CathegorieMoleculeUpdateView(UpdateView):
 class MedicamentListView(ListView):
     model = Medicament
     template_name = 'pharmacy/medicament_list.html'
+    context_object_name = "medicament"
+    paginate_by = 50
+    ordering = ['-date_expiration']
 
 
 class MedicamentDetailView(DetailView):

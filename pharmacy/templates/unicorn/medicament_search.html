@@ -1,7 +1,11 @@
 <div>
-    <div class="form-inline flex-nowrap gx-3">
-        <input type="text" wire:model="search" class="form-control" placeholder="Rechercher par nom de médicament...">
-        <div class="form-wrap w-150px">
+    <!-- Barre de recherche -->
+    <div class="form-inline flex-nowrap gx-3 mb-3">
+        <input type="text" wire:model.debounce.500ms="search" class="form-control w-50"
+               placeholder="Rechercher par nom de médicament...">
+
+        <!-- Filtres catégories -->
+        <div class="form-wrap w-150px mx-2">
             <select wire:model="selected_categorie" class="form-select form-select-sm">
                 <option value="">Toutes les catégories</option>
                 {% for categorie in categories %}
@@ -9,7 +13,9 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="form-wrap w-150px">
+
+        <!-- Filtres molécules -->
+        <div class="form-wrap w-150px mx-2">
             <select wire:model="selected_molecule" class="form-select form-select-sm">
                 <option value="">Toutes les molécules</option>
                 {% for molecule in molecules %}
@@ -19,16 +25,26 @@
         </div>
     </div>
 
-    <ul class="row g-gs preview-icon-svg p-3">
-        {% for medocs in medicaments %}
-        <li class="col-lg-3 col-6 col-sm-4">
+    <!-- Résultats -->
+    <div class="row g-gs preview-icon-svg p-3">
+        {% for med in medicaments %}
+        <li class="col-lg-3 col-6 col-sm-4 medicament-card">
             <div class="preview-icon-box card card-bordered">
                 <div class="preview-icon-wrap">
-                   <!-- SVG Icon -->
+                    <!-- SVG Icon -->
                 </div>
-                <span class="preview-icon-name">{{ medocs.nom|upper }}</span>
+                <div class="preview-icon-name">
+                    <strong>{{ med.nom }}</strong>
+                    <p>{{ med.description|default:"Aucune description disponible" }}</p>
+                    <p><small>Catégorie: {{ med.categorie.nom|default:"Non spécifiée" }}</small></p>
+                    <p><small>Stock: {{ med.stock }}</small></p>
+                </div>
             </div>
         </li>
+        {% empty %}
+        <div class="alert alert-warning">
+            Aucun médicament ne correspond à votre recherche.
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 </div>

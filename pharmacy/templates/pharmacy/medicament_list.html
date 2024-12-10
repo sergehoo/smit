@@ -1,0 +1,117 @@
+{% extends 'layout/base.html' %}
+{% load unicorn %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+        <div class="container-xl wide-lg">
+            <div class="nk-content-body">
+                <div class="nk-block-head nk-block-head-sm">
+                    <div class="nk-block-between">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title">Liste des Medicaments</h3>
+                            <div class="nk-block-des text-soft">
+                                <p>{{ medicaments_nbr }} Medicaments </p>
+                            </div>
+                        </div>
+                        <div class="nk-block-head-content">
+                            {% include 'layout/toggleoption.html' %}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="medicamentSearch" class="container">
+                    <div class="form-inline flex-nowrap gx-3 mb-3">
+                        <!-- Barre de recherche -->
+                        <input type="text" id="searchBar" class="form-control w-50"
+                               placeholder="Rechercher par nom de médicament...">
+
+                        <!-- Filtres catégories -->
+                        <div class="form-wrap w-150px mx-2">
+                            <select id="categorieFilter" class="form-select form-select-sm">
+                                <option value="">Toutes les catégories</option>
+                                {% for categorie in categories %}
+                                    <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Filtres molécules -->
+                        <div class="form-wrap w-150px mx-2">
+                            <select id="moleculeFilter" class="form-select form-select-sm">
+                                <option value="">Toutes les molécules</option>
+                                {% for molecule in molecules %}
+                                    <option value="{{ molecule.id }}">{{ molecule.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Résultats -->
+                    <div id="medicamentResults" class="row g-gs preview-icon-svg p-3">
+                        <!-- Médicaments affichés dynamiquement -->
+                    </div>
+
+                    <!-- Alerte aucun médicament -->
+                    <div id="noResultsMessage" class="alert alert-warning d-none">
+                        Aucun médicament ne correspond à votre recherche.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const searchBar = document.getElementById("searchBar");
+                const categorieFilter = document.getElementById("categorieFilter");
+                const moleculeFilter = document.getElementById("moleculeFilter");
+                const medicamentResults = document.getElementById("medicamentResults");
+                const noResultsMessage = document.getElementById("noResultsMessage");
+
+                const spinner = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+
+                function fetchMedicaments() {
+                    const query = searchBar.value.trim();
+                    const categorie = categorieFilter.value;
+                    const molecule = moleculeFilter.value;
+
+                    medicamentResults.innerHTML = spinner;
+
+                    fetch(`/api/medicaments?search=${query}&categorie=${categorie}&molecule=${molecule}`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            medicamentResults.innerHTML = "";
+
+                            if (data.medicaments.length > 0) {
+                                data.medicaments.forEach((med) => {
+                                    const medCard = `
+                            <li class="col-lg-3 col-6 col-sm-4 medicament-card">
+                                <div class="preview-icon-box card card-bordered">
+                                    <div class="preview-icon-wrap">
+                                       <!-- SVG Icon -->
+                                    </div>
+                                    <div class="preview-icon-name">
+                                        <strong>${med.nom}</strong>
+                                        <p>${med.description || "Aucune description disponible"}</p>
+                                        <p><small>Catégorie: ${med.categorie || "Non spécifiée"}</small></p>
+                                        <p><small>Stock: ${med.stock}</small></p>
+                                    </div>
+                                </div>
+                            </li>`;
+                                    medicamentResults.insertAdjacentHTML("beforeend", medCard);
+                                });
+                                noResultsMessage.classList.add("d-none");
+                            } else {
+                                noResultsMessage.classList.remove("d-none");
+                            }
+                        })
+                        .catch((error) => {
+                            medicamentResults.innerHTML = `<div class="alert alert-danger">Erreur lors du chargement des médicaments.</div>`;
+                            console.error(error);
+                        });
+                }
+
+                searchBar.addEventListener("input", fetchMedicaments);
+                categorieFilter.addEventListener("change", fetchMedicaments);
+                moleculeFilter.addEventListener("change", fetchMedicaments);
+            });
+        </script>
+    </div>
+{% endblock %}

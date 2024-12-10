@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from core.models import Location
+from core.models import Location, PolesRegionaux, HealthRegion, DistrictSanitaire
 from laboratory.models import Echantillon
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
@@ -186,12 +186,11 @@ class EmployeeResource(resources.ModelResource):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     resource_class = EmployeeResource
-    list_display = ['qlook_id', 'user', 'gender',]
+    list_display = ['qlook_id', 'user', 'gender', ]
     search_fields = ['qlook_id', 'user__username']
 
 
 admin.site.register(Employee, EmployeeAdmin)
-
 
 
 class PatientResource(resources.ModelResource):
@@ -251,3 +250,34 @@ class MaladieOpportunisteAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(MaladieOpportuniste, MaladieOpportunisteAdmin)
+
+
+@admin.register(PolesRegionaux)
+class PolesRegionauxAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'name')  # Affiche les colonnes ID et nom
+    search_fields = ('name',)  # Ajoute une barre de recherche pour le champ 'name'
+
+
+@admin.register(HealthRegion)
+class HealthRegionDistrictAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'name', 'poles')  # Affiche ID, nom et pole associé
+    search_fields = ('name', 'poles__name')  # Barre de recherche sur 'name' et le nom du pole
+    list_filter = ('poles',)  # Ajoute un filtre par pole régional
+
+
+@admin.register(DistrictSanitaire)
+class DistrictSanitaireAdmin(ImportExportModelAdmin):
+    list_display = ('id', 'nom', 'region', 'previous_rank')  # Colonnes principales à afficher
+    search_fields = ('nom', 'region__name')  # Recherche par nom du district ou de la région
+    list_filter = ('region',)  # Filtrage par région de santé
+    ordering = ('previous_rank',)  # Trie par classement précédent
+    readonly_fields = ('geojson',)  # Rendre le champ 'geojson' en lecture seule dans l'admin
+    fieldsets = (
+        (None, {
+            'fields': ('nom', 'region', 'previous_rank')
+        }),
+        ('Données géographiques', {
+            'fields': ('geojson',),
+            'classes': ('collapse',),  # Permet de cacher la section
+        }),
+    )

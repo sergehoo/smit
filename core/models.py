@@ -1,9 +1,11 @@
 import datetime
 import io
+import json
 import random
 import uuid
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.db.models import Max
@@ -12,6 +14,7 @@ from django_countries.fields import CountryField
 from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
+from django.contrib.gis.db import models
 
 
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
@@ -899,15 +902,27 @@ class HealthRegion(models.Model):
 class DistrictSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True, )
     region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
+    geom = models.PointField(null=True, blank=True, )
     geojson = models.JSONField(null=True, blank=True, )
     previous_rank = models.IntegerField(null=True, blank=True)
+
+    def clean(self):
+        # Valider le champ `geojson` si présent
+        if self.geojson:
+            try:
+                json.dumps(self.geojson)  # Vérifie que le contenu est JSON
+            except ValueError:
+                raise ValidationError("Le champ GeoJSON n'est pas valide.")
+
+    def __str__(self):
+        return f'{self.nom}---->{self.region}'
 
     def __str__(self):
         return f'{self.nom}---->{self.region}'
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True, unique=True)
     type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True)
     population = models.CharField(max_length=100, null=True, blank=True)
     source = models.CharField(max_length=255, null=True, blank=True)

@@ -43,6 +43,7 @@ urlpatterns = [
                   path('pharmacy/', include('pharmacy.urls')),
                   path('hospitalisation/', include('hospitalisation.urls')),
                   path('laboratoire/', include('laboratory.urls')),
+                  path('api/', include('core.api.urls')),
                   path('tinymce/', include('tinymce.urls')),
 
                   path('user_role/', RoleListView.as_view(), name='user_role'),
@@ -59,6 +60,7 @@ urlpatterns = [
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
                   path('modifierPatient/<int:pk>', PatientUpdateView.as_view(), name='update_patient'),
                   path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
+
 
                   # path('patient/<int:patient_id>/service/<int:service_id>/', service_detail_view, name='service_detail'),
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospitalisation, LitHospitalisation, \
-    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators
+    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution
 
 
 # Register your models here.
@@ -65,4 +65,9 @@ class LitHospitalisation(admin.ModelAdmin):
 
 @admin.register(SigneFonctionnel)
 class SigneFonctionnelAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'hospitalisation']
+    list_display = (['nom', 'hospitalisation'])
+
+
+@admin.register(PrescriptionExecution)
+class PrescriptionExecutionAdmin(admin.ModelAdmin):
+    list_display = ['prescription', 'scheduled_time']

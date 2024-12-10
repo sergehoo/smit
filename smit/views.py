@@ -711,9 +711,20 @@ class PatientDetailView(LoginRequiredMixin, DetailView):
 
         # Récupérer les éléments liés au patient
         context["consultations"] = patient.consultation_set.all().order_by('-created_at')
-        context["hospitalizations"] = patient.hospitalized.all().order_by('-created_at')
+        # context["hospitalizations"] = patient.hospitalized.all().order_by('-created_at')
         context["appointments"] = patient.appointment_set.all().order_by('-created_at')
         context["suivis"] = patient.suivimedecin.all()
+
+        # Ajouter les hospitalisations
+        hospitalizations = patient.hospitalized.all().prefetch_related(
+            'indicateurs_biologiques',
+            'indicateurs_fonctionnels',
+            'indicateurs_subjectifs',
+            'indicateurs_compliques',
+            'indicateurs_autres',
+        ).order_by('-created_at')
+
+        context['hospitalizations'] = hospitalizations
 
         return context
 
@@ -725,40 +736,36 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('global_search')  # Ensure 'global_search' points to your desired view
 
     def form_valid(self, form):
-        nom = form.cleaned_data['nom'].upper()
-        prenoms = form.cleaned_data['prenoms'].upper()
+        # Normaliser les noms pour éviter les doublons à cause de la casse
+        nom = form.cleaned_data['nom'].strip().upper()
+        prenoms = form.cleaned_data['prenoms'].strip().upper()
         date_naissance = form.cleaned_data['date_naissance']
-        contact = form.cleaned_data['contact']
+        contact = form.cleaned_data['contact'].strip()
 
-        # Vérification des doublons
-        if Patient.objects.filter(nom__iexact=nom, prenoms__iexact=prenoms, date_naissance=date_naissance).exists():
-            messages.error(self.request, 'Ce patient existe déjà.')
+        # Vérification des doublons (nom, prénoms, date de naissance)
+        if Patient.objects.filter(
+            nom__iexact=nom,
+            prenoms__iexact=prenoms,
+            date_naissance=date_naissance
+        ).exists():
+            messages.error(self.request, "Un patient avec les mêmes nom, prénoms et date de naissance existe déjà.")
             return self.form_invalid(form)
 
+        # Vérification des doublons de contact
         if Patient.objects.filter(contact=contact).exists():
-            messages.error(self.request, 'Un patient avec ce contact existe déjà.')
+            messages.error(self.request, "Un patient avec ce contact existe déjà.")
             return self.form_invalid(form)
 
-        # new_commune = form.cleaned_data['new_commune'].strip()
-
-        # Check if the new commune is not in the existing choices
-        # if new_commune and not Location.objects.filter(commune=new_commune).exists():
-        #     Location.objects.create(commune=new_commune)
-        # Optionally, you can update the choice list dynamically
-
-        # Save the Patient object
+        # Création du patient
         self.object = form.save()
 
-        # Handle the Location information
-        location_data = {
-            'contry': form.cleaned_data['pays'],
-            'commune': form.cleaned_data['commune']
-        }
-        location_instance, created = Location.objects.get_or_create(**location_data)
-        self.object.localite = location_instance
-        self.object.save()
+        # Gestion des informations de localité
+        commune = form.cleaned_data.get('commune')
+        if commune:
+            self.object.localite = commune
+            self.object.save()
 
-        messages.success(self.request, 'Patient créé avec succès!')
+        messages.success(self.request, "Patient créé avec succès !")
         return redirect(self.success_url)
 
 

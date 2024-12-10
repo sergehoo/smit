@@ -28,8 +28,7 @@
                     </div><!-- .nk-block-between -->
 
                     <div class="mt-2">
-                        <a href="#" data-toggle="modal" data-target="#constanteover"
-                           class="btn btn-outline-primary mr-4"><em class="icon ni ni-note-add"></em>Constantes</a>
+                        <a href="#" data-toggle="modal" data-target="#constanteover" class="btn btn-outline-primary mr-4"><em class="icon ni ni-note-add"></em>Constantes</a>
 
                         <div class="modal fade" tabindex="-1" id="constanteover">
                             <div class="modal-dialog modal-lg" role="document">
@@ -310,12 +309,10 @@
                             </div>
                         </div>
 
-                        {#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
+                        {# <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
 {#                           class="btn btn-outline-secondary float-right mr-5"#}
 {#                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
 {#                                class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>#}
-
-
 
                     </div>
 
@@ -325,22 +322,122 @@
                 <div class="nk-block">
                     <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
-                            <blockquote class="blockquote text-center">
-                                {% if hospitalisationdetail.discharge_date %}
-                                  {% else %}
-                                <img src="{% static 'images/hospitalization-2.gif' %}" height="200">
-                                {% endif %}
-                                <p class="mb-0">Admis en hospitalisation le <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>      <footer class="blockquote-footer">{{ hospitalisationdetail.reason }}</footer></p>
-{% if hospitalisationdetail.discharge_date %}
-                                      
- <p class="mb-0">Sortie de l' hospitalisation le <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>      <footer class="blockquote-footer">{{ hospitalisationdetail.discharge_reason }}</footer></p>
-{% else %}
-{% endif %}
-                            </blockquote>
+                            <div class="row">
+
+                                    <div class="col-lg-12">
+                                        <blockquote class="blockquote text-center">
+                                            {% if hospitalisationdetail.discharge_date %}
+                                            {% else %}
+                                                <img src="{% static 'images/hospitalization-2.gif' %}" height="200">
+                                            {% endif %}
+                                            <p class="mb-0">Admis en hospitalisation le <strong
+                                                    class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
+
+                                            <footer class="blockquote-footer">{{ hospitalisationdetail.reason }}</footer>
+                                            </p>
+                                            {% if hospitalisationdetail.discharge_date %}
+
+
+                                                <p class="mb-0">Sortie de l' hospitalisation le <strong
+                                                        class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
+                                                <footer class="blockquote-footer">{{ hospitalisationdetail.discharge_reason }}</footer>
+                                                </p>
+                                            {% else %}
+                                            {% endif %}
+                                        </blockquote>
+                                    </div>
+                                
+
+                            </div>
+                            <div class="row">
+                                <!-- Médicament manqué -->
+                                <div class="col-lg-6 mx-auto">
+                                    {% if missed_executions %}
+                                        <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
+                                            <div class="card-body">
+                                                <h5 class="text-danger font-weight-bold mb-3">
+                                                    Médicaments Non Pris
+                                                </h5>
+                                                <ul class="list-group">
+                                                    {% for execution in missed_executions %}
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>{{ execution.prescription.medication.nom }}</strong>
+                                                                <br>
+                                                                <span class="text-muted">Heure prévue : {{ execution.scheduled_time|date:"d/m/Y H:i" }}</span>
+                                                            </div>
+                                                            <span class="badge badge-danger">Non pris</span>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="card shadow-sm border-0 bg-success text-white rounded-lg p-4">
+                                            <div class="card-body text-center">
+                                                <h5 class="font-weight-bold">Aucune Prise Manquée</h5>
+                                                <p class="mt-2">Toutes les prescriptions ont été suivies à temps.</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <!-- Prochaine prise -->
+                                <div class="col-lg-6 mx-auto">
+                                    {% if next_execution %}
+                                        <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
+                                            <div class="card-body text-center">
+                                                <h5 class="text-primary font-weight-bold">Prochaine Prise de
+                                                    Médicament</h5>
+                                                <h4 class="text-dark mt-3">{{ next_execution.prescription.medication.nom }}</h4>
+                                                <p class="text-muted">Heure prévue :
+                                                    <strong>{{ next_execution.scheduled_time|date:"d/m/Y H:i" }}</strong>
+                                                </p>
+                                                <div class="mt-4">
+                                                    <div id="countdown"
+                                                         class="display-4 text-warning font-weight-bold"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="card shadow-sm border-0 bg-success text-white rounded-lg p-4">
+                                            <div class="card-body text-center">
+                                                <h5 class="font-weight-bold">Aucun Médicament Prévu</h5>
+                                                <p class="mt-2">Tous les médicaments prescrits ont été administrés ou
+                                                    aucune prescription n'est en attente.</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <script>
+                                    {% if next_execution %}
+                                        // Script pour le compte à rebours
+                                        const nextExecutionTime = new Date("{{ next_execution.scheduled_time|date:"Y-m-d H:i:s" }}").getTime();
+                                        const countdownElement = document.getElementById("countdown");
+
+                                        const countdown = setInterval(function () {
+                                            const now = new Date().getTime();
+                                            const distance = nextExecutionTime - now;
+
+                                            if (distance <= 0) {
+                                                clearInterval(countdown);
+                                                countdownElement.innerHTML = "Prise de médicament en cours ou en retard.";
+                                            } else {
+                                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                                countdownElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+                                            }
+                                        }, 1000);
+                                    {% endif %}
+                                </script>
+
+                            </div>
+
                             <hr>
                             <!-- Indicateurs Cliniques -->
                             <div class="row m-4">
-<h3 class="text-muted"> Indicateurs Cliniques </h3>
+<h3 class="text-muted"> Suivie de Soins </h3>
 
                                 <div class="row col-12">
 
@@ -463,7 +560,8 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                        <form method="post"
+                                                              action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
                                                             {% csrf_token %}
                                                             <div class="row">
                                                                 {% for field in constante_form %}
@@ -488,10 +586,98 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Executes prescriptions -->
+                                    <div class="col-12 col-md-12 mb-5">
+    <div class="card text-black-100 border">
+        <div class="card-header d-flex justify-content-between">
+            <h5 class="card-title">Suivi des soins prescrits</h5>
+            <a class="btn btn-outline-info btn-icon btn-round" href="#">
+                <em class="icon ni ni-download-cloud"></em>
+            </a>
+        </div>
+        <div class="card-inner text-black-70">
+            <table class="table table-bordered table-responsive-md">
+                <thead>
+                    <tr>
+                        <th>Médicament</th>
+                        <th>Heure Prévue</th>
+                        <th>Heure Réelle</th>
+                        <th>Durée</th>
+                        <th>Status</th>
+                        <th>Infirmier(ère)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for execution in executions %}
+                        <tr class="{% if forloop.counter > 5 %}prescription-suivi-data d-none{% endif %}">
+                            <td>{{ execution.prescription.medication.nom }}</td>
+                            <td>{{ execution.scheduled_time|naturaltime }}</td>
+                            <td>
+                                {% if execution.executed_at %}
+                                    {{ execution.executed_at|naturaltime }}
+                                {% else %}
+                                    Non prise
+                                {% endif %}
+                            </td>
+                            <td>{{ execution.prescription.pendant }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if execution.status == 'Pending' %}badge-warning
+                                    {% elif execution.status == 'Taken' %}badge-success
+                                    {% else %}badge-danger{% endif %}">
+                                    {{ execution.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if execution.executed_by %}
+                                    {{ execution.executed_by }}
+                                {% else %}
+                                    Non attribué
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if execution.status == 'Pending' %}
+                                    <form method="post" action="{% url 'mark_execution_taken' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="execution_id" value="{{ execution.id }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Marquer comme pris</button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm" disabled>Déjà pris</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if executions|length > 5 %}
+                <div class="text-center mt-3">
+                    <button id="toggleButtonPrescriptionssuivi" class="btn btn-secondary">
+                        Voir plus
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('toggleButtonPrescriptionssuivi');
+        const hiddenRows = document.querySelectorAll('.prescription-suivi-data');
+        let isExpanded = false;
+
+        toggleButton.addEventListener('click', function () {
+            hiddenRows.forEach(row => row.classList.toggle('d-none'));
+            isExpanded = !isExpanded;
+            toggleButton.textContent = isExpanded ? 'Voir moins' : 'Voir plus';
+        });
+    });
+</script>
 
                                     <!-- Prescription Card -->
                                     <!-- Tableau des prescriptions -->
-
                                     <div class="col-12 col-md-12 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
@@ -512,7 +698,6 @@
                                                         <th>Date</th>
                                                         <th>Medecin</th>
                                                         <th>Actions</th>
-                                                        <th>Ordonnance</th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -522,48 +707,69 @@
                                                             <tr class="{% if forloop.counter > 5 %}prescription-data d-none{% endif %}">
                                                                 <td>
                                                                     {% if prescription.medication.dosage_form == 'Comprimé' %}
-    <img src="{% static 'images/comprimes.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Sirop' %}
-    <img src="{% static 'images/sirop.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Injection' %}
-    <img src="{% static 'images/seringue.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Gélule' %}
-    <img src="{% static 'images/gelules.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Crème' %}
-    <img src="{% static 'images/pommade.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Pommade' %}
-    <img src="{% static 'images/pommade.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Suppositoire' %}
-    <img src="{% static 'images/suppositoire.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Gouttes' %}
-    <img src="{% static 'images/goutte-deau.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Patch' %}
-    <img src="{% static 'images/patch.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Inhalateur' %}
-    <img src="{% static 'images/spray-de-peinture.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Solution' %}
-    <img src="{% static 'images/solution.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Suspension' %}
-    <img src="{% static 'images/suspension.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Poudre' %}
-    <img src="{% static 'images/poudre-de-talc.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Spray' %}
-    <img src="{% static 'images/spray-de-peinture.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Ovule' %}
-    <img src="{% static 'images/ovule.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Collyre' %}
-    <img src="{% static 'images/collyre.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Aérosol' %}
-    <img src="{% static 'images/aerosol.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Élixir' %}
-    <img src="{% static 'images/elixir.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Baume' %}
-    <img src="{% static 'images/baume.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Granulé' %}
-    <img src="{% static 'images/granule.png' %}" width="20">
-{% elif prescription.medication.dosage_form == 'Capsule' %}
-    <img src="{% static 'images/capsule.png' %}" width="20">
-{% endif %}
+                                                                        <img src="{% static 'images/comprimes.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Sirop' %}
+                                                                        <img src="{% static 'images/sirop.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Injection' %}
+                                                                        <img src="{% static 'images/seringue.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Gélule' %}
+                                                                        <img src="{% static 'images/gelules.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Crème' %}
+                                                                        <img src="{% static 'images/pommade.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Pommade' %}
+                                                                        <img src="{% static 'images/pommade.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Suppositoire' %}
+                                                                        <img src="{% static 'images/suppositoire.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Gouttes' %}
+                                                                        <img src="{% static 'images/goutte-deau.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Patch' %}
+                                                                        <img src="{% static 'images/patch.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Inhalateur' %}
+                                                                        <img src="{% static 'images/spray-de-peinture.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Solution' %}
+                                                                        <img src="{% static 'images/solution.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Suspension' %}
+                                                                        <img src="{% static 'images/suspension.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Poudre' %}
+                                                                        <img src="{% static 'images/poudre-de-talc.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Spray' %}
+                                                                        <img src="{% static 'images/spray-de-peinture.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Ovule' %}
+                                                                        <img src="{% static 'images/ovule.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Collyre' %}
+                                                                        <img src="{% static 'images/collyre.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Aérosol' %}
+                                                                        <img src="{% static 'images/aerosol.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Élixir' %}
+                                                                        <img src="{% static 'images/elixir.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Baume' %}
+                                                                        <img src="{% static 'images/baume.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Granulé' %}
+                                                                        <img src="{% static 'images/granule.png' %}"
+                                                                             width="20">
+                                                                    {% elif prescription.medication.dosage_form == 'Capsule' %}
+                                                                        <img src="{% static 'images/capsule.png' %}"
+                                                                             width="20">
+                                                                    {% endif %}
                                                                     <span class="badge badge-dark">{{ prescription.medication }}</span><br>
                                                                 </td>
                                                                 <td>
@@ -575,15 +781,12 @@
                                                                 <td>
                                                                     <span>{{ prescription.created_by }}</span>
                                                                 </td>
-                                                                <td>
-                                <span>
-                                    <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                            class="icon ni ni-eye"></em></a>
-                                    <a class="btn btn-outline-info btn-icon btn-round btn-xs" href="#"><em
-                                            class="icon ni ni-download-cloud ml-10"></em></a>
-                                    <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                            class="icon ni ni-trash-fill"></em></a>
-                                </span>
+                                                                <td> <form method="post" action="{% url 'delete_prescription' prescription.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-icon btn-round btn-xs" onclick="return confirm('Voulez-vous vraiment supprimer cette prescription ?')">
+            <em class="icon ni ni-trash-fill"></em>
+        </button>
+    </form>
                                                                 </td>
                                                             </tr>
                                                         {% endfor %}
@@ -643,7 +846,7 @@
                                                             {% csrf_token %}
                                                             <div class="row">
                                                                 {% for field in prescription_hospi_form %}
-                                                                    <div class="col-md-4 mb-3">
+                                                                    <div class="col-md-3 mb-3">
                                                                         <div class="form-group">
                                                                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                                                             <div class="form-control-wrap">

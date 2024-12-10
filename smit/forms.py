@@ -11,11 +11,12 @@ from tinymce.widgets import TinyMCE
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
     Patient_statut_choices, Location
+
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
-    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators
+    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution
 
 POSOLOGY_CHOICES = [
     ('Une fois par jour', 'Une fois par jour'),
@@ -209,18 +210,11 @@ class PatientCreateForm(forms.ModelForm):
     employeur = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
 
-    pays = CountryField().formfield(required=False,
-                                    initial="CI",  # Set the default to Côte d'Ivoire
-                                    widget=forms.Select(
-                                        attrs={
-                                            'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                                            'data-search': 'on',
-                                            'id': 'pays'}))
-
     commune = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control select2', 'data-search': 'on'})
+        widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+               'data-search': 'on', 'id': 'commune'})
     )
 
     code_vih = forms.CharField(required=False, widget=forms.TextInput(
@@ -683,7 +677,7 @@ class PrescriptionHospiForm(forms.ModelForm):
 
     class Meta:
         model = Prescription
-        fields = ['medication', 'quantity', 'posology']
+        fields = ['medication', 'quantity', 'posology', 'pendant', 'a_partir_de']
         labels = {
             'medication': 'Médicament',
             'quantity': 'Quantité',
@@ -699,7 +693,7 @@ class PrescriptionHospiForm(forms.ModelForm):
             ),
             'quantity': forms.NumberInput(
                 attrs={
-                    'class': 'form-control number-spinner',
+                    'class': 'form-control',
                     'value': '0',
                     'placeholder': 'Entrez la quantité',
                     'type': 'number'
@@ -710,6 +704,22 @@ class PrescriptionHospiForm(forms.ModelForm):
                     'class': 'form-control form-control-lg form-control-outlined select2 form-select',
                     'data-search': 'on',
                     'id': 'posology'
+                }
+            ),
+
+            'pendant': forms.Select(
+                attrs={
+                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                    'data-search': 'on',
+                    'id': 'pendant'
+                }
+            ),
+
+            'a_partir_de': forms.Select(
+                attrs={
+                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+                    'data-search': 'on',
+                    'id': 'a_partir_de'
                 }
             ),
             'form_type': forms.CharField(initial="prescription", widget=forms.HiddenInput())
@@ -870,6 +880,16 @@ class HospitalizationIndicatorsForm(forms.ModelForm):
                    'respiratory_rate',
                    'blood_pressure',
                    )
+
+
+class PrescriptionExecutionForm(forms.ModelForm):
+    class Meta:
+        model = PrescriptionExecution
+        fields = ['executed_at', 'observations']
+        widgets = {
+            'executed_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'observations': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 
 
 # class HospitalizationIndicatorsForm(forms.Form):

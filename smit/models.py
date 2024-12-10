@@ -1,12 +1,13 @@
 import datetime
 import io
 import random
+import unicodedata
 import uuid
 
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Max
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -61,6 +62,31 @@ POSOLOGY_CHOICES = [
     ('Une fois par semaine', 'Une fois par semaine'),
     ('Deux fois par semaine', 'Deux fois par semaine'),
     ('Un jour sur deux', 'Un jour sur deux'),
+]
+
+DELAY_CHOICES = [
+    ('1', '1 jour'),
+    ('2', '2 jours'),
+    ('3', '3 jours'),
+    ('4', '4 jours'),
+    ('5', '5 jours'),
+    ('7', '1 semaine'),
+    ('14', '2 semaines'),
+    ('21', '3 semaines'),
+    ('30', '1 mois'),
+]
+
+FROM_CHOICES = [
+    ('1', '1 heure'),
+    ('2', '2 heures'),
+    ('3', '3 heures'),
+    ('4', '4 heures'),
+    ('6', '6 heures'),
+    ('8', '8 heures'),
+    ('12', '12 heures'),
+    ('24', '24 heures'),
+    ('48', '48 heures'),
+    ('72', '72 heures'),
 ]
 
 
@@ -360,7 +386,8 @@ class Consultation(models.Model):
 
 class Constante(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="constantes")
-    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiconstantes",null=True, blank=True)
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiconstantes",
+                                        null=True, blank=True)
     tension_systolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle systolique")
     tension_diastolique = models.IntegerField(null=True, blank=True, verbose_name="Tension artérielle diastolique")
     frequence_cardiaque = models.IntegerField(null=True, blank=True, verbose_name="Fréquence cardiaque")
@@ -485,11 +512,12 @@ class Constante(models.Model):
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions')
-    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiprescriptions",
-                                        null=True, blank=True)
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiprescriptions", null=True, blank=True)
     medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     posology = models.CharField(max_length=350, choices=POSOLOGY_CHOICES, null=True, blank=True)
+    pendant = models.CharField(max_length=350, choices=DELAY_CHOICES, null=True, blank=True)
+    a_partir_de = models.CharField(max_length=350, choices=FROM_CHOICES, null=True, blank=True)
     prescribed_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=50, choices=[
         ('Pending', 'Pending'),
@@ -498,11 +526,113 @@ class Prescription(models.Model):
     ])
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescription_creator')
 
+    executed_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,
+                                    related_name='executed_prescriptions')
+    executed_at = models.DateTimeField(null=True, blank=True)
+    observations = models.TextField(null=True, blank=True, help_text="Notes ou observations lors de l'exécution.")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def normalize_string(value):
+        """
+        Normalise une chaîne en minuscule, sans accents, et supprime les espaces inutiles.
+        """
+        if not value:
+            return None
+        # Supprime les accents
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+        # Convertit en minuscule et supprime les espaces superflus
+        return ' '.join(value.lower().split())
+
+    def generate_executions(self):
+        """
+        Génère les prises de médicament en fonction de la posologie, de la durée du traitement, et du délai avant la première prise.
+        """
+        POSOLOGY_MAPPING = {
+            'une fois par jour': 24,
+            'deux fois par jour': 12,
+            'trois fois par jour': 8,
+            'quatre fois par jour': 6,
+            'toutes les 4 heures': 4,
+            'toutes les 6 heures': 6,
+            'toutes les 8 heures': 8,
+            'si besoin': None,
+            'avant les repas': None,
+            'après les repas': None,
+            'au coucher': None,
+            'une fois par semaine': None,
+            'deux fois par semaine': None,
+            'un jour sur deux': None,
+        }
+
+        # Normaliser la posologie
+        normalized_posology = self.normalize_string(self.posology)
+        interval = POSOLOGY_MAPPING.get(normalized_posology)
+
+        if interval is None:
+            # Si la posologie n'est pas basée sur un intervalle (ex. : "Si besoin"), ne rien générer
+            return
+
+        # Calcul de la durée du traitement
+        try:
+            duration_days = int(self.pendant)
+        except (TypeError, ValueError):
+            # Par défaut, limiter à 1 jour si `pendant` n'est pas défini ou invalide
+            duration_days = 1
+
+        # Calcul du délai avant la première prise
+        try:
+            delay_hours = int(self.a_partir_de)  # Convertir la valeur de `a_partir_de` en heures
+        except (TypeError, ValueError):
+            delay_hours = 0  # Par défaut, aucune attente avant la première prise
+
+        start_time = self.prescribed_at + datetime.timedelta(hours=delay_hours)  # Ajoute le délai à la prescription
+        end_time = self.prescribed_at + datetime.timedelta(days=duration_days)
+
+        # Récupérer toutes les exécutions existantes pour cette prescription
+        existing_executions = set(
+            PrescriptionExecution.objects.filter(prescription=self).values_list('scheduled_time', flat=True)
+        )
+
+        # Génération des exécutions
+        new_executions = []
+        while start_time < end_time:
+            if start_time not in existing_executions:
+                new_executions.append(
+                    PrescriptionExecution(
+                        prescription=self,
+                        scheduled_time=start_time,
+                        status='Pending',
+                    )
+                )
+            start_time += datetime.timedelta(hours=interval)
+
+        # Utiliser une transaction pour insérer toutes les nouvelles exécutions en une seule requête
+        if new_executions:
+            with transaction.atomic():
+                PrescriptionExecution.objects.bulk_create(new_executions)
+
     def __str__(self):
         return f"{self.patient.nom} - {self.medication.nom}"
+
+
+class PrescriptionExecution(models.Model):
+    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="executions")
+    scheduled_time = models.DateTimeField()  # Heure prévue de la prise
+    executed_at = models.DateTimeField(null=True, blank=True)  # Heure réelle de la prise
+    executed_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="executed_meds")
+    status = models.CharField(max_length=50, choices=[
+        ('Pending', 'Pending'),
+        ('Taken', 'Taken'),
+        ('Missed', 'Missed'),
+    ], default='Pending')
+    observations = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.prescription.medication.nom} - {self.scheduled_time} - {self.status}"
 
 
 class WaitingRoom(models.Model):
@@ -648,7 +778,8 @@ class IndicateurFonctionnel(models.Model):
 
 
 class IndicateurSubjectif(models.Model):
-    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,related_name='indicateurs_subjectifs')
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE,
+                                        related_name='indicateurs_subjectifs')
     date = models.DateField(default=datetime.date.today)
 
     bien_etre = models.IntegerField(null=True, blank=True, choices=[(i, i) for i in range(0, 11)])
@@ -719,7 +850,8 @@ class ComplicationsIndicators(models.Model):
     ALP_NORMAL_RANGE = (44, 147)  # U/L
 
     # Champs du modèle
-    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name='indicateurs_compliques',null=True, blank=True)
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE,
+                                        related_name='indicateurs_compliques', null=True, blank=True)
     sodium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     potassium = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     chlorure = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)

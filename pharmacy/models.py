@@ -1,7 +1,11 @@
 import random
 import uuid
 
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from schedule.models import Calendar, Event
 
 from core.models import Patient, Service, Employee
@@ -49,7 +53,7 @@ UNITE_DOSAGE_CHOICES = [
 
 
 class CathegorieMolecule(models.Model):
-    nom = models.CharField(max_length=255, null=True, blank=True)
+    nom = models.CharField(max_length=255, unique=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -57,7 +61,7 @@ class CathegorieMolecule(models.Model):
 
 
 class Molecule(models.Model):
-    nom = models.CharField(max_length=255, null=True, blank=True)
+    nom = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
     cathegorie = models.ForeignKey(CathegorieMolecule, on_delete=models.SET_NULL, null=True, blank=True)
 
@@ -72,7 +76,7 @@ def generate_unique_code_barre():
 
 class Medicament(models.Model):
     codebarre = models.CharField(max_length=150, unique=True, default=generate_unique_code_barre,
-                                 help_text="Code unique pour le médicament")  # Pour l'identification par code-barre
+                                 help_text="Code unique pour le médicament", validators=[RegexValidator(regex=r'^\d{12}$',message="Le code-barre doit être composé de 12 chiffres.")])  # Pour l'identification par code-barre
     nom = models.CharField(max_length=255, null=True, blank=True, unique=True)
     dosage = models.IntegerField(null=True, blank=True)
     unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,
@@ -96,6 +100,28 @@ class MouvementStock(models.Model):
     type_mouvement = models.CharField(max_length=50, choices=[('Entrée', 'Entrée'), ('Sortie', 'Sortie')])
     date_mouvement = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        if self.type_mouvement == 'Sortie' and self.quantite > self.medicament.stock:
+            raise ValidationError('La quantité retirée dépasse le stock disponible.')
+
+
+@receiver(post_save, sender=MouvementStock)
+def update_stock_on_save(sender, instance, **kwargs):
+    if instance.type_mouvement == 'Entrée':
+        instance.medicament.stock += instance.quantite
+    elif instance.type_mouvement == 'Sortie':
+        instance.medicament.stock -= instance.quantite
+    instance.medicament.save()
+
+
+@receiver(post_delete, sender=MouvementStock)
+def update_stock_on_delete(sender, instance, **kwargs):
+    if instance.type_mouvement == 'Entrée':
+        instance.medicament.stock -= instance.quantite
+    elif instance.type_mouvement == 'Sortie':
+        instance.medicament.stock += instance.quantite
+    instance.medicament.save()
+
     def __str__(self):
         return f"{self.type_mouvement} de {self.quantite} {self.medicament.nom}"
 
@@ -103,8 +129,24 @@ class MouvementStock(models.Model):
 class StockAlert(models.Model):
     medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     niveau_critique = models.PositiveIntegerField()
-    quantité_actuelle = models.PositiveIntegerField()
-    alerté = models.BooleanField(default=False)
+    quantite_actuelle = models.PositiveIntegerField()
+    alerte = models.BooleanField(default=False)
+
+
+@receiver(post_save, sender=Medicament)
+def create_or_update_stock_alert(sender, instance, **kwargs):
+    niveau_critique = 10  # Par exemple, valeur par défaut
+    if instance.stock < niveau_critique:
+        StockAlert.objects.update_or_create(
+            medication=instance,
+            defaults={
+                'niveau_critique': niveau_critique,
+                'quantité_actuelle': instance.stock,
+                'alerté': True
+            }
+        )
+    else:
+        StockAlert.objects.filter(medication=instance).delete()
 
 
 class Commande(models.Model):
@@ -123,6 +165,11 @@ class ArticleCommande(models.Model):
     commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='articles')
     medicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['commande', 'medicament'], name='unique_commande_medicament')
+        ]
 
     def __str__(self):
         return f"{self.quantite} de {self.medicament.nom}"
@@ -162,16 +209,20 @@ class RendezVous(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if RendezVous.objects.filter(patient=self.patient, date=self.date, time=self.time).exists():
+            raise ValidationError("Un rendez-vous existe déjà à cette date et heure pour ce patient.")
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Rendez-vous de {self.patient} - {self.date} à {self.time}"
 
 
 class Fournisseur(models.Model):
-    nom = models.CharField(max_length=255)
+    nom = models.CharField(max_length=255, unique=True)
     adresse = models.TextField()
     contact = models.CharField(max_length=255)
     email = models.EmailField()
 
     def __str__(self):
         return f"{self.nom}"
-
