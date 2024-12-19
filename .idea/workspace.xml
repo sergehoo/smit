@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
-    </list>
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -185,7 +179,7 @@
       <workItem from="1731582058160" duration="37987000" />
       <workItem from="1732306782412" duration="65082000" />
       <workItem from="1734032736480" duration="7545000" />
-      <workItem from="1734569615153" duration="4528000" />
+      <workItem from="1734569615153" duration="4863000" />
     </task>
     <servers />
   </component>
