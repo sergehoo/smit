@@ -13,8 +13,7 @@
                         <div class="nk-block-between">
 
                             <div class="nk-block-head-content">
-                                <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation
-                                    Patient</h1>
+                                <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation Patient</h1>
 
                                 <div class="nk-block-des">
                                     <h2 class="ml-5"> {{ hospitalisationdetail.patient }}</h2>
@@ -832,8 +831,7 @@
                                     </script>
 
                                     <!-- Prescriptions Form Modal -->
-                                    <div class="modal fade" id="prescriptionModal" tabindex="-1"
-                                         aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="prescriptionModal" tabindex="-1" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
@@ -895,8 +893,8 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        {% if indicateurs_biologiques %}
-                                                            {% for indicateur in indicateurs_biologiques %}
+                                                        {% if indicateur_biologique %}
+                                                            {% for indicateur in indicateur_biologique %}
                                                                 <tr>
                                                                     <td>
                                                                         <span class="badge badge-dark">Globules Blancs: {{ indicateur.globules_blancs }}</span><br>
@@ -926,12 +924,11 @@
                                             </div>
                                         </div>
                                      <!-- Indicateur Form Modal -->
-                                    <div class="modal fade" id="indicateurbiologiqueformModal" tabindex="-1"
-                                         aria-labelledby="indicateurbiologiqueformModalModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="indicateurbiologiqueformModal" tabindex="-1" aria-labelledby="indicateurbiologiqueformModalModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="indicateurbiologiqueformModalModalLabel">Indicateurs biologique</h5>
+                                                    <h5 class="modal-title" id="indicateurbiologiqueformModalLabel">Indicateurs biologique</h5>
                                                     <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
                                                 </div>
                                                 <div class="modal-body">
@@ -996,8 +993,8 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        {% if indicateurs_fonctionnels %}
-                                                            {% for indicateur in indicateurs_fonctionnels %}
+                                                        {% if indicateur_fonctionnel %}
+                                                            {% for indicateur in indicateur_fonctionnel %}
                                                                 <tr>
                                                                     <td>
                                                                         <span class="badge badge-dark">Mobilité: {{ indicateur.mobilite }}</span><br>
@@ -1217,7 +1214,7 @@
                 </div>
             </div>
         </div>
-    </div>
+  
     <script>
         // Données JSON pour les indicateurs et leurs plages
         const chartData = JSON.parse('{{ lab_ink|escapejs }}');
@@ -1395,129 +1392,126 @@
         functionalChart.render();
     </script>
     <script>
-    // Données JSON pour les indicateurs de complications
-    const complicationsData = JSON.parse('{{ complications_chart_data|escapejs }}');
+        // Données JSON pour les indicateurs de complications
+        const complicationsData = JSON.parse('{{ complications_chart_data|escapejs }}');
 
-    // Transformation de l'état mental en valeurs numériques
-    const mentalStateValues = complicationsData.mental_state.map(state => {
-        if (state === "clair") return 3;
-        if (state === "confusion") return 2;
-        if (state === "somnolent") return 1;
-        return null;
-    });
+        // Transformation de l'état mental en valeurs numériques
+        const mentalStateValues = complicationsData.mental_state.map(state => {
+            if (state === "clair") return 3;
+            if (state === "confusion") return 2;
+            if (state === "somnolent") return 1;
+            return null;
+        });
 
-    // Configuration du graphique ApexCharts
-    const complicationsOptions = {
-        chart: {
-            type: 'line',
-            height: 450
-        },
-        series: [
-            {
-                name: 'Niveau de Douleur',
-                data: complicationsData.pain_level
+        // Configuration du graphique ApexCharts
+        const complicationsOptions = {
+            chart: {
+                type: 'line',
+                height: 450
             },
-            {
-                name: 'État Mental',
-                data: mentalStateValues
-            }
-        ],
-        xaxis: {
-            categories: complicationsData.dates,
-            title: {
-                text: 'Dates'
-            },
-            labels: {
-                rotate: -45
-            }
-        },
-        yaxis: [
-            {
-                title: {
-                    text: 'Niveau de Douleur'
+            series: [
+                {
+                    name: 'Niveau de Douleur',
+                    data: complicationsData.pain_level
                 },
-                min: 0,
-                max: 10,
-                tickAmount: 10
-            },
-            {
-                opposite: true,
+                {
+                    name: 'État Mental',
+                    data: mentalStateValues
+                }
+            ],
+            xaxis: {
+                categories: complicationsData.dates,
                 title: {
-                    text: 'État Mental'
+                    text: 'Dates'
                 },
-                min: 0,
-                max: 3,
-                tickAmount: 3,
                 labels: {
-                    formatter: function (value) {
-                        if (value === 3) return 'Clair';
-                        if (value === 2) return 'Confusion';
-                        if (value === 1) return 'Somnolent';
-                        return '';
+                    rotate: -45
+                }
+            },
+            yaxis: [
+                {
+                    title: {
+                        text: 'Niveau de Douleur'
+                    },
+                    min: 0,
+                    max: 10,
+                    tickAmount: 10
+                },
+                {
+                    opposite: true,
+                    title: {
+                        text: 'État Mental'
+                    },
+                    min: 0,
+                    max: 3,
+                    tickAmount: 3,
+                    labels: {
+                        formatter: function (value) {
+                            if (value === 3) return 'Clair';
+                            if (value === 2) return 'Confusion';
+                            if (value === 1) return 'Somnolent';
+                            return '';
+                        }
                     }
                 }
-            }
-        ],
-        tooltip: {
-            shared: true,
-            intersect: false,
-        },
-        title: {
-            text: 'Évolution des Indicateurs de Complications',
-            align: 'center'
-        }
-    };
-
-    // Rendu du graphique
-    const complicationsChart = new ApexCharts(document.querySelector("#complications-chart"), complicationsOptions);
-    complicationsChart.render();
-</script>
-
-    <script>
-    // Données JSON pour les graphiques en camembert
-    const pieChartData = JSON.parse('{{ pie_chart_data|escapejs }}');
-
-    // Fonction de configuration et de rendu d'un graphique en camembert
-    function renderPieChart(elementId, seriesData, labels, title) {
-        const options = {
-            chart: {
-                type: 'donut',
-                height: 350
+            ],
+            tooltip: {
+                shared: true,
+                intersect: false,
             },
-            series: seriesData,
-            labels: labels,
             title: {
-                text: title,
+                text: 'Évolution des Indicateurs de Complications',
                 align: 'center'
             }
         };
 
-        const chart = new ApexCharts(document.querySelector(elementId), options);
-        chart.render();
-    }
+        // Rendu du graphique
+        const complicationsChart = new ApexCharts(document.querySelector("#complications-chart"), complicationsOptions);
+        complicationsChart.render();
+    </script>
+    <script>
+        // Données JSON pour les graphiques en camembert
+        const pieChartData = JSON.parse('{{ pie_chart_data|escapejs }}');
 
-    // Données et rendu du graphique pour l'état mental
-    const mentalStateLabels = Object.keys(pieChartData.mental_state);
-    const mentalStateSeries = Object.values(pieChartData.mental_state);
-    renderPieChart("#mental-state-chart", mentalStateSeries, mentalStateLabels, "État Mental");
+        // Fonction de configuration et de rendu d'un graphique en camembert
+        function renderPieChart(elementId, seriesData, labels, title) {
+            const options = {
+                chart: {
+                    type: 'donut',
+                    height: 350
+                },
+                series: seriesData,
+                labels: labels,
+                title: {
+                    text: title,
+                    align: 'center'
+                }
+            };
 
-    // Données et rendu du graphique pour l'équilibre électrolytique
-    const electrolytesBalanceLabels = Object.keys(pieChartData.electrolytes_balance);
-    const electrolytesBalanceSeries = Object.values(pieChartData.electrolytes_balance);
-    renderPieChart("#electrolytes-balance-chart", electrolytesBalanceSeries, electrolytesBalanceLabels, "Équilibre Électrolytique");
+            const chart = new ApexCharts(document.querySelector(elementId), options);
+            chart.render();
+        }
 
-    // Données et rendu du graphique pour la fonction rénale
-    const renalFunctionLabels = Object.keys(pieChartData.renal_function);
-    const renalFunctionSeries = Object.values(pieChartData.renal_function);
-    renderPieChart("#renal-function-chart", renalFunctionSeries, renalFunctionLabels, "Fonction Rénale");
+        // Données et rendu du graphique pour l'état mental
+        const mentalStateLabels = Object.keys(pieChartData.mental_state);
+        const mentalStateSeries = Object.values(pieChartData.mental_state);
+        renderPieChart("#mental-state-chart", mentalStateSeries, mentalStateLabels, "État Mental");
 
-    // Données et rendu du graphique pour la fonction hépatique
-    const hepaticFunctionLabels = Object.keys(pieChartData.hepatic_function);
-    const hepaticFunctionSeries = Object.values(pieChartData.hepatic_function);
-    renderPieChart("#hepatic-function-chart", hepaticFunctionSeries, hepaticFunctionLabels, "Fonction Hépatique");
-</script>
+        // Données et rendu du graphique pour l'équilibre électrolytique
+        const electrolytesBalanceLabels = Object.keys(pieChartData.electrolytes_balance);
+        const electrolytesBalanceSeries = Object.values(pieChartData.electrolytes_balance);
+        renderPieChart("#electrolytes-balance-chart", electrolytesBalanceSeries, electrolytesBalanceLabels, "Équilibre Électrolytique");
 
+        // Données et rendu du graphique pour la fonction rénale
+        const renalFunctionLabels = Object.keys(pieChartData.renal_function);
+        const renalFunctionSeries = Object.values(pieChartData.renal_function);
+        renderPieChart("#renal-function-chart", renalFunctionSeries, renalFunctionLabels, "Fonction Rénale");
 
+        // Données et rendu du graphique pour la fonction hépatique
+        const hepaticFunctionLabels = Object.keys(pieChartData.hepatic_function);
+        const hepaticFunctionSeries = Object.values(pieChartData.hepatic_function);
+        renderPieChart("#hepatic-function-chart", hepaticFunctionSeries, hepaticFunctionLabels, "Fonction Hépatique");
+    </script>
     <script>
         // Données JSON pour le graphique des indicateurs biologiques
         const biologicalData = JSON.parse('{{ chart_data|escapejs }}');
@@ -1578,7 +1572,6 @@
         const biologicalChart = new ApexCharts(document.querySelector("#biological-chart"), biologicalOptions);
         biologicalChart.render();
     </script>
-
     <script>
         // Données JSON pour le graphique des constantes vitales
         const labels = [

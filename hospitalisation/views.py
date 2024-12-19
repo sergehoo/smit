@@ -408,34 +408,26 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['complications_chart_data'] = json.dumps(complicbarre, cls=DjangoJSONEncoder)
         context['pie_chart_data'] = json.dumps(complic)
         context['lab_ink'] = json.dumps(labcompliq, cls=DjangoJSONEncoder)
-
         context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
-
         context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient)
         context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization)
-
         prescriptions = Prescription.objects.filter(hospitalisation=hospitalization)
         executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions).order_by('scheduled_time')
-
         # context['prescriptions'] = prescriptions
         context['executions'] = executions
-
         # context['prescription_execution_form'] = PrescriptionExecutionForm()
-
         context['signe_fonctionnel'] = SigneFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_biologique'] = IndicateurBiologique.objects.filter(hospitalisation=self.object)
         context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
         context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
-
+        
         # Récupérer toutes les exécutions liées à cette hospitalisation
         executions = PrescriptionExecution.objects.filter(
             prescription__hospitalisation=hospitalization
         ).order_by('scheduled_time')
-
         # Trouver la prochaine prise
         next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
-
         # Trouver la dernière prise manquée
         # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
         missed_executions = executions.filter(scheduled_time__lt=now(),status='Pending'
