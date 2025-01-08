@@ -1,12 +1,16 @@
+import datetime
 import json
 import logging
+import traceback
 import uuid
 from collections import Counter
 from datetime import date, timedelta
 from decimal import Decimal
 from io import BytesIO
 
+import pandas as pd
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,7 +19,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse
-from django.utils.timezone import now
+from django.utils.timezone import now, make_naive, is_aware
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView
 from xhtml2pdf import pisa
@@ -23,10 +27,12 @@ from xhtml2pdf import pisa
 from core.models import Patient, ServiceSubActivity
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
-    HospitalizationIndicatorsForm, HospitalizationreservedForm
+    HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
+    DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
-    ComplicationsIndicators, PrescriptionExecution
+    ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
+    EffetIndesirable, CommentaireInfirmier
 
 
 def render_to_pdf(template_src, context_dict={}):
@@ -39,23 +45,102 @@ def render_to_pdf(template_src, context_dict={}):
     return None
 
 
-# Create your views here.
+class ExportHospitalizationView(LoginRequiredMixin, ListView):
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        current_date = timezone.now().strftime('%Y-%m-%d')
+        filename = f"Exportation donnees hospitalisations_{current_date}.xlsx".replace(' ', '_')
+
+
+        # Convertir les données en DataFrame Pandas
+        data = []
+        for hosp in queryset:
+            admission_date = hosp.admission_date
+            discharge_date = hosp.discharge_date
+
+            # Rendre les datetime naïfs si nécessaire
+            if is_aware(admission_date):
+                admission_date = make_naive(admission_date)
+            if discharge_date and is_aware(discharge_date):
+                discharge_date = make_naive(discharge_date)
+
+            data.append({
+                'Patient': f"{hosp.patient.nom} {hosp.patient.prenoms}",
+                'Admission Date': admission_date,
+                'Discharge Date': discharge_date or 'En cours',
+                'Diagnostic Final': hosp.diagnostics.filter(
+                    type_diagnostic='final').first().maladie.nom if hosp.diagnostics.filter(
+                    type_diagnostic='final').exists() else 'Aucun',
+                'Status': hosp.patient.status,
+            })
+
+        df = pd.DataFrame(data)
+
+        # Exporter en fichier Excel
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        df.to_excel(response, index=False, engine='openpyxl')
+        return response
+
+    def get_queryset(self):
+        queryset = Hospitalization.objects.select_related('patient').prefetch_related('diagnostics')
+
+        # Appliquer les filtres si des paramètres sont présents
+        maladie = self.request.GET.get('maladie')
+        status = self.request.GET.get('status')
+        nom_patient = self.request.GET.get('nom_patient')
+
+        if maladie:
+            queryset = queryset.filter(diagnostics__maladie__id=maladie, diagnostics__type_diagnostic='final')
+        if status:
+            queryset = queryset.filter(patient__status=status)
+        if nom_patient:
+            queryset = queryset.filter(
+                Q(patient__nom__icontains=nom_patient) | Q(patient__prenoms__icontains=nom_patient))
+
+        return queryset.distinct()
+
+
 class HospitalisationListView(LoginRequiredMixin, ListView):
     model = Hospitalization
     template_name = "pages/hospitalisation/hospitalisation.html"
     context_object_name = "hospitalisationgenerale"
+    paginate_by = 10
+    ordering = "-admission_date"
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('patient').prefetch_related('diagnostics')
+
+        # Appliquer les filtres de recherche
+        maladie = self.request.GET.get('maladie')
+        status = self.request.GET.get('status')
+        nom_patient = self.request.GET.get('nom_patient')
+
+        if maladie:
+            queryset = queryset.filter(diagnostics__maladie__id=maladie,
+                                       diagnostics__type_diagnostic='final')  # Utilisation de l'ID pour éviter ambiguïtés
+        if status:
+            queryset = queryset.filter(patient__status=status)
+        if nom_patient:
+            queryset = queryset.filter(
+                Q(patient__nom__icontains=nom_patient) | Q(patient__prenoms__icontains=nom_patient))
+
+        return queryset.distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         today = date.today()
         demande_hospi = Consultation.objects.filter(hospitalised=1).order_by('created_at')
         demande_hospi_nbr = demande_hospi.count()
+        queryset = self.get_queryset()
 
         # Récupérer la dernière constante pour chaque patient
-
+        context['search_form'] = PatientSearchForm(self.request.GET or None)
         context['demande_hospi'] = demande_hospi
         context['demande_hospi_nbr'] = demande_hospi_nbr
         context['demande_hospi_form'] = HospitalizationSendForm()
+        context['result_count'] = queryset.count()
 
         return context
 
@@ -244,6 +329,144 @@ def delete_prescription(request, prescription_id):
     else:
         messages.error(request, "Action non autorisée.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required
+def add_diagnostic(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
+    if request.method == 'POST':
+        form = DiagnosticForm(request.POST)
+        if form.is_valid():
+            diagnostic = form.save(commit=False)
+            diagnostic.hospitalisation = hospitalisation
+            diagnostic.date_diagnostic = timezone.now()
+            diagnostic.medecin_responsable = request.user
+            diagnostic.save()  # Sauvegarde finale du diagnostic
+            messages.success(request, f"Diagnostic '{diagnostic.nom}' ajouté avec succès.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        else:
+            # Afficher les erreurs du formulaire avec un message d'erreur global
+            messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+    # Pour les requêtes GET (peu probable dans ce cas), rediriger
+    messages.error(request, "Méthode non autorisée.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_observations(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = ObservationForm(request.POST)
+        if form.is_valid():
+            observation = form.save(commit=False)
+            observation.hospitalisation = hospitalisation
+            observation.patient = hospitalisation.patient
+            # observation.date_enregistrement = timezone.now()  # Utilisation correcte du champ dans le modèle
+            observation.medecin = request.user  # Associe l'utilisateur actuel comme médecin
+            observation.save()
+            messages.success(request, "Observation ajoutée avec succès.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout de l'observation. Veuillez corriger les erreurs.")
+
+    messages.error(request, "Erreur lors de l'ajout de l'observation. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_avis_medical(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = AvisMedicalForm(request.POST)
+        if form.is_valid():
+            avis = form.save(commit=False)
+            avis.hospitalisation = hospitalisation
+            avis.date_avis = timezone.now()
+            avis.medecin = request.user
+            avis.save()
+            messages.success(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+    else:
+        form = AvisMedicalForm()
+    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_hospi_comment(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
+    if request.method == 'POST':
+        form = CommentaireInfirmierForm(request.POST)
+        if form.is_valid():
+            commentaire = form.save(commit=False)
+            commentaire.patient = hospitalisation.patient
+            commentaire.hospitalisation = hospitalisation
+            commentaire.medecin = request.user
+            commentaire.save()
+            messages.success(request, "Commentaire ajouté avec succès.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout du commentaire. Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = CommentaireInfirmierForm()
+    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_effet_indesirable(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = EffetIndesirableForm(request.POST)
+        if form.is_valid():
+            try:
+                effet = form.save(commit=False)
+                effet.hospitalisation = hospitalisation
+                effet.patient = hospitalisation.patient
+                effet.medecin = request.user
+                effet.save()
+                messages.success(request, "Effet indésirable ajouté avec succès !")
+                return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            except Exception as e:
+                # Capture et affichage des exceptions inattendues
+                messages.error(request, f"Une erreur inattendue s'est produite : {e}")
+                traceback.print_exc()  # Afficher la trace complète dans la console pour le débogage
+        else:
+            # Récupérer et afficher les erreurs spécifiques du formulaire
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Erreur dans {field} : {error}")
+    else:
+        form = EffetIndesirableForm()
+    messages.error(request, "Erreur. Veuillez corriger les erreurs ci-dessous.")
+
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_historique_maladie(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = HistoriqueMaladieForm(request.POST)
+        if form.is_valid():
+            historique = form.save(commit=False)
+            historique.hospitalisation = hospitalisation
+            historique.medecin = request.user  # Associe le médecin connecté
+            historique.save()
+            messages.success(request, "Historique de la maladie ajouté avec succès.")
+            return redirect('hospitalisation_details', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout de l'historique. Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = HistoriqueMaladieForm()
+    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
 class HospitalisationDetailView(LoginRequiredMixin, DetailView):
     model = Hospitalization
     template_name = "pages/hospitalisation/hospitalisation_details.html"
@@ -390,8 +613,6 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         else:
             context['discharge_criteria'] = {}
 
-
-
         # Add forms to context
         context['constante_form'] = ConstanteForm()
         context['prescription_hospi_form'] = PrescriptionHospiForm()
@@ -400,6 +621,34 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
         context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
         context['autresindicatorsform'] = HospitalizationIndicatorsForm()
+
+        context['diagnosticsform'] = DiagnosticForm()
+        context['observationform'] = ObservationForm()
+        context['avismedicalform'] = AvisMedicalForm()
+        context['effetindesirableform'] = EffetIndesirableForm()
+        context['historiquemaladieform'] = HistoriqueMaladieForm()
+        context['hospicomment'] = CommentaireInfirmierForm()
+
+        context['observations'] = Observation.objects.filter(hospitalisation=self.object).order_by(
+            '-date_enregistrement')
+        context['observationscount'] = Observation.objects.filter(hospitalisation=self.object).count
+
+        context['historiques_maladie'] = HistoriqueMaladie.objects.filter(hospitalisation=self.object).order_by(
+            '-date_enregistrement')
+
+        context['diagnostics'] = Diagnostic.objects.filter(hospitalisation=self.object).order_by('-date_diagnostic')
+        context['diagnosticscount'] = Diagnostic.objects.filter(hospitalisation=self.object).count()
+
+        context['avis_medicaux'] = AvisMedical.objects.filter(hospitalisation=self.object).order_by('-date_avis')
+        context['avis_medicauxcount'] = AvisMedical.objects.filter(hospitalisation=self.object).count()
+
+        context['effets_indesirables'] = EffetIndesirable.objects.filter(hospitalisation=self.object).order_by(
+            '-date_signalement')
+        context['effets_indesirablescount'] = EffetIndesirable.objects.filter(hospitalisation=self.object).count()
+
+        context['hopi_comment'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).order_by(
+            '-date_commentaire')
+        context['hopi_commentcount'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).count()
 
         context['constantes'] = Constante.objects.filter(hospitalisation=self.object)
         # Retrieve related 'Constante' data for the current hospitalization
@@ -421,7 +670,7 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
         context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
         context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
-        
+
         # Récupérer toutes les exécutions liées à cette hospitalisation
         executions = PrescriptionExecution.objects.filter(
             prescription__hospitalisation=hospitalization
@@ -430,8 +679,8 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
         # Trouver la dernière prise manquée
         # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
-        missed_executions = executions.filter(scheduled_time__lt=now(),status='Pending'
-        ).order_by('-scheduled_time')
+        missed_executions = executions.filter(scheduled_time__lt=now(), status='Pending'
+                                              ).order_by('-scheduled_time')
         context['next_execution'] = next_execution
         context['missed_executions'] = missed_executions
         return context

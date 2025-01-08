@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospitalisation, LitHospitalisation, \
-    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution
+    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution, Observation, HistoriqueMaladie
 
 
 # Register your models here.
@@ -71,3 +71,16 @@ class SigneFonctionnelAdmin(admin.ModelAdmin):
 @admin.register(PrescriptionExecution)
 class PrescriptionExecutionAdmin(admin.ModelAdmin):
     list_display = ['prescription', 'scheduled_time']
+
+
+@admin.register(Observation)
+class ObservationAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'medecin', 'date_enregistrement', 'statut')
+    search_fields = ('patient__nom', 'details', 'statut')
+    list_filter = ('statut', 'date_enregistrement')
+
+
+@admin.register(HistoriqueMaladie)
+class HistoriqueMaladieAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'medecin', 'date_enregistrement',)
+    search_fields = ('patient__nom', 'details', 'statut')

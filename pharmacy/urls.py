@@ -3,7 +3,9 @@ from django.urls import path
 
 from pharmacy.views import PharmacyListView, MedicamentDetailView, MedicamentCreateView, MedicamentUpdateView, \
     MedicamentDeleteView, MouvementStockListView, MouvementStockDetailView, MouvementStockCreateView, \
-    MouvementStockUpdateView, MouvementStockDeleteView, RendezVousListView, MedicamentListView
+    MouvementStockUpdateView, MouvementStockDeleteView, RendezVousListView, MedicamentListView, RendezVousCreateView, \
+    RendezVousUpdateView, RendezVousDeleteView, complete_appointment, reschedule_appointment, search_rendezvous, \
+    CommandeListView, CommandeDetailView, CommandeCreateView, CommandeUpdateView, CommandeDeleteView
 from smitci import settings
 
 urlpatterns = [
@@ -19,9 +21,22 @@ urlpatterns = [
                   path('mouvement/stock/update', MouvementStockUpdateView.as_view(), name='mouvement-update'),
                   path('mouvement/stock/delete', MouvementStockDeleteView.as_view(), name='mouvement-delete'),
 
+                  path('rdv', RendezVousListView.as_view(), name='rendezvous_list'),
+                  path('search_rendezvous/', search_rendezvous, name='search_rendezvous'),
+
+                  path('rendezvous/create/', RendezVousCreateView.as_view(), name='rendezvous_create'),
+                  path('rendezvous/<int:pk>/update/', RendezVousUpdateView.as_view(), name='rendezvous_update'),
+                  path('rendezvous/<int:pk>/delete/', RendezVousDeleteView.as_view(), name='rendezvous_delete'),
+                  path('rendezvous/<int:pk>/complete/', complete_appointment, name='complete_appointment'),
+                  path('rendezvous/<int:pk>/reschedule/', reschedule_appointment, name='reschedule_appointment'),
                   path('rendez-vous/', RendezVousListView.as_view(), name='appointment_pharmacie'),
 
+                  path('commandes', CommandeListView.as_view(), name='commandes-list'),
+                  path('commandes/detail/<int:pk>', CommandeDetailView.as_view(), name='commandes-detail'),
+                  path('commandes/create', CommandeCreateView.as_view(), name='commandes-create'),
+                  path('commandes/upadate/<int:pk>', CommandeUpdateView.as_view(), name='commandes-update'),
+                  path('commandes/delete/<int:pk>', CommandeDeleteView.as_view(), name='commandes-delete'),
 
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

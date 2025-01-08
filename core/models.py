@@ -17,6 +17,8 @@ from simple_history.models import HistoricalRecords
 from django.contrib.gis.db import models
 
 
+
+
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
     # Taille de l'image
     image_size = (size, size)
@@ -529,8 +531,12 @@ villes_choices = [
     ('Zuenoula', 'Zuenoula'),
     ('Autre', 'Autre'),
 ]
+
 professions_choices = [
     ('Médecin', 'Médecin'),
+    ('Commercant', 'Commercant'),
+    ('Cultuvateur', 'Cultuvateur'),
+    ('Planteur', 'Planteur'),
     ('Infirmier/Infirmière', 'Infirmier/Infirmière'),
     ('Dentiste', 'Dentiste'),
     ('Pharmacien/Pharmacienne', 'Pharmacien/Pharmacienne'),
@@ -835,35 +841,18 @@ class ServiceSubActivity(models.Model):
 
 
 class Employee(models.Model):
+    from pharmacy.models import Pharmacy
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee", )
     qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100)
     gender = models.CharField(choices=Sexe_choices, max_length=100, null=True, blank=True, )
     situation_matrimoniale = models.CharField(choices=situation_matrimoniales_choices, max_length=100, null=True,
                                               blank=True, )
-    nbr_enfants = models.IntegerField(null=True, blank=True, default='20')
-    persone_ref_noms = models.CharField(null=True, blank=True, max_length=100, default='Jean Kouame')
-    persone_ref_contact = models.CharField(null=True, blank=True, max_length=100, default='05 00 05 00 05')
-    # persone_ref_type = models.CharField(choices=REF_CHOICES, max_length=100, null=True, blank=True, )
-    num_cnps = models.CharField(null=True, blank=True, max_length=100, default='CNPS00000000')
     phone = models.CharField(null=True, blank=True, max_length=20, default='+22507070707')
-    bank_name = models.CharField(null=True, blank=True, default='Banque name', max_length=20, )
-    account_number = models.IntegerField(null=True, blank=True, default='000000000000', )
-    code_guichet = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
-    cle_rib = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
-    code_banque = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
-    iban = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
-    swift = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
-    bank_adress = models.CharField(null=True, blank=True, default='Plateau', max_length=20, )
-    alternative_phone = models.CharField(null=True, blank=True, default='00000000', max_length=20, )
     nationalite = models.CharField(null=True, blank=True, default='00000000', max_length=70, )
-    personal_mail = models.CharField(null=True, blank=True, default='email@sah.com', max_length=70)
+    email = models.CharField(null=True, blank=True, default='email@sah.com', max_length=70)
     birthdate = models.DateField(null=True, blank=True)
-    date_embauche = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    salary = models.CharField(blank=True, max_length=100, null=True)
-    dpt = models.ForeignKey('Service', on_delete=models.CASCADE, verbose_name="service", blank=True, null=True)
-    job_title = models.CharField(null=True, blank=True, max_length=50, verbose_name="Titre du poste")
-    phone_number = models.CharField(max_length=20, blank=True, verbose_name="Numéro de téléphone")
+    departement = models.ForeignKey('Service', on_delete=models.CASCADE, verbose_name="service", blank=True, null=True)
+    pharmacie = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name="Pharmacie", blank=True, null=True)
     photo = models.ImageField(null=True, blank=True, default='urap/users/5.png', upload_to='urap/users')
     sortie = models.SmallIntegerField(null=True, blank=True, default=0)
     is_deleted = models.SmallIntegerField(null=True, blank=True, default=0)
@@ -873,7 +862,7 @@ class Employee(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return f"{self.user.username}- {self.user.first_name} {self.user.last_name} ({self.dpt})"
+        return f"{self.user.username}- {self.user.first_name} {self.user.last_name} ({self.departement})"
 
     class Meta:
         permissions = (
@@ -1085,3 +1074,71 @@ class PatientUserObjectPermission(UserObjectPermissionBase):
 
 class PatientGroupObjectPermission(GroupObjectPermissionBase):
     content_object = models.ForeignKey(Patient, on_delete=models.CASCADE)
+
+
+class Maladie(models.Model):
+    CATEGORY_CHOICES = [
+        ('infectieuse', 'Maladies infectieuses'),
+        ('cardiovasculaire', 'Maladies cardiovasculaires'),
+        ('respiratoire', 'Maladies respiratoires'),
+        ('metabolique', 'Maladies métaboliques'),
+        ('neurologique', 'Maladies neurologiques'),
+        ('autoimmune', 'Maladies auto-immunes'),
+        ('cancer', 'Cancers'),
+        ('genetique', 'Maladies génétiques'),
+        ('psychiatrique', 'Maladies psychiatriques'),
+        ('musculosquelettique', 'Maladies musculosquelettiques'),
+        ('dermatologique', 'Maladies dermatologiques'),
+        ('gastrointestinale', 'Maladies gastro-intestinales'),
+        ('urologique', 'Maladies urologiques et rénales'),
+        ('rare', 'Maladies rares'),
+        ('mode_de_vie', 'Maladies liées au mode de vie'),
+        ('autre', 'Autres'),
+    ]
+
+    SEVERITY_CHOICES = [
+        ('leger', 'Léger'),
+        ('modere', 'Modéré'),
+        ('grave', 'Grave'),
+    ]
+
+    nom = models.CharField(max_length=255)  # Nom de la maladie
+    categorie = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='autre'
+    )  # Catégorie de la maladie
+    description = models.TextField(blank=True, null=True)  # Description de la maladie
+    gravite = models.CharField(
+        max_length=20,
+        choices=SEVERITY_CHOICES,
+        default='leger'
+    )  # Gravité de la maladie
+    date_diagnostic = models.DateField(blank=True, null=True)  # Date du diagnostic
+    medecin_responsable = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='maladies_traitees'
+    )  # Médecin ayant diagnostiqué la maladie
+    patient = models.ForeignKey(
+        'Patient',  # Association avec un patient (si applicable)
+        on_delete=models.CASCADE,
+        related_name='maladies',
+        null=True,
+        blank=True
+    )
+    traitements = models.TextField(blank=True, null=True)  # Détails des traitements proposés
+    observations = models.TextField(blank=True, null=True)  # Observations ou remarques supplémentaires
+
+    date_enregistrement = models.DateTimeField(auto_now_add=True)  # Date d'ajout dans le système
+    date_mise_a_jour = models.DateTimeField(auto_now=True)  # Dernière mise à jour
+
+    def __str__(self):
+        return f"{self.nom}"
+
+    class Meta:
+        verbose_name = "Maladie"
+        verbose_name_plural = "Maladies"
+        ordering = ['categorie', 'nom']

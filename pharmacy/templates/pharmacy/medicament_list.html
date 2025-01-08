@@ -1,6 +1,12 @@
 {% extends 'layout/base.html' %}
 {% load unicorn %}
 {% block content %}
+    <style>
+    .img-thumbnail{
+        width: 200px;
+        height: 100px;
+    }
+    </style>
     <div class="nk-content nk-content-fluid">
         <div class="container-xl wide-lg">
             <div class="nk-content-body">
@@ -13,105 +19,313 @@
                             </div>
                         </div>
                         <div class="nk-block-head-content">
-                            {% include 'layout/toggleoption.html' %}
+                            <div class="toggle-wrap nk-block-tools-toggle">
+    <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em
+            class="icon ni ni-menu-alt-r"></em></a>
+    <div class="toggle-expand-content" data-content="pageMenu">
+        <ul class="nk-block-tools g-3">
+            <li><a href="#" class="btn btn-white btn-outline-light"><em class="icon ni ni-download-cloud"></em><span>Export</span></a>
+            </li>
+            <li class="nk-block-tools-opt">
+                <div class="drodown">
+                    <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em
+                            class="icon ni ni-plus"></em></a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <ul class="link-list-opt no-bdr">
+                            <li><a href="{% url 'medicaments-create' %}"><span>Nouveau Medicament</span></a></li>
+                            <li><a href="#"><span>Consultation</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div><!-- .toggle-wrap -->
                         </div>
                     </div>
                 </div>
-
-                <div id="medicamentSearch" class="container">
+{#--version simple#}
+{#                <div id="medicamentSearch" class="container">#}
+{#    <div class="form-inline flex-nowrap gx-3 mb-3">#}
+{#        <!-- Barre de recherche -->#}
+{#        <input type="text" id="searchBar" class="form-control w-50" placeholder="Rechercher par nom de médicament...">#}
+{##}
+{#        <!-- Filtres catégories -->#}
+{#        <div class="form-wrap w-150px mx-2">#}
+{#            <select id="categorieFilter" class="form-select form-select-sm">#}
+{#                <option value="">Toutes les catégories</option>#}
+{#                {% for categorie in categorie_list %}#}
+{#                    <option value="{{ categorie.id }}">{{ categorie.nom }}</option>#}
+{#                {% endfor %}#}
+{#            </select>#}
+{#        </div>#}
+{##}
+{#        <!-- Filtres molécules -->#}
+{#        <div class="form-wrap w-150px mx-2">#}
+{#            <select id="moleculeFilter" class="form-select form-select-sm">#}
+{#                <option value="">Toutes les molécules</option>#}
+{#                {% for molecule in molecule_list %}#}
+{#                    <option value="{{ molecule.id }}">{{ molecule.nom }}</option>#}
+{#                {% endfor %}#}
+{#            </select>#}
+{#        </div>#}
+{#      <button id="resetFilters" class="btn btn-outline-secondary mx-2">Réinitialiser</button>#}
+{#    </div>#}
+{##}
+{#    <!-- Résultats -->#}
+{#    <div id="medicamentResults" class="row g-gs preview-icon-svg p-3">#}
+{#        <!-- Médicaments affichés dynamiquement -->#}
+{#    </div>#}
+{##}
+{#    <!-- Alerte aucun médicament -->#}
+{#    <div id="noResultsMessage" class="alert alert-warning d-none">#}
+{#        Aucun médicament ne correspond à votre recherche.#}
+{#    </div>#}
+{#</div>#}
+                <div x-data="medicamentFilter()" x-init="init()" class="container">
+                    <!-- Barre de recherche et filtres -->
                     <div class="form-inline flex-nowrap gx-3 mb-3">
-                        <!-- Barre de recherche -->
-                        <input type="text" id="searchBar" class="form-control w-50"
-                               placeholder="Rechercher par nom de médicament...">
+                        <input
+                                type="text"
+                                x-model="search"
+                                class="form-control w-50"
+                                placeholder="Rechercher par nom de médicament..."
+                                @input="fetchMedicaments(1)">
 
-                        <!-- Filtres catégories -->
                         <div class="form-wrap w-150px mx-2">
-                            <select id="categorieFilter" class="form-select form-select-sm">
+                            <select
+                                    x-model="categorie"
+                                    class="form-select form-select-sm"
+                                    @change="fetchMedicaments(1)">
                                 <option value="">Toutes les catégories</option>
-                                {% for categorie in categories %}
-                                    <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
-                                {% endfor %}
+                                <template x-for="cat in categories" :key="cat.id">
+                                    <option :value="cat.id" x-text="cat.nom"></option>
+                                </template>
                             </select>
                         </div>
 
-                        <!-- Filtres molécules -->
                         <div class="form-wrap w-150px mx-2">
-                            <select id="moleculeFilter" class="form-select form-select-sm">
+                            <select
+                                    x-model="molecule"
+                                    class="form-select form-select-sm"
+                                    @change="fetchMedicaments(1)">
                                 <option value="">Toutes les molécules</option>
-                                {% for molecule in molecules %}
-                                    <option value="{{ molecule.id }}">{{ molecule.nom }}</option>
-                                {% endfor %}
+                                <template x-for="mol in molecules" :key="mol.id">
+                                    <option :value="mol.id" x-text="mol.nom"></option>
+                                </template>
                             </select>
                         </div>
+
+                        <!-- Bouton Réinitialiser -->
+                        <button @click="resetFilters" class="btn btn-outline-secondary mx-2">Réinitialiser</button>
                     </div>
 
                     <!-- Résultats -->
                     <div id="medicamentResults" class="row g-gs preview-icon-svg p-3">
-                        <!-- Médicaments affichés dynamiquement -->
+                        <template x-if="loading">
+                            <div class="text-center p-5">
+                                <div class="spinner-border text-primary"></div>
+                            </div>
+                        </template>
+                        <template x-if="!loading && medicaments.length > 0">
+                            <template x-for="med in medicaments" :key="med.id">
+                                <div class="col-lg-3 col-6 col-sm-4 medicament-card">
+                                    <div class="card card-bordered">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <span x-text="med.nom"></span>
+                                                <span class="small" x-show="med.dosage && med.unite_dosage"
+                                                      x-text="' - ' + med.dosage + ' ' + med.unite_dosage"></span>
+                                            </h6>
+                                            <p class="badge badge-outline-info small" x-text="med.dosage_form || 'Aucune  forme de dosage disponible'"></p>
+                                            <img :src="med.miniature" alt="Miniature du médicament"
+                                                 class="img-thumbnail" x-show="med.miniature">
+                                            <ul>
+                                                <li><small>Catégorie: <span x-text="med.categorie || 'Non spécifiée'"></span></small></li>
+                                                <li><small>Molécules: <span x-text="med.molecules.join(', ') || 'Non spécifiées'"></span></small>
+                                                </li>
+                                                <li><small>Stock: <span class="badge badge-secondary" x-text="med.stock"></span></small></li>
+                                                <li><small>Date d'expiration: <span x-text="med.expiration"></span></small></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                        <template x-if="!loading && medicaments.length === 0">
+                            <div class="alert alert-warning">
+                                Aucun médicament ne correspond à votre recherche.
+                            </div>
+                        </template>
                     </div>
 
-                    <!-- Alerte aucun médicament -->
-                    <div id="noResultsMessage" class="alert alert-warning d-none">
-                        Aucun médicament ne correspond à votre recherche.
+                    <!-- Pagination -->
+                    <div class="pagination mt-3 d-flex justify-content-between align-items-center">
+                        <button
+                                x-show="currentPage > 1"
+                                @click="fetchMedicaments(currentPage - 1)"
+                                class="btn btn-outline-primary">
+                            Précédent
+                        </button>
+
+                        <span x-text="'Page ' + currentPage + ' sur ' + numPages"></span>
+
+                        <button
+                                x-show="currentPage < numPages"
+                                @click="fetchMedicaments(currentPage + 1)"
+                                class="btn btn-outline-primary">
+                            Suivant
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+{#        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>#}
+        <script src="//unpkg.com/alpinejs" defer></script>
+
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const searchBar = document.getElementById("searchBar");
-                const categorieFilter = document.getElementById("categorieFilter");
-                const moleculeFilter = document.getElementById("moleculeFilter");
-                const medicamentResults = document.getElementById("medicamentResults");
-                const noResultsMessage = document.getElementById("noResultsMessage");
+            function medicamentFilter() {
+                return {
+                    search: "",
+                    categorie: "",
+                    molecule: "",
+                    medicaments: [],
+                    categories: [],
+                    molecules: [],
+                    loading: false,
+                    totalCount: 0,
+                    currentPage: 1,
+                    numPages: 0,
 
-                const spinner = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+                    async fetchMedicaments(page = 1) {
+                        this.loading = true;
+                        this.currentPage = page;
 
-                function fetchMedicaments() {
-                    const query = searchBar.value.trim();
-                    const categorie = categorieFilter.value;
-                    const molecule = moleculeFilter.value;
-
-                    medicamentResults.innerHTML = spinner;
-
-                    fetch(`/api/medicaments?search=${query}&categorie=${categorie}&molecule=${molecule}`)
-                        .then((response) => response.json())
-                        .then((data) => {
-                            medicamentResults.innerHTML = "";
-
-                            if (data.medicaments.length > 0) {
-                                data.medicaments.forEach((med) => {
-                                    const medCard = `
-                            <li class="col-lg-3 col-6 col-sm-4 medicament-card">
-                                <div class="preview-icon-box card card-bordered">
-                                    <div class="preview-icon-wrap">
-                                       <!-- SVG Icon -->
-                                    </div>
-                                    <div class="preview-icon-name">
-                                        <strong>${med.nom}</strong>
-                                        <p>${med.description || "Aucune description disponible"}</p>
-                                        <p><small>Catégorie: ${med.categorie || "Non spécifiée"}</small></p>
-                                        <p><small>Stock: ${med.stock}</small></p>
-                                    </div>
-                                </div>
-                            </li>`;
-                                    medicamentResults.insertAdjacentHTML("beforeend", medCard);
-                                });
-                                noResultsMessage.classList.add("d-none");
-                            } else {
-                                noResultsMessage.classList.remove("d-none");
-                            }
-                        })
-                        .catch((error) => {
-                            medicamentResults.innerHTML = `<div class="alert alert-danger">Erreur lors du chargement des médicaments.</div>`;
-                            console.error(error);
+                        const params = new URLSearchParams({
+                            search: this.search,
+                            categorie: this.categorie,
+                            molecule: this.molecule,
+                            page: page,
                         });
-                }
 
-                searchBar.addEventListener("input", fetchMedicaments);
-                categorieFilter.addEventListener("change", fetchMedicaments);
-                moleculeFilter.addEventListener("change", fetchMedicaments);
-            });
+                        try {
+                            const response = await fetch(`/api/list/medicaments?${params}`);
+                            const data = await response.json();
+
+                            this.medicaments = data.medicaments;
+                            this.totalCount = data.total_count;
+                            this.numPages = data.num_pages;
+                        } catch (error) {
+                            console.error("Erreur lors du chargement des médicaments :", error);
+                            this.medicaments = [];
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    resetFilters() {
+                        this.search = "";
+                        this.categorie = "";
+                        this.molecule = "";
+                        this.fetchMedicaments(1);
+                    },
+
+                    async init() {
+                        try {
+                            const [categoriesResponse, moleculesResponse] = await Promise.all([
+                                fetch("/api/list/categorie"),
+                                fetch("/api/list/molecule"),
+                            ]);
+                            this.categories = await categoriesResponse.json();
+                            this.molecules = await moleculesResponse.json();
+                        } catch (error) {
+                            console.error("Erreur lors du chargement des catégories/molécules :", error);
+                        }
+
+                        this.fetchMedicaments(1);
+                    },
+                };
+            }
         </script>
+{#        <script>#}
+{#document.addEventListener("DOMContentLoaded", function () {#}
+{#    const searchBar = document.getElementById("searchBar");#}
+{#    const categorieFilter = document.getElementById("categorieFilter");#}
+{#    const moleculeFilter = document.getElementById("moleculeFilter");#}
+{#    const resetButton = document.getElementById("resetFilters");#}
+{#    const medicamentResults = document.getElementById("medicamentResults");#}
+{#    const noResultsMessage = document.getElementById("noResultsMessage");#}
+{##}
+{#    const spinnerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;#}
+{##}
+{#    // Fonction pour actualiser la liste des médicaments#}
+{#    const fetchMedicaments = async () => {#}
+{#        const query = searchBar.value.trim();#}
+{#        const categorie = categorieFilter.value;#}
+{#        const molecule = moleculeFilter.value;#}
+{##}
+{#        // Affichage du spinner#}
+{#        medicamentResults.innerHTML = spinnerHTML;#}
+{##}
+{#        // Construire l'URL dynamiquement avec les filtres actifs#}
+{#        const url = new URL("/api/list/medicaments", window.location.origin);#}
+{#        if (query) url.searchParams.append("search", query);#}
+{#        if (categorie) url.searchParams.append("categorie", categorie);#}
+{#        if (molecule) url.searchParams.append("molecule", molecule);#}
+{##}
+{#        try {#}
+{#            const response = await fetch(url);#}
+{#            const data = await response.json();#}
+{##}
+{#            medicamentResults.innerHTML = "";#}
+{##}
+{#            if (data.medicaments.length > 0) {#}
+{#                data.medicaments.forEach((med) => {#}
+{#                    const medCard = `#}
+{#                    <div class="col-lg-3 col-6 col-sm-4 medicament-card">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-body">#}
+{#                                <h5 class="card-title">${med.nom}</h5>#}
+{#                                <p>${med.description}</p>#}
+{#                                <p><small>Catégorie: ${med.categorie || "Non spécifiée"}</small></p>#}
+{#                                <p><small>Molécules: ${med.molecules.join(", ") || "Non spécifiées"}</small></p>#}
+{#                                <p><small>Stock: ${med.stock}</small></p>#}
+{#                                <p><small>Date d'expiration: ${med.expiration}</small></p>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>`;#}
+{#                    medicamentResults.insertAdjacentHTML("beforeend", medCard);#}
+{#                });#}
+{#                noResultsMessage.classList.add("d-none");#}
+{#            } else {#}
+{#                noResultsMessage.classList.remove("d-none");#}
+{#            }#}
+{#        } catch (error) {#}
+{#            medicamentResults.innerHTML = `<div class="alert alert-danger">Erreur lors du chargement des médicaments.</div>`;#}
+{#            console.error("Erreur lors de la récupération des médicaments :", error);#}
+{#        }#}
+{#    };#}
+{##}
+{#    // Gestion des changements dans les filtres#}
+{#    const handleFilterChange = () => fetchMedicaments();#}
+{##}
+{#    // Réinitialiser les filtres et actualiser la liste complète#}
+{#    const resetFilters = () => {#}
+{#        searchBar.value = "";#}
+{#        categorieFilter.value = "";#}
+{#        moleculeFilter.value = "";#}
+{#        fetchMedicaments();#}
+{#    };#}
+{##}
+{#    // Ajout des écouteurs d'événements#}
+{#    searchBar.addEventListener("input", handleFilterChange);#}
+{#    categorieFilter.addEventListener("change", handleFilterChange);#}
+{#    moleculeFilter.addEventListener("change", handleFilterChange);#}
+{#    resetButton.addEventListener("click", resetFilters);#}
+{##}
+{#    // Chargement initial des médicaments#}
+{#    fetchMedicaments();#}
+{#});        </script>#}
     </div>
+
 {% endblock %}

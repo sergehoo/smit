@@ -16,7 +16,7 @@ class Command(BaseCommand):
     help = 'Generate fake data for Patient and related models'
 
     def handle(self, *args, **kwargs):
-        self.generate_patients(10)
+        self.generate_patients(100)
 
     def generate_patients(self, count):
         employees = Employee.objects.all()

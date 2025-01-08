@@ -10,13 +10,15 @@ from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
-    Patient_statut_choices, Location
+    Patient_statut_choices, Location, Maladie
 
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
+from pharmacy.models import Medicament, RendezVous, ArticleCommande
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
-    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution
+    IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
+    Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier
 
 POSOLOGY_CHOICES = [
     ('Une fois par jour', 'Une fois par jour'),
@@ -45,6 +47,7 @@ school_level = [
 ]
 ethnic_groups = [
     # AKAN Group
+    ('Autre', 'Autre'),
     ('Abbey', 'Abbey'),
     ('Abidji', 'Abidji'),
     ('Abron', 'Abron'),
@@ -214,7 +217,7 @@ class PatientCreateForm(forms.ModelForm):
         queryset=Location.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-               'data-search': 'on', 'id': 'commune'})
+                                   'data-search': 'on', 'id': 'commune'})
     )
 
     code_vih = forms.CharField(required=False, widget=forms.TextInput(
@@ -1031,4 +1034,281 @@ class EmployeeCreateForm(forms.ModelForm):
             'phone': "Téléphone",
             'job_title': "Titre du poste",
             'role': "Rôle",
+        }
+
+
+class DiagnosticForm(forms.ModelForm):
+    class Meta:
+        model = Diagnostic
+        fields = ['type_diagnostic', 'maladie', 'remarques']
+        widgets = {
+            'type_diagnostic': forms.Select(attrs={'class': 'form-control', 'type': 'select'}),
+            'maladie': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'remarques': TinyMCE(attrs={'class': 'tinymce-basic', 'cols': 65, 'rows': 10}),
+        }
+
+
+class ObservationForm(forms.ModelForm):
+    class Meta:
+        model = Observation
+        fields = ['details', 'statut']
+        widgets = {
+            # 'patient': forms.Select(attrs={'class': 'form-control'}),
+            # 'medecin': forms.Select(attrs={'class': 'form-control'}),
+            # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
+            'details': TinyMCE(attrs={'class': 'tinymce-obs', 'cols': 65, 'rows': 10}),
+            'statut': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            # 'patient': 'Patient',
+            # 'medecin': 'Médecin',
+            # 'hospitalisation': 'Hospitalisation',
+            'details': 'Détails de l\'observation',
+            'statut': 'Statut',
+        }
+
+    def clean_details(self):
+        """Validation personnalisée pour le champ 'details'."""
+        details = self.cleaned_data.get('details')
+        if len(details) < 10:
+            raise forms.ValidationError("Les détails doivent contenir au moins 10 caractères.")
+        return details
+
+
+class AvisMedicalForm(forms.ModelForm):
+    class Meta:
+        model = AvisMedical
+        fields = ['titre', 'contenu']
+        widgets = {
+            'titre': forms.TextInput(attrs={'class': 'form-control'}),
+            'contenu': TinyMCE(attrs={'class': 'tinymce-avis', 'cols': 65, 'rows': 10}),
+
+        }
+
+
+class EffetIndesirableForm(forms.ModelForm):
+    class Meta:
+        model = EffetIndesirable
+        fields = ['description', 'gravite', 'date_apparition', 'medicament_associe', 'observations']
+        widgets = {
+            'date_apparition': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'gravite': forms.Select(attrs={'class': 'form-control'}),
+            'medicament_associe': forms.Select(
+                attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'observations': TinyMCE(attrs={'class': 'tinymce-effet', 'cols': 65, 'rows': 10}),
+
+        }
+
+
+class HistoriqueMaladieForm(forms.ModelForm):
+    class Meta:
+        model = HistoriqueMaladie
+        fields = ['description', 'antecedents', 'diagnostics_associes',
+                  'traitements_precedents', 'observations']
+        widgets = {
+            # 'patient': forms.Select(attrs={'class': 'form-control'}),
+            # 'medecin': forms.Select(attrs={'class': 'form-control'}),
+            # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': 'Description de l\'évolution de la maladie'
+            }),
+            'antecedents': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Antécédents médicaux pertinents'
+            }),
+            'diagnostics_associes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Diagnostics associés'
+            }),
+            'traitements_precedents': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Traitements administrés par le passé'
+            }),
+            'observations': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observations médicales'
+            }),
+        }
+        labels = {
+            'patient': 'Patient',
+            'medecin': 'Médecin',
+            'hospitalisation': 'Hospitalisation',
+            'description': 'Description',
+            'antecedents': 'Antécédents médicaux',
+            'diagnostics_associes': 'Diagnostics associés',
+            'traitements_precedents': 'Traitements précédents',
+            'observations': 'Observations',
+        }
+
+
+class CommentaireInfirmierForm(forms.ModelForm):
+    class Meta:
+        model = CommentaireInfirmier
+        fields = ['contenu']
+        widgets = {
+            'contenu': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Entrez votre commentaire ici...'
+            }),
+        }
+        labels = {
+            'contenu': 'Commentaire',
+        }
+
+
+class MedicamentForm(forms.ModelForm):
+    class Meta:
+        model = Medicament
+        fields = [
+            'codebarre', 'nom', 'dosage', 'unitdosage', 'dosage_form',
+            'stock', 'date_expiration', 'categorie',
+            'fournisseur', 'molecules', 'miniature'
+        ]
+        widgets = {
+            'codebarre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Code-barre'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom du médicament'}),
+            'dosage': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Dosage'}),
+            'unitdosage': forms.Select(attrs={'class': 'form-control'}),
+            'dosage_form': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Description', 'rows': 3}),
+            'stock': forms.NumberInput(
+                attrs={'class': 'form-control number-spinner', 'placeholder': 'Quantité en stock'}),
+            'date_expiration': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'categorie': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'fournisseur': forms.Select(attrs={'class': 'form-control'}),
+            'molecules': forms.SelectMultiple(attrs={'class': 'form-control form-select select2'}),
+            'miniature': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+
+class RescheduleAppointmentForm(forms.ModelForm):
+    class Meta:
+        model = RendezVous
+        fields = ['date', 'time']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        }
+
+
+class RendezVousForm(forms.ModelForm):
+    class Meta:
+        model = RendezVous
+        fields = [
+            'patient',
+            # 'pharmacie',
+            'medicaments',
+            # 'service',
+            # 'doctor',
+            'date',
+            'time',
+            'reason',
+            # 'status',
+            'recurrence',
+            'recurrence_end_date',
+        ]
+
+        widgets = {
+            'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'pharmacie': forms.Select(attrs={'class': 'form-control'}),
+            'medicaments': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'service': forms.Select(attrs={'class': 'form-control'}),
+            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'status': forms.Select(attrs={'class': 'form-control'}),
+            'recurrence': forms.Select(attrs={'class': 'form-control'}),
+            'recurrence_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+        labels = {
+            'patient': 'Patient',
+            'pharmacie': 'Pharmacie',
+            'medicaments': 'Médicaments',
+            # 'service': 'Service',
+            'doctor': 'Docteur',
+            'date': 'Date',
+            'time': 'Heure',
+            'reason': 'Motif',
+            'status': 'Statut',
+            'recurrence': 'Récurrence',
+            'recurrence_end_date': 'Fin de la Récurrence',
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Capture the logged-in user from the view
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        recurrence = cleaned_data.get('recurrence')
+        recurrence_end_date = cleaned_data.get('recurrence_end_date')
+
+        # Ensure recurrence end date is after the appointment date
+        if recurrence != 'None' and recurrence_end_date and recurrence_end_date <= date:
+            self.add_error('recurrence_end_date',
+                           "La date de fin de la récurrence doit être après la date du rendez-vous.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Retrieve the instance being saved
+        instance = super().save(commit=False)
+
+        # Automatically set the pharmacy and doctor based on the logged-in user
+        if self.user and hasattr(self.user, 'employee'):
+            instance.pharmacie = self.user.employee.pharmacie
+            instance.doctor = self.user.employee
+
+        # Automatically set the status to "Scheduled"
+        if not instance.status:
+            instance.status = 'Scheduled'
+
+        if commit:
+            instance.save()
+
+        return instance
+
+
+class PatientSearchForm(forms.Form):
+    maladie = forms.ModelChoiceField(
+        queryset=Maladie.objects.all(),
+        required=False,
+        label="Maladie",
+        widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on',
+                                   'placeholder': 'Sélectionner une maladie'})
+    )
+    status = forms.ChoiceField(
+        choices=[('', 'Tous')] + Patient_statut_choices,
+        required=False,
+        label="Statut du patient",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    nom_patient = forms.CharField(
+        required=False,
+        label="Nom du patient",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Rechercher par nom'})
+    )
+
+
+class ArticleCommandeForm(forms.ModelForm):
+    class Meta:
+        model = ArticleCommande
+        fields = ['medicament', 'quantite_commandee', 'fournisseur', 'statut']
+        widgets = {
+            'medicament': forms.Select(attrs={'class': 'form-control'}),
+            'quantite_commandee': forms.NumberInput(attrs={'class': 'form-control'}),
+            'fournisseur': forms.Select(attrs={'class': 'form-control'}),
+            'statut': forms.Select(attrs={'class': 'form-control'}),
         }

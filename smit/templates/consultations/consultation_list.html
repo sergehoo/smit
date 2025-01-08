@@ -69,7 +69,7 @@
                                                     <div class="nk-tb-item">
                                                         <div class="nk-tb-col tb-col-md">
                                                             <span data-toggle="tooltip" data-placement="top"
-                          title="{{ consultation.reason }}">{{ consultation.id }}</span>
+                                                                  title="{{ consultation.reason }}">{{ consultation.id }}</span>
                                                         </div>
                                                         <div class="nk-tb-col tb-col-md">
                                                             <span>{{ consultation.created_at }}</span>
@@ -81,14 +81,19 @@
                                                         <div class="nk-tb-col">
                                                             <div class="user-card">
                                                                 <div class="user-avatar xs bg-white">
-                                                                    <span><img src="{{ consultation.patient.avatar.url }}" alt="Avatar"/></span>
+                                                                    <span><img
+                                                                            src="{{ consultation.patient.avatar.url }}"
+                                                                            alt="Avatar"/></span>
                                                                 </div>
                                                                 <div class="user-name">
                     <span class="tb-lead">{{ consultation.patient.nom|upper }} {{ consultation.patient.prenoms|upper }}
                         {% if consultation.patient.latest_constante %}
                             <span class="tb-status text-gray">
-                                <a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ consultation.patient.id }}">
-                                    <img data-toggle="tooltip" data-placement="top" title="Constantes du :{{ consultation.patient.latest_constante.created_at }} par {{ consultation.patient.latest_constante.created_by }}" src="{% static 'images/gift/livre-medical.gif' %}" width="20"/></a>
+                                <a class="tb-status" href="" data-toggle="modal"
+                                   data-target="#constanteover{{ consultation.patient.id }}">
+                                    <img data-toggle="tooltip" data-placement="top"
+                                         title="Constantes du :{{ consultation.patient.latest_constante.created_at }} par {{ consultation.patient.latest_constante.created_by }}"
+                                         src="{% static 'images/gift/livre-medical.gif' %}" width="20"/></a>
                             </span>
                             </span>
                         {% endif %}
@@ -146,22 +151,26 @@
                                                                                     </li>
                                                                                 {% endif %}
                                                                                 <li>
-                                                                                    <a href="{% url 'detail_consultation' consultation.pk %}"><em
+                                                                                    <a href="{% url 'consultation_detail' consultation.pk %}"><em
                                                                                             class="fa fa-edit mr-1"></em><span>Consulter</span></a>
                                                                                 </li>
 
                                                                                 <li>
-{#                                                                                    <a href="{% url 'delete_consult' consultation_id=consultation.id %}"><em#}
-{#                                                                                            class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a>#}
-                                                                                    <form method="post" action="{% url 'delete_consult' consultation_id=consultation.id %}">
+                                                                                    {#                                                                                    <a href="{% url 'delete_consult' consultation_id=consultation.id %}"><em#}
+                                                                                    {#                                                                                            class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a>#}
+                                                                                    <form method="post"
+                                                                                          action="{% url 'delete_consult' consultation_id=consultation.id %}">
                                                                                         {% csrf_token %}
-                                                                                        <button type="submit" class="btn-icon form-control "> <em class="fa fa-delete-left mr-1"></em>
-                                                                                           <span>Retirer de la liste</span></button>
+                                                                                        <button type="submit"
+                                                                                                class="btn-icon form-control ">
+                                                                                            <em class="fa fa-delete-left mr-1"></em>
+                                                                                            <span>Retirer de la liste</span>
+                                                                                        </button>
 
                                                                                     </form>
                                                                                 </li>
-                                                                            <hr>
-                                                                            <li>
+                                                                                <hr>
+                                                                                <li>
                                                                                     <a href="{% url 'detail_patient' consultation.patient.pk %}"><em
                                                                                             class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a>
                                                                                 </li>
@@ -191,7 +200,8 @@
                                                                     <div class="nk-block card card-bordered">
 
                                                                         {% if consultation.patient.latest_constante %}
-                                                                            <h4>Deniere constante enregistrée le : {{ consultation.patient.latest_constante.created_at }} </h4>
+                                                                            <h4>Deniere constante enregistrée le
+                                                                                : {{ consultation.patient.latest_constante.created_at }} </h4>
                                                                             <table class="table table-ulogs">
                                                                                 <thead class="thead-light">
                                                                                 <tr>

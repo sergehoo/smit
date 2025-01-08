@@ -32,7 +32,7 @@ class Command(BaseCommand):
             # Parcourir les lignes du fichier
             for index, row in df.iterrows():
                 full_name = row["NOM& PRENOMS"].strip()
-                job_title = row["FONCTIONS"].strip()
+                # job_title = row["FONCTIONS"].strip()
                 email = row["ADRESSE-EMAIL"].strip()
 
                 # Découper NOM& PRENOMS
@@ -64,8 +64,8 @@ class Command(BaseCommand):
                 employee, created_employee = Employee.objects.get_or_create(
                     user=user,
                     defaults={
-                        'job_title': job_title,
-                        'personal_mail': email,
+                        # 'job_title': job_title,
+                        # 'personal_mail': email,
                     }
                 )
 

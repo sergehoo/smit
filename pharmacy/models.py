@@ -1,14 +1,17 @@
 import random
 import uuid
+from datetime import timedelta
 
+from PIL import Image
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.urls import reverse
+from django.utils import timezone
 from schedule.models import Calendar, Event
-
-from core.models import Patient, Service, Employee
+from django.core.files.storage import default_storage
 
 FORME_MEDICAMENT_CHOICES = [
     ('Comprimé', 'Comprimé'),
@@ -74,21 +77,71 @@ def generate_unique_code_barre():
     return ''.join([str(random.randint(0, 9)) for _ in range(12)])
 
 
+class Pharmacy(models.Model):
+    nom = models.CharField(max_length=255, unique=True)
+    type = models.CharField(max_length=255, choices=FORME_MEDICAMENT_CHOICES)
+    description = models.TextField(null=True, blank=True)
+    lieu = models.CharField(max_length=255)
+    responsable = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True,
+                                    blank=True)  # Use string reference
+
+    def __str__(self):
+        return f'{self.nom} {self.lieu}'
+
+
 class Medicament(models.Model):
     codebarre = models.CharField(max_length=150, unique=True, default=generate_unique_code_barre,
-                                 help_text="Code unique pour le médicament", validators=[RegexValidator(regex=r'^\d{12}$',message="Le code-barre doit être composé de 12 chiffres.")])  # Pour l'identification par code-barre
+                                 help_text="Code unique pour le médicament", validators=[
+            RegexValidator(regex=r'^\d{12}$',
+                           message="Le code-barre doit être composé de 12 chiffres.")])  # Pour l'identification par code-barre
     nom = models.CharField(max_length=255, null=True, blank=True, unique=True)
     dosage = models.IntegerField(null=True, blank=True)
     unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,
                                   help_text="Ex: 500mg, 20mg/ml")
     dosage_form = models.CharField(max_length=50, choices=FORME_MEDICAMENT_CHOICES, null=True, blank=True)
     description = models.TextField(null=True, blank=True, )
-    stock = models.PositiveIntegerField(null=True, blank=True, )
+    stock = models.PositiveIntegerField(null=True, blank=True, default=0)
     date_expiration = models.DateField(null=True, blank=True, )
     categorie = models.ForeignKey(CathegorieMolecule, on_delete=models.SET_NULL, null=True, blank=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.SET_NULL, null=True, blank=True)
     molecules = models.ManyToManyField(Molecule)
     miniature = models.ImageField(upload_to="pharmacy/miniature", null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Enregistrez d'abord l'image originale
+
+        if self.miniature:
+            miniature_path = self.miniature.path
+            with Image.open(miniature_path) as img:
+                # Convertir en RGB si nécessaire (utile pour les formats non RGB comme PNG)
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+
+                # Étape 1 : Redimensionner pour couvrir le cadre tout en conservant les proportions
+                img_ratio = img.width / img.height
+                target_ratio = 200 / 100
+
+                if img_ratio > target_ratio:
+                    # Image trop large, réduire la largeur
+                    new_height = 100
+                    new_width = int(new_height * img_ratio)
+                else:
+                    # Image trop haute, réduire la hauteur
+                    new_width = 200
+                    new_height = int(new_width / img_ratio)
+
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+                # Étape 2 : Rogner pour obtenir exactement 150x100
+                left = (new_width - 200) / 2
+                top = (new_height - 100) / 2
+                right = left + 200
+                bottom = top + 100
+
+                img = img.crop((left, top, right, bottom))
+
+                # Étape 3 : Enregistrer avec une qualité élevée
+                img.save(miniature_path, format="JPEG", quality=100)
 
     def __str__(self):
         return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
@@ -96,6 +149,7 @@ class Medicament(models.Model):
 
 class MouvementStock(models.Model):
     medicament = models.ForeignKey('Medicament', on_delete=models.CASCADE)
+    patient = models.ForeignKey('core.Patient', on_delete=models.SET_NULL, null=True, blank=True)
     quantite = models.PositiveIntegerField()
     type_mouvement = models.CharField(max_length=50, choices=[('Entrée', 'Entrée'), ('Sortie', 'Sortie')])
     date_mouvement = models.DateTimeField(auto_now_add=True)
@@ -107,10 +161,14 @@ class MouvementStock(models.Model):
 
 @receiver(post_save, sender=MouvementStock)
 def update_stock_on_save(sender, instance, **kwargs):
+    if instance.medicament.stock is None:
+        instance.medicament.stock = 0  # Initialiser à 0 si stock est None
+
     if instance.type_mouvement == 'Entrée':
         instance.medicament.stock += instance.quantite
     elif instance.type_mouvement == 'Sortie':
         instance.medicament.stock -= instance.quantite
+
     instance.medicament.save()
 
 
@@ -132,27 +190,30 @@ class StockAlert(models.Model):
     quantite_actuelle = models.PositiveIntegerField()
     alerte = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"Alert for {self.medication.nom}: {self.quantite_actuelle} remaining"
+
 
 @receiver(post_save, sender=Medicament)
 def create_or_update_stock_alert(sender, instance, **kwargs):
-    niveau_critique = 10  # Par exemple, valeur par défaut
+    niveau_critique = 10  # Par exemple, valeur par défaut pour l'alerte
     if instance.stock < niveau_critique:
         StockAlert.objects.update_or_create(
             medication=instance,
             defaults={
                 'niveau_critique': niveau_critique,
-                'quantité_actuelle': instance.stock,
-                'alerté': True
+                'quantite_actuelle': instance.stock,
+                'alerte': True  # Correction du champ
             }
         )
     else:
         StockAlert.objects.filter(medication=instance).delete()
 
 
-class Commande(models.Model):
+class ArticleCommande(models.Model):
     medicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     quantite_commandee = models.PositiveIntegerField()
-    date_commande = models.DateField()
+    date_commande = models.DateField(auto_now_add=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.CASCADE)
     statut = models.CharField(max_length=50, choices=[
         ('Commandé', 'Commandé'),
@@ -161,57 +222,171 @@ class Commande(models.Model):
     ])
 
 
-class ArticleCommande(models.Model):
-    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='articles')
-    medicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
-    quantite = models.PositiveIntegerField()
+class Commande(models.Model):
+    numero = models.PositiveIntegerField()
+    articles = models.ForeignKey(ArticleCommande, on_delete=models.CASCADE, related_name='articles')
+    date_commande = models.DateField()
+    statut = models.CharField(max_length=50, choices=[
+        ('Commandé', 'Commandé'),
+        ('Reçu', 'Reçu'),
+        ('En attente', 'En attente')
+    ])
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['commande', 'medicament'], name='unique_commande_medicament')
-        ]
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=[ 'numero'], name='unique_commande_medicament')
+    #     ]
 
     def __str__(self):
-        return f"{self.quantite} de {self.medicament.nom}"
+        return f"{self.articles} de {self.date_commande}"
+
+    def get_absolute_url(self):
+        return reverse('commande_detail', kwargs={'pk': self.pk})
+
+
+# class RendezVous(models.Model):
+#     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+#     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
+#     pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True)
+#     medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True)
+#     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+#     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True)
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
+#     date = models.DateField()
+#     time = models.TimeField()
+#     reason = models.CharField(max_length=255)
+#     status = models.CharField(max_length=50, choices=[
+#         ('Scheduled', 'Scheduled'),
+#         ('Completed', 'Completed'),
+#         ('Cancelled', 'Cancelled')
+#     ])
+#     recurrence = models.CharField(max_length=20, choices=[
+#         ('None', 'None'),
+#         ('Weekly', 'Weekly'),
+#         ('Monthly', 'Monthly'),
+#         ('Quarterly', 'Quarterly'),
+#         ('Semi-Annual', 'Semi-Annual'),
+#         ('Annual', 'Annual')
+#     ], default='None')
+#     recurrence_end_date = models.DateField(null=True, blank=True, help_text="Date de fin de la récurrence")
+#     reminder = models.BooleanField(default=False)
+#     reminder_interval = models.CharField(max_length=20, choices=[
+#         ('None', 'None'),
+#         ('1 Day', '1 Day'),
+#         ('2 Days', '2 Days'),
+#         ('1 Week', '1 Week')
+#     ], default='None')
+#     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='rdvcreator')
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#
+#     def save(self, *args, **kwargs):
+#         if RendezVous.objects.filter(patient=self.patient, date=self.date, time=self.time).exists():
+#             raise ValidationError("Un rendez-vous existe déjà à cette date et heure pour ce patient.")
+#         super().save(*args, **kwargs)
+#
+#     def __str__(self):
+#         return f"Rendez-vous de {self.patient} - {self.date} à {self.time}"
 
 
 class RendezVous(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
-    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
-    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
+    patient = models.ForeignKey('core.Patient', on_delete=models.CASCADE)
+    pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True)
+    medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True)
+    service = models.ForeignKey('core.Service', on_delete=models.SET_NULL, null=True)
+    doctor = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField()
     time = models.TimeField()
-    reason = models.CharField(max_length=255)
+    reason = models.CharField(max_length=255, default="Récupération des médicaments")
     status = models.CharField(max_length=50, choices=[
         ('Scheduled', 'Scheduled'),
         ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled')
-    ])
+        ('Missed', 'Missed'),
+    ], default='Scheduled')
     recurrence = models.CharField(max_length=20, choices=[
         ('None', 'None'),
-        ('Weekly', 'Weekly'),
-        ('Monthly', 'Monthly'),
-        ('Quarterly', 'Quarterly'),
-        ('Semi-Annual', 'Semi-Annual'),
-        ('Annual', 'Annual')
+        ('Weekly', 'Chaque semaine'),
+        ('Biweekly', 'Chaque deux semaines'),
+        ('Monthly', 'Chaque mois'),
+        ('Bimonthly', 'Chaque deux mois'),
+        ('trimonthly', 'Chaque trois mois'),
+        ('semestrial', 'Chaque Semestre'),
     ], default='None')
     recurrence_end_date = models.DateField(null=True, blank=True, help_text="Date de fin de la récurrence")
-    reminder = models.BooleanField(default=False)
-    reminder_interval = models.CharField(max_length=20, choices=[
-        ('None', 'None'),
-        ('1 Day', '1 Day'),
-        ('2 Days', '2 Days'),
-        ('1 Week', '1 Week')
-    ], default='None')
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='rdvcreator')
+    reminder_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, related_name='created_by')
     updated_at = models.DateTimeField(auto_now=True)
 
+    def create_recurrences(self):
+        """
+        Crée automatiquement des rendez-vous récurrents en fonction des règles de récurrence.
+        Empêche la duplication des rendez-vous.
+        """
+        if self.recurrence != 'None' and self.recurrence_end_date:
+            current_date = self.date
+            recurrences = []
+
+            while current_date < self.recurrence_end_date:
+                # Calculer la prochaine date en fonction du type de récurrence
+                if self.recurrence == 'Weekly':
+                    current_date += timedelta(weeks=1)
+                elif self.recurrence == 'Biweekly':
+                    current_date += timedelta(weeks=2)
+                elif self.recurrence == 'Monthly':
+                    current_date += timedelta(weeks=4)
+                elif self.recurrence == 'Bimonthly':
+                    current_date += timedelta(weeks=8)
+                elif self.recurrence == 'trimonthly':
+                    current_date += timedelta(weeks=13)
+                elif self.recurrence == 'semestrial':
+                    current_date += timedelta(weeks=26)
+
+                # Vérifier si un rendez-vous existe déjà pour cette date et heure
+                if not RendezVous.objects.filter(
+                        patient=self.patient,
+                        pharmacie=self.pharmacie,
+                        doctor=self.doctor,
+                        date=current_date,
+                        time=self.time
+                ).exists():
+                    recurrences.append(
+                        RendezVous(
+                            patient=self.patient,
+                            pharmacie=self.pharmacie,
+                            medicaments=self.medicaments,
+                            service=self.service,
+                            doctor=self.doctor,
+                            date=current_date,
+                            time=self.time,
+                            reason=self.reason,
+                            status='Scheduled',
+                            recurrence='None',  # Les occurrences créées ne doivent pas être récurrentes
+                            created_by=self.created_by,
+                        )
+                    )
+
+            # Créer les rendez-vous en masse pour une meilleure efficacité
+            if recurrences:
+                RendezVous.objects.bulk_create(recurrences)
+
     def save(self, *args, **kwargs):
-        if RendezVous.objects.filter(patient=self.patient, date=self.date, time=self.time).exists():
-            raise ValidationError("Un rendez-vous existe déjà à cette date et heure pour ce patient.")
+        if self.recurrence != 'None' and self.recurrence_end_date:
+            self.create_recurrences()
+        # Prevent overlapping appointments for the same patient and pharmacy
+        overlapping = RendezVous.objects.filter(
+            patient=self.patient,
+            pharmacie=self.pharmacie,
+            date=self.date,
+            time=self.time
+        ).exclude(pk=self.pk)
+        if overlapping.exists():
+            raise ValidationError("Un rendez-vous existe déjà pour ce patient à cette date et heure.")
+
+        # Automatically mark appointments as missed if the date is in the past and not completed
+        if self.date < timezone.now().date() and self.status == 'Scheduled':
+            self.status = 'Missed'
+
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -2,6 +2,15 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+    <style>
+    .uniform-btn {
+    width: 100%;
+    min-width: 100px; /* Définit une largeur minimale pour tous les boutons */
+    text-align: left; /* Centre le texte dans les boutons */
+    padding: 5px 5px; /* Uniformise le padding des boutons */
+    font-size: 16px; /* Assure une taille de texte uniforme */
+}
+    </style>
     <div class="nk-content nk-content-fluid">
 
         <div class="container-xl wide-lg">
@@ -11,258 +20,436 @@
                 <div class="nk-block-head nk-block-head-sm ">
                     <div class="row rounded" style="height: 200px;background-repeat: no-repeat; background-image: url('{% static 'images/hospitalization.png' %}')">
                         <div class="nk-block-between">
-
                             <div class="nk-block-head-content">
                                 <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation Patient</h1>
 
                                 <div class="nk-block-des">
-                                    <h2 class="ml-5"> {{ hospitalisationdetail.patient }}</h2>
-                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span></h6>
+                                     <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
+                           class=""><h2 class="ml-5"> {{ hospitalisationdetail.patient|upper }}</h2></a>
+                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
+                                    <br><a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
+                           class="text-white mt-3"><em class="icon ni ni-folder-list"></em> Dossier Medical</a></h6>
 {#                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ hospitalisationdetail.patient.code_vih }}</span></h6>#}
+                                    {% if hospitalisationdetail.discharge_date %}
+    <span class="h4 float-right" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
+        Patient Sorti {{ hospitalisationdetail.discharge_date|naturaltime }}
+    </span>
+{% else %}
+    <a href="" data-toggle="modal" data-target="#hospitalisationout"
+       class="btn btn-outline-warning float-right position-absolute ml-5">
+        <i class="fa-solid fa-sign-out "></i> Sortir ?
+    </a>
+{% endif %}
+
+
 
                                 </div>
+
+
                             </div><!-- .nk-block-head-content -->
 
                         </div>
+
                     </div><!-- .nk-block-between -->
 
-                    <div class="mt-2">
-                        <a href="#" data-toggle="modal" data-target="#constanteover" class="btn btn-outline-primary mr-4"><em class="icon ni ni-note-add"></em>Constantes</a>
+                    <div class="mt-2 " style="height: 20px">
 
-                        <div class="modal fade" tabindex="-1" id="constanteover">
-                            <div class="modal-dialog modal-lg" role="document">
+                        {% if observations %}
+                            <button class="btn btn-outline-primary " data-toggle="modal"
+                                    data-target="#observationsModal">
+                                <em class="icon ni ni-eye"></em> Observations<span
+                                    class="badge badge-info ml-1">{{ observationscount }}</span>
+                            </button>
+
+
+                        {% endif %}
+                        <div class="modal fade" id="observationsModal" tabindex="-1" aria-labelledby="observationsModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
-                                    <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                                        <em class="icon ni ni-cross"></em>
-                                    </a>
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Overview des constante du Patient : <span
-                                                class="text-primary">{{ hospitalisationdetaildupatient.patient }}</span>
-                                        </h5>
+                                        <h5 class="modal-title" id="observationsModalLabel">Observations pour l'Hospitalisation</h5>
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" aria-label="Close"><em class="icon ni ni-close"></em></button>
                                     </div>
                                     <div class="modal-body">
-                                        <div class="nk-block card card-bordered">
-                                            {% if hospitalisationdetaildupatient.patient.latest_constante %}
-                                                <h4>Deniere constante enregistrée le
-                                                    : {{ hospitalisationdetaildupatient.patient.latest_constante.created_at }} </h4>
-                                                <table class="table table-responsive">
-                                                    <thead class="thead-light">
-                                                    <tr>
-                                                        <th class="tb-col-os"><span class="overline-title">Libélé <span
-                                                                class="d-sm-none">/ IP</span></span>
-                                                        </th>
-                                                        <th class="tb-col-ip"><span
-                                                                class="overline-title">Valeure</span></th>
-                                                        <th class="tb-col-time"><span
-                                                                class="overline-title">Observation</span></th>
-
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-
-                                                    <tr>
-                                                        <td class="tb-col-os">Tension systolique</td>
-                                                        <td class="tb-col-ip">
-                                                            <span class="sub-text">{{ hospitalisationdetaildupatient.patient.latest_constante.tension_systolique }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-                                                            {% if hospitalisationdetaildupatient.patient.latest_constante.tension_systolique < 90 or hospitalisationdetaildupatient.patient.latest_constante.tension_systolique > 140 %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Tension diastolique</td>
-                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.tension_diastolique }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.tension_diastolique < 60 or hospitalisationdetail.patient.latest_constante.tension_diastolique > 90 %}
-                                                                <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                                            {% endif %}</td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Frequence cardiaque</td>
-                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_cardiaque }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.frequence_cardiaque < 60 or hospitalisationdetail.patient.latest_constante.frequence_cardiaque > 100 %}
-                                                                <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Frequence respiratoire</td>
-                                                        <td class="tb-col-ip"><span class="sub-text">{{ hospitalisationdetail.patient.latest_constante.frequence_respiratoire }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-                                                            {% if hospitalisationdetail.patient.latest_constante.frequence_respiratoire < 12 or hospitalisationdetail.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                                                <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Temperature</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.temperature }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.temperature < 36 or hospitalisationdetail.patient.latest_constante.temperature > 37.5 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Saturation oxygene</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.saturation_oxygene }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.saturation_oxygene < 95 or hospitalisationdetail.patient.latest_constante.saturation_oxygene > 100 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">Glycemie</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.glycemie }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.glycemie < 70 or hospitalisationdetail.patient.latest_constante.glycemie > 140 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">poids</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.poids }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">taille</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.taille }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
-                                                                <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">pouls</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.pouls }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
-                                                                <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="tb-col-os">IMC</td>
-                                                        <td class="tb-col-ip"><span
-                                                                class="sub-text">{{ hospitalisationdetail.patient.latest_constante.imc }}</span>
-                                                        </td>
-                                                        <td class="tb-col-time">
-
-                                                            {% if hospitalisationdetail.patient.latest_constante.tension_systolique < 90 or hospitalisationdetail.patient.latest_constante.tension_systolique > 140 %}
-                                                                <span class="sub-text"><i
-                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                            {% else %}
-                                                                <span class="sub-text font-italic"><i
-                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                            {% endif %}
-                                                        </td>
-
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-
-                                            {% else %}
-                                                Pas de constantes enregistrées
-                                            {% endif %}
-                                        </div>
-
-
+                                        {% if observations %}
+                                            <ul class="list-group">
+                                                {% for observation in observations %}
+                                                    <li class="list-group-item">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <h6 class="mb-1">
+                                                                    <strong>{{ observation.date_enregistrement|naturaltime }}</strong>
+                                                                    -
+                                                                    <span class="badge badge-info text-dark">{{ observation.statut }}</span>
+                                                                </h6>
+                                                                <div class="mb-1">{{ observation.details|safe }}</div>
+                                                                <small class="text-muted">Enregistré par
+                                                                    : {{ observation.medecin.get_full_name|default:"Non spécifié" }}</small>
+                                                            </div>
+                                                            <div>
+                                                                {% if observation.medecin == request.user %}
+                                                                    <!-- Button to delete observation -->
+                                                                    <form method="post"
+                                                                          action=""
+                                                                          style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit"
+                                                                                class="btn btn-danger btn-sm"
+                                                                                onclick="return confirm('Voulez-vous vraiment supprimer cette observation ?')">
+                                                                            Supprimer
+                                                                        </button>
+                                                                    </form>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <div class="alert alert-info text-center">
+                                                Aucune observation enregistrée pour cette hospitalisation.
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    <div class="modal-footer bg-light">
-                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ hospitalisationdetail.patient.code_patient }}</span>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
-                           class="btn btn-outline-primary mr-4"><em class="icon ni ni-folder"></em>Dossier</a>
-                        <a href="#" class="btn btn-outline-lighter float-right"><em class="icon ni ni-printer"></em>Imprimer</a>
-{#                        <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
-{#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
-{#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
-                        {% if hospitalisationdetail.discharge_date %}
-                            <span class="h4 float-right mr-5" data-toggle="tooltip"
-                                  title="{{ hospitalisationdetail.discharge_date }}">Patient Sorti {{ hospitalisationdetail.discharge_date|naturaltime }}</span>
-                        {% else %}
-                            <a href="" data-toggle="modal" data-target="#hospitalisationout"
-                               class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-sign-out mr-1"></i>Sortir ?</a>
+
+                        {% if historiques_maladie %}
+                            <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                    data-target="#historiqueModal">
+                                <em class="icon ni ni-book"></em>Histoire Maladie<span
+                                    class="badge badge-info ml-1">{{ effets_indesirablescount }}</span>
+                            </button>
+
                         {% endif %}
+                        <!-- Modal Historique -->
+                        <div class="modal fade" id="historiqueModal" tabindex="-1"
+                             aria-labelledby="historiqueModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="historiqueModalLabel">Historique de la Maladie</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if historiques_maladie %}
+                                            <ul class="list-group">
+                                                {% for historique in historiques_maladie %}
+                                                    <li class="list-group-item">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <h6 class="mb-1">
+                                                                    <strong>{{ historique.date_enregistrement|date:"d/m/Y H:i" }}</strong>
+                                                                    -
+                                                                    <span class="badge bg-info text-dark">Par {{ historique.medecin.get_full_name|default:"Médecin inconnu" }}</span>
+                                                                </h6>
+                                                                <p class="mb-1">
+                                                                    <strong>Description
+                                                                        :</strong> {{ historique.description }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Antécédents
+                                                                        :</strong> {{ historique.antecedents|default:"Non spécifiés" }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Diagnostics Associés
+                                                                        :</strong> {{ historique.diagnostics_associes|default:"Non spécifiés" }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Traitements Précédents
+                                                                        :</strong> {{ historique.traitements_precedents|default:"Non spécifiés" }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Observations
+                                                                        :</strong> {{ historique.observations|default:"Non spécifiées" }}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                {% if historique.medecin == request.user %}
+                                                                    <!-- Button to delete historique -->
+                                                                    <form method="post" action="" style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Voulez-vous vraiment supprimer cet historique ?')">Supprimer</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <div class="alert alert-info text-center">
+                                                Aucun historique enregistré pour cette hospitalisation.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Button to Trigger Modal -->
+                        {% if diagnostics %}
+                            <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                    data-target="#diagnosticModal">
+                                <em class="icon ni ni-list"></em> Diagnostics<span
+                                    class="badge badge-info ml-1">{{ diagnosticscount }}</span>
+                            </button>{% endif %}
+
+                        <!-- Modal Diagnostics -->
+                        <div class="modal fade" id="diagnosticModal" tabindex="-1"
+                             aria-labelledby="diagnosticModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="diagnosticModalLabel">Diagnostics Associés</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if diagnostics %}
+                                            <ul class="list-group">
+                                                {% for diagnostic in diagnostics %}
+                                                    <li class="list-group-item">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <h6 class="mb-1">
+                                                                    <strong>{{ diagnostic.date_diagnostic|naturaltime }}</strong>
+                                                                    -
+                                                                    <span class="badge bg-info text-dark">{{ diagnostic.get_type_diagnostic_display }}</span>
+                                                                </h6>
+                                                                <p class="mb-1">
+                                                                    <strong>Maladie :</strong> {{ diagnostic.maladie }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Remarques
+                                                                        :</strong> {{ diagnostic.remarques|safe|default:"Aucune remarque" }}
+                                                                </p>
+                                                                <p class="mb-1">
+                                                                    <strong>Médecin
+                                                                        :</strong> {{ diagnostic.medecin_responsable.get_full_name|default:"Inconnu" }}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                {% if diagnostic.medecin_responsable == request.user %}
+                                                                    <!-- Button to delete diagnostic -->
+                                                                    <form method="post" action=""
+                                                                          style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit"
+                                                                                class="btn btn-danger btn-sm"
+                                                                                onclick="return confirm('Voulez-vous vraiment supprimer ce diagnostic ?')">
+                                                                            <em class="icon ni ni-trash"></em>
+                                                                        </button>
+                                                                    </form>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <div class="alert alert-info text-center">
+                                                Aucun diagnostic enregistré pour cette hospitalisation.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if avis_medicaux %}
+                            <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                    data-target="#voiravisMedicalModal">
+                                <em class="icon ni ni-edit-alt"></em> Avis medical<span
+                                    class="badge badge-info ml-1">{{ avis_medicauxcount }}</span>
+                            </button>
+                        {% endif %}
+                        <div class="modal fade" id="voiravisMedicalModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Avis Médicaux</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="text" id="searchAvis" class="form-control mb-3"
+                                               placeholder="Rechercher un avis médical">
+                                        <div id="avisMedicalList">
+                                            {% for avis in avis_medicaux %}
+                                                <div class="card mb-3 avis-card">
+                                                    <div class="card-header">
+                                                        <strong>{{ avis.medecin.get_full_name }}</strong> -
+                                                        <em>{{ avis.date_avis|date:"d/m/Y H:i" }}</em>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p>{{ avis.contenu|safe }}</p>
+                                                        <small>Par : {{ avis.medecin.get_full_name }}</small>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const searchInput = document.getElementById('searchAvis');
+                                const avisCards = document.querySelectorAll('.avis-card');
+
+                                searchInput.addEventListener('input', function () {
+                                    const searchValue = searchInput.value.toLowerCase();
+
+                                    avisCards.forEach(card => {
+                                        const title = card.querySelector('.card-header strong').innerText.toLowerCase();
+                                        const content = card.querySelector('.card-body p').innerText.toLowerCase();
+
+                                        if (title.includes(searchValue) || content.includes(searchValue)) {
+                                            card.style.display = '';
+                                        } else {
+                                            card.style.display = 'none';
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+                        {% if effets_indesirables %}
+                            <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                    data-target="#effetIndesirableModal">
+                                <em class="icon ni ni-edit-alt"></em> Effets indesirables <span
+                                    class="badge badge-info">{{ effets_indesirablescount }}</span>
+                            </button>
+                        {% endif %}
+
+                        <div class="modal fade" id="effetIndesirableModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Effets Indésirables</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="text" id="searchEffetsIndesirables" class="form-control mb-3"
+                                               placeholder="Rechercher un effet indésirable">
+                                        <div id="effetsIndesirablesList">
+                                            {% for effet in effets_indesirables %}
+                                                <div class="card mb-3 effet-card">
+                                                    <div class="card-header">
+                                                        <strong>Gravité : {{ effet.gravite }}</strong> -
+                                                        <em>{{ effet.date_apparition|date:"d/m/Y" }}</em>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p><strong>Description : </strong>{{ effet.description }}</p>
+                                                        <p><strong>Médicament associé
+                                                            : </strong>{{ effet.medicament_associe.nom|default:"Non spécifié" }}
+                                                        </p>
+                                                        <small>Signalé par
+                                                            : {{ effet.medecin.get_full_name|default:"Non spécifié" }}</small>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const searchInput = document.getElementById('searchEffetsIndesirables');
+                                const effetCards = document.querySelectorAll('.effet-card');
+
+                                searchInput.addEventListener('input', function () {
+                                    const searchValue = searchInput.value.toLowerCase();
+
+                                    effetCards.forEach(card => {
+                                        const description = card.querySelector('.card-body').innerText.toLowerCase();
+
+                                        if (description.includes(searchValue)) {
+                                            card.style.display = '';
+                                        } else {
+                                            card.style.display = 'none';
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+                     {% if hopi_comment %}
+                            <button class="btn btn-outline-primary ml-2" data-toggle="modal" data-target="#commentairesModal">
+                                <em class="icon ni ni-edit-alt"></em>Comment.  <span class="badge badge-info">{{ hopi_commentcount }}</span>
+                            </button>
+                        {% endif %}
+
+                       <div class="modal fade" id="commentairesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Commentaires des medecins </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Champ de recherche -->
+                <input type="text" id="searchComment" class="form-control mb-3" placeholder="Rechercher un commentaire">
+
+                <!-- Liste des commentaires -->
+                <div id="commentList">
+                    {% if hopi_comment %}
+                        {% for comment in hopi_comment %}
+                            <div class="card mb-3 comment-card">
+                                <div class="card-header">
+                                    <strong>{{ comment.medecin|default:"auteur inconnu" }}</strong> -
+                                    <em>{{ comment.date_commentaire|naturaltime }}</em>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ comment.contenu }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Aucun commentaire disponible.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchComment');
+        const commentCards = document.querySelectorAll('.comment-card');
+
+        searchInput.addEventListener('input', function () {
+            const searchValue = searchInput.value.toLowerCase();
+
+            commentCards.forEach(card => {
+                const content = card.querySelector('.card-body').innerText.toLowerCase();
+
+                if (content.includes(searchValue)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
+
 
                         <!-- Modal Content Code -->
                         <div class="modal fade" tabindex="-1" id="hospitalisationout">
@@ -280,17 +467,13 @@
                                               action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
                                             {% csrf_token %}
                                             <div class="form-group">
-                                                <label for="discharge_date">Date de sortie</label>
-                                                <input type="date" class="form-control" id="discharge_date"
+                                                <label for="discharge_date">Date et heure de sortie</label>
+                                                <input type="datetime-local" class="form-control" id="discharge_date"
                                                        name="discharge_date" required>
                                             </div>
+
                                             <div class="form-group">
-                                                <label for="discharge_reason">Raison de sortie</label>
-                                                <textarea class="form-control" id="discharge_reason"
-                                                          name="discharge_reason" rows="4" required></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="status">Statut du patient</label>
+                                                <label for="status">Mode de sortie</label>
                                                 <select class="form-control" id="status" name="status" required>
                                                     <option value="Sortie">Sortie</option>
                                                     <option value="Gueris-EXEA">Gueris-EXEA</option>
@@ -301,50 +484,269 @@
                                                     <!-- Add other status options if needed -->
                                                 </select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                                            <div class="form-group">
+                                                <label for="discharge_reason">Commentaires</label>
+                                                <textarea class="form-control" id="discharge_reason"
+                                                          name="discharge_reason" rows="4" required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Sortir</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        {# <a href="{% url 'mark_hospitalisation' consultation_id=hospitalisationdetail.id patient_id=hospitalisationdetail.patient.id %}"#}
-{#                           class="btn btn-outline-secondary float-right mr-5"#}
-{#                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
-{#                                class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>#}
-
                     </div>
 
 
-                </div><!-- .nk-block-head -->
+                </div>
+
 
                 <div class="nk-block">
-                    <div class="card card-bordered card-stretch">
+                <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
                             <div class="row">
 
-                                    <div class="col-lg-12">
-                                        <blockquote class="blockquote text-center">
-                                            {% if hospitalisationdetail.discharge_date %}
-                                            {% else %}
-                                                <img src="{% static 'images/hospitalization-2.gif' %}" height="200">
-                                            {% endif %}
-                                            <p class="mb-0">Admis en hospitalisation le <strong
-                                                    class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
+                                <div class="col-lg-6">
+                                   <div class="d-flex align-items-center"><!-- Texte à gauche -->
+    <div class="text-start">
+        <blockquote class="blockquote">
+            <br class="mb-0">
+                Admis le :</br>
+                <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
+            </p>
+            <footer class="blockquote-footer">{{ hospitalisationdetail.reason_for_admission }}</footer>
 
-                                            <footer class="blockquote-footer">{{ hospitalisationdetail.reason }}</footer>
-                                            </p>
-                                            {% if hospitalisationdetail.discharge_date %}
+            {% if hospitalisationdetail.discharge_date %}
+                <p class="mb-0 mt-3">
+                    Sortie le:</br>
+                    <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
+                </p>
+                <footer class="blockquote-footer">
+                <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span></br>
+                    {{ hospitalisationdetail.discharge_reason }}
+                </footer>
+            {% endif %}
+        </blockquote>
+
+    </div>
+    <!-- Image à droite -->
+    <div class="me-3">
+        {% if not hospitalisationdetail.discharge_date %}
+            <img src="{% static 'images/hospitalization-2.gif' %}" height="200" alt="Hospitalization Image">
+        {% endif %}
+
+    </div>
 
 
-                                                <p class="mb-0">Sortie de l' hospitalisation le <strong
-                                                        class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
-                                                <footer class="blockquote-footer">{{ hospitalisationdetail.discharge_reason }}</footer>
-                                                </p>
-                                            {% else %}
-                                            {% endif %}
-                                        </blockquote>
-                                    </div>
+</div>
+                                </div>
+                            {% if hospitalisationdetail.discharge_date  %}
+                                {% else %}
+
+                                <div class="col-lg-2 text-end">
+                                <ul class="m-0 p-0 list-unstyled text-end">
+                                        <li class="d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-outline-secondary uniform-btn mt-2" data-toggle="modal" data-target="#addobservationModal">
+                                                <em class="icon ni ni-plus-circle-fill"></em>Observations
+                                            </button>
+                                            <div class="modal fade" id="addobservationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une Observations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_observations' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ observationform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                            <script>
+                                                document.addEventListener('DOMContentLoaded', function () {
+                                                    // Reinitialiser TinyMCE quand le modal est affiché
+                                                    $('#addobservationModal').on('shown.bs.modal', function () {
+                                                        tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                                                        tinymce.init({
+                                                            selector: '.tinymce-obs',
+                                                            plugins: 'advlist autolink lists link charmap print preview anchor',
+                                                            toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                                                            menubar: false,
+                                                            height: 300,
+                                                        });
+                                                    });
+                                                });
+                                            </script>
+
+                                            <!-- Bouton pour le modal de prescription -->
+                                        </li>
+                                        <li class="d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-outline-secondary uniform-btn  mt-2"
+                                                    data-toggle="modal" data-target="#addhistoireModal">
+                                                <em class="icon ni ni-plus-circle-fill"></em> Histoire
+                                            </button>
+                                             <div class="modal fade" id="addhistoireModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un Diagnostic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_historique_maladie' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ historiquemaladieform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                        </li>
+                                    <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-secondary  uniform-btn mt-2"
+                data-toggle="modal" data-target="#addcommentModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Commentaire
+        </button>
+                    <div class="modal fade" id="addcommentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un commentaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ hospicomment.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </li>
+
+
+                                    </ul>
+                                </div>
+                                <div class="col-lg-3 text-end">
+
+                                   <ul class="m-0 p-0 list-unstyled text-end">
+    <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-secondary  uniform-btn mt-2"
+                data-toggle="modal" data-target="#adddiagnosticModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Diagnostic
+        </button>
+
+        <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un Diagnostic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ diagnosticsform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    </li>
+    <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-secondary  uniform-btn mt-2"
+                data-toggle="modal" data-target="#addavisModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Avis médical
+        </button>
+
+        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un Avi medical</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ avismedicalform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+         <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Reinitialiser TinyMCE quand le modal est affiché
+            $('#addavisModal').on('shown.bs.modal', function () {
+                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                tinymce.init({
+                    selector: '.tinymce-avis',
+                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                    menubar: false,
+                    height: 300,
+                });
+            });
+        });
+    </script>
+    </li>
+
+    <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-outline-secondary  uniform-btn mt-2"
+                data-toggle="modal" data-target="#addeffetindesirableModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Effet indésirable
+        </button>
+        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un effet indesirable</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ effetindesirableform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Reinitialiser TinyMCE quand le modal est affiché
+            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
+                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                tinymce.init({
+                    selector: '.tinymce-effet',
+                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                    menubar: false,
+                    height: 300,
+                });
+            });
+        });
+    </script>
+    </li>
+</ul>
+
+                                </div>
+                             {% endif %}
                                 
 
                             </div>
@@ -361,7 +763,7 @@
                                                     {% for execution in missed_executions %}
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                                             <div>
-                                                                <strong>{{ execution.prescription.medication.nom }}</strong>
+                                                                <strong>{{ execution.prescription.medication }}</strong>
                                                                 <br>
                                                                 <span class="text-muted">Heure prévue : {{ execution.scheduled_time|date:"d/m/Y H:i" }}</span>
                                                             </div>
@@ -380,16 +782,16 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                                <!-- Prochaine prise -->
+                       
                                 <div class="col-lg-6 mx-auto">
                                     {% if next_execution %}
                                         <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
                                             <div class="card-body text-center">
                                                 <h5 class="text-primary font-weight-bold">Prochaine Prise de
                                                     Médicament</h5>
-                                                <h4 class="text-dark mt-3">{{ next_execution.prescription.medication.nom }}</h4>
-                                                <p class="text-muted">Heure prévue :
-                                                    <strong>{{ next_execution.scheduled_time|date:"d/m/Y H:i" }}</strong>
+                                                <h4 class="text-dark mt-3">{{ next_execution.prescription.medication }}</h4>
+                                                <p class="text-muted">Date et heure prévue :
+                                                    <strong>{{ next_execution.scheduled_time|date:"d/m/Y H:i"  }}</strong>
                                                 </p>
                                                 <div class="mt-4">
                                                     <div id="countdown"
@@ -434,9 +836,9 @@
                             </div>
 
                             <hr>
-                            <!-- Indicateurs Cliniques -->
+                      
                             <div class="row m-4">
-<h3 class="text-muted"> Suivie de Soins </h3>
+                                <h3 class="text-muted"> Suivie de Soins </h3>
 
                                 <div class="row col-12">
 
@@ -866,7 +1268,6 @@
                                 </div>
                             </div>
                                 <!-- Indicateurs Biologiques -->
-
                                 <div class="row m-4">
 
                                     <h3 class="text-muted"> Indicateurs Biologiques </h3>
@@ -1214,7 +1615,22 @@
                 </div>
             </div>
         </div>
-  
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Reinitialiser TinyMCE quand le modal est affiché
+            $('#adddiagnosticModal').on('shown.bs.modal', function () {
+                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                tinymce.init({
+                    selector: '.tinymce-basic',
+                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                    menubar: false,
+                    height: 300,
+                });
+            });
+        });
+    </script>
+
     <script>
         // Données JSON pour les indicateurs et leurs plages
         const chartData = JSON.parse('{{ lab_ink|escapejs }}');

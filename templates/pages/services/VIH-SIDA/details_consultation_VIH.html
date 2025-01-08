@@ -268,8 +268,7 @@
 
                         <a href="{% url 'detail_patient' consultationsdupatient.patient.pk %}"
                            class="btn btn-outline-primary mr-4"><em class="icon ni ni-folder"></em>Dossier</a>
-                        <a href="#" class="btn btn-outline-lighter float-right"><em class="icon ni ni-printer"></em>
-                            Imprimer</a>
+
 
 
 {#                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"#}
@@ -277,7 +276,7 @@
 {#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
                         <a href="" data-toggle="modal" data-target="#hospitalisationreq"
                            class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-bed-pulse mr-1"></i>
-                            Hospitaliser ?</a>
+                            Hospitalisation</a>
 
                         <!-- Modal Content Code -->
                         <div class="modal fade" tabindex="-1" id="hospitalisationreq">
@@ -311,8 +310,8 @@
 
                         <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
                            class="btn btn-outline-secondary float-right mr-5"
-                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i
-                                class="fa-solid fa-user-friends mr-1"></i> Suivre ?</a>
+                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');">
+                            <em class="icon ni ni-reply-fill"></em> Suivie VIH</a>
 
 
 
@@ -331,7 +330,18 @@
                             <hr>
                             <div class="row m-4">
 
-                                <h3 class="text-muted"> Bilan Initial VIH </h3>
+
+                            <div class=" col-9 position-relative">
+         <h3 class="text-muted"> Bilan Initial VIH </h3>
+
+</div>
+                                                  <div class="col-2 position-relative">
+
+    <a href="{% url 'telecharger_bilaninitial' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}" class="btn btn-outline-lighter" style="right: 0; top: 0; left: 100%">
+        <em class="icon ni ni-printer"></em> Imprimer
+    </a>
+                                                      
+</div>
 
 
                                 <div class="row col-12 mt-5">
@@ -370,9 +380,7 @@
                                                                 <a class="btn btn-outline-danger  btn-icon btn-round btn-xs mr-1"
                                                                    href="{% url 'delete_test_rapide_vih' test_id=test.id consultation_id=consultationsdupatient.id %}"><em
                                                                         class="icon ni ni-trash  "></em></a>
-                                                                <a class="btn btn-outline-info  btn-icon btn-round btn-xs mr-1"
-                                                                   href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                                        class="icon ni ni-download-cloud "></em></a>
+
 
                                                             </td>
 
@@ -394,8 +402,7 @@
                                                         class="icon ni ni-plus-circle-fill"></em></button>
 
 
-                                                <button type="button" class="btn btn-info mr-5 btn-icon btn-round"><em
-                                                        class="icon ni ni-download-cloud "></em></button>
+                                              
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table ">
@@ -425,7 +432,7 @@
 
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                                 <div class="row col-12">
                                     <div class="col-12 col-md-12 mb-5">
@@ -434,9 +441,7 @@
                                             <div class="card-header">Enquete VIH
                                                 {% if not consultationsdupatient.enqueteconsultation.exists %}
                                                 {% else %}
-                                                    <a class="btn btn-outline-info  btn-icon btn-round mr-5"
-                                                       href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                            class="icon ni ni-download-cloud ml-10 "></em></a>
+
                                                 {% endif %}
                                                 {% if not consultationsdupatient.enqueteconsultation.exists %}
                                                     <button type="button"
@@ -536,10 +541,7 @@
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
 
-                                            <div class="card-header">Examens <a
-                                                    class="btn btn-outline-info  btn-icon btn-round mr-5"
-                                                    href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                    class="icon ni ni-download-cloud ml-10 "></em></a>
+                                            <div class="card-header">Examens 
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
                                                         data-toggle="modal" data-target="#rendezvous"><em
@@ -584,10 +586,7 @@
                                     </div>
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
-                                            <div class="card-header">Prélèvement <a
-                                                    class="btn btn-outline-info  btn-icon btn-round mr-5"
-                                                    href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                    class="icon ni ni-download-cloud ml-10 "></em></a>
+                                            <div class="card-header">Prélèvement 
 
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
@@ -754,9 +753,7 @@
                                                             </div>
                                                         {% endfor %}
                                                     </div>
-                                                    <button type="button" id="add-symptome" class="btn btn-secondary">
-                                                        Ajouter <i class="fa-solid fa-plus-circle fa-lg ml-5"> </i>
-                                                    </button>
+
                                                 </div>
                                                 <div class="modal-footer bg-light">
                                                     <div class="col-md-12 float-right mb-10">

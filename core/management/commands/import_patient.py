@@ -87,7 +87,7 @@ class Command(BaseCommand):
             doctor, created = Employee.objects.get_or_create(
                 user=user,
                 defaults={
-                    'job_title': 'Doctor',
+                    # 'job_title': 'Doctor',
                     'phone': '00000000',  # Default phone number, adjust as needed
                     'gender': 'Male' if sexe == 'Homme' else 'Female',
                     'created_at': timezone.now(),

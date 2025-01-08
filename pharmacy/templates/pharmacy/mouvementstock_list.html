@@ -1,0 +1,154 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load unicorn %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+                    <div class="container-xl wide-lg">
+                        <div class="nk-content-body">
+                           <div class="nk-block">
+    <div class="card card-bordered card-stretch">
+        <div class="card-inner-group">
+            <div class="container mt-4">
+                <h2 class="mb-4">Liste des Mouvements de Stock</h2>
+                <table id="mouvementStockTable" class="table table-bordered table-striped nk-tb-list nk-tb-ulist">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" title="Tout sélectionner"></th>
+                            <th>ID</th>
+                            <th>Médicament</th>
+                            <th>Patient</th>
+                            <th>Quantité</th>
+                            <th>Type de Mouvement</th>
+                            <th>Date du Mouvement</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+                        </div>
+                    </div>
+                </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const mouvementTable = $('#mouvementStockTable').DataTable({
+                processing: true,
+                serverSide: true,
+                responsive: true,
+                ajax: {
+                    url: "{% url 'api_mouvement_stock_list' %}",
+                    type: "GET",
+                },
+                columns: [
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return `<input type="checkbox" class="rowCheckbox" value="${row.id}" title="Sélectionner ce mouvement">`;
+                        },
+                    },
+                    {data: "id", title: "ID", orderable: true},
+                    {data: "medicament", title: "Médicament", orderable: true},
+                    {data: "patient", title: "Patient", orderable: true},
+                    {data: "quantite", title: "Quantité", orderable: true},
+                    {data: "type_mouvement", title: "Type de Mouvement", orderable: true},
+                    {data: "date_mouvement", title: "Date du Mouvement", orderable: true},
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return `
+                            <button class="btn btn-sm btn-primary" onclick="viewDetails(${row.id})">Voir</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMovement(${row.id})">Supprimer</button>`;
+                        },
+                    },
+                ],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json",
+                },
+                dom: "Bfrtip",
+                buttons: [
+                    {
+                        extend: "copyHtml5",
+                        text: '<i class="fa fa-copy"></i> Copier',
+                        className: "btn btn-outline-secondary btn-sm",
+                    },
+                    {
+                        extend: "excelHtml5",
+                        text: '<i class="fa fa-file-excel"></i> Exporter Excel',
+                        className: "btn btn-outline-success btn-sm",
+                        exportOptions: {
+                            modifier: {
+                                selected: true,
+                            },
+                        },
+                    },
+                    {
+                        extend: "pdfHtml5",
+                        text: '<i class="fa fa-file-pdf"></i> Exporter PDF',
+                        className: "btn btn-outline-danger btn-sm",
+                        exportOptions: {
+                            modifier: {
+                                selected: true,
+                            },
+                        },
+                    },
+                    {
+                        extend: "print",
+                        text: '<i class="fa fa-print"></i> Imprimer',
+                        className: "btn btn-outline-info btn-sm",
+                        exportOptions: {
+                            modifier: {
+                                selected: true,
+                            },
+                        },
+                    },
+                ],
+                select: {
+                    style: "multi",
+                    selector: "td:first-child input[type='checkbox']",
+                },
+                order: [[1, "desc"]],
+            });
+
+            // Gestion de la case "Tout sélectionner"
+            document.getElementById("selectAll").addEventListener("change", function () {
+                const isChecked = this.checked;
+                $('.rowCheckbox').prop("checked", isChecked).trigger("change");
+            });
+
+            // Gestion des cases individuelles
+            $('#mouvementStockTable tbody').on('change', '.rowCheckbox', function () {
+                const row = mouvementTable.row($(this).closest('tr'));
+                if (this.checked) {
+                    row.select();
+                } else {
+                    row.deselect();
+                }
+
+                // Mettre à jour la case "Tout sélectionner"
+                const allChecked = $('.rowCheckbox').length === $('.rowCheckbox:checked').length;
+                $('#selectAll').prop("checked", allChecked);
+            });
+
+            // Ajouter les boutons d'exportation à l'interface
+            mouvementTable.buttons().container().appendTo('#mouvementStockTable_wrapper .col-md-6:eq(0)');
+
+            // Fonction Voir les détails
+            window.viewDetails = function (id) {
+                alert(`Voir les détails pour l'ID : ${id}`);
+            };
+
+            // Fonction Supprimer un mouvement
+            window.deleteMovement = function (id) {
+                if (confirm("Voulez-vous vraiment supprimer ce mouvement ?")) {
+                    alert(`Mouvement ID : ${id} supprimé.`);
+                    // Ajoutez une logique AJAX pour supprimer si nécessaire.
+                }
+            };
+        });
+    </script>
+{% endblock %}

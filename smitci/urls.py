@@ -91,6 +91,7 @@ urlpatterns = [
 
                   path('consultation/<int:patient_id>/<int:rdv_id>', consultation_send_create,
                        name='send_consultation'),
+
                   path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
                   path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
 
@@ -125,7 +126,7 @@ urlpatterns = [
                   path('constantes/<int:patient_id>', Constantes_create, name='ajouter_constantes'),
 
                   path('consultation_print/<int:patient_id> <int:consultation_id>', create_consultation_pdf,
-                       name='telecharger_consultations'),
+                       name='telecharger_bilaninitial'),
                   # path('constantes/<int:patient_id>', ConstanteCreateView.as_view(), name='ajouter_constantes'),
 
                   path('appointments/new/', views.appointment_create, name='appointment_create'),

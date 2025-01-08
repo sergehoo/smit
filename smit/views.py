@@ -236,7 +236,7 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     enquete_vih = EnqueteVih.objects.filter(consultation=consultation).first()
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Consultation_{consultation_id}_Patient_{patient.nom}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="Fiche_de_bilan_initial_{consultation_id}_Patient_{patient.nom}.pdf"'
 
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)  # Mode portrait
@@ -244,7 +244,7 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     # Charger les images
     logo_path = os.path.join(settings.STATIC_ROOT, 'images/logoMSHPCMU.jpg')
     logo_ci = os.path.join(settings.STATIC_ROOT, 'images/armoirieci.jpg')
-    watermark_path = os.path.join(settings.STATIC_ROOT, 'images/logokeneya260.png')
+    watermark_path = os.path.join(settings.STATIC_ROOT, 'images/bluefondsbilaninit.png')
     logo_image = ImageReader(logo_path) if os.path.exists(logo_path) else None
     logo_ci = ImageReader(logo_ci) if os.path.exists(logo_ci) else None
     watermark_image = ImageReader(watermark_path) if os.path.exists(watermark_path) else None
@@ -265,7 +265,7 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     # Dessiner le filigrane en arrière-plan
     if watermark_image:
         c.saveState()
-        c.setFillAlpha(0.1)  # Ajustez la transparence du filigrane ici
+        c.setFillAlpha(0.2)  # Ajustez la transparence du filigrane ici
         c.drawImage(watermark_image, 0, 0, width=width, height=height, mask='auto')
         c.restoreState()
 
@@ -283,34 +283,100 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     c.setFont("Helvetica", 8)
     c.drawString(1 * cm, height - 2.3 * cm, "Ministère de la Santé de l'hygiène Publique")  # Texte à gauche
     c.drawString(1 * cm, height - 2.6 * cm, "et de la Couverture Maladie Universelle")  # Texte à gauche
-    # c.drawString(16 * cm, height - 2 * cm, "République de Côte d'Ivoire")  # Texte à droite
-    c.drawString(16.2 * cm, height - 2.3 * cm, "Union-Discipline-Travail")  # Texte à droite
+
+    c.drawString(2 * cm, height - 3 * cm, "___________________")  # Texte à gauche
+    c.drawString(16.2 * cm, height - 2.3 * cm, "Union - Discipline - Travail")  # Texte à droite
 
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(5 * cm, height - 5 * cm, "FICHE DE SUIVIE DES PERSONNES VIVANT AVEC LE VIH")  # Texte à droite
-    c.line(5 * cm, height - 5.2 * cm, width - 4 * cm, height - 5.2 * cm)
+    c.drawString(1.7 * cm, height - 3.5 * cm, "PNPCPVVIH/SIDA")  # Texte à gauche
+    # c.drawString(16 * cm, height - 2 * cm, "République de Côte d'Ivoire")  # Texte à droite
+
+
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(1.5 * cm, height - 5 * cm, "FICHE DE BILAN INITIAL POUR LA PRISE EN CHARGE DES PERSONNES VIVANT AVEC LE VIH")  # Texte à droite
+    c.line(1.5 * cm, height - 5.2 * cm, width - 1.8 * cm, height - 5.2 * cm)
 
     # Ajouter une ligne pour séparer l'en-tête du contenu
     # c.line(1 * cm, height - 2.2 * cm, width - 1 * cm, height - 2.2 * cm)
 
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(0.4 * cm, height - 6 * cm, "I.")  # Texte à gauche
+    c.drawString(1.5 * cm, height - 6 * cm, "Caractéristiques socio-démographiques du patient")  # Texte à gauche
+
     c.setFont("Helvetica-Bold", 8)
-    c.drawString(2.5 * cm, height - 6 * cm, "SUI 01 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 6.5 * cm, "SUI 02 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 7 * cm, "SUI 03 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 7.5 * cm, "SUI 04 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 8 * cm, "SUI 05 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 8.5 * cm, "SUI 06 .")  # Texte à gauche
-    c.drawString(2.5 * cm, height - 9 * cm, "SUI 07 .")  # Texte à gauche
+
+    c.drawString(2.5 * cm, height - 7 * cm, "DEM 01")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 7.5 * cm, "DEM 02")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 8 * cm, "DEM 03")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 8.5 * cm, "DEM 04")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 9 * cm, "DEM 05")  # Texte à gauche
+
+    c.drawString(2.5 * cm, height - 14 * cm, "DEM 06")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 14.5 * cm, "DEM 08")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 15 * cm, "DEM 09")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 15.5 * cm, "DEM 10")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 16 * cm, "DEM 11")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 16.5 * cm, "DEM 12")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 17 * cm, "DEM 13")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 17.5 * cm, "DEM 14")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 18 * cm, "DEM 15")  # Texte à gauche
 
     c.setFont("Helvetica", 8)
-    c.drawString(0.4 * cm, height - 6 * cm, "(DINTV)")  # Texte à gauche
-    c.drawString(0.4 * cm, height - 6.5 * cm, "(SUJETNO)")  # Texte à gauche
-    c.drawString(0.4 * cm, height - 7 * cm, "(LABNO)")  # Texte à gauche
-    c.drawString(0.4 * cm, height - 7.5 * cm, "(NOMSERV)")  # Texte à gauche
-    c.drawString(0.4 * cm, height - 8 * cm, "(SERVICE)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 7 * cm, "(DINTV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 7.5 * cm, "(SUJETNO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 8 * cm, "(LABNO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 8.5 * cm, "(NOMSERV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 9 * cm, "(SERVICE)")  # Texte à gauche
+
+    c.drawString(0.4 * cm, height - 14 * cm, "(NOM)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 14.5 * cm, "(PRENOM)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 15 * cm, "(SEXE)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 15.5 * cm, "(DATENAIS)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 16 * cm, "(SESNIVET)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 16.5 * cm, "(SESETCV1)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 17 * cm, "(NATIONAL)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 17.5 * cm, "(RESIDE)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 18 * cm, "(NOMMED)")  # Texte à gauche
+
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(0.4 * cm, height - 19 * cm, "II.")  # Texte à gauche
+    c.drawString(1.5 * cm, height - 19 * cm, "Données clinique")  # Texte à gauche
+
+    c.setFont("Helvetica", 8)
+    c.drawString(0.4 * cm, height - 19.5 * cm, "(HISATCD)")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 19.5 * cm, "CLI 01.")  # Texte à gauche
+    c.drawString(5 * cm, height - 19.5 * cm, "Antécédents ")  # Texte à gauche
+
+    c.drawString(0.4 * cm, height - 20.5 * cm, "(HISPRARRV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 21 * cm, "(HISPRTYP)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 21.5 * cm, "(HISTXARV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 22 * cm, "(HISTRARV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 22.5 * cm, "(DERXARV)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 23 * cm, "(COTRIMO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 23.5 * cm, "(STAEVOL)")  # Texte à gauche
+
+    c.drawString(0.4 * cm, height - 24 * cm, "(IOENCOUR)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 24.54 * cm, "(TRAITIO)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 25 * cm, "(PHYPOIDS)")  # Texte à gauche
+    c.drawString(0.4 * cm, height - 25.5 * cm, "(PHYKARN)")  # Texte à gauche
+
+    c.setFont("Helvetica", 8)
+
+    c.drawString(2.5 * cm, height - 20.5 * cm, "CLI 02.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 21 * cm, "CLI 03.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 21.5 * cm, "CLI 04.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 22 * cm, "CLI 05.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 22.5 * cm, "CLI 06.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 23 * cm, "CLI 07.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 23.5 * cm, "CLI 08.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 24 * cm, "CLI 09.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 24.5 * cm, "CLI 10.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 25 * cm, "CLI 11.")  # Texte à gauche
+    c.drawString(2.5 * cm, height - 25.5 * cm, "CLI 12.")  # Texte à gauche
+
 
     # Position de départ pour le formulaire
-    y_position = height - 6 * cm
+    y_position = height - 7 * cm
     line_height = 0.5 * cm
 
     # Fonction pour dessiner une ligne de formulaire avec pointillés
@@ -318,22 +384,54 @@ def create_consultation_pdf(request, patient_id, consultation_id):
 
     def draw_form_line(label, value):
         nonlocal y_position
-        c.drawString(4 * cm, y_position, f"{label}:")
-        c.drawString(9 * cm, y_position, str(value) if value else '______________________________')
+        c.drawString(4 * cm, y_position, f"{label}")
+        c.drawString(13 * cm, y_position, str(value) if value else '______________________________')
         c.setDash(1, 2)  # Pointillé
         c.line(9 * cm, y_position - 0.2 * cm, width - 2 * cm, y_position - 0.2 * cm)
         c.setDash()  # Réinitialiser les lignes normales
         y_position -= line_height
 
     # Informations de la consultation sous forme de lignes de formulaire
-    draw_form_line("Code VIH", patient.code_vih)
-    draw_form_line("Nom", patient.nom)
-    draw_form_line("Prenom", patient.prenoms)
+    draw_form_line("Date de l'interview ", patient.code_vih)
+    draw_form_line("Sujet No ", patient.nom)
+    draw_form_line("Numéro de laboratoire", patient.prenoms)
+    draw_form_line("Nom du centre", patient.prenoms)
+    draw_form_line("Code du centre", patient.prenoms)
+    draw_form_line("MI=Maladies Infect CHU Treichville", patient.prenoms)
+    draw_form_line("CA = CAT Adjame", patient.prenoms)
+    draw_form_line("PC = PPH CHU de Cocody", patient.prenoms)
+    draw_form_line("PY = Pédiatrie CHU de Yopougon", patient.prenoms)
+    draw_form_line("PB = Port-Bouët", patient.prenoms)
+    draw_form_line("AG = Abengourou", patient.prenoms)
+    draw_form_line("US = USAC", patient.prenoms)
+    draw_form_line("HM = Hôpital Militaire d'Abidjan", patient.prenoms)
+    draw_form_line("CI = CIBRA", patient.prenoms)
+    draw_form_line("Nom du Patien", patient.prenoms)
+    draw_form_line("Prénoms du Patien", patient.prenoms)
+    draw_form_line("Sexe", patient.prenoms)
+    draw_form_line("Date de naissance", patient.prenoms)
+    draw_form_line("Niveau d'instruction du patient", patient.prenoms)
+    draw_form_line("Situation matrimoniale du patient", patient.prenoms)
+    draw_form_line("Nationalité", patient.prenoms)
+    draw_form_line("Lieu de résidence habituel", patient.prenoms)
+    draw_form_line("Nom du médecin", patient.prenoms)
 
-    draw_form_line("SUI 04. Médecin", doctor)
-    draw_form_line("SUI 05. Date de consultation", consultation.consultation_date.strftime('%d-%m-%Y %H:%M'))
-    draw_form_line("Diagnostic", consultation.diagnosis)
-    draw_form_line("Commentaires", consultation.commentaires)
+    draw_form_line("antécédents medicaux 01", patient.prenoms)
+    draw_form_line("", patient.prenoms)
+    draw_form_line("", patient.prenoms)
+    draw_form_line("", patient.prenoms)
+
+    draw_form_line("le patient a t-il bénéficié d'une prophylaxie antiretrovirale ?", patient.prenoms)
+    draw_form_line("type de prophylaxie antiretrovirale ?", patient.prenoms)
+    draw_form_line("le patient a t-il été sous traitement antiretrovirale ?", patient.prenoms)
+    draw_form_line("le patient se rappel t-il de son dernier régime antiretrovirale ?", patient.prenoms)
+    draw_form_line("Derniers régimes antiretrovirale ?", patient.prenoms)
+    draw_form_line("le patient est t-il sous traitement prophylactique au Cotrimoxazole ?", patient.prenoms)
+    draw_form_line("Stade évolutif (CDC 1993)", patient.prenoms)
+    draw_form_line("Le Patient a t-il une IO en cours ? ", patient.prenoms)
+    draw_form_line("Est-il présentement sous traitement ?  ", patient.prenoms)
+    draw_form_line("Poids du patient ce jour en KG  ", patient.prenoms)
+    draw_form_line("Score de Karnofsky  ", patient.prenoms)
 
     # Ajouter les informations de l'enquête VIH si disponible
     if enquete_vih:
@@ -1084,7 +1182,7 @@ class ConsultationListView(LoginRequiredMixin, ListView):
 class ConsultationDetailView(LoginRequiredMixin, DetailView):
     model = Consultation
     template_name = 'consultations/consultation_detail.html'
-    context_object_name = 'consultation'
+    context_object_name = 'consultationsdupatient'
 
 
 class ConsultationUpdateView(LoginRequiredMixin, UpdateView):

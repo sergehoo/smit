@@ -3,17 +3,21 @@ from django.contrib.auth.models import User
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from core.models import Location, PolesRegionaux, HealthRegion, DistrictSanitaire
+from core.models import Location, PolesRegionaux, HealthRegion, DistrictSanitaire, Maladie
 from laboratory.models import Echantillon
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     ServiceSubActivity, Consultation, EtapeProtocole, Protocole, Evaluation, Molecule, Allergies, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
-    ComplicationsIndicators
-
+    ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie
 
 # Register your models here.
+admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
+admin.site.site_title = 'SMIT Super Admin Pannel'
+admin.site.site_url = 'http://smitci.com/'
+admin.site.index_title = 'SMIT'
+admin.empty_value_display = '**Empty**'
 
 
 @admin.register(Echantillon)
@@ -66,14 +70,10 @@ class EvaluationAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(CathegorieMolecule)
-class CathegorieMoleculeAdmin(admin.ModelAdmin):
-    pass
 
 
-@admin.register(Molecule)
-class MoleculeAdmin(admin.ModelAdmin):
-    pass
+
+
 
 
 @admin.register(Allergies)
@@ -104,13 +104,6 @@ class ExamenAdmin(admin.ModelAdmin):
 @admin.register(Hospitalization)
 class HospitalizationAdmin(admin.ModelAdmin):
     list_display = ['id', 'patient']
-
-
-@admin.register(Medicament)
-class MedicamentAdmin(admin.ModelAdmin):
-    list_display = ['nom', 'dosage_form', 'dosage', 'unitdosage', 'fournisseur', 'categorie']
-    # list_editable = ['dosage']
-    # list_display_links = ['fournisseur']
 
 
 @admin.register(Prescription)
@@ -289,3 +282,34 @@ class LocationAdmin(ImportExportModelAdmin):
             'fields': ('name', 'type', 'population', 'source', 'district')
         }),
     )
+
+
+@admin.register(EffetIndesirable)
+class EffetIndesirableAdmin(admin.ModelAdmin):
+    list_display = (
+        'hospitalisation', 'patient', 'gravite', 'date_apparition', 'date_signalement', 'medicament_associe')
+    list_filter = ('gravite', 'date_apparition', 'medecin')
+    search_fields = ('description', 'patient__nom', 'patient__prenom')
+
+
+@admin.register(AvisMedical)
+class AvisMedicalAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'hospitalisation', 'medecin', 'date_avis', 'mise_a_jour')
+    list_filter = ('date_avis', 'mise_a_jour', 'medecin')
+    search_fields = ('titre', 'contenu', 'hospitalisation__patient__nom', 'hospitalisation__patient__prenom')
+
+
+@admin.register(Diagnostic)
+class DiagnosticAdmin(admin.ModelAdmin):
+    list_display = ('type_diagnostic', 'hospitalisation', 'date_diagnostic', 'maladie', 'medecin_responsable')
+    list_filter = ('type_diagnostic', 'date_diagnostic')
+    search_fields = ('hospitalisation__patient__nom', 'hospitalisation__patient__prenom')
+
+
+
+
+@admin.register(Maladie)
+class MaladieAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
+    search_fields = ('nom', 'categorie', 'patient__nom')
+    list_filter = ('categorie', 'gravite', 'date_diagnostic')
