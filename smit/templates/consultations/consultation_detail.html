@@ -324,7 +324,7 @@
                         <div class="card-inner-group">
                             <blockquote class="blockquote text-center">
                                 <p class="mb-0">Motif de consultation du <strong class="text-primary">{{ consultationsdupatient.created_at }}</strong>:</p>
-                                <footer class="blockquote-footer">{{ consultationsdupatient.reason }}</footer>
+                                <footer class="blockquote-footer">Motif : {{ consultationsdupatient.reason }}</footer>
                             </blockquote>
                             <hr>
                             <div class="row m-4">
@@ -374,9 +374,7 @@
                                                                 <a class="btn btn-outline-danger  btn-icon btn-round btn-xs mr-1"
                                                                    href="{% url 'delete_test_rapide_vih' test_id=test.id consultation_id=consultationsdupatient.id %}"><em
                                                                         class="icon ni ni-trash  "></em></a>
-                                                                <a class="btn btn-outline-info  btn-icon btn-round btn-xs mr-1"
-                                                                   href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                                        class="icon ni ni-download-cloud "></em></a>
+                                                                <a class="btn btn-outline-info  btn-icon btn-round btn-xs mr-1" href=""><em class="icon ni ni-download-cloud "></em></a>
 
                                                             </td>
 
@@ -388,7 +386,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-6 col-md-6 mb-5">
+                                <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
 
                                             <div class="card-header">Symptomes
@@ -396,10 +394,6 @@
                                                         class="btn btn-dark float-right ml-5   btn-icon btn-round"
                                                         data-toggle="modal" data-target="#symptomes"><em
                                                         class="icon ni ni-plus-circle-fill"></em></button>
-
-
-                                                <button type="button" class="btn btn-info mr-5 btn-icon btn-round"><em
-                                                        class="icon ni ni-download-cloud "></em></button>
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table ">
@@ -437,10 +431,7 @@
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
 
-                                            <div class="card-header">Examens <a
-                                                    class="btn btn-outline-info  btn-icon btn-round mr-5"
-                                                    href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                    class="icon ni ni-download-cloud ml-10 "></em></a>
+                                            <div class="card-header">Examens
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
                                                         data-toggle="modal" data-target="#rendezvous"><em
@@ -485,10 +476,7 @@
                                     </div>
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
-                                            <div class="card-header">Prélèvement <a
-                                                    class="btn btn-outline-info  btn-icon btn-round mr-5"
-                                                    href="{% url 'telecharger_consultations' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"><em
-                                                    class="icon ni ni-download-cloud ml-10 "></em></a>
+                                            <div class="card-header">Prélèvement
 
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
@@ -625,8 +613,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Symptômes</h5>
                                             </div>
-                                            <form method="post"
-                                                  action="{% url 'create_symptomes' consultation_id=consultationsdupatient.id %}">
+                                            <form method="post" action="{% url 'create_symptomes' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="symptomes-forms">
