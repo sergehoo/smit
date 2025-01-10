@@ -534,6 +534,8 @@ villes_choices = [
 
 professions_choices = [
     ('Médecin', 'Médecin'),
+    ('Fille de Menage', 'Fille de Menage'),
+    ('Employer de maison', 'Employer de maison'),
     ('Commercant', 'Commercant'),
     ('Cultuvateur', 'Cultuvateur'),
     ('Planteur', 'Planteur'),
@@ -653,7 +655,7 @@ communes_et_quartiers_choices = [
     ('Aboisso', 'Aboisso'),
     ('Abengourou', 'Abengourou'),
     ('Adzopé', 'Adzopé'),
-    ('Agboville', 'Agboville'),
+
     ('Agboville', 'Agboville'),
     ('Anyama', 'Anyama'),
     ('Attécoubé', 'Attécoubé'),
@@ -862,7 +864,7 @@ class Employee(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return f"{self.user.username}- {self.user.first_name} {self.user.last_name} ({self.departement})"
+        return f" {self.user.first_name} {self.user.last_name} | {self.departement}"
 
     class Meta:
         permissions = (
@@ -950,11 +952,11 @@ class Patient(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        # permissions = (
-        #     ('view_patient', 'Can view patient'),
-        #     ('edit_patient', 'Can edit patient'),
-        #     ('delete_patient', 'Can delete patient'),
-        # )
+        permissions = (
+            ('view_patient_name', 'Can view patient name'),
+            ('view_dossier_patient', 'Can View dossier patient'),
+            # ('delete_patient', 'Can delete patient'),
+        )
 
     @property
     def services_passed(self):

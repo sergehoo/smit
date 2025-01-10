@@ -54,7 +54,7 @@
     <!-- JavaScript -->
     <script src="{% static 'assets/js/bundle.js' %}"></script>
     <script src="{% static 'assets/js/scripts.js' %}"></script>
-<script>
+    <script>
         //according to loftblog tut
         $('input').addClass('form-control')
         $('button').addClass('btn btn-primary')
@@ -102,7 +102,12 @@
           checkSection();
         });
     </script>
-
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-info">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+</body>
 </html>
 
 

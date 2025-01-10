@@ -5,13 +5,15 @@ from datetime import datetime
 import qrcode
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.db.models import Count, Avg
 from django.db.models.functions import ExtractMonth, ExtractYear
-from django.http import request, HttpResponse
+from django.http import request, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
@@ -63,7 +65,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         total_patients_femme = Patient.objects.filter(genre='Femme').count()
         total_patients_homme = Patient.objects.filter(genre='Homme').count()
         patient_status_counts = Patient.objects.values('status').annotate(count=Count('status'))
-        average_age = Patient.objects.annotate(age=(datetime.now().year - ExtractYear('date_naissance'))).aggregate(Avg('age'))
+        average_age = Patient.objects.annotate(age=(datetime.now().year - ExtractYear('date_naissance'))).aggregate(
+            Avg('age'))
 
         # Service Utilization
         consultation_by_service = Consultation.objects.values('services__nom').annotate(count=Count('id'))
@@ -227,6 +230,7 @@ def consultation_send_create(request, patient_id, rdv_id):
     }
     return redirect('attente')
 
+
 @login_required
 def create_consultation_pdf(request, patient_id, consultation_id):
     # Récupérer la consultation et l'enquête VIH associée
@@ -236,7 +240,8 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     enquete_vih = EnqueteVih.objects.filter(consultation=consultation).first()
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Fiche_de_bilan_initial_{consultation_id}_Patient_{patient.nom}.pdf"'
+    response[
+        'Content-Disposition'] = f'attachment; filename="Fiche_de_bilan_initial_{consultation_id}_Patient_{patient.nom}.pdf"'
 
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=A4)  # Mode portrait
@@ -291,9 +296,9 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     c.drawString(1.7 * cm, height - 3.5 * cm, "PNPCPVVIH/SIDA")  # Texte à gauche
     # c.drawString(16 * cm, height - 2 * cm, "République de Côte d'Ivoire")  # Texte à droite
 
-
     c.setFont("Helvetica-Bold", 11)
-    c.drawString(1.5 * cm, height - 5 * cm, "FICHE DE BILAN INITIAL POUR LA PRISE EN CHARGE DES PERSONNES VIVANT AVEC LE VIH")  # Texte à droite
+    c.drawString(1.5 * cm, height - 5 * cm,
+                 "FICHE DE BILAN INITIAL POUR LA PRISE EN CHARGE DES PERSONNES VIVANT AVEC LE VIH")  # Texte à droite
     c.line(1.5 * cm, height - 5.2 * cm, width - 1.8 * cm, height - 5.2 * cm)
 
     # Ajouter une ligne pour séparer l'en-tête du contenu
@@ -373,7 +378,6 @@ def create_consultation_pdf(request, patient_id, consultation_id):
     c.drawString(2.5 * cm, height - 24.5 * cm, "CLI 10.")  # Texte à gauche
     c.drawString(2.5 * cm, height - 25 * cm, "CLI 11.")  # Texte à gauche
     c.drawString(2.5 * cm, height - 25.5 * cm, "CLI 12.")  # Texte à gauche
-
 
     # Position de départ pour le formulaire
     y_position = height - 7 * cm
@@ -842,9 +846,9 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
 
         # Vérification des doublons (nom, prénoms, date de naissance)
         if Patient.objects.filter(
-            nom__iexact=nom,
-            prenoms__iexact=prenoms,
-            date_naissance=date_naissance
+                nom__iexact=nom,
+                prenoms__iexact=prenoms,
+                date_naissance=date_naissance
         ).exists():
             messages.error(self.request, "Un patient avec les mêmes nom, prénoms et date de naissance existe déjà.")
             return self.form_invalid(form)
@@ -907,6 +911,18 @@ class PatientUpdateView(LoginRequiredMixin, UpdateView):
         return redirect(self.get_success_url())
 
 
+@login_required
+@permission_required('appointments.view_patient_name', raise_exception=True)
+def get_patient_name(request, appointment_id):
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+        return JsonResponse({
+            'full_name': f"{appointment.patient.nom} {appointment.patient.prenoms}"
+        })
+    except Appointment.DoesNotExist:
+        return JsonResponse({'error': 'Appointment not found'}, status=404)
+
+
 class RendezVousListView(LoginRequiredMixin, ListView):
     model = Appointment
     template_name = "pages/appointments/appointment_list.html"
@@ -939,6 +955,16 @@ class RendezVousConsultationUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "pages/appointments/appointment_update.html"
     context_object_name = "rendezvousupdate"
     success_url = reverse_lazy('appointment_list')
+
+
+@login_required
+@permission_required('core.view_patient_name', raise_exception=True)
+def get_patient_all_name(request, patient_id):
+    try:
+        patient = Patient.objects.get(id=patient_id)
+        return JsonResponse({'full_name': f"{patient.nom} {patient.prenoms}"})
+    except Appointment.DoesNotExist:
+        return JsonResponse({'error': 'Patient not found'}, status=404)
 
 
 class SalleAttenteListView(LoginRequiredMixin, ListView):
@@ -1112,7 +1138,7 @@ class ServiceContentDetailView(LoginRequiredMixin, DetailView):
 #         return [template_map.get((serv, acty), 'pages/services/servicecontent_detail.html')]
 class ActiviteListView(LoginRequiredMixin, ListView):
     context_object_name = 'activities'
-    ordering = ['created_at']
+    ordering = ['-created_at']
     paginate_by = 10
 
     def get_queryset(self):
@@ -1128,17 +1154,28 @@ class ActiviteListView(LoginRequiredMixin, ListView):
 
         subactivity = ServiceSubActivity.objects.filter(service__nom=serv, nom=acty, id=acty_id).first()
         consultations = Consultation.objects.filter(activite=subactivity) if subactivity else []
-        hospitalizations = Hospitalization.objects.filter(activite=subactivity) if subactivity else []
+        consultations_paginator = Paginator(consultations, 10)
+        consultations_page = self.request.GET.get('consultations_page')
+        context['consultations'] = consultations_paginator.get_page(consultations_page)
+
+        hospitalizations = Hospitalization.objects.filter(activite=subactivity).order_by('-admission_date') if subactivity else []
+        hospitalizations_paginator = Paginator(hospitalizations, 10)
+        hospitalizations_page = self.request.GET.get('hospitalizations_page')
+        context['hospitalizations'] = hospitalizations_paginator.get_page(hospitalizations_page)
+
         suivis = Suivi.objects.filter(activite=subactivity) if subactivity else []  # Assuming you have a Suivi model
+        suivis_paginator = Paginator(suivis, 10)
+        suivis_page = self.request.GET.get('suivis_page')
+        context['suivis'] = suivis_paginator.get_page(suivis_page)
 
         context.update({
             'serv': serv,
             'acty': acty,
             'acty_id': acty_id,
             'subactivity': subactivity,
-            'consultations': consultations,
-            'hospitalizations': hospitalizations,
-            'suivis': suivis,
+            # 'consultations': consultations,
+            # 'hospitalizations': hospitalizations,
+            # 'suivis': suivis,
         })
         return context
 
@@ -1205,6 +1242,7 @@ class ConsultationSidaListView(LoginRequiredMixin, ListView):
     template_name = "pages/services/consultation_VIH.html"
     context_object_name = "consultations_vih"
 
+
 @login_required
 def test_rapide_vih_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
@@ -1225,6 +1263,7 @@ def test_rapide_vih_create(request, consultation_id):
         messages.error(request, 'Le test a echoué!')
     return redirect('detail_consultation', pk=consultation.id)
 
+
 @login_required
 def delete_test_rapide_vih(request, test_id, consultation_id):
     # Récupérer l'objet TestRapideVIH avec l'id fourni
@@ -1237,6 +1276,7 @@ def delete_test_rapide_vih(request, test_id, consultation_id):
     messages.success(request, 'Le test rapide VIH a été supprimé avec succès.')
     # Redirection après suppression (à personnaliser selon vos besoins)
     return redirect('detail_consultation', pk=consultation.id)
+
 
 @login_required
 def delete_examen(request, examen_id, consultation_id):
@@ -1323,5 +1363,3 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
         return context
-
-

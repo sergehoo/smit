@@ -13,24 +13,24 @@
                         <table class="table table-tranx">
                             <thead>
                             <tr class="tb-tnx-head">
-                                <th class="tb-tnx-id"><span class="">#</span></th>
-                                <th class="tb-tnx-info">
-                                                        <span class="tb-tnx-desc d-none d-sm-inline-block">
+                                <th class=""><span class="">Code Patient</span></th>
+
+                                <th class="">
+                                    <span class="tb-tnx-desc d-none d-sm-inline-block">
                                                             <span>Patient</span>
                                                         </span>
                                     <span class="tb-tnx-date d-md-inline-block d-none">
-                                                            <span class="d-md-none"></span>
-                                                            <span class="d-none d-md-block">
-                                                                <span> Date de demande </span>
-
-                                                            </span>
-                                                        </span>
+                                        <span class="d-md-none"></span>
+                                        <span class="d-none d-md-block">
+                                            <span> Date de demande </span>
+                                        </span>
+                                    </span>
                                 </th>
-                                <th class="tb-tnx-amount is-alt">
+                                <th class="">
                                     <span class="tb-tnx-total">Service</span>
                                     <span class="tb-tnx-status d-none d-md-inline-block">Status</span>
                                 </th>
-                                <th class="tb-tnx-action">
+                                <th class="">
                                     <span>Action</span>
                                 </th>
                             </tr>
@@ -38,12 +38,31 @@
                             <tbody>
                             {% for demande in demande_hospi.all %}
                                 <tr class="tb-tnx-item">
-                                    <td class="tb-tnx-id">
-                                        <a href="#"><span>#{{ demande.id }}</span></a>
+                                    <td class="">
+                                        <a href="#"><span class="title">{{ demande.patient.code_patient }}</span></a>
                                     </td>
                                     <td class="tb-tnx-info">
                                         <div class="tb-tnx-desc">
-                                            <span class="title">{{ demande.patient }}</span>
+
+                                             <span>
+                                                                <span>
+        <i class="fa-solid fa-user-alt"></i>
+        <span class="masked-name" id="masked-name-{{ demande.patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ demande.patient.id }}-{{ forloop.counter }}"></span>
+        {% if perms.core.view_patient_name %}
+        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
+                data-patient-id="{{ demande.patient.id }}"
+                data-counter="{{ forloop.counter }}">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+        {% else %}
+        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+        {% endif %}
+    </span>
+
+
                                         </div>
                                         <div class="tb-tnx-date">
                                             <span class="date">{{ demande.requested_at }}</span>
@@ -294,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
 
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date admission</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Date sorti</span></div>
@@ -307,9 +327,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                                 {% for patient in hospitalisationgenerale.all %}
                                                     <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                            <div class="user-card">
+                                                                <div class="user-name">
+                                                                    <span class="tb-lead" data-toggle="tooltip"
+                                                                          data-placement="top"
+                                                                          title="{{ patient.patient.code_patient }}"><i class="fa-solid fa-id-card"></i> {{ patient.patient.code_patient }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         <div class="nk-tb-col tb-col-md">
-                                                            <span><i
-                                                                    class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
+                                                            <span>
+                                                                <span>
+        <i class="fa-solid fa-user-alt"></i>
+        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
+        {% if perms.core.view_patient_name %}
+        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
+                data-patient-id="{{ patient.patient.id }}"
+                data-counter="{{ forloop.counter }}">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+        {% else %}
+        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+        {% endif %}
+    </span>
                                                             {% if patient.patient.latest_constante %}
                                                                 <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img
                                                                         data-toggle="tooltip" data-placement="top"
@@ -737,5 +781,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
 
+ <script>
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId; // ID du patient
+            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('i');
 
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+</script>
 {% endblock %}

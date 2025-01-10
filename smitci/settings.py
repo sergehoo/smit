@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from decouple import config
+from django.conf import settings
 from django.contrib import staticfiles
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,7 +69,6 @@ LOGGING = {
     },
 }
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -106,9 +109,14 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Authentification classique
     # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
+
     'guardian.backends.ObjectPermissionBackend',  # Backend de permissions Guardian
 
 )
+
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -121,6 +129,8 @@ MIDDLEWARE = [
     # Add the account middleware:
     "allauth.account.middleware.AccountMiddleware",
     'simple_history.middleware.HistoryRequestMiddleware',
+    'smit.middlewares.SessionTimeoutMiddleware',
+
 ]
 
 ROOT_URLCONF = 'smitci.urls'
@@ -185,7 +195,14 @@ DATABASES = {
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
 
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+# Durée de vie de la session en secondes (par exemple, 30 minutes)
+SESSION_COOKIE_AGE = 30 * 60  # 30 minutes
+
+# SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+# Configurer pour que la session expire uniquement après inactivité
+SESSION_SAVE_EVERY_REQUEST = False  # La session ne sera pas prolongée à chaque requête
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 ACCOUNT_ADAPTER = 'core.account_adapter.NoNewUsersAccountAdapter'
 LOGOUT_REDIRECT_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
@@ -224,7 +241,7 @@ LANGUAGES = [
 
 SITE_ID = 1
 USE_L10N = True
-USE_THOUSAND_SEPARATOR = True
+# USE_THOUSAND_SEPARATOR = True
 
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
@@ -284,41 +301,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# TINYMCE_DEFAULT_CONFIG = {
-#     'height': 360,
-#     'width': 1120,
-#     'cleanup_on_startup': True,
-#     'custom_undo_redo_levels': 20,
-#     'selector': 'textarea',
-#     'theme': 'modern',
-#     'plugins': '''
-#         textcolor save link image media preview codesample contextmenu
-#         table code lists fullscreen  insertdatetime  nonbreaking
-#         contextmenu directionality searchreplace wordcount visualblocks
-#         visualchars code fullscreen autolink lists  charmap print  hr
-#         anchor pagebreak
-#         ''',
-#     'toolbar1': '''
-#         fullscreen preview bold italic underline | fontselect,
-#         fontsizeselect  | forecolor backcolor | alignleft alignright |
-#         aligncenter alignjustify | indent outdent | bullist numlist table |
-#         | link image media | codesample |
-#         ''',
-#     'toolbar2': '''
-#         visualblocks visualchars |
-#         charmap hr pagebreak nonbreaking anchor |  code |
-#         ''',
-#     'contextmenu': 'formats | link image',
-#     'menubar': True,
-#     'statusbar': True,
-# }
-
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = config('EMAIL_HOST')
-# EMAIL_PORT = config('EMAIL_PORT', cast=int)
-# EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
-# EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-# DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')

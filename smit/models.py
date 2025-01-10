@@ -402,25 +402,98 @@ class Constante(models.Model):
     pouls = models.FloatField(null=True, blank=True, verbose_name="Pouls")
     imc = models.FloatField(null=True, blank=True, verbose_name="IMC", editable=False)
     pb = models.FloatField(null=True, blank=True, verbose_name="Périmètre Braciale")
+    po = models.FloatField(null=True, blank=True, verbose_name="Périmètre Ombilicale")
 
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='constantes_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
+    def pb_status(self):
+        if self.pb is None:
+            return "Non mesuré"
+
+        if self.patient.genre == "Homme":
+            if self.pb < 24:
+                return "Malnutrition sévère"
+            elif 24 <= self.pb < 26:
+                return "Malnutrition modérée"
+            elif 26 <= self.pb <= 35:
+                return "Normal"
+            elif self.pb > 35:
+                return "Obésité"
+        elif self.patient.genre == "Femme":
+            if self.pb < 23:
+                return "Malnutrition sévère"
+            elif 23 <= self.pb < 25:
+                return "Malnutrition modérée"
+            elif 25 <= self.pb <= 32:
+                return "Normal"
+            elif self.pb > 32:
+                return "Obésité"
+        else:
+            return "Sexe non spécifié"
+
+    @property
+    def po_status(self):
+        if self.po is None:
+            return "Non mesuré"
+
+        if self.patient.genre == "Homme":
+            if self.po < 78:
+                return "Insuffisance pondérale"
+            elif 78 <= self.po <= 94:
+                return "Normal"
+            elif 95 <= self.po <= 102:
+                return "Surpoids"
+            elif self.po > 102:
+                return "Obésité abdominale"
+        elif self.patient.genre == "Femme":
+            if self.po < 70:
+                return "Insuffisance pondérale"
+            elif 70 <= self.po <= 80:
+                return "Normal"
+            elif 81 <= self.po <= 88:
+                return "Surpoids"
+            elif self.po > 88:
+                return "Obésité abdominale"
+        else:
+            return "Sexe non spécifié"
+
+    @property
     def imc_status(self):
-        if self.imc < 18.5:
-            return 'Maigreur'
-        elif self.imc >= 18.5 and self.imc <= 24.9:
-            return 'Normal'
-        elif self.imc >= 25 and self.imc <= 29.9:
-            return 'Surpoids'
-        elif self.imc >= 30 and self.imc <= 34.9:
-            return 'Obésité modérée'
-        elif self.imc >= 35 and self.imc <= 39.9:
-            return 'Obésité sévère'
-        elif self.imc >= 40:
-            return 'Obésité morbide'
+        if self.imc is None:
+            return "IMC non calculé"
+
+        # Définir les seuils en fonction du sexe
+        if self.patient.genre == "Homme":
+            if self.imc < 20:
+                return "Maigreur"
+            elif 20 <= self.imc <= 25:
+                return "Normal"
+            elif 25 < self.imc <= 30:
+                return "Surpoids"
+            elif 30 < self.imc <= 35:
+                return "Obésité modérée"
+            elif 35 < self.imc <= 40:
+                return "Obésité sévère"
+            else:
+                return "Obésité morbide"
+        elif self.patient.genre == "Femme":
+            if self.imc < 18.5:
+                return "Maigreur"
+            elif 18.5 <= self.imc <= 24.9:
+                return "Normal"
+            elif 24.9 < self.imc <= 29.9:
+                return "Surpoids"
+            elif 29.9 < self.imc <= 34.9:
+                return "Obésité modérée"
+            elif 34.9 < self.imc <= 39.9:
+                return "Obésité sévère"
+            else:
+                return "Obésité morbide"
+        else:
+            return "Sexe non spécifié"
 
     @property
     def tension_status(self):
@@ -492,6 +565,14 @@ class Constante(models.Model):
 
         if self.pouls and not (60 <= self.pouls <= 100):
             alertes.append(f"Pouls anormal: {self.pouls} bpm")
+
+            # Vérification pour le périmètre brachial
+        if self.pb and not (20 <= self.pb <= 40):  # Ajustez les valeurs normales selon votre contexte
+            alertes.append(f"Périmètre brachial anormal: {self.pb} cm")
+
+            # Vérification pour le périmètre ombilical
+        if self.po and not (70 <= self.po <= 120):  # Ajustez les valeurs normales selon votre contexte
+            alertes.append(f"Périmètre ombilical anormal: {self.po} cm")
 
         # Calculer l'IMC si taille et poids sont disponibles
         if self.taille and self.poids:

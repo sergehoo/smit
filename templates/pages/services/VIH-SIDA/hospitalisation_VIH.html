@@ -162,13 +162,14 @@
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
 
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Heure</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Service</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Medecin</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date admission</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Date sorti</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Diagnostique</span></div>
+                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Chambre</span></div>
                                                     <div class="nk-tb-col"><span class="sub-text">Status</span></div>
+
 
                                                     <div class="nk-tb-col nk-tb-col-tools text-right">
                                                         <div class="dropdown">
@@ -204,333 +205,472 @@
                                                         </div>
                                                     </div>
                                                 </div><!-- .nk-tb-item -->
-                                            
-                                                {% for patient in hospitalizations.all %}
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
-                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img src="{% static 'images/gift/alert.gif' %}" width="20"/></a> </span>
-                                                    </div>
-                                                    <div class="nk-tb-col">
-                                                        <div class="user-card">
-                                                            <div class="user-name">
-                                                                <span class="tb-lead"><i class="fa-solid fa-calendar-check"></i> {{ patient.date|naturalday }}</span>
+
+                                                {% for patient in hospitalizations %}
+                                                    <div class="nk-tb-item">
+                                                        <div class="nk-tb-col tb-col-md">
+                                                            <span>{{ patient.patient.code_patient }}</span>
+                                                        </div>
+                                                        <div class="nk-tb-col tb-col-md">
+                                                       <span>
+        <i class="fa-solid fa-user-alt"></i>
+        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
+                                                           {% if perms.core.view_patient_name %}
+                                                               <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
+                                                                       data-patient-id="{{ patient.patient.id }}"
+                                                                       data-counter="{{ forloop.counter }}">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+                                                           {% else %}
+                                                               <span class="btn-sm ml-1" data-toggle="tooltip"
+                                                                     data-placement="top"
+                                                                     title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+                                                           {% endif %}
+                                                           <span class="tb-status text-gray">
+                                                              <a class="tb-status" href="" data-toggle="modal"
+                                                                 data-target="#constanteover{{ patient.patient.id }}">
+                                                                  {% if patient.patient.latest_constante %}
+                                                                      {% if patient.patient.latest_constante.alerte %}
+                                                                          <img src="{% static 'images/gift/alert.gif' %}"
+                                                                               width="20"/>
+                                                                      {% else %}
+                                                                          <i class="fa-solid fa-check-circle "></i>
+
+                                                                      {% endif %}
+                                                                  {% else %}
+                                                                  {% endif %}
+                                                              </a>
+
+                                                          </span>
+                                                       </span>
+                                                        </div>
+                                                        <div class="nk-tb-col">
+                                                            <div class="user-card">
+                                                                <div class="user-name">
+                                                                    <span class="tb-lead" data-toggle="tooltip"
+                                                                          data-placement="top"
+                                                                          title="{{ patient.admission_date }}"><em
+                                                                            class="icon ni ni-arrow-up-right text-success"></em> {{ patient.admission_date|naturaltime }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="nk-tb-col tb-col-sm">
+                                                            {% if patient.discharge_date is none %}
+                                                                <small>Aucune sortie enregistrée</small>
+                                                            {% else %}
+                                                                <span data-toggle="tooltip" data-placement="top"
+                                                                      title="{{ patient.discharge_date }}"><em
+                                                                        class="icon ni ni-arrow-down-right text-primary"></em> {{ patient.discharge_date|naturaltime }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="nk-tb-col tb-col-md">
+                                                        <span>
+
+    {% with patient.dernier_diagnostic as diagnostic %}
+        {% if diagnostic %}
+            <i class="fa-solid fa-virus"></i>
+            {{ diagnostic.maladie.nom|default:"Aucun" }} ({{ diagnostic.get_type_diagnostic_display }})
+        {% else %}
+            Aucun diagnostic
+        {% endif %}
+    {% endwith %}
+                                                        </span>
+                                                        </div>
+                                                        <div class="nk-tb-col tb-col-lg">
+                                                            {% if patient.bed %}
+                                                                <span data-toggle="tooltip" data-placement="top"
+                                                                      title="{{ patient.bed.nom }}"><i
+                                                                        class="fa-solid fa-bed-pulse"></i> {{ patient.bed.box.chambre }}</span>
+                                                            {% else %}
+                                                                Aucun lit
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="nk-tb-col">
+                                                            <span class="badge badge-pill badge-dark">{{ patient.patient.status }}</span>
+                                                        </div>
+
+
+                                                        <div class="nk-tb-col nk-tb-col-tools">
+                                                            <ul class="nk-tb-actions gx-2">
+
+                                                                <li>
+                                                                    <div class="drodown">
+                                                                        <a href="#"
+                                                                           class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
+                                                                           data-toggle="dropdown"><em
+                                                                                class="icon ni ni-more-h"></em></a>
+                                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                                            <ul class="link-list-opt no-bdr">
+                                                                                <li>
+                                                                                    <a href="{% url 'detail_patient' patient.patient.pk %}"><em
+                                                                                            class="icon ni ni-eye"></em><span>Voir Dossier </span></a>
+                                                                                </li>
+
+                                                                                <li class="divider"></li>
+                                                                                <li>
+                                                                                    <a href="{% url 'hospitalisationdetails' patient.pk %}"><em
+                                                                                            class="icon ni ni-file-check"></em><span>Detail de l'Hospitalisation</span></a>
+                                                                                </li>
+
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+
+                                                        <div class="modal fade" tabindex="-1"
+                                                             id="constante{{ patient.patient.id }}">
+                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                <div class="modal-content">
+                                                                    <a href="#" class="close" data-dismiss="modal"
+                                                                       aria-label="Close">
+                                                                        <em class="icon ni ni-cross"></em>
+                                                                    </a>
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Patient : <span
+                                                                                class="text-primary">{{ patient.patient }}</span>
+                                                                            <span class="ml-20 text-gray">Prise de constantes</span>
+                                                                        </h5>
+
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <form method="post">
+                                                                            {% csrf_token %}
+                                                                            <div class="row m-4">
+                                                                                {% for field in constanteform %}
+                                                                                    <div class="col-4 col-md-4 mb-3 ">
+
+                                                                                        <label for="{{ field.label }}"
+                                                                                               class="form-label">{{ field.label }}</label>
+                                                                                        {{ field }}
+
+                                                                                        {% if field.help_text %}
+                                                                                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                                                                                        {% endif %}
+                                                                                        {% for error in field.errors %}
+                                                                                            <div class="text-danger">{{ error }}</div>
+                                                                                        {% endfor %}
+                                                                                    </div>
+                                                                                {% endfor %}
+                                                                                <div class="col-md-12 float-right mb-10">
+                                                                                    <button type="submit"
+                                                                                            class="btn btn-primary mb-10 float-right">
+                                                                                        <i class="fa-solid fa-floppy-disk"> </i>
+                                                                                        Enregistrer
+                                                                                    </button>
+                                                                                    <button type="reset"
+                                                                                            class="btn btn-secondary mb-10 mr-5 float-right">
+                                                                                        <i class="fa-solid fa-floppy-disk"> </i>
+                                                                                        Annuler
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+
+
+                                                                    </div>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal fade" tabindex="-1"
+                                                             id="constanteover{{ patient.patient.id }}">
+                                                            <div class="modal-dialog modal-lg" role="document">
+                                                                <div class="modal-content">
+                                                                    <a href="#" class="close" data-dismiss="modal"
+                                                                       aria-label="Close">
+                                                                        <em class="icon ni ni-cross"></em>
+                                                                    </a>
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Overview des constante
+                                                                            du Patient : <span
+                                                                                    class="text-primary">{{ patient.patient }}</span>
+                                                                        </h5>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="nk-block card card-bordered">
+
+                                                                            {% if patient.patient.latest_constante %}
+                                                                                <h4>Deniere constante enregistrée le
+                                                                                    : {{ patient.patient.latest_constante.created_at }} </h4>
+                                                                                <table class="table table-ulogs">
+                                                                                    <thead class="thead-light">
+                                                                                    <tr>
+                                                                                        <th class="tb-col-os"><span
+                                                                                                class="overline-title">Libélé <span
+                                                                                                class="d-sm-none">/ IP</span></span>
+                                                                                        </th>
+                                                                                        <th class="tb-col-ip"><span
+                                                                                                class="overline-title">Valeure</span>
+                                                                                        </th>
+                                                                                        <th class="tb-col-time"><span
+                                                                                                class="overline-title">Observation</span>
+                                                                                        </th>
+
+                                                                                    </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+
+
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Tension
+                                                                                            systolique
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip">
+                                                                                            <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Tension
+                                                                                            diastolique
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
+                                                                                            {% endif %}</td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Frequence
+                                                                                            cardiaque
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Frequence
+                                                                                            respiratoire
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+                                                                                            {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">
+                                                                                            Temperature
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.temperature }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Saturation
+                                                                                            oxygene
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">Glycemie
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">poids</td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.poids }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">taille
+                                                                                        </td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.taille }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">pouls</td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.pouls }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td class="tb-col-os">IMC</td>
+                                                                                        <td class="tb-col-ip"><span
+                                                                                                class="sub-text">{{ patient.patient.latest_constante.imc }}</span>
+                                                                                        </td>
+                                                                                        <td class="tb-col-time">
+
+                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                                <span class="sub-text"><i
+                                                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
+                                                                                            {% else %}
+                                                                                                <span class="sub-text font-italic"><i
+                                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
+                                                                                            {% endif %}
+                                                                                        </td>
+
+                                                                                    </tr>
+                                                                                    </tbody>
+                                                                                </table>
+
+                                                                            {% else %}
+                                                                                Pas de constantes enregistrées
+                                                                            {% endif %}
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="nk-tb-col tb-col-sm">
-                                                        <span><i class="fa-solid fa-calendar-check"></i> {{ patient.time|naturaltime  }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span><i class="fa-solid fa-virus"></i>{{ patient.service }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <span><i class="fa-solid fa-user-doctor"></i>{{ patient.doctor }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <ul class="list-status">
-                                                            <li><span><i class="fa-solid fa-phone"></i>{{ patient.patient.contact }}</span></li>
-                                                        </ul>
-                                                    </div>
-
-                                                    <div class="nk-tb-col">
-                                                      <span class="tb-status text-gray">{{ patient.patient.status }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col nk-tb-col-tools">
-                                                        <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="{% url 'detail_consultation' patient.pk %}" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Consulter">
-                                                                     <i class="fa-solid fa-edit fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Envoyer en Hospitalisation">
-                                                                    <i class="fa-solid fa-bed-pulse fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Retirer de la liste">
-                                                                    <i class="fa-solid fa-trash-alt fa-xl"></i>
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <div class="drodown">
-                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                                        <ul class="link-list-opt no-bdr">
-                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier </span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Orders</span></a></li>
-                                                                            <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span></span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
-                                                                            <li><a href="#"><em class="fa fa-arrow-right mr-1"></em><span>Sortie</span></a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                <!-- Modal Trigger Code -->
-
-
-<!-- Modal Content Code -->
-<div class="modal fade" tabindex="-1" id="constante{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Patient : <span class="text-primary">{{ patient.patient}}</span>   <span class="ml-20 text-gray">Prise de constantes</span> </h5>
-
-            </div>
-            <div class="modal-body">
-                <form method="post">
-            {% csrf_token %}
-            <div class="row m-4">
-                {% for field in constanteform %}
-                <div class="col-4 col-md-4 mb-3 ">
-
-                    <label for="{{ field.label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-
-                    {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            <div class="col-md-12 float-right mb-10">
-            <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
-            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
-            </div>
-            </div>
-                </form>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" tabindex="-1" id="constanteover{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Overview des constante du Patient : <span class="text-primary">{{ patient.patient}}</span> </h5>
-            </div>
-            <div class="modal-body">
-                <div class="nk-block card card-bordered">
-
-                     {% if patient.patient.latest_constante %}
-                     <h4>Deniere constante enregistrée le : {{ patient.patient.latest_constante.created_at }} </h4>
-                            <table class="table table-ulogs">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th class="tb-col-os"><span class="overline-title">Libélé <span class="d-sm-none">/ IP</span></span>
-                                    </th>
-                                    <th class="tb-col-ip"><span class="overline-title">Valeure</span></th>
-                                    <th class="tb-col-time"><span class="overline-title">Observation</span></th>
-
-                                </tr>
-                                </thead>
-                                <tbody>
-
-
-
-
-
-                                <tr>
-                                    <td class="tb-col-os">Tension systolique</td>
-                                    <td class="tb-col-ip">
-                                        <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
-                                    </td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                        </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Tension diastolique</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
-                                    <td class="tb-col-time">
-
-                                        {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                            {% endif %}</td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence cardiaque</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence respiratoire</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Temperature</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.temperature }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Saturation oxygene</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Glycemie</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">poids</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.poids }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">taille</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.taille }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                    <tr>
-                                    <td class="tb-col-os">pouls</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.pouls }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">IMC</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.imc }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                </tbody>
-                            </table>
-
-                    {% else %}
-                        Pas de constantes enregistrées
-                    {% endif %}
-                </div>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                                </div>
                                                 {% endfor %}
 
 
                                             </div><!-- .nk-tb-list -->
                                         </div><!-- .card-inner -->
-                                       <div class="card-inner">
+                                        <div class="card-inner">
                                             <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.previous_page_number }}">Prev</a></li>
+                                                <!-- Bouton "Prev" -->
+                                                {% if hospitalizations.has_previous %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="{{ request.path }}?hospitalizations_page={{ hospitalizations.previous_page_number }}">Prev</a>
+                                                    </li>
                                                 {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                                    <li class="page-item disabled"><span class="page-link">Prev</span>
+                                                    </li>
                                                 {% endif %}
 
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
+                                                <!-- Pages numérotées -->
+                                                {% for num in hospitalizations.paginator.page_range %}
+                                                    {% if hospitalizations.number == num %}
+                                                        <!-- Page active -->
                                                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="salle_attente/?page={{ num }}">{{ num }}</a></li>
+                                                    {% elif num > hospitalizations.number|add:'-3' and num < hospitalizations.number|add:'3' %}
+                                                        <!-- Pages autour de la page actuelle -->
+                                                        <li class="page-item"><a class="page-link"
+                                                                                 href="{{ request.path }}?hospitalizations_page={{ num }}">{{ num }}</a>
+                                                        </li>
                                                     {% endif %}
                                                 {% endfor %}
 
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.next_page_number }}">Next</a></li>
+                                                <!-- Bouton "Next" -->
+                                                {% if hospitalizations.has_next %}
+                                                    <li class="page-item"><a class="page-link"
+                                                                             href="{{ request.path }}?hospitalizations_page={{ hospitalizations.next_page_number }}">Next</a>
+                                                    </li>
                                                 {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                                    <li class="page-item disabled"><span class="page-link">Next</span>
+                                                    </li>
                                                 {% endif %}
                                             </ul>
                                         </div><!-- .card-inner -->
@@ -540,6 +680,46 @@
                         </div>
                     </div>
                 </div>
+ <script>
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId; // ID du patient
+            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('i');
 
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+</script>
 
 {% endblock %}

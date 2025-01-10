@@ -138,6 +138,9 @@ urlpatterns = [
                   path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
                   path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),
 
+                  path('api/get-patient-name/<int:appointment_id>/', views.get_patient_name, name='get_patient_name'),
+                  path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name, name='get_patient_all_name'),
+
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

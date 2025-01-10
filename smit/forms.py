@@ -375,9 +375,9 @@ class ConstantesForm(forms.ModelForm):
     taille = forms.FloatField(required=True,
                               widget=forms.NumberInput(
                                   attrs={'class': 'form-control form-control-lg ', 'placeholder': '175 cm'}))
-    pouls = forms.FloatField(required=False,
-                             widget=forms.NumberInput(
-                                 attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
+    pouls = forms.FloatField(required=False,widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
+    pb = forms.FloatField(required=False,label='Périmètre brachial',widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '39 cm'}))
+    po = forms.FloatField(required=False,label='Périmètre ombilical',widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '10 cm'}))
 
     # imc = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': 'glycemie'}))
 

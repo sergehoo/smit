@@ -213,7 +213,22 @@
 
 
                                                     <div class="nk-tb-col tb-col-md">
-                                                        <span><i class="fa-solid fa-user-alt"></i> {{ patient.patient|upper }}</span>
+                                                          <span>
+        <i class="fa-solid fa-user-alt"></i>
+        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
+        {% if perms.core.view_patient_name %}
+        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
+                data-patient-id="{{ patient.patient.id }}"
+                data-counter="{{ forloop.counter }}">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+        {% else %}
+        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+        {% endif %}
+    </span>
                                                           <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
                                                           {% with constante=patient.patient.constantes.last %}
                                                               {% if constante %}
@@ -542,5 +557,45 @@
                     </div>
                 </div>
 
+ <script>
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId; // ID du patient
+            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('i');
 
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+</script>
 {% endblock %}
