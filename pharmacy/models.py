@@ -244,57 +244,13 @@ class Commande(models.Model):
         return reverse('commande_detail', kwargs={'pk': self.pk})
 
 
-# class RendezVous(models.Model):
-#     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-#     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
-#     pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True)
-#     medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True)
-#     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
-#     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True)
-#     event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
-#     date = models.DateField()
-#     time = models.TimeField()
-#     reason = models.CharField(max_length=255)
-#     status = models.CharField(max_length=50, choices=[
-#         ('Scheduled', 'Scheduled'),
-#         ('Completed', 'Completed'),
-#         ('Cancelled', 'Cancelled')
-#     ])
-#     recurrence = models.CharField(max_length=20, choices=[
-#         ('None', 'None'),
-#         ('Weekly', 'Weekly'),
-#         ('Monthly', 'Monthly'),
-#         ('Quarterly', 'Quarterly'),
-#         ('Semi-Annual', 'Semi-Annual'),
-#         ('Annual', 'Annual')
-#     ], default='None')
-#     recurrence_end_date = models.DateField(null=True, blank=True, help_text="Date de fin de la récurrence")
-#     reminder = models.BooleanField(default=False)
-#     reminder_interval = models.CharField(max_length=20, choices=[
-#         ('None', 'None'),
-#         ('1 Day', '1 Day'),
-#         ('2 Days', '2 Days'),
-#         ('1 Week', '1 Week')
-#     ], default='None')
-#     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='rdvcreator')
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     def save(self, *args, **kwargs):
-#         if RendezVous.objects.filter(patient=self.patient, date=self.date, time=self.time).exists():
-#             raise ValidationError("Un rendez-vous existe déjà à cette date et heure pour ce patient.")
-#         super().save(*args, **kwargs)
-#
-#     def __str__(self):
-#         return f"Rendez-vous de {self.patient} - {self.date} à {self.time}"
-
-
 class RendezVous(models.Model):
     patient = models.ForeignKey('core.Patient', on_delete=models.CASCADE)
-    pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True)
-    medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True)
-    service = models.ForeignKey('core.Service', on_delete=models.SET_NULL, null=True)
+    pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
+    medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True, blank=True)
+    service = models.ForeignKey('core.Service', on_delete=models.SET_NULL, null=True, blank=True)
     doctor = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
+    suivi = models.ForeignKey('smit.Suivi', on_delete=models.SET_NULL, related_name='suivierdv', null=True, blank=True)
     date = models.DateField()
     time = models.TimeField()
     reason = models.CharField(max_length=255, default="Récupération des médicaments")
@@ -354,6 +310,7 @@ class RendezVous(models.Model):
                         RendezVous(
                             patient=self.patient,
                             pharmacie=self.pharmacie,
+                            suivi=self.suivi,
                             medicaments=self.medicaments,
                             service=self.service,
                             doctor=self.doctor,

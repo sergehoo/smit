@@ -101,11 +101,16 @@ def request_number():
 
 
 def consult_number():
+    # Lettres de base
     WordStack = ['S', 'M', 'I', 'T', 'C', '', 'I']
-    random_str = random.choice(WordStack)
-    current_date = datetime.datetime.now().strftime("%Y%m%d")
-    traking = (random_str + str(random.randrange(0, 9999, 1)) + current_date)
-    return traking
+    random_str = ''.join(random.choices(WordStack, k=2))  # Combine 2 lettres aléatoires
+    current_date = datetime.datetime.now().strftime("%Y%m%d")  # Date au format AAAAMMJJ
+    random_number = random.randint(1000, 9999)  # Nombre aléatoire à 4 chiffres
+    unique_id = uuid.uuid4().hex[:6]  # Identifiant unique basé sur UUID (6 caractères)
+
+    # Combinaison finale
+    tracking = f"{random_str}-{random_number}-{current_date}-{unique_id}"
+    return tracking
 
 
 class Appointment(models.Model):
@@ -148,32 +153,52 @@ class Emergency(models.Model):
         return f"{self.patient.nom} - {self.arrival_time}"
 
 
-class Protocole(models.Model):
-    nom = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    duree = models.PositiveIntegerField(null=True, blank=True)
-    date_debut = models.DateField(null=True, blank=True)
-    date_fin = models.DateField(null=True, blank=True)
-    molecules = models.ManyToManyField(Molecule)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="protocoles")
+class TypeProtocole(models.Model):
+    nom = models.CharField(max_length=255, verbose_name="Nom du type de protocole")
+    description = models.TextField(null=True, blank=True, verbose_name="Description")
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='type_protocoles')
 
     def __str__(self):
         return self.nom
 
 
-class EtapeProtocole(models.Model):
+class Protocole(models.Model):
+    nom = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    type_protocole = models.ForeignKey(TypeProtocole, on_delete=models.SET_NULL, null=True, blank=True)
+    duree = models.PositiveIntegerField(null=True, blank=True)
+    date_debut = models.DateField(null=True, blank=True)
+    date_fin = models.DateField(null=True, blank=True)
+    molecules = models.ManyToManyField(Molecule)
+    medicament = models.ManyToManyField(Medicament, verbose_name="Médicaments et posologies",  blank=True)
+    maladies = models.ForeignKey(Maladie, related_name="protocolesmaladies", on_delete=models.SET_NULL,
+                                 verbose_name="Maladies traitées", null=True, blank=True)
+    examens = models.ManyToManyField('Examen', related_name="protocolesexam", blank=True, verbose_name="Examens requis")
+
+    def save(self, *args, **kwargs):
+        if self.date_debut and self.duree:
+            self.date_fin = self.date_debut + datetime.timedelta(days=self.duree)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nom} - {self.type_protocole.nom}"
+
+
+class SuiviProtocole(models.Model):
     protocole = models.ForeignKey(Protocole, on_delete=models.CASCADE, related_name="etapes")
+    suivi = models.ForeignKey('Suivi', on_delete=models.CASCADE, related_name="protocolessuivi", null=True, blank=True)
     nom = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,blank=True, related_name='suivicreator')
     def __str__(self):
         return f"{self.protocole.nom} - {self.nom}"
 
 
 class Evaluation(models.Model):
-    etape = models.ForeignKey(EtapeProtocole, on_delete=models.CASCADE, related_name="evaluations", null=True,
+    etape = models.ForeignKey(SuiviProtocole, on_delete=models.CASCADE, related_name="evaluations", null=True,
                               blank=True)
     date_evaluation = models.DateField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
@@ -308,14 +333,17 @@ class Analyse(models.Model):
 
 class Examen(models.Model):
     request_number = models.CharField(default=request_number, max_length=100, unique=True)
-    patients_requested = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="patients")
-    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='examen_for_consultation')
+    patients_requested = models.ForeignKey(Patient, blank=True, null=True, on_delete=models.CASCADE,
+                                           verbose_name="patients")
+    consultation = models.ForeignKey('Consultation', blank=True, null=True, on_delete=models.CASCADE,
+                                     related_name='examen_for_consultation')
     number = models.CharField(blank=True, null=True, max_length=300)
     delivered_by = models.CharField(blank=True, null=True, max_length=300)
     delivered_contact = models.CharField(blank=True, null=True, max_length=300)
     delivered_services = models.CharField(blank=True, null=True, max_length=300)
     date = models.DateField(blank=True, null=True)
-    analyses = models.ForeignKey('Analyse', on_delete=models.CASCADE, blank=True, verbose_name="Type d'analyse")
+    analyses = models.ForeignKey('Analyse', on_delete=models.CASCADE, blank=True, related_name='examanalyse', null=True,
+                                 verbose_name="Type d'analyse")
     accepted = models.BooleanField(default=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -366,8 +394,8 @@ class Consultation(models.Model):
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, blank=True, null=True, related_name='consultations')
     consultation_date = models.DateTimeField(default=timezone.now, blank=True)
     reason = models.TextField(blank=True, null=True, )
-    diagnosis = HTMLField()
-    commentaires = HTMLField()
+    diagnosis = models.CharField(max_length=300, blank=True, null=True, )
+    commentaires = models.CharField(max_length=300, blank=True, null=True, )
 
     suivi = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True, related_name='suivi')
     status = models.CharField(max_length=50, blank=True, null=True,
@@ -383,7 +411,7 @@ class Consultation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Consultation for {self.patient.nom} on {self.consultation_date}"
+        return f"Consultation #{self.numeros} - {self.patient.nom} ({self.consultation_date.strftime('%d/%m/%Y')})"
 
 
 class Constante(models.Model):
@@ -737,8 +765,37 @@ class WaitingRoom(models.Model):
         return f"{self.patient.nom} - {self.arrival_time}"
 
 
+class FicheSuiviClinique(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
+    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='fichemedecinsuivi')
+    date_consultation = models.DateField(help_text="Date de la consultation.")
+    heure_consultation = models.TimeField(help_text="Heure de la consultation.", blank=True, null=True)
+    observations_cliniques = models.TextField(blank=True, null=True, help_text="Observations cliniques du médecin.")
+    poids = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
+                                help_text="Poids du patient en kg.")
+    taille = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
+                                 help_text="Taille du patient en cm.")
+    pression_arterielle = models.CharField(max_length=20, blank=True, null=True, help_text="Exemple : 120/80 mmHg")
+    temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True,
+                                      help_text="Température corporelle en °C.")
+    recommandations = models.TextField(blank=True, null=True, help_text="Recommandations du médecin pour le patient.")
+    prochaine_consultation = models.DateField(blank=True, null=True,
+                                              help_text="Date de la prochaine consultation prévue.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Consultation de {self.patient} avec {self.medecin} le {self.date_consultation}"
+
+
 class TraitementARV(models.Model):
+    suivi = models.ForeignKey('Suivi', on_delete=models.CASCADE, blank=True, null=True,
+                              verbose_name=_("Détails du suivi"), related_name='suivitreatarv')
     # Informations de base sur le traitement
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name="patientarv", blank=True, null=True, verbose_name=_("Patient")
+    )
     nom = models.CharField(max_length=100, verbose_name=_("Nom du traitement ARV"), null=True, blank=True)
     description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     dosage = models.CharField(max_length=50, verbose_name=_("Dosage recommandé"), null=True, blank=True)
@@ -793,32 +850,13 @@ class TraitementARV(models.Model):
         return f"{self.nom} - {self.type_traitement}"
 
 
-class FicheSuiviClinique(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
-    medecin = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
-                                related_name='fichemedecinsuivi')
-    date_consultation = models.DateField(help_text="Date de la consultation.")
-    heure_consultation = models.TimeField(help_text="Heure de la consultation.", blank=True, null=True)
-    observations_cliniques = models.TextField(blank=True, null=True, help_text="Observations cliniques du médecin.")
-    poids = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
-                                help_text="Poids du patient en kg.")
-    taille = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True,
-                                 help_text="Taille du patient en cm.")
-    pression_arterielle = models.CharField(max_length=20, blank=True, null=True, help_text="Exemple : 120/80 mmHg")
-    temperature = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True,
-                                      help_text="Température corporelle en °C.")
-    recommandations = models.TextField(blank=True, null=True, help_text="Recommandations du médecin pour le patient.")
-    prochaine_consultation = models.DateField(blank=True, null=True,
-                                              help_text="Date de la prochaine consultation prévue.")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Consultation de {self.patient} avec {self.medecin} le {self.date_consultation}"
-
-
 class Suivi(models.Model):
     # Relations
+    mode = models.CharField(max_length=50, choices=[
+        ('permanent', 'Permanent'),
+        ('occasionnel', 'Occasionnel'),
+        ('periodique', 'Periodique')
+    ], blank=True, null=True, )
     activite = models.ForeignKey(
         ServiceSubActivity, on_delete=models.CASCADE, related_name="suiviactivitepat",
         null=True, blank=True, verbose_name=_("Activité")
@@ -830,14 +868,7 @@ class Suivi(models.Model):
     patient = models.ForeignKey(
         Patient, on_delete=models.CASCADE, related_name="suivimedecin", verbose_name=_("Patient")
     )
-    fichesuivie = models.ForeignKey(
-        FicheSuiviClinique, on_delete=models.CASCADE, related_name='suivisfiche',
-        verbose_name=_("Fiche de suivi clinique")
-    )
-    traitement = models.ForeignKey(
-        TraitementARV, on_delete=models.CASCADE, related_name='suivispatient', null=True, blank=True,
-        verbose_name=_("Traitement ARV")
-    )
+
     rdvconsult = models.ForeignKey(
         Appointment, on_delete=models.CASCADE, related_name='suivierdvconsult', null=True, blank=True,
         verbose_name=_("Rendez-vous de consultation")
@@ -878,6 +909,8 @@ class Suivi(models.Model):
     observations = models.TextField(
         null=True, blank=True, verbose_name=_("Observations générales")
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # Métadonnées
     class Meta:
@@ -887,6 +920,204 @@ class Suivi(models.Model):
 
     def __str__(self):
         return f"{self.patient.nom} - {self.services} - {self.date_suivi}"
+
+
+class InfectionOpportuniste(models.Model):
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="infections_opportunistes",
+        verbose_name=_("Patient")
+    )
+    type_infection = models.CharField(
+        max_length=255,
+        verbose_name=_("Type d'infection")
+    )
+    date_diagnostic = models.DateField(
+        verbose_name=_("Date de diagnostic")
+    )
+    gravite = models.CharField(
+        max_length=20,
+        choices=[
+            ('faible', _("Faible")),
+            ('modérée', _("Modérée")),
+            ('sévère', _("Sévère")),
+        ],
+        default='faible',
+        verbose_name=_("Gravité")
+    )
+    traitement = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Traitement")
+    )
+    statut_traitement = models.CharField(
+        max_length=20,
+        choices=[
+            ('en cours', _("En cours")),
+            ('terminé', _("Terminé")),
+            ('abandonné', _("Abandonné")),
+        ],
+        default='en cours',
+        verbose_name=_("Statut du traitement")
+    )
+    suivi = models.ForeignKey(Suivi, on_delete=models.CASCADE, blank=True, null=True,
+                              verbose_name=_("Détails du suivi"), related_name='suiviinfections')
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date de création")
+    )
+    date_mise_a_jour = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date de mise à jour")
+    )
+
+    def __str__(self):
+        return f"{self.type_infection} chez {self.patient.nom}"
+
+    class Meta:
+        verbose_name = _("Infection Opportuniste")
+        verbose_name_plural = _("Infections Opportunistes")
+        ordering = ['-date_diagnostic']
+
+
+class Comorbidite(models.Model):
+    suivi = models.ForeignKey(Suivi, on_delete=models.CASCADE, blank=True, null=True,
+                              verbose_name=_("Détails du suivi"), related_name='suivicomorbide')
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="comorbidites",
+        verbose_name=_("Patient")
+    )
+    type_comorbidite = models.CharField(
+        max_length=255,
+        verbose_name=_("Type de comorbidité")
+    )
+    date_diagnostic = models.DateField(
+        verbose_name=_("Date de diagnostic")
+    )
+    traitement = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Traitement")
+    )
+    statut_traitement = models.CharField(
+        max_length=20,
+        choices=[
+            ('en cours', _("En cours")),
+            ('terminé', _("Terminé")),
+            ('abandonné', _("Abandonné")),
+        ],
+        default='en cours',
+        verbose_name=_("Statut du traitement")
+    )
+    impact_sur_vih = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Impact sur le VIH"),
+        help_text=_("Expliquez comment cette comorbidité influence la gestion du VIH.")
+    )
+    recommandations = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Recommandations"),
+        help_text=_("Recommandations spécifiques liées à cette comorbidité.")
+    )
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date de création")
+    )
+    date_mise_a_jour = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date de mise à jour")
+    )
+
+    def __str__(self):
+        return f"{self.type_comorbidite} chez {self.patient.nom}"
+
+    class Meta:
+        verbose_name = _("Comorbidité")
+        verbose_name_plural = _("Comorbidités")
+        ordering = ['-date_diagnostic']
+
+
+class Vaccination(models.Model):
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="vaccinations",
+        verbose_name=_("Patient")
+    )
+    type_vaccin = models.CharField(
+        max_length=255,
+        verbose_name=_("Type de vaccin"),
+        help_text=_("Exemple : Hépatite B, Pneumocoque, Grippe, etc.")
+    )
+    date_administration = models.DateField(
+        verbose_name=_("Date d'administration")
+    )
+    centre_vaccination = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name=_("Centre de vaccination"),
+        help_text=_("Lieu où la vaccination a été administrée.")
+    )
+    lot_vaccin = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Numéro de lot du vaccin"),
+        help_text=_("Numéro de lot pour traçabilité.")
+    )
+    professionnel_sante = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name=_("Professionnel de santé"),
+        help_text=_("Nom ou identifiant du professionnel ayant administré le vaccin.")
+    )
+    rappel_necessaire = models.BooleanField(
+        default=False,
+        verbose_name=_("Rappel nécessaire"),
+        help_text=_("Indique si un rappel est nécessaire pour ce vaccin.")
+    )
+    date_rappel = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Date de rappel"),
+        help_text=_("Date prévue pour le rappel, si applicable.")
+    )
+    effets_secondaires = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Effets secondaires signalés"),
+        help_text=_("Décrire les effets secondaires éventuels observés après l'administration du vaccin.")
+    )
+    remarques = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Remarques"),
+        help_text=_("Informations supplémentaires concernant la vaccination.")
+    )
+    date_creation = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date de création")
+    )
+    date_mise_a_jour = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date de mise à jour")
+    )
+
+    def __str__(self):
+        return f"Vaccination de {self.patient.nom} ({self.type_vaccin})"
+
+    class Meta:
+        verbose_name = _("Vaccination")
+        verbose_name_plural = _("Vaccinations")
+        ordering = ['-date_administration']
 
 
 class Hospitalization(models.Model):

@@ -2,17 +2,20 @@ import datetime
 import os
 from datetime import date, timedelta
 from datetime import datetime
+from itertools import groupby
+
 import qrcode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Prefetch
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.http import request, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -32,9 +35,9 @@ from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
-    HospitalizationForm, AppointmentUpdateForm
+    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
-    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen
+    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole
 
 
 # Create your views here.
@@ -1090,52 +1093,6 @@ class ServiceContentDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-# class ActiviteListView(ListView):
-#     context_object_name = 'activities'
-#
-#     def get_queryset(self):
-#         serv = self.kwargs['serv']
-#         acty = self.kwargs['acty']
-#         return ServiceSubActivity.objects.filter(service__nom=serv, nom=acty)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         serv = self.kwargs['serv']
-#         acty = self.kwargs['acty']
-#         acty_id = self.kwargs['acty_id']
-#
-#         subactivity = ServiceSubActivity.objects.filter(service__nom=serv, nom=acty, id=acty_id).first()
-#         consultations = Consultation.objects.filter(activite=subactivity) if subactivity else []
-#
-#         context.update({
-#             'serv': serv,
-#             'acty': acty,
-#             'acty_id': acty_id,
-#             'subactivity': subactivity,
-#             'consultations': consultations,
-#         })
-#         return context
-#
-#     def get_template_names(self):
-#         template_map = {
-#             ('VIH-SIDA', 'Overview'): 'pages/services/vih_sida_overview.html',
-#             ('VIH-SIDA', 'Consultation'): 'pages/services/consultation_VIH.html',
-#             ('VIH-SIDA', 'Hospitalisation'): 'pages/services/consultation_VIH.html',
-#             ('VIH-SIDA', 'Suivi'): 'pages/services/consultation_VIH.html',
-#
-#             ('COVID', 'Overview'): 'pages/services/consultation_COVID.html',
-#             ('COVID', 'Consultation'): 'pages/services/consultation_COVID.html',
-#             ('COVID', 'Hospitalisation'): 'pages/services/consultation_COVID.html',
-#             ('COVID', 'Suivi'): 'pages/services/consultation_COVID.html',
-#
-#             ('TUBERCULOSE', 'Overview'): 'pages/services/consultation_COVID.html',
-#             ('TUBERCULOSE', 'Consultation'): 'pages/services/consultation_COVID.html',
-#             ('TUBERCULOSE', 'Hospitalisation'): 'pages/services/consultation_COVID.html',
-#             ('TUBERCULOSE', 'Suivi'): 'pages/services/consultation_COVID.html',
-#         }
-#         serv = self.kwargs['serv']
-#         acty = self.kwargs['acty']
-#         return [template_map.get((serv, acty), 'pages/services/servicecontent_detail.html')]
 class ActiviteListView(LoginRequiredMixin, ListView):
     context_object_name = 'activities'
     ordering = ['-created_at']
@@ -1158,12 +1115,14 @@ class ActiviteListView(LoginRequiredMixin, ListView):
         consultations_page = self.request.GET.get('consultations_page')
         context['consultations'] = consultations_paginator.get_page(consultations_page)
 
-        hospitalizations = Hospitalization.objects.filter(activite=subactivity).order_by('-admission_date') if subactivity else []
+        hospitalizations = Hospitalization.objects.filter(activite=subactivity).order_by(
+            '-admission_date') if subactivity else []
         hospitalizations_paginator = Paginator(hospitalizations, 10)
         hospitalizations_page = self.request.GET.get('hospitalizations_page')
         context['hospitalizations'] = hospitalizations_paginator.get_page(hospitalizations_page)
 
-        suivis = Suivi.objects.filter(activite=subactivity) if subactivity else []  # Assuming you have a Suivi model
+        suivis = Suivi.objects.filter(
+            services=subactivity.service) if subactivity else []  # Assuming you have a Suivi model
         suivis_paginator = Paginator(suivis, 10)
         suivis_page = self.request.GET.get('suivis_page')
         context['suivis'] = suivis_paginator.get_page(suivis_page)
@@ -1359,7 +1318,125 @@ class ConsultationSidaDetailView(LoginRequiredMixin, DetailView):
         context['hospit_request'] = HospitalizationForm()
         context['depistage_form'] = TestRapideVIHForm()
         context['prelevement_form'] = EchantillonForm()
+        context['suivisform'] = SuiviSendForm()
 
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
+        return context
+
+
+@login_required
+def suivi_send_create(request, consultationsvih_id, patient_id):
+    # Récupérer le patient et la consultation
+    patient = get_object_or_404(Patient, id=patient_id)
+    consultation = get_object_or_404(Consultation, id=consultationsvih_id)
+
+    if request.method == 'GET':  # Action déclenchée via un simple clic
+        try:
+            # Vérifier si un suivi existe déjà pour ce patient et cette consultation
+            suivi_existe = Suivi.objects.filter(
+                patient=patient,
+                activite=consultation.activite,
+                services=consultation.services,
+                # date_suivi=now().date()  # Vérifie un suivi créé aujourd'hui
+            ).exists()
+
+            if suivi_existe:
+                # Si un suivi existe déjà, afficher un message d'erreur
+                messages.error(request,
+                               f"Un suivi existe déjà pour le patient {patient.nom} pour cette activité et ce service.")
+                return redirect('suivi_list')
+
+            # Créer une nouvelle instance de suivi
+            suivi = Suivi.objects.create(
+                patient=patient,
+                activite=consultation.activite,  # Activité associée
+                services=consultation.services,  # Service associé
+                date_suivi=now().date(),  # Date de suivi (par défaut aujourd'hui)
+                poids=patient.latest_poids if hasattr(patient, 'latest_poids') else None,  # Poids, si disponible
+                observations=f"Suivi créé pour la consultation {consultation.numeros}.",
+                statut_patient='actif',  # Statut par défaut
+                adherence_traitement='bonne',  # Adhérence par défaut
+            )
+
+            # Mettre à jour la consultation (optionnel)
+            consultation.status = 'Completed'
+            consultation.save()
+
+            # Afficher un message de succès
+            messages.success(request, f"Suivi créé avec succès pour le patient {patient.nom}.")
+            return redirect('suivi_list')  # Rediriger vers la page de la liste des suivis
+
+        except Exception as e:
+            # Gérer les erreurs potentielles
+            messages.error(request, f"Une erreur s'est produite lors de la création du suivi : {e}")
+            return redirect('suivi_list')
+
+    # Si la méthode HTTP est incorrecte
+    messages.error(request, "Action non autorisée.")
+    return redirect('suivi_list')
+
+
+class SuiviListView(LoginRequiredMixin, ListView):
+    model = Suivi
+    template_name = "pages/suivi/suivi_list.html"
+    context_object_name = "suivis"
+
+
+def create_rdv(request, suivi_id):
+    # Récupérer le suivi correspondant
+    suivi = get_object_or_404(Suivi, id=suivi_id)
+
+    if request.method == 'POST':
+        form = RdvSuiviForm(request.POST, user=request.user)
+        if form.is_valid():
+            # Créer le rendez-vous sans l'enregistrer pour ajouter des données supplémentaires
+            rdv = form.save(commit=False)
+            rdv.suivi = suivi  # Associer le rendez-vous au suivi
+            rdv.patient = suivi.patient  # Associer automatiquement le patient du suivi
+            rdv.created_by = request.user.employee  # Associer le créateur
+            rdv.save()
+            messages.success(request, "Le rendez-vous a été créé avec succès.")
+            return redirect('suivi-detail', pk=suivi.id)
+        else:
+            messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
+    else:
+        form = RdvSuiviForm()
+
+    return render(request, 'pages/suivi/create_rdv.html', {
+        'form': form,
+        'suivi': suivi,
+    })
+
+class SuiviDetailView(LoginRequiredMixin, DetailView):
+    model = Suivi
+    template_name = "pages/suivi/suivi_detail.html"
+    context_object_name = "suividetail"
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(
+            Prefetch(
+                'suivierdv',
+                queryset=RendezVous.objects.all()
+            ),
+            Prefetch(
+                'protocolessuivi',
+                queryset=SuiviProtocole.objects.select_related('protocole', 'protocole__type_protocole')
+                .order_by('protocole__type_protocole__nom')
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Group protocols by their type
+        protocols = self.object.protocolessuivi.all()
+        grouped_protocols = {
+            key: list(group) for key, group in groupby(protocols, key=lambda p: p.protocole.type_protocole)
+        }
+
+        # Add grouped protocols to the context
+        context['grouped_protocols'] = grouped_protocols
+        context['suivirdvform'] = RdvSuiviForm()
+
         return context

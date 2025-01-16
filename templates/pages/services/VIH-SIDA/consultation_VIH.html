@@ -205,7 +205,7 @@
                                                     </div>
                                                 </div><!-- .nk-tb-item -->
                                          
-                                                {% for patient in consultations.all %}
+                                                {% for patient in consultations %}
                                                 <div class="nk-tb-item">
                                                 <div class="nk-tb-col tb-col-md">
                                                           <span class="tb-status text-gray">VIH-{{ patient.patient.code_vih }} </span>
@@ -229,7 +229,8 @@
         </span>
         {% endif %}
     </span>
-                                                          <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
+                                                          <span class="tb-status text-gray">
+                                                              <a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
                                                           {% with constante=patient.patient.constantes.last %}
                                                               {% if constante %}
                                                                   {% if constante.alerte %}

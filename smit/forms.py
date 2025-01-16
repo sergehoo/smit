@@ -18,7 +18,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
-    Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier
+    Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi
 
 POSOLOGY_CHOICES = [
     ('Une fois par jour', 'Une fois par jour'),
@@ -375,9 +375,12 @@ class ConstantesForm(forms.ModelForm):
     taille = forms.FloatField(required=True,
                               widget=forms.NumberInput(
                                   attrs={'class': 'form-control form-control-lg ', 'placeholder': '175 cm'}))
-    pouls = forms.FloatField(required=False,widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
-    pb = forms.FloatField(required=False,label='Périmètre brachial',widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '39 cm'}))
-    po = forms.FloatField(required=False,label='Périmètre ombilical',widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': '10 cm'}))
+    pouls = forms.FloatField(required=False, widget=forms.NumberInput(
+        attrs={'class': 'form-control form-control-lg ', 'placeholder': '50 bpm'}))
+    pb = forms.FloatField(required=False, label='Périmètre brachial', widget=forms.NumberInput(
+        attrs={'class': 'form-control form-control-lg ', 'placeholder': '39 cm'}))
+    po = forms.FloatField(required=False, label='Périmètre ombilical', widget=forms.NumberInput(
+        attrs={'class': 'form-control form-control-lg ', 'placeholder': '10 cm'}))
 
     # imc = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control form-control-lg ', 'placeholder': 'glycemie'}))
 
@@ -394,6 +397,16 @@ class ConsultationSendForm(forms.ModelForm):
     class Meta:
         model = Consultation
         fields = ['service']
+
+
+class SuiviSendForm(forms.ModelForm):
+    class Meta:
+        model = Suivi
+        fields = [
+            'statut_patient', 'adherence_traitement',
+            'poids', 'cd4', 'charge_virale', 'observations',
+        ]
+
 
 
 class HospitalizationreservedForm(forms.ModelForm):
@@ -1312,3 +1325,58 @@ class ArticleCommandeForm(forms.ModelForm):
             'fournisseur': forms.Select(attrs={'class': 'form-control'}),
             'statut': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+class RdvSuiviForm(forms.ModelForm):
+    class Meta:
+        model = RendezVous
+        fields = [
+            'recurrence',
+            'recurrence_end_date',
+        ]
+
+        widgets = {
+            'recurrence': forms.Select(attrs={'class': 'form-control'}),
+            'recurrence_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+        labels = {
+            'recurrence': 'Récurrence',
+            'recurrence_end_date': 'Fin de la Récurrence',
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Capture the logged-in user from the view
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        recurrence = cleaned_data.get('recurrence')
+        recurrence_end_date = cleaned_data.get('recurrence_end_date')
+
+        # Ensure recurrence end date is after the appointment date
+        if recurrence != 'None' and recurrence_end_date and recurrence_end_date <= date:
+            self.add_error('recurrence_end_date',
+                           "La date de fin de la récurrence doit être après la date du rendez-vous.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Retrieve the instance being saved
+        instance = super().save(commit=False)
+
+        # Automatically set the pharmacy and doctor based on the logged-in user
+        if self.user and hasattr(self.user, 'employee'):
+            instance.pharmacie = self.user.employee.pharmacie
+            instance.doctor = self.user.employee
+
+        # Automatically set the status to "Scheduled"
+        if not instance.status:
+            instance.status = 'Scheduled'
+
+        if commit:
+            instance.save()
+
+        return instance

@@ -308,10 +308,10 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
-                           class="btn btn-outline-secondary float-right mr-5"
-                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');">
+                        <a href="{% url 'send_to_suivie' consultationsvih_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}" class="btn btn-outline-secondary float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir suivre ce patient ?');">
                             <em class="icon ni ni-reply-fill"></em> Suivie VIH</a>
+                    
+             
 
 
 

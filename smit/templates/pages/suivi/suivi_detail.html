@@ -1,0 +1,288 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+                    <div class="container-xl wide-lg">
+    <div class="nk-content-body">
+        <!-- Header Section -->
+        <div class="nk-block-head nk-block-head-sm">
+            <div class="nk-block-between g-3">
+                <div class="nk-block-head-content">
+                    <h3 class="nk-block-title page-title">Suivi /
+                        <strong class="text-primary small">{{ suividetail.patient.nom }} {{ suividetail.patient.prenoms }}</strong>
+                    </h3>
+                    <div class="nk-block-des text-soft">
+                        <ul class="list-inline">
+                            <li>Code Patient : <span class="text-base">{{ suividetail.patient.code_patient }}</span></li>
+                            <li>Date de Suivi : <span class="text-base">{{ suividetail.date_suivi|date:"d M, Y" }}</span></li>
+                            <li>Mode de suivi : <span class="text-base">{{ suividetail.get_mode_display }}</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="nk-block-head-content">
+                    <a href="{% url 'suivi_list' %}" class="btn btn-outline-light bg-white d-none d-sm-inline-flex">
+                        <em class="icon ni ni-arrow-left"></em><span>Retour</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="nk-block">
+            <div class="row gy-5">
+                <!-- Informations Générales -->
+                <div class="col-lg-5">
+                    <div class="card card-bordered">
+                        <div class="card-header">
+                            <h5 class="title">Informations Générales</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="data-list is-compact">
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Statut du Patient</div>
+                                        <div class="data-value">{{ suividetail.get_statut_patient_display }}</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Poids</div>
+                                        <div class="data-value">{{ suividetail.poids }} kg</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Taux de CD4</div>
+                                        <div class="data-value">{{ suividetail.cd4 }} cellules/mm³</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Charge Virale</div>
+                                        <div class="data-value">{{ suividetail.charge_virale }} copies/mL</div>
+                                    </div>
+                                </li>
+                                <li class="data-item">
+                                    <div class="data-col">
+                                        <div class="data-label">Observations</div>
+                                        <div class="data-value">{{ suividetail.observations }}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protocole et Traitement ARV -->
+               <div class="col-lg-7">
+    <div class="card card-bordered">
+        <div class="card-header">
+            <h5 class="title">Traitements</h5>
+        </div>
+        <div class="card-body">
+            <h6 class="text-muted">Traitements ARV</h6>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Dosage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for traitement in suividetail.suivitreatarv.all %}
+                    <tr>
+                        <td>{{ traitement.nom }}</td>
+                        <td>{{ traitement.get_type_traitement_display }}</td>
+                        <td>{{ traitement.dosage }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+             <!-- Protocoles -->
+                <div class="col-lg-12">
+                    <div class="card card-bordered">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h5 class="title">Protocoles</h5>
+                            <a href="" class="btn btn-outline-primary">Nouveau protocole</a>
+                        </div>
+
+                        {% for type, protocols in grouped_protocols.items %}
+                            <div class="card-body">
+                                <h6 class="text-success">{{ type.nom|upper }} |
+                                    <span class="text-muted">{{ type.parent.nom|upper }}</span>
+                                </h6>
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Durée</th>
+                                        <th>Date Début</th>
+                                        <th>Date Fin</th>
+                                        <th>Molécules</th>
+                                        <th>Médicament</th>
+                                        <th>Maladies</th>
+                                        <th>Examens</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for proto in protocols %}
+                                        <tr>
+                                            <td>{{ proto.protocole.nom }}</td>
+                                            <td>{{ proto.protocole.duree }}</td>
+                                            <td>{{ proto.protocole.date_debut|date:"d M, Y" }}</td>
+                                            <td>{{ proto.protocole.date_fin|date:"d M, Y" }}</td>
+                                            <td>
+                                                {% for molecule in proto.protocole.molecules.all %}
+                                                    <span class="badge badge-outline-dark mr-2">{{ molecule.nom }}</span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for medicament in proto.protocole.medicament.all %}
+                                                    <span class="badge badge-outline-info">{{ medicament.nom }}</span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>{{ proto.protocole.maladies }}</td>
+                                            <td>
+                                                {% for exam in proto.protocole.protocoleexam.all %}
+                                                    {{ exam.request_number }}
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Rendez-vous -->
+               <div class="col-lg-12">
+    <div class="card card-bordered">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h5 class="title">Rendez-vous</h5>
+            <a href="#" data-toggle="modal"
+               data-target="#rdvsuivi" class="btn btn-outline-primary">Nouveau rendez-vous</a>
+
+            <div class="modal fade" tabindex="-1" id="rdvsuivi">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                            <em class="icon ni ni-cross"></em>
+                        </a>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Modal Title</h5>
+                        </div>
+                        <div class="modal-body">
+                           <form action="{% url 'suivis-rdv-create' suivi_id=suividetail.id %}">
+                               {% csrf_token %}
+                               {{ suivirdvform.as_p }}
+
+                           </form>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button class="btn btn-primary">Creer </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Raison</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rdv in suividetail.suivierdv.all %}
+                    <tr>
+                        <td>{{ rdv.date|date:"d M, Y" }}</td>
+                        <td>{{ rdv.time|time:"H:i" }}</td>
+                        <td>{{ rdv.reason }}</td>
+                        <td>
+                            <span class="badge badge-sm badge-outline-{{ rdv.status|lower }}">
+                                {{ rdv.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+                <!-- Vaccinations -->
+                <div class="col-lg-12">
+    <div class="card card-bordered">
+        <div class="card-header">
+            <h5 class="title">Vaccinations</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Vaccin</th>
+                        <th>Date</th>
+                        <th>Centre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vaccination in suividetail.patient.vaccinations.all %}
+                    <tr>
+                        <td>{{ vaccination.type_vaccin }}</td>
+                        <td>{{ vaccination.date_administration|date:"d M, Y" }}</td>
+                        <td>{{ vaccination.centre_vaccination }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+                <!-- Comorbidités -->
+                <!-- Comorbidités -->
+<div class="col-lg-12">
+    <div class="card card-bordered">
+        <div class="card-header">
+            <h5 class="title">Comorbidités</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comorbidite in suividetail.suivicomorbide.all %}
+                    <tr>
+                        <td>{{ comorbidite.type_comorbidite }}</td>
+                        <td>{{ comorbidite.impact_sur_vih }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+                </div>
+{% endblock %}

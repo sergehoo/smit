@@ -101,16 +101,21 @@
         {% endif %}
     </span>
 
-    {% if consultation.patient.latest_constante %}
-    <span class="tb-status text-gray">
-        <a class="tb-status" href="#" data-toggle="modal"
-           data-target="#constanteover{{ consultation.patient.id }}">
-            <img data-toggle="tooltip" data-placement="top"
+
+                                                                <a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ consultation.patient.id }}">
+                                                          {% with constante=consultation.patient.latest_constante %}
+                                                              {% if constante %}
+                                                                  {% if constante.alerte %}
+                                                                      <span> <img src="{% static 'images/gift/alert.gif' %}" width="20"/></span>
+                                                                      <!-- Affiche les anomalies -->
+                                                                  {% else %}
+                                                                      <span><img data-toggle="tooltip" data-placement="top"
                  title="Constantes du : {{ consultation.patient.latest_constante.created_at }} par {{ consultation.patient.latest_constante.created_by }}"
-                 src="{% static 'images/gift/livre-medical.gif' %}" width="20" />
-        </a>
-    </span>
-    {% endif %}
+                 src="{% static 'images/gift/livre-medical.gif' %}" width="20" /></span> <!-- Tout est normal -->
+                                                                  {% endif %}
+                                                              {% endif %}
+                                                          {% endwith %}
+                                                          </a>
 </div>
                                                             </div>
                                                         </div>

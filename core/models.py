@@ -17,8 +17,6 @@ from simple_history.models import HistoricalRecords
 from django.contrib.gis.db import models
 
 
-
-
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
     # Taille de l'image
     image_size = (size, size)
@@ -957,6 +955,12 @@ class Patient(models.Model):
             ('view_dossier_patient', 'Can View dossier patient'),
             # ('delete_patient', 'Can delete patient'),
         )
+
+    @property
+    def latest_poids(self):
+        # Récupérer le poids le plus récent à partir des constantes ou des suivis
+        constante = self.constantes.order_by('-created_at').first()
+        return constante.poids if constante and constante.poids else None
 
     @property
     def services_passed(self):

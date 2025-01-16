@@ -1,7 +1,7 @@
 from datetime import date
 
 from core.models import Patient
-from smit.models import Service, Appointment, Hospitalization, Consultation
+from smit.models import Service, Appointment, Hospitalization, Consultation, Suivi
 
 
 def services_processor(request):
@@ -17,11 +17,17 @@ def menu_processor(request):
     patient_nbr = Patient.objects.all().count()
     appointments_all = Appointment.objects.all().count()
     Hospitaliza = Hospitalization.objects.all().count()
-    consultations = Consultation.objects.filter(status='Scheduled').count()
+    consultations = Consultation.objects.all().count()
+    suivi = Suivi.objects.all().count()
     # vih_consult = Consultation.objects.filter(service='VIH-SIDA').count()
 
-    return {'apointments_nbr': appointments_today, 'patient_nbr': patient_nbr, 'appointments_all': appointments_all,
-            'hoapi_nbr': Hospitaliza, 'consul_nbr': consultations}
+    return {'apointments_nbr': appointments_today,
+            'patient_nbr': patient_nbr,
+            'appointments_all': appointments_all,
+            'hoapi_nbr': Hospitaliza,
+            'consul_nbr': consultations,
+            'suivi_nbr': suivi
+            }
 
 # def check_accueil_group(request):
 #     is_accueil = False

@@ -31,7 +31,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
     delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
-    RendezVousConsultationUpdateView, PatientRecuListView
+    RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, create_rdv
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -60,7 +60,6 @@ urlpatterns = [
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
                   path('modifierPatient/<int:pk>', PatientUpdateView.as_view(), name='update_patient'),
                   path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),
-
 
                   # path('patient/<int:patient_id>/service/<int:service_id>/', service_detail_view, name='service_detail'),
 
@@ -92,10 +91,18 @@ urlpatterns = [
                   path('consultation/<int:patient_id>/<int:rdv_id>', consultation_send_create,
                        name='send_consultation'),
 
+                  path('suivi/<int:patient_id>/<int:consultationsvih_id>', suivi_send_create, name='send_to_suivie'),
+
                   path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
                   path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
 
                   path('consultations/', ConsultationListView.as_view(), name='consultation_list'),
+
+                  path('Suivi/', SuiviListView.as_view(), name='suivi_list'),
+                  path('Suivi/detail<int:pk>', SuiviDetailView.as_view(), name='suivis-detail'),
+
+                  path('Suivi/rdv/create<int:suivi_id>', create_rdv, name='suivis-rdv-create'),
+
                   path('consultations/<int:pk>/', ConsultationDetailView.as_view(), name='consultation_detail'),
                   path('consultations/<int:pk>/modifier/', ConsultationUpdateView.as_view(),
                        name='consultation_update'),
@@ -139,7 +146,8 @@ urlpatterns = [
                   path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),
 
                   path('api/get-patient-name/<int:appointment_id>/', views.get_patient_name, name='get_patient_name'),
-                  path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name, name='get_patient_all_name'),
+                  path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name,
+                       name='get_patient_all_name'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

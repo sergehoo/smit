@@ -7,10 +7,11 @@ from core.models import Location, PolesRegionaux, HealthRegion, DistrictSanitair
 from laboratory.models import Echantillon
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
-    ServiceSubActivity, Consultation, EtapeProtocole, Protocole, Evaluation, Molecule, Allergies, \
+    ServiceSubActivity, Consultation, Protocole, Evaluation, Molecule, Allergies, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
-    ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie
+    ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
+    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -47,7 +48,10 @@ class ConstanteAdmin(admin.ModelAdmin):
 
 @admin.register(Consultation)
 class ConsultationAdmin(admin.ModelAdmin):
-    list_display = ['patient', 'services', 'hospitalised']
+    list_display = ('numeros', 'patient', 'doctor', 'consultation_date', 'status')
+    list_filter = ('status', 'consultation_date')
+    search_fields = ('numeros', 'patient__nom', 'doctor__user__username')
+    readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(ServiceSubActivity)
@@ -55,25 +59,68 @@ class ServiceSubActivityAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(EtapeProtocole)
-class EtapeProtocoleAdmin(admin.ModelAdmin):
-    pass
+@admin.register(TypeProtocole)
+class TypeProtocoleAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'description', 'parent')
 
 
 @admin.register(Protocole)
 class ProtocoleAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('nom', 'type_protocole', 'date_debut', 'date_fin', 'duree')
+    search_fields = ('nom', 'patient__nom', 'type_protocole__nom')
+    list_filter = ('type_protocole',)
+
+
+@admin.register(SuiviProtocole)
+class SuiviProtocoleAdmin(admin.ModelAdmin):
+    list_display = (
+        'protocole',
+        'suivi',
+        'date_debut',
+        'date_fin',
+        'created_at',
+        'created_by',
+    )
+
+
+# Configuration pour le modèle TraitementARV
+@admin.register(TraitementARV)
+class TraitementARVAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'patient', 'type_traitement', 'date_creation', 'duree_traitement')
+    search_fields = ('nom', 'patient__nom', 'patient__prenom')
+    list_filter = ('type_traitement', 'date_creation')
+
+
+# Configuration pour le modèle InfectionOpportuniste
+@admin.register(InfectionOpportuniste)
+class InfectionOpportunisteAdmin(admin.ModelAdmin):
+    list_display = ('type_infection', 'patient', 'date_diagnostic', 'gravite', 'statut_traitement')
+    search_fields = ('type_infection', 'patient__nom', 'patient__prenom')
+    list_filter = ('gravite', 'statut_traitement', 'date_diagnostic')
+    date_hierarchy = 'date_diagnostic'
+
+
+# Configuration pour le modèle Comorbidite
+@admin.register(Comorbidite)
+class ComorbiditeAdmin(admin.ModelAdmin):
+    list_display = ('type_comorbidite', 'patient', 'date_diagnostic', 'statut_traitement')
+    search_fields = ('type_comorbidite', 'patient__nom', 'patient__prenom')
+    list_filter = ('statut_traitement', 'date_diagnostic')
+    date_hierarchy = 'date_diagnostic'
+
+
+# Configuration pour le modèle Vaccination
+@admin.register(Vaccination)
+class VaccinationAdmin(admin.ModelAdmin):
+    list_display = ('type_vaccin', 'patient', 'date_administration', 'rappel_necessaire', 'centre_vaccination')
+    search_fields = ('type_vaccin', 'patient__nom', 'patient__prenom', 'centre_vaccination')
+    list_filter = ('rappel_necessaire', 'date_administration')
+    date_hierarchy = 'date_administration'
 
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
     pass
-
-
-
-
-
-
 
 
 @admin.register(Allergies)
@@ -91,14 +138,27 @@ class AllergiesAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Analyse)
-class AnalyseAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(Examen)
 class ExamenAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('request_number', 'patients_requested', 'analyses', 'date', 'accepted', 'created_at')
+    list_filter = ('date', 'accepted')
+    search_fields = ('request_number', 'patients_requested__name',
+                     'analyses__name')  # Assuming patients_requested and analyses have a name field.
+    ordering = ('-created_at',)
+    autocomplete_fields = ('patients_requested', 'analyses')  # For better usability with ForeignKey fields.
+
+
+@admin.register(Analyse)
+class AnalyseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'tarif_base', 'tarif_public', 'tarif_mutuelle', 'forfait_assurance', 'result')
+    list_filter = ('tarif_base',)
+    search_fields = ('name',)
+    ordering = ('name',)
+    fields = (
+        'name', 'tarif_base', 'tarif_public', 'tarif_mutuelle', 'forfait_assurance', 'forfait_societe',
+        'lanema', 'analysis_description', 'analysis_method', 'delai_analyse', 'result', 'notes'
+    )
+    readonly_fields = ('tarif_public', 'tarif_mutuelle', 'forfait_assurance', 'forfait_societe', 'lanema')
 
 
 @admin.register(Hospitalization)
@@ -133,7 +193,26 @@ class IndicateurSubjectifAdmin(admin.ModelAdmin):
 
 @admin.register(Suivi)
 class SuiviAdmin(admin.ModelAdmin):
-    list_display = ['activite']
+    list_display = ('patient', 'services', 'date_suivi', 'statut_patient', 'adherence_traitement')
+    search_fields = ('patient__nom', 'patient__prenoms', 'services__nom')
+    list_filter = ('statut_patient', 'adherence_traitement', 'date_suivi', 'mode')
+    date_hierarchy = 'date_suivi'
+    ordering = ('-date_suivi',)
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Informations générales', {
+            'fields': ('patient', 'services', 'activite', 'mode', 'date_suivi')
+        }),
+        ('Détails du suivi', {
+            'fields': ('statut_patient', 'adherence_traitement', 'poids', 'cd4', 'charge_virale', 'observations')
+        }),
+        ('Rendez-vous', {
+            'fields': ('rdvconsult', 'rdvpharmacie')
+        }),
+        ('Métadonnées', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
 
 
 # @admin.register(Localite)
@@ -214,6 +293,7 @@ class PatientResource(resources.ModelResource):
 class PatientAdmin(ImportExportModelAdmin):
     resource_class = PatientResource
     list_display = ('code_patient', 'code_vih', 'nom', 'prenoms')
+    search_fields = ['code_ptient', 'nom']
 
 
 class TestRapideVIHAdmin(ImportExportModelAdmin):
@@ -304,8 +384,6 @@ class DiagnosticAdmin(admin.ModelAdmin):
     list_display = ('type_diagnostic', 'hospitalisation', 'date_diagnostic', 'maladie', 'medecin_responsable')
     list_filter = ('type_diagnostic', 'date_diagnostic')
     search_fields = ('hospitalisation__patient__nom', 'hospitalisation__patient__prenom')
-
-
 
 
 @admin.register(Maladie)
