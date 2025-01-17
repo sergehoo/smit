@@ -35,7 +35,7 @@ from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
-    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm
+    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole
 
@@ -1440,3 +1440,28 @@ class SuiviDetailView(LoginRequiredMixin, DetailView):
         context['suivirdvform'] = RdvSuiviForm()
 
         return context
+
+
+class UrgenceListView(LoginRequiredMixin, ListView):
+    model = Patient
+    template_name = "pages/urgence/urgence_list.html"
+    context_object_name = "hurgenceliste"
+    paginate_by = 10
+    # ordering = "-admission_date"
+
+    def get_queryset(self):
+        # Filtrer les patients dont urgence est True
+        return Patient.objects.filter(urgence=True)
+
+
+class UrgenceCreateView(LoginRequiredMixin, CreateView):
+    model = Patient
+    template_name = "pages/urgence/urgence_create.html"
+    form_class = UrgencePatientForm
+    success_url = reverse_lazy('urgences_list')  # Rediriger après la création
+
+    def form_valid(self, form):
+        # Forcer le champ urgence à True
+        form.instance.urgence = True
+        form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
+        return super().form_valid(form)

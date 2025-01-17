@@ -18,17 +18,18 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, make_naive, is_aware
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
 from xhtml2pdf import pisa
 
 from core.models import Patient, ServiceSubActivity
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
-    DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm
+    DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm, \
+    HospitalizationUrgenceForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
     ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
@@ -51,7 +52,6 @@ class ExportHospitalizationView(LoginRequiredMixin, ListView):
 
         current_date = timezone.now().strftime('%Y-%m-%d')
         filename = f"Exportation donnees hospitalisations_{current_date}.xlsx".replace(' ', '_')
-
 
         # Convertir les données en DataFrame Pandas
         data = []
@@ -143,6 +143,13 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         context['result_count'] = queryset.count()
 
         return context
+
+
+class HospitalizationUrgenceCreateView(CreateView):
+    model = Hospitalization
+    form_class = HospitalizationUrgenceForm
+    template_name = "pages/hospitalization/hospitalization_urgence_create.html"
+    success_url = reverse_lazy('hospitalisation')  # Redirige après la création
 
 
 # Constante PDF Export View
@@ -458,7 +465,7 @@ def add_historique_maladie(request, hospitalisation_id):
             historique.medecin = request.user  # Associe le médecin connecté
             historique.save()
             messages.success(request, "Historique de la maladie ajouté avec succès.")
-            return redirect('hospitalisation_details', pk=hospitalisation_id)
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
         else:
             messages.error(request, "Erreur lors de l'ajout de l'historique. Veuillez corriger les erreurs ci-dessous.")
     else:

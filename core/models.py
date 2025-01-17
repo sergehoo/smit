@@ -944,6 +944,7 @@ class Patient(models.Model):
     localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
     cascontact = models.ManyToManyField('self')
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
+    urgence = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     details = models.JSONField(null=True, blank=True)

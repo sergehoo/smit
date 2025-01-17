@@ -22,6 +22,7 @@ from django.urls import path, include
 
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
     EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView
+from hospitalisation.views import HospitalizationUrgenceCreateView
 from smit import views
 from smit.views import HomePageView, PatientListView, PatientCreateView, RendezVousListView, RendezVousDetailView, \
     PatientDetailView, SalleAttenteListView, ServiceContentDetailView, consultation_send_create, \
@@ -31,7 +32,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     mark_consultation_as_hospitalised, test_rapide_vih_create, enquete_create, create_consultation_pdf, \
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
     delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
-    RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, create_rdv
+    RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, \
+    create_rdv, UrgenceListView, UrgenceCreateView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -148,6 +150,9 @@ urlpatterns = [
                   path('api/get-patient-name/<int:appointment_id>/', views.get_patient_name, name='get_patient_name'),
                   path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name,
                        name='get_patient_all_name'),
+                  path('urgence/liste', UrgenceListView.as_view(), name='urgences_list'),
+                  path('urgence/create/', UrgenceCreateView.as_view(), name='urgence_create'),
+                  path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(), name='hospitalization_urgence_create'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

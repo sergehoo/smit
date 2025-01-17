@@ -293,7 +293,7 @@ class PatientResource(resources.ModelResource):
 class PatientAdmin(ImportExportModelAdmin):
     resource_class = PatientResource
     list_display = ('code_patient', 'code_vih', 'nom', 'prenoms')
-    search_fields = ['code_ptient', 'nom']
+    search_fields = ['code_patient', 'nom']
 
 
 class TestRapideVIHAdmin(ImportExportModelAdmin):

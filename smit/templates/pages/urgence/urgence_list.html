@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sélectionner tous les champs de formulaire avec la classe 'dynamic-field'
     const fields = document.querySelectorAll('.bedid');
-    
+
     fields.forEach((field, index) => {
         // Générer un ID unique et l'attribuer à chaque champ
         const uniqueId = generateUniqueId();
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="nk-block-head nk-block-head-sm">
                                 <div class="nk-block-between">
                                     <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title">HOSPITALISATION</h3>
+                                        <h3 class="nk-block-title page-title">URGENCE HOSPITALISATION</h3>
                                         <div class="nk-block-des text-soft">
                                             <p>  {% if result_count %}
                                                 <strong>{{ result_count }}</strong> patient(s) hospitalisé(s).
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             class="icon ni ni-plus"></em></a>
                     <div class="dropdown-menu dropdown-menu-right">
                         <ul class="link-list-opt no-bdr">
-                            <li><a href="{% url 'hospitalization_urgence_create' %}"><span>Urgence Hospitalisation</span></a></li>
+                            <li><a href="{% url 'urgence_create' %}"><span>Nouvelle Urgence</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -325,14 +325,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     </div>
                                                 </div><!-- .nk-tb-item -->
 
-                                                {% for patient in hospitalisationgenerale.all %}
+                                                {% for patient in hurgenceliste.all %}
                                                     <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
                                                             <div class="user-card">
                                                                 <div class="user-name">
                                                                     <span class="tb-lead" data-toggle="tooltip"
                                                                           data-placement="top"
-                                                                          title="{{ patient.patient.code_patient }}"><i class="fa-solid fa-id-card"></i> {{ patient.patient.code_patient }}</span>
+                                                                          title="{{ patient.code_patient }}"><i class="fa-solid fa-id-card"></i> {{ patient.code_patient }}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -340,11 +340,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                             <span>
                                                                 <span>
         <i class="fa-solid fa-user-alt"></i>
-        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
-        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
+        <span class="masked-name" id="masked-name-{{patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ patient.id }}-{{ forloop.counter }}"></span>
         {% if perms.core.view_patient_name %}
         <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
-                data-patient-id="{{ patient.patient.id }}"
+                data-patient-id="{{ patient.id }}"
                 data-counter="{{ forloop.counter }}">
             <i class="fa-solid fa-eye"></i>
         </button>
@@ -354,10 +354,10 @@ document.addEventListener('DOMContentLoaded', function() {
         </span>
         {% endif %}
     </span>
-                                                            {% if patient.patient.latest_constante %}
-                                                                <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}"><img
+                                                            {% if patient.latest_constante %}
+                                                                <span class="tb-status text-gray"><a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.id }}"><img
                                                                         data-toggle="tooltip" data-placement="top"
-                                                                        title="Constantes du :{{ patient.patient.latest_constante.created_at }} par {{ patient.patient.latest_constante.created_by }}"
+                                                                        title="Constantes du :{{ patient.latest_constante.created_at }} par {{ patient.latest_constante.created_by }}"
                                                                         src="{% static 'images/gift/livre-medical.gif' %}"
                                                                         width="20"/></a> </span>
                                                             {% endif %}
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
                                                         <div class="nk-tb-col">
-                                                            <span class="badge badge-pill badge-dark">{{ patient.patient.status }}</span>
+                                                            <span class="badge badge-pill badge-dark">{{ patient.status }}</span>
                                                         </div>
                                                         <div class="nk-tb-col nk-tb-col-tools">
                                                             <ul class="nk-tb-actions gx-2">
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                         <div class="dropdown-menu dropdown-menu-right">
                                                                             <ul class="link-list-opt no-bdr">
                                                                                 <li>
-                                                                                    <a href="{% url 'detail_patient' patient.patient.pk %}"><em
+                                                                                    <a href="{% url 'detail_patient' patient.pk %}"><em
                                                                                             class="icon ni ni-eye"></em><span>Voir Dossier </span></a>
                                                                                 </li>
 
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         </div>
                                                         <!-- Modal Content Code -->
                                                         <div class="modal fade" tabindex="-1"
-                                                             id="constante{{ patient.patient.id }}">
+                                                             id="constante{{ patient.id }}">
                                                             <div class="modal-dialog modal-lg" role="document">
                                                                 <div class="modal-content">
                                                                     <a href="#" class="close" data-dismiss="modal"
@@ -488,13 +488,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                                                     </div>
                                                                     <div class="modal-footer bg-light">
-                                                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
+                                                                        <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.code_patient }}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal fade" tabindex="-1"
-                                                             id="constanteover{{ patient.patient.id }}">
+                                                             id="constanteover{{ patient.id }}">
                                                             <div class="modal-dialog modal-lg" role="document">
                                                                 <div class="modal-content">
                                                                     <a href="#" class="close" data-dismiss="modal"
@@ -510,9 +510,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                     <div class="modal-body">
                                                                         <div class="nk-block card card-bordered">
 
-                                                                            {% if patient.patient.latest_constante %}
+                                                                            {% if patient.latest_constante %}
                                                                                 <h4>Deniere constante enregistrée le
-                                                                                    : {{ patient.patient.latest_constante.created_at }} </h4>
+                                                                                    : {{ patient.latest_constante.created_at }} </h4>
                                                                                 <table class="table table-ulogs">
                                                                                     <thead class="thead-light">
                                                                                     <tr>
@@ -535,10 +535,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             systolique
                                                                                         </td>
                                                                                         <td class="tb-col-ip">
-                                                                                            <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
+                                                                                            <span class="sub-text">{{ patient.latest_constante.tension_systolique }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
-                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                            {% if patient.latest_constante.tension_systolique < 90 or patient.latest_constante.tension_systolique > 140 %}
                                                                                                 <span class="sub-text font-italic"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
                                                                                             {% else %}
@@ -553,11 +553,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             diastolique
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.tension_diastolique }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
+                                                                                            {% if patient.latest_constante.tension_diastolique < 60 or patient.latest_constante.tension_diastolique > 90 %}
                                                                                                 <span class="sub-text font-italic"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
                                                                                             {% else %}
@@ -571,11 +571,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             cardiaque
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.frequence_cardiaque }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
+                                                                                            {% if patient.latest_constante.frequence_cardiaque < 60 or patient.latest_constante.frequence_cardiaque > 100 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
                                                                                             {% else %}
@@ -590,10 +590,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             respiratoire
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.frequence_respiratoire }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
-                                                                                            {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
+                                                                                            {% if patient.latest_constante.frequence_respiratoire < 12 or patient.latest_constante.frequence_respiratoire  > 20 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
                                                                                             {% else %}
@@ -608,11 +608,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             Temperature
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.temperature }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.temperature }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
+                                                                                            {% if patient.latest_constante.temperature < 36 or patient.latest_constante.temperature > 37.5 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
                                                                                             {% else %}
@@ -627,11 +627,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                             oxygene
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.saturation_oxygene }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
+                                                                                            {% if patient.latest_constante.saturation_oxygene < 95 or patient.latest_constante.saturation_oxygene > 100 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
                                                                                             {% else %}
@@ -645,11 +645,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                         <td class="tb-col-os">Glycemie
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.glycemie }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
+                                                                                            {% if patient.latest_constante.glycemie < 70 or patient.latest_constante.glycemie > 140 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
                                                                                             {% else %}
@@ -662,11 +662,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                     <tr>
                                                                                         <td class="tb-col-os">poids</td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.poids }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.poids }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                            {% if patient.latest_constante.tension_systolique < 90 or patient.latest_constante.tension_systolique > 140 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
                                                                                             {% else %}
@@ -680,11 +680,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                         <td class="tb-col-os">taille
                                                                                         </td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.taille }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.taille }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                            {% if patient.latest_constante.tension_systolique < 90 or patient.latest_constante.tension_systolique > 140 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
                                                                                             {% else %}
@@ -697,11 +697,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                     <tr>
                                                                                         <td class="tb-col-os">pouls</td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.pouls }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.pouls }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                            {% if patient.latest_constante.tension_systolique < 90 or patient.latest_constante.tension_systolique > 140 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
                                                                                             {% else %}
@@ -714,11 +714,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                     <tr>
                                                                                         <td class="tb-col-os">IMC</td>
                                                                                         <td class="tb-col-ip"><span
-                                                                                                class="sub-text">{{ patient.patient.latest_constante.imc }}</span>
+                                                                                                class="sub-text">{{ patient.latest_constante.imc }}</span>
                                                                                         </td>
                                                                                         <td class="tb-col-time">
 
-                                                                                            {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
+                                                                                            {% if patient.latest_constante.tension_systolique < 90 or patient.latest_constante.tension_systolique > 140 %}
                                                                                                 <span class="sub-text"><i
                                                                                                         class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
                                                                                             {% else %}
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                                                     </div>
                                                                     <div class="modal-footer bg-light">
-                                                                        <span class="sub-text">Enregistres par  {{ patient.patient.latest_constante.created_by }}  | Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
+                                                                        <span class="sub-text">Enregistres par  {{ patient.latest_constante.created_by }}  | Prise de tension {{ patient.patient }} {{ patient.code_patient }}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>

@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
+from django.http import request
+from django.utils.timezone import now
 
 from core.models import Patient
-from smit.models import Service, ServiceSubActivity, SigneFonctionnel
+from smit.models import Service, ServiceSubActivity, SigneFonctionnel, Hospitalization
 
 
 @receiver(post_save, sender=Service)
@@ -43,6 +45,7 @@ def create_user_for_patient(sender, instance, created, **kwargs):
         # Associer l'utilisateur au patient
         instance.user = user
         instance.save()
+
 
 
 # @receiver(post_migrate)

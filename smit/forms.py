@@ -408,7 +408,6 @@ class SuiviSendForm(forms.ModelForm):
         ]
 
 
-
 class HospitalizationreservedForm(forms.ModelForm):
     patient = forms.ModelChoiceField(queryset=Patient.objects.all(), label='Selectionnez le patien à affecter',
                                      widget=forms.Select(
@@ -1380,3 +1379,63 @@ class RdvSuiviForm(forms.ModelForm):
             instance.save()
 
         return instance
+
+
+class UrgencePatientForm(forms.ModelForm):
+    class Meta:
+        model = Patient
+        fields = ['nom', 'prenoms', 'contact', 'situation_matrimoniale', 'lieu_naissance',
+                  'date_naissance', 'genre', 'nationalite', 'ethnie', 'profession',
+                  'nbr_enfants', 'groupe_sanguin', 'niveau_etude', 'employeur',
+                  'localite', ]
+        widgets = {
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom'}),
+            'prenoms': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénoms'}),
+            'contact': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrez un numéro de téléphone'}),
+            'situation_matrimoniale': forms.Select(attrs={'class': 'form-control'}),
+            'lieu_naissance': forms.TextInput(attrs={'class': 'form-control'}),
+            'date_naissance': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'genre': forms.Select(attrs={'class': 'form-control'}),
+            'nationalite': forms.TextInput(attrs={'class': 'form-control'}),
+            'ethnie': forms.TextInput(attrs={'class': 'form-control'}),
+            'profession': forms.TextInput(attrs={'class': 'form-control'}),
+            'nbr_enfants': forms.NumberInput(attrs={'class': 'form-control'}),
+            'groupe_sanguin': forms.Select(attrs={'class': 'form-control'}),
+            'niveau_etude': forms.TextInput(attrs={'class': 'form-control'}),
+            'employeur': forms.TextInput(attrs={'class': 'form-control'}),
+            'localite': forms.Select(attrs={'class': 'form-control'}),
+            # 'avatar': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            # 'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        # Forcer le champ urgence à True
+        instance.urgence = True
+        if commit:
+            instance.save()
+        return instance
+
+
+class HospitalizationUrgenceForm(forms.ModelForm):
+    class Meta:
+        model = Hospitalization
+        fields = ['patient',  'admission_date',
+                  'bed', 'reason_for_admission',]
+        widgets = {
+            'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            # 'discharge_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            # 'discharge_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'reason_for_admission': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            # 'room': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'status': forms.Select(attrs={'class': 'form-control'}),
+            'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'activite': forms.Select(attrs={'class': 'form-control'}),
+            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
+            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrer les patients urgents uniquement
+        self.fields['patient'].queryset = Patient.objects.filter(urgence=True)

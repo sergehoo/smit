@@ -4,84 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/management/commands/generate_fake_suivi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/management/commands/load_diseases.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/reschedule_appointment.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/bluefondsbilaninit.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/fondsbilan.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/fondsbilaninit.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/pharmacie.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/watermark.jpg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/api/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/management/commands/create_employee.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/create_employee.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/management/commands/generate_fake_hospy.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/generate_fake_hospy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/management/commands/import_patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/import_patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0002_patient_ethnie_alter_patient_code_patient_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0003_alter_patient_code_patient_alter_patient_code_vih.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0004_alter_patient_code_vih_alter_patient_created_by_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0005_alter_patient_code_patient.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0006_alter_employee_options.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0007_polesregionaux_remove_location_commune_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0008_alter_location_name.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/migrations/0009_districtsanitaire_geom.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/laboratory/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/laboratory/migrations/0002_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0002_alter_medicament_date_expiration_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0003_medicament_dosage_form.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0004_medicament_unitdosage_alter_medicament_dosage.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0005_alter_medicament_nom.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0006_alter_medicament_unitdosage.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/migrations/0007_rename_alerté_stockalert_alerte_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/commande_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/commande_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/medicament_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit.sqlite3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0002_hospitalizationindicators.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0003_hospitalizationindicators_hospitalisation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0004_lithospitalisation_is_cleaning_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0005_lithospitalisation_reserved.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0006_lithospitalisation_status_changed_at.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0007_alter_hospitalization_bed.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0008_prescription_posology.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0009_prescription_hospitalisation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0010_complicationsindicators.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0011_constante_pb.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0012_prescription_executed_at_prescription_executed_by_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0013_prescriptionexecution.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0014_prescription_pendant.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0015_prescription_a_partir_de_alter_prescription_pendant.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/migrations/0016_alter_prescription_a_partir_de.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/logs/error.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/error.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" afterDir="false" />
-    </list>
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -259,6 +182,7 @@
       <workItem from="1734569615153" duration="80834000" />
       <workItem from="1735426092183" duration="41632000" />
       <workItem from="1736068413795" duration="9629000" />
+      <workItem from="1737106172701" duration="603000" />
     </task>
     <servers />
   </component>
