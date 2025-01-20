@@ -20,11 +20,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, make_naive, is_aware
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView
 from xhtml2pdf import pisa
 
-from core.models import Patient, ServiceSubActivity
+from core.models import Patient, ServiceSubActivity, Maladie
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
@@ -338,29 +339,74 @@ def delete_prescription(request, prescription_id):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
+# @login_required
+# def add_diagnostic(request, hospitalisation_id):
+#     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+#
+#     if request.method == 'POST':
+#         form = DiagnosticForm(request.POST)
+#         if form.is_valid():
+#             diagnostic = form.save(commit=False)
+#             diagnostic.hospitalisation = hospitalisation
+#             diagnostic.date_diagnostic = timezone.now()
+#             diagnostic.medecin_responsable = request.user
+#             diagnostic.save()  # Sauvegarde finale du diagnostic
+#             # messages.success(request, f"Diagnostic '{diagnostic.nom}' ajouté avec succès.")
+#             # return redirect('hospitalisationdetails', pk=hospitalisation_id)
+#         else:
+#             # Afficher les erreurs du formulaire avec un message d'erreur global
+#             # messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+#             # return redirect('hospitalisationdetails', pk=hospitalisation_id)
+#             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+#
+#
+#     # Pour les requêtes GET (peu probable dans ce cas), rediriger
+#     messages.error(request, "Méthode non autorisée.")
+#     return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
 @login_required
 def add_diagnostic(request, hospitalisation_id):
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
 
     if request.method == 'POST':
-        form = DiagnosticForm(request.POST)
+        data = request.POST.copy()
+
+        # Vérifiez si la maladie existe, sinon créez-la
+        maladie_nom = data.get('maladie')
+        if maladie_nom and not Maladie.objects.filter(nom=maladie_nom).exists():
+            nouvelle_maladie = Maladie.objects.create(nom=maladie_nom)
+            data['maladie'] = nouvelle_maladie.id  # Remplacez le nom par l'ID dans les données POST
+
+        form = DiagnosticForm(data)
         if form.is_valid():
             diagnostic = form.save(commit=False)
             diagnostic.hospitalisation = hospitalisation
             diagnostic.date_diagnostic = timezone.now()
             diagnostic.medecin_responsable = request.user
-            diagnostic.save()  # Sauvegarde finale du diagnostic
+            diagnostic.save()
             messages.success(request, f"Diagnostic '{diagnostic.nom}' ajouté avec succès.")
             return redirect('hospitalisationdetails', pk=hospitalisation_id)
         else:
-            # Afficher les erreurs du formulaire avec un message d'erreur global
             messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
             return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
-    # Pour les requêtes GET (peu probable dans ce cas), rediriger
     messages.error(request, "Méthode non autorisée.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
+
+@csrf_exempt
+def add_maladie(request):
+    if request.method == 'POST':
+        nom = request.POST.get('nom')
+        if not nom:
+            return JsonResponse({'success': False, 'message': 'Le nom de la maladie est requis.'})
+
+        maladie, created = Maladie.objects.get_or_create(nom=nom)
+        if created:
+            return JsonResponse({'success': True, 'id': maladie.id, 'nom': maladie.nom})
+        else:
+            return JsonResponse({'success': False, 'message': 'Cette maladie existe déjà.'})
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'})
 
 @login_required
 def add_observations(request, hospitalisation_id):

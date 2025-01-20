@@ -35,7 +35,7 @@ from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
-    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm
+    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole
 
@@ -798,6 +798,27 @@ class PatientListView(LoginRequiredMixin, FilterView):
         return context
 
 
+@login_required
+def add_cas_contact(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+
+    if request.method == 'POST':
+        form = CasContactForm(request.POST)
+        if form.is_valid():
+            cas_contact = form.save(commit=False)
+            cas_contact.patient = patient  # Associer le cas contact au patient
+            cas_contact.save()
+            messages.success(request, "Cas contact ajouté avec succès.")
+            return JsonResponse({'success': True, 'message': 'Cas contact ajouté avec succès.'}, status=200)
+        else:
+            # Retourner les erreurs du formulaire au format JSON
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    # Si la requête est GET, affichez le formulaire
+    form = CasContactForm()
+    return render(request, 'add_cas_contact.html', {'form': form, 'patient': patient})
+
+
 class PatientDetailView(LoginRequiredMixin, DetailView):
     model = Patient
     template_name = "pages/dossier_patient.html"
@@ -819,6 +840,8 @@ class PatientDetailView(LoginRequiredMixin, DetailView):
         # context["hospitalizations"] = patient.hospitalized.all().order_by('-created_at')
         context["appointments"] = patient.appointment_set.all().order_by('-created_at')
         context["suivis"] = patient.suivimedecin.all()
+        context['case_contacts'] = self.object.case_contacts.all()
+        context['cascontactsForm'] = CasContactForm()
 
         # Ajouter les hospitalisations
         hospitalizations = patient.hospitalized.all().prefetch_related(
@@ -1408,6 +1431,7 @@ def create_rdv(request, suivi_id):
         'suivi': suivi,
     })
 
+
 class SuiviDetailView(LoginRequiredMixin, DetailView):
     model = Suivi
     template_name = "pages/suivi/suivi_detail.html"
@@ -1447,6 +1471,7 @@ class UrgenceListView(LoginRequiredMixin, ListView):
     template_name = "pages/urgence/urgence_list.html"
     context_object_name = "hurgenceliste"
     paginate_by = 10
+
     # ordering = "-admission_date"
 
     def get_queryset(self):

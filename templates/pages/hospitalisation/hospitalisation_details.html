@@ -1614,7 +1614,42 @@
                     </div><!-- .card -->
                 </div>
             </div>
-        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            // Initialisation de Select2 avec l'option tags
+            $('.select2').select2({
+                tags: true,
+                tokenSeparators: [',', ' '],
+                placeholder: "Choisissez ou ajoutez une maladie",
+                allowClear: true,
+                ajax: {
+                    url: "{% url 'add_maladie' %}",
+                    type: "POST",
+                    dataType: "json",
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            nom: params.term, // Le terme recherché ou ajouté
+                            csrfmiddlewaretoken: '{{ csrf_token }}' // Token CSRF pour sécuriser la requête
+                        };
+                    },
+                    processResults: function (data) {
+                        if (data.success) {
+                            return {
+                                results: [
+                                    {id: data.id, text: data.nom}
+                                ]
+                            };
+                        } else {
+                            alert(data.message);
+                            return {results: []};
+                        }
+                    },
+                },
+            });
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Reinitialiser TinyMCE quand le modal est affiché

@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from core.models import CasContact
 from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospitalisation, LitHospitalisation, \
     TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution, Observation, HistoriqueMaladie
 
@@ -84,3 +85,9 @@ class ObservationAdmin(admin.ModelAdmin):
 class HistoriqueMaladieAdmin(admin.ModelAdmin):
     list_display = ('patient', 'medecin', 'date_enregistrement',)
     search_fields = ('patient__nom', 'details', 'statut')
+
+
+@admin.register(CasContact)
+class CaseContactAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'contact_person', 'relationship')
+    search_fields = ('patient__nom', 'contact_patient__nom', )

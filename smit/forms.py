@@ -10,7 +10,7 @@ from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
-    Patient_statut_choices, Location, Maladie
+    Patient_statut_choices, Location, Maladie, CasContact
 
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
 from pharmacy.models import Medicament, RendezVous, ArticleCommande
@@ -1055,7 +1055,7 @@ class DiagnosticForm(forms.ModelForm):
         fields = ['type_diagnostic', 'maladie', 'remarques']
         widgets = {
             'type_diagnostic': forms.Select(attrs={'class': 'form-control', 'type': 'select'}),
-            'maladie': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'maladie': forms.Select(attrs={'class': 'form-control form-select select2','data-tags': 'true', 'data-search': 'on'}),
             'remarques': TinyMCE(attrs={'class': 'tinymce-basic', 'cols': 65, 'rows': 10}),
         }
 
@@ -1439,3 +1439,28 @@ class HospitalizationUrgenceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filtrer les patients urgents uniquement
         self.fields['patient'].queryset = Patient.objects.filter(urgence=True)
+
+
+class CasContactForm(forms.ModelForm):
+    class Meta:
+        model = CasContact
+        fields = [
+            'contact_person',
+            'phone_number',
+            'relationship',
+            'contact_frequency',
+            'date_contact',
+            'location',
+            'prevention_measures',
+            'details'
+        ]
+        widgets = {
+            'contact_person': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1234567890'}),
+            'relationship': forms.Select(attrs={'class': 'form-control'}),
+            'contact_frequency': forms.Select(attrs={'class': 'form-control'}),
+            'date_contact': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            'prevention_measures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }

@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'tinymce',
     'django_countries',
     'schedule',
+    'dbbackup',
 
     'django_extensions',
     'django_unicorn',
@@ -113,10 +114,6 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',  # Backend de permissions Guardian
 
 )
-
-
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -189,6 +186,8 @@ DATABASES = {
         'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date admission</span></div>
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date Creation</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Date sorti</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Diagnostique</span></div>
                                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Chambre</span></div>
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                 <div class="user-name">
                                                                     <span class="tb-lead" data-toggle="tooltip"
                                                                           data-placement="top"
-                                                                          title="{{ patient.admission_date }}"><em class="icon ni ni-arrow-up-right text-success"></em> {{ patient.admission_date|naturaltime }}</span>
+                                                                          title="{{ patient.created_at }}"><em class="icon ni ni-arrow-up-right text-success"></em> {{ patient.created_at|naturaltime }}</span>
                                                                 </div>
                                                             </div>
                                                         </div>

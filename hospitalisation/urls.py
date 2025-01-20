@@ -6,7 +6,8 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     export_indicateur_fonctionnel_pdf, export_indicateur_subjectif_pdf, update_hospitalisation_discharge, reserve_bed, \
     release_bed, mark_as_out_of_service, mark_as_cleaning, delete_bed, set_cleaning_false, hospitalisation_lit_reserved, \
     LitDetailView, mark_execution_taken, delete_prescription, add_diagnostic, add_avis_medical, add_effet_indesirable, \
-    add_historique_maladie, add_observations, add_hospi_comment, ExportHospitalizationView
+    add_historique_maladie, add_observations, add_hospi_comment, ExportHospitalizationView, add_maladie
+from smit.views import add_cas_contact
 from smitci import settings
 
 urlpatterns = [
@@ -51,6 +52,8 @@ urlpatterns = [
                   path('add-avis-medical/<int:hospitalisation_id>', add_avis_medical, name='add_avis_medical'),
                   path('add-effet-indesirable/<int:hospitalisation_id>', add_effet_indesirable, name='add_effet_indesirable'),
                   path('add-historique-maladie/<int:hospitalisation_id>', add_historique_maladie, name='add_historique_maladie'),
+                  path('add-maladie/', add_maladie, name='add_maladie'),
+                  path('patient/<int:patient_id>/add-cas-contact/', add_cas_contact, name='add_cas_contact'),
 
                   # path('hospitalisation/<int:hospitalisation_id>prescription/<int:prescription_id>/execute/', execute_prescription, name='nurse_execute'),
 

@@ -15,7 +15,8 @@ from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 from django.contrib.gis.db import models
-
+from django.utils.translation import gettext_lazy as _
+import qrcode
 
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
     # Taille de l'image
@@ -928,6 +929,7 @@ class Patient(models.Model):
     nom = models.CharField(max_length=225)
     prenoms = models.CharField(max_length=225)
     contact = models.CharField(max_length=225)
+    adresse_mail = models.CharField(max_length=50, blank=True, unique=True)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
     lieu_naissance = models.CharField(max_length=200, )
     date_naissance = models.DateField(null=True, blank=True)
@@ -941,8 +943,8 @@ class Patient(models.Model):
     employeur = models.CharField(max_length=100, null=True, blank=True)
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True)
+    qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
     localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
-    cascontact = models.ManyToManyField('self')
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     urgence = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -956,6 +958,39 @@ class Patient(models.Model):
             ('view_dossier_patient', 'Can View dossier patient'),
             # ('delete_patient', 'Can delete patient'),
         )
+
+    def generate_qr_code(self):
+        """
+        Génère un QR code pour le patient contenant des informations pertinentes.
+        """
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        # Construire les données du QR code
+        qr_data = (
+            "BEGIN:VCARD\n"
+            "VERSION:3.0\n"
+            f"N:{self.nom};{self.prenoms}\n"
+            f"TEL:{self.contact}\n"
+            f"EMAIL:{self.adresse_mail or 'non spécifié'}\n"
+            f"ORG:SMIT-KENEYA\n"
+            f"TITLE:Patient\n"
+            f"NOTE:Code Patient: {self.code_patient}\n"
+            "END:VCARD"
+        )
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        # Générer l'image du QR code
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        file_name = f"qr_code_{self.code_patient}.png"
+
+        self.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
 
     @property
     def latest_poids(self):
@@ -982,6 +1017,8 @@ class Patient(models.Model):
             bg_color = (0, 122, 255) if self.genre == 'HOMME' else (0, 122, 255)
             avatar_image = generate_avatar(name, bg_color)
             self.avatar.save(f"{self.code_patient}.png", ContentFile(avatar_image.read()), save=False)
+        if not self.qr_code:
+            self.generate_qr_code()
         super(Patient, self).save(*args, **kwargs)
 
     def generate_numeric_uuid(self):
@@ -1081,6 +1118,106 @@ class PatientUserObjectPermission(UserObjectPermissionBase):
 
 class PatientGroupObjectPermission(GroupObjectPermissionBase):
     content_object = models.ForeignKey(Patient, on_delete=models.CASCADE)
+
+
+class CasContact(models.Model):
+    patient = models.ForeignKey(
+        'Patient',
+        on_delete=models.CASCADE,
+        related_name='case_contacts',
+        verbose_name=_("Patient")
+    )
+    contact_person = models.CharField(
+        max_length=255,
+        verbose_name=_("Contact Person Name"))
+
+    phone_number = models.CharField(
+        max_length=15,
+        verbose_name=_("Phone Number"),
+        help_text="Enter a valid phone number with country code, e.g., +1234567890"
+    )
+
+    relationship = models.CharField(
+        max_length=255,
+        choices=[
+            ('FAMILY', _('Family Member')),
+            ('FRIEND', _('Friend')),
+            ('COWORKER', _('Coworker')),
+            ('NEIGHBOR', _('Neighbor')),
+            ('OTHER', _('Other')),
+        ],
+        verbose_name=_("Relationship to Patient")
+    )
+    contact_frequency = models.CharField(
+        max_length=255,
+        choices=[
+            ('DAILY', _('Daily')),
+            ('WEEKLY', _('Weekly')),
+            ('OCCASIONAL', _('Occasional')),
+        ],
+        verbose_name=_("Frequency of Contact")
+    )
+    date_contact = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Date of Last Contact")
+    )
+    location = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Location of Interaction")
+    )
+    prevention_measures = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Prevention Measures Taken")
+    )
+    details = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Details")
+    )
+    smsdepistage = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+
+    class Meta:
+        verbose_name = _("Case Contact")
+        verbose_name_plural = _("Case Contacts")
+        unique_together = ('patient', 'contact_person')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.patient} - {self.contact_person}"
+
+    def clean(self):
+        if not self.phone_number.startswith('+'):
+            raise ValidationError({
+                'phone_number': _("Phone number must include the country code and start with '+'.")
+            })
+
+    # def send_sms(self, message):
+    #     """Send an SMS to the contact using Twilio."""
+    #     try:
+    #         # Replace with your Twilio credentials
+    #         TWILIO_ACCOUNT_SID = 'your_account_sid'
+    #         TWILIO_AUTH_TOKEN = 'your_auth_token'
+    #         TWILIO_PHONE_NUMBER = 'your_twilio_phone_number'
+    #
+    #         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    #
+    #         message = client.messages.create(
+    #             body=message,
+    #             from_=TWILIO_PHONE_NUMBER,
+    #             to=self.phone_number
+    #         )
+    #
+    #         return message.sid
+    #     except Exception as e:
+    #         raise ValidationError({
+    #             'phone_number': _(f"Failed to send SMS: {e}")
+    #         })
 
 
 class Maladie(models.Model):

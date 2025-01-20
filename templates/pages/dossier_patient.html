@@ -11,9 +11,13 @@
 
 
                                     <div class="nk-block-head-content">
-                                        <div class="nk-block float-left">
-                                            <img src="{% static 'images/images.png' %}" width="110">
-                                       </div>
+                                        {% if patientsdetail.qr_code %}
+                                            <div class="nk-block float-left">
+                                                <img src="{{ patientsdetail.qr_code.url }}" width="110" alt="QR Code">
+                                            </div>
+                                        {% else %}
+                                            <p>Aucun QR code disponible pour ce patient.</p>
+                                        {% endif %}
                                         <h3 class="nk-block-title page-title">Patient / <strong class="text-primary small">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</strong></h3>
                                         <div class="nk-block-des text-soft ml-5">
                                             <ul class="list-inline">
@@ -84,167 +88,211 @@
                                     <!-- Tab Peronal Info -->
                                     <div class="tab-pane fade show active" id="tabPersonal">
 
-                                        <div class="nk-block">
-                                            <div class="nk-block-head">
-                                                <h5 class="title">Personal Information</h5>
-                                                <p>Informations relative au patient.</p>
-                                            </div><!-- .nk-block-head -->
-                                            <div class="profile-ud-list">
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Sexe</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.genre }}.</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Nom & Prenom </span>
-                                                        <span class="profile-ud-value">{{ patientsdetail|upper }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Date de naissance</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.date_naissance }}</span>
+                                      <div class="nk-block">
+    <div class="nk-block-head">
+        <h5 class="title">Personal Information</h5>
+        <p>Informations relatives au patient.</p>
+    </div>
+    <!-- .nk-block-head -->
+    <div class="profile-ud-list">
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Sexe</span>
+                <span class="profile-ud-value">{{ patientsdetail.genre }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Nom & Prénom</span>
+                <span class="profile-ud-value">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Date de naissance</span>
+                <span class="profile-ud-value">{{ patientsdetail.date_naissance }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Lieu de naissance</span>
+                <span class="profile-ud-value">{{ patientsdetail.lieu_naissance }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Âge</span>
+                <span class="profile-ud-value">{{ patientsdetail.calculate_age }} ans</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Code Patient</span>
+                <span class="profile-ud-value text-primary"><i class="fa-solid fa-lock"></i> {{ patientsdetail.code_patient }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Contact</span>
+                <span class="profile-ud-value">{{ patientsdetail.contact }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Email</span>
+                <span class="profile-ud-value">{{ patientsdetail.adresse_mail }}</span>
+            </div>
+        </div>
+    </div>
+    <!-- .profile-ud-list -->
+</div>
+<!-- .nk-block -->
+<div class="nk-block">
+    <div class="nk-block-head nk-block-head-line">
+        <h6 class="title overline-title text-base">Informations Supplémentaires</h6>
+    </div>
+    <!-- .nk-block-head -->
+    <div class="profile-ud-list">
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Groupe Sanguin</span>
+                <span class="profile-ud-value"><i class="fa-solid fa-droplet text-danger"></i> {{ patientsdetail.groupe_sanguin }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Nationalité</span>
+                <span class="profile-ud-value">{{ patientsdetail.nationalite }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Profession</span>
+                <span class="profile-ud-value">{{ patientsdetail.profession }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Employeur</span>
+                <span class="profile-ud-value">{{ patientsdetail.employeur }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Nombre d'enfants</span>
+                <span class="profile-ud-value">{{ patientsdetail.nbr_enfants }} <i class="fa-solid fa-children text-black-50"></i></span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Situation Matrimoniale</span>
+                <span class="profile-ud-value">{{ patientsdetail.situation_matrimoniale }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Niveau d'Étude</span>
+                <span class="profile-ud-value">{{ patientsdetail.niveau_etude }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Ethnie</span>
+                <span class="profile-ud-value">{{ patientsdetail.ethnie }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Localité</span>
+                <span class="profile-ud-value">{{ patientsdetail.localite.nom }}</span>
+            </div>
+        </div>
+        <div class="profile-ud-item">
+            <div class="profile-ud wider">
+                <span class="profile-ud-label">Statut</span>
+                <span class="profile-ud-value">{{ patientsdetail.status }}</span>
+            </div>
+        </div>
+    </div>
+    <!-- .profile-ud-list -->
+</div>
+<!-- .nk-block -->
 
-                                                    </div>
-                                                </div>
-
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Lieu de naissance</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.lieu_naissance }}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">âge</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.calculate_age }} ans</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Code patient</span>
-                                                        <span class="profile-ud-value"> <i
-                                                                class="fa-solid fa-lock"></i> {{ patientsdetail.code_patient }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Contact</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.contact }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Email</span>
-                                                        <span class="profile-ud-value">info@afriqconsulting.com</span>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .profile-ud-list -->
-                                        </div><!-- .nk-block -->
-                                        <div class="nk-block">
-                                            <div class="nk-block-head nk-block-head-line">
-                                                <h6 class="title overline-title text-base">Information
-                                                    Supplémentaire</h6>
-                                            </div><!-- .nk-block-head -->
-                                            <div class="profile-ud-list">
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Group Sanguin </span>
-                                                        <span class="profile-ud-value"><i
-                                                                class="fa-solid fa-droplet text-danger"></i> {{ patientsdetail.groupe_sanguin }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Nationalite </span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.nationalite }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Profession</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.profession }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Employeur</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.employeur }}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Nombre d'enfants</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.nbr_enfants }} <i
-                                                                class="fa-solid fa-children text-black-50"></i></span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="profile-ud-item">
-                                                    <div class="profile-ud wider">
-                                                        <span class="profile-ud-label">Situation matrimoniale</span>
-                                                        <span class="profile-ud-value">{{ patientsdetail.situation_matrimoniale }}</span>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .profile-ud-list -->
-                                        </div>
                                         <!-- .nk-block -->
                                         <div class="nk-divider divider md"></div>
                                         <div class="nk-block">
                                             <div class="nk-block-head nk-block-head-sm nk-block-between">
-                                                <h5 class="title">Adresse</h5>
+                                                <h5 class="title">Cas Contacts</h5>
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalDefault">Ajouter contact</button>
+
+                                                <div class="modal fade" tabindex="-1" id="modalDefault">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                    <h5>Ajouter un Cas Contact pour {{ patient.nom }} {{ patient.prenoms }}</h5>
+            </div>
+            <div class="modal-body">
+            <form id="casContactForm" method="post" action="{% url 'add_cas_contact' patient_id=patientsdetail.id %}">
+                {% csrf_token %}
+                {{ cascontactsForm.as_p }}
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <span class="sub-text">Modal Footer Text</span>
+            </div>
+        </div>
+    </div>
+</div>
                                             </div><!-- .nk-block-head -->
                                             <div class="bq-note">
                                                 <div class="bq-note-item">
-                                                    <div class=" profile-ud-list">
+                                                    <table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Nom</th>
+      <th>Prénom</th>
+      <th>Téléphone</th>
+      <th>Relation</th>
+      <th>Fréquence de Contact</th>
+      <th>Dernier contact</th>
+      <th>SMS Sensibilisation</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contact in case_contacts %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>{{ contact.contact_person.split|first }}</td>
+      <td>{{ contact.contact_person.split|last }}</td>
+      <td>{{ contact.phone_number }}</td>
+      <td>{{ contact.get_relationship_display }}</td>
+      <td>{{ contact.get_contact_frequency_display }}</td>
+      <td>{{ contact.date_contact|date:"d/m/Y" }}</td>
+      <td>{% if contact.smsdepistage %}
+          <span class="badge badge-success xs">Envoyer</span>
+          {% else %}
+         <span class="badge badge-danger xs">non envoyer</span>
+          {% endif %}
+      </td>
+      <td><button class="btn btn-outline-secondary btn-xs">
+          Notifier
+      </button></td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="7" class="text-center">Aucun cas contact enregistré.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+                                                            </div>
 
-                                                        <div class="profile-ud-item">
-                                                            <div class="profile-ud wider">
-                                                                <span class="profile-ud-label">Pays</span>
-                                                                <span class="profile-ud-value">{{ patientsdetail.localite.contry }}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="profile-ud-item">
-                                                            <div class="profile-ud wider">
-                                                                <span class="profile-ud-label">Ville</span>
-                                                                <span class="profile-ud-value">{{ patientsdetail.localite.ville }}</span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="profile-ud-item">
-                                                            <div class="profile-ud wider">
-                                                                <span class="profile-ud-label">Commune</span>
-                                                                <span class="profile-ud-value">{{ patientsdetail.localite.commune }}</span>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="profile-ud-item">
-                                                            <div class="profile-ud wider">
-                                                                <span class="profile-ud-label">Quartier</span>
-                                                                <span class="profile-ud-value">{{ patientsdetail.localite.quartier }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div><!-- .bq-note-item -->
-                                                <div class="bq-note-item">
-                                                    <div class="bq-note-text">
-                                                        <p>Aproin at metus et dolor tincidunt feugiat eu id quam.
-                                                            Pellentesque habitant morbi tristique senectus et netus et
-                                                            malesuada fames ac turpis egestas. Aenean sollicitudin non
-                                                            nunc vel pharetra. </p>
-                                                    </div>
-                                                    <div class="bq-note-meta">
-                                                        <span class="bq-note-added">Added on <span class="date">November 18, 2019</span> at <span
-                                                                class="time">5:34 PM</span></span>
-                                                        <span class="bq-note-sep sep">|</span>
-                                                        <span class="bq-note-by">By <span>Softnio</span></span>
-                                                        <a href="#" class="link link-sm link-danger">Delete Note</a>
-                                                    </div>
-                                                </div><!-- .bq-note-item -->
                                             </div><!-- .bq-note -->
                                         </div><!-- .nk-block -->
                                     </div>
@@ -576,6 +624,30 @@
                             <!-- .card-aside-wrap -->
                         </div><!-- .card -->
                             </div><!-- .nk-block -->
-                        </div>
+                       
+    <script>
+        document.getElementById('casContactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
 
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();  // Recharge la page ou redirige si nécessaire
+                    } else if (data.errors) {
+                        let errorMessages = Object.values(data.errors).map(err => err.join(' ')).join('\n');
+                        alert("Erreur :\n" + errorMessages);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        });
+    </script>
 {% endblock %}
