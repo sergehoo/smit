@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import phonenumbers
+from allauth.account.forms import LoginForm
 from django import forms
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ValidationError
@@ -149,6 +150,13 @@ MotifRendezVous = [
     ('Consultation pour réadaptation', 'Consultation pour réadaptation'),
     ('Autre', 'Autre'),
 ]
+
+
+class CustomLoginForm(LoginForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajouter une classe CSS personnalisée pour le champ de mot de passe
+        self.fields['password'].widget.attrs.update({'class': 'form-control password-field'})
 
 
 class ConsultationForm(forms.ModelForm):
@@ -1055,7 +1063,8 @@ class DiagnosticForm(forms.ModelForm):
         fields = ['type_diagnostic', 'maladie', 'remarques']
         widgets = {
             'type_diagnostic': forms.Select(attrs={'class': 'form-control', 'type': 'select'}),
-            'maladie': forms.Select(attrs={'class': 'form-control form-select select2','data-tags': 'true', 'data-search': 'on'}),
+            'maladie': forms.Select(
+                attrs={'class': 'form-control form-select select2', 'data-tags': 'false', 'data-search': 'on'}),
             'remarques': TinyMCE(attrs={'class': 'tinymce-basic', 'cols': 65, 'rows': 10}),
         }
 
@@ -1382,46 +1391,113 @@ class RdvSuiviForm(forms.ModelForm):
 
 
 class UrgencePatientForm(forms.ModelForm):
+    nom = forms.CharField(required=True, widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
+    prenoms = forms.CharField(required=True,
+                              widget=forms.TextInput(
+                                  attrs={'class': 'form-control form-control-lg form-control-outlined',
+                                         'placeholder': 'prenom', }))
+
+    contact = forms.CharField(required=True,
+                              widget=forms.TextInput(
+                                  attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
+                                         'placeholder': '0701020304', 'id': 'phone'}))
+
+    lieu_naissance = forms.ChoiceField(required=False, choices=villes_choices, widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
+               'id': 'outlined'}))
+    date_naissance = forms.DateField(required=True,
+                                     widget=forms.DateInput(
+                                         attrs={'class': 'form-control form-control-lg form-control-outlined',
+                                                'id': 'outlined',
+                                                'type': 'date'}))
+    genre = forms.ChoiceField(required=True, choices=Sexe_choices,
+                              widget=forms.Select(
+                                  attrs={'class': 'form-control form-control-lg form-control-outlined', }))
+    nationalite = forms.ChoiceField(required=False, choices=nationalite_choices,
+                                    widget=forms.Select(
+                                        attrs={
+                                            'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                            'data-search': 'on', 'id': 'nationalite'}))
+    ethnie = forms.ChoiceField(required=False, choices=ethnic_groups, widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+               'data-search': 'on', 'id': 'ethnie'}))
+    profession = forms.ChoiceField(required=False, choices=professions_choices, widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
+               'id': 'profession'}))
+
+    groupe_sanguin = forms.ChoiceField(required=False, choices=Goupe_sanguin_choices, widget=forms.Select(
+        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
+               'id': 'groupe_sanguin'}))
+    niveau_etude = forms.ChoiceField(required=False, choices=school_level,
+                                     widget=forms.Select(
+                                         attrs={'class': 'form-control  form-control-lg form-control-outlined',
+                                                'id': 'outlined', }))
+
+    commune = forms.ModelChoiceField(
+        queryset=Location.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                   'data-search': 'on', 'id': 'commune'})
+    )
+
     class Meta:
         model = Patient
-        fields = ['nom', 'prenoms', 'contact', 'situation_matrimoniale', 'lieu_naissance',
-                  'date_naissance', 'genre', 'nationalite', 'ethnie', 'profession',
-                  'nbr_enfants', 'groupe_sanguin', 'niveau_etude', 'employeur',
-                  'localite', ]
-        widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom'}),
-            'prenoms': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénoms'}),
-            'contact': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrez un numéro de téléphone'}),
-            'situation_matrimoniale': forms.Select(attrs={'class': 'form-control'}),
-            'lieu_naissance': forms.TextInput(attrs={'class': 'form-control'}),
-            'date_naissance': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'genre': forms.Select(attrs={'class': 'form-control'}),
-            'nationalite': forms.TextInput(attrs={'class': 'form-control'}),
-            'ethnie': forms.TextInput(attrs={'class': 'form-control'}),
-            'profession': forms.TextInput(attrs={'class': 'form-control'}),
-            'nbr_enfants': forms.NumberInput(attrs={'class': 'form-control'}),
-            'groupe_sanguin': forms.Select(attrs={'class': 'form-control'}),
-            'niveau_etude': forms.TextInput(attrs={'class': 'form-control'}),
-            'employeur': forms.TextInput(attrs={'class': 'form-control'}),
-            'localite': forms.Select(attrs={'class': 'form-control'}),
-            # 'avatar': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            # 'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-        }
+        fields = [
+            'nom', 'prenoms', 'contact',
+            'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
+            'profession', 'groupe_sanguin', 'niveau_etude', 'commune',
+        ]
+        widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        # Forcer le champ urgence à True
-        instance.urgence = True
-        if commit:
-            instance.save()
-        return instance
+    def clean_contact(self):
+        contact = self.cleaned_data.get('contact')
+        try:
+            parsed_number = phonenumbers.parse(contact, 'CI')
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise ValidationError("Invalid phone number format.")
+        except phonenumbers.phonenumberutil.NumberParseException:
+            raise ValidationError("Invalid phone number.")
+        return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
+
+    def clean_commune(self):
+        commune = self.cleaned_data.get('commune')
+        nouvelle_commune = self.cleaned_data.get('nouvelle_commune')
+
+        if not commune and not nouvelle_commune:
+            raise ValidationError("Veuillez sélectionner une commune ou en ajouter une nouvelle.")
+
+        if nouvelle_commune:
+            # Si une nouvelle commune est renseignée, elle est prioritaire
+            # Vous pouvez ajouter une logique pour enregistrer cette nouvelle commune dans votre base de données ici
+            # Exemple :
+            # Commune.objects.get_or_create(name=nouvelle_commune)
+            return nouvelle_commune
+
+        return commune
+
+    def clean_date_naissance(self):
+        date_naissance = self.cleaned_data.get('date_naissance')
+        today = datetime.today().date()
+
+        # Calculate the maximum and minimum valid birth dates
+        min_date_naissance = today - timedelta(days=365.25)  # Approximately 1 year ago
+        max_date_naissance = today - timedelta(days=365.25 * 120)  # Approximately 120 years ago
+
+        # Check if the date is outside the allowed range
+        if date_naissance > min_date_naissance:
+            raise ValidationError("La date de naissance doit être supérieure à 1 an.")
+        elif date_naissance < max_date_naissance:
+            raise ValidationError("La date de naissance doit être inférieure à 120 ans.")
+
+        return date_naissance
 
 
 class HospitalizationUrgenceForm(forms.ModelForm):
     class Meta:
         model = Hospitalization
-        fields = ['patient',  'admission_date',
-                  'bed', 'reason_for_admission',]
+        fields = ['patient', 'admission_date',
+                  'bed', 'reason_for_admission', ]
         widgets = {
             'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             # 'discharge_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),

@@ -21,7 +21,7 @@ from django.shortcuts import redirect
 from django.urls import path, include
 
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
-    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView
+    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view
 from hospitalisation.views import HospitalizationUrgenceCreateView
 from smit import views
 from smit.views import HomePageView, PatientListView, PatientCreateView, RendezVousListView, RendezVousDetailView, \
@@ -152,8 +152,9 @@ urlpatterns = [
                        name='get_patient_all_name'),
                   path('urgence/liste', UrgenceListView.as_view(), name='urgences_list'),
                   path('urgence/create/', UrgenceCreateView.as_view(), name='urgence_create'),
-                  path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(), name='hospitalization_urgence_create'),
-
+                  path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(),
+                       name='hospitalization_urgence_create'),
+                  path('send_employee_sms/<int:employee_id>', send_sms_view, name='send_sms_view'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

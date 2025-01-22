@@ -98,25 +98,7 @@
                         <div class="card-inner position-relative card-tools-toggle">
                             <div class="card-title-group">
                                 <div class="card-tools">
-                                    <div class="form-inline flex-nowrap gx-3">
-                                        <div class="form-wrap w-150px">
-                                            <select class="form-select form-select-sm" data-search="off"
-                                                    data-placeholder="Bulk Action">
-                                                <option value="">Bulk Action</option>
-                                                <option value="email">Send Email</option>
-                                                <option value="group">Change Group</option>
-                                                <option value="suspend">Suspend User</option>
-                                                <option value="delete">Delete User</option>
-                                            </select>
-                                        </div>
-                                        <div class="btn-wrap">
-                                            <span class="d-none d-md-block"><button
-                                                    class="btn btn-dim btn-outline-light disabled">Apply</button></span>
-                                            <span class="d-md-none"><button
-                                                    class="btn btn-dim btn-outline-light btn-icon disabled"><em
-                                                    class="icon ni ni-arrow-right"></em></button></span>
-                                        </div>
-                                    </div><!-- .form-inline -->
+
                                 </div><!-- .card-tools -->
                                 <div class="card-tools mr-n1">
                                     <ul class="btn-toolbar gx-1">
@@ -257,24 +239,30 @@
                                     </ul><!-- .btn-toolbar -->
                                 </div><!-- .card-tools -->
                             </div><!-- .card-title-group -->
-                            <div class="card-search search-wrap" data-search="search">
-                                <div class="card-body">
-                                    <div class="search-content">
-                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em
-                                                class="icon ni ni-arrow-left"></em></a>
-                                        <input type="text" class="form-control border-transparent form-focus-none"
-                                               placeholder="Search by user or email">
-                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div><!-- .card-search -->
+                           <div class="card-search search-wrap" data-search="search">
+    <div class="card-body">
+        <div class="search-content">
+            <form method="get" action="{% url 'employee_list' %}">
+                <a href="#" class="search-back btn btn-icon toggle-search" data-target="search">
+                    <em class="icon ni ni-arrow-left"></em>
+                </a>
+                <input type="text" name="search" class="form-control border-transparent form-focus-none"
+                       placeholder="Search by name, email, or phone"
+                       value="{{ search_query }}">
+                <button type="submit" class="search-submit btn btn-icon">
+                    <em class="icon ni ni-search"></em>
+                </button>
+            </form>
+        </div>
+    </div>
+</div><!-- .card-search -->
                         </div><!-- .card-inner -->
                         <div class="card-inner p-0">
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Employé(s)</th>
+                                    <th>Contact</th>
                                     <th>Fonction</th>
                                     <th>Rôle(s)</th>
                                     <th>Action</th>
@@ -284,6 +272,7 @@
                                 {% for employee in employees %}
                                     <tr>
                                         <td>{{ employee.user.first_name }} {{ employee.user.last_name }}</td>
+                                        <td>{{ employee.phone }} </td>
                                         <td>{{ employee.job_title }} </td>
                                         <td>
                                             {% for group in employee.user.groups.all %}
@@ -293,9 +282,14 @@
                                             {% endfor %}
                                         </td>
                                         <td>
-                                                                <a href="{% url 'employee_update' employee.id %}" class="btn btn-sm btn-warning"><i class="ni ni-update"></i></a>
-                                                                <a href="{% url 'employee_delete' employee.id %}" class="btn btn-sm btn-danger"><i class="ni ni-trash"></i></a>
-                                        </td>
+                                            <a href="{% url 'employee_update' employee.id %}"
+                                               class="btn btn-sm btn-warning"><i class="ni ni-update"></i></a>
+                                            <a href="{% url 'employee_delete' employee.id %}"
+                                               class="btn btn-sm btn-danger ml-2"><i class="ni ni-trash"></i></a>
+                                            <a href="{% url 'send_sms_view' employee_id=employee.id %}"
+                                               class="btn btn-sm btn-outline-secondary ml-2">
+                                                <i class="ni ni-send"></i> SMS
+                                            </a></td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

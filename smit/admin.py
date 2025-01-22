@@ -388,6 +388,6 @@ class DiagnosticAdmin(admin.ModelAdmin):
 
 @admin.register(Maladie)
 class MaladieAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
-    search_fields = ('nom', 'categorie', 'patient__nom')
+    list_display = ('code_cim','nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
+    search_fields = ('code_cim','nom', 'categorie', 'patient__nom')
     list_filter = ('categorie', 'gravite', 'date_diagnostic')

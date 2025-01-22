@@ -937,6 +937,7 @@ class Patient(models.Model):
     nationalite = models.CharField(max_length=200)
     ethnie = models.CharField(null=True, blank=True, max_length=100)
     profession = models.CharField(max_length=100, null=True, blank=True)
+    cmu = models.CharField(max_length=100, null=True, blank=True)
     nbr_enfants = models.PositiveIntegerField(default=0, null=True, blank=True)
     groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
     niveau_etude = models.CharField(max_length=100, null=True, blank=True)
@@ -1245,7 +1246,8 @@ class Maladie(models.Model):
         ('modere', 'Modéré'),
         ('grave', 'Grave'),
     ]
-
+    code_cim = models.CharField(max_length=50, unique=True,blank=True, null=True)  # Code CIM-10
+    urlcim = models.CharField(max_length=100, unique=True,blank=True, null=True)  # Code CIM-10
     nom = models.CharField(max_length=255)  # Nom de la maladie
     categorie = models.CharField(
         max_length=50,
@@ -1280,7 +1282,7 @@ class Maladie(models.Model):
     date_mise_a_jour = models.DateTimeField(auto_now=True)  # Dernière mise à jour
 
     def __str__(self):
-        return f"{self.nom}"
+        return f"CIM-11:{self.code_cim} | {self.nom}"
 
     class Meta:
         verbose_name = "Maladie"

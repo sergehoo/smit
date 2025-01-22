@@ -57,13 +57,19 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'static/logs', 'error.log'),  # Adjusted path
+            'filename': os.path.join(BASE_DIR, 'static/logs', 'django_errors.log'),  # Adjusted path
         },
     },
+
     'loggers': {
         'django': {
             'handlers': ['file'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     },
@@ -110,7 +116,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Authentification classique
     # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
-
     'guardian.backends.ObjectPermissionBackend',  # Backend de permissions Guardian
 
 )
@@ -127,10 +132,13 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     'simple_history.middleware.HistoryRequestMiddleware',
     'smit.middlewares.SessionTimeoutMiddleware',
+    'smit.middlewares.LogForbiddenMiddleware',
 
 ]
 
 ROOT_URLCONF = 'smitci.urls'
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 TEMPLATES = [
     {
@@ -144,7 +152,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # `allauth` needs this from django
                 'django.template.context_processors.request',
                 'smit.context_processors.services_processor',
                 'smit.context_processors.menu_processor',
@@ -175,7 +182,7 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #         'PORT': '5433',
 #     }
 # }
-# prod
+#prod
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
@@ -205,15 +212,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 ACCOUNT_ADAPTER = 'core.account_adapter.NoNewUsersAccountAdapter'
 LOGOUT_REDIRECT_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
-
-# AUTHENTICATION_BACKENDS = [
-#     # Needed to login by username in Django admin, regardless of `allauth`
-#     'django.contrib.auth.backends.ModelBackend',
-#
-#     # `allauth` specific authentication methods, such as login by email
-#     'allauth.account.auth_backends.AuthenticationBackend',
-#
-# ]
+# ACCOUNT_FORMS = {
+#     'login': 'smit.forms.CustomLoginForm',
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -300,3 +301,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+HANDLER403 = 'core.views.custom_403_view'

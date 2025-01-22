@@ -30,3 +30,16 @@ class SessionTimeoutMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class LogForbiddenMiddleware:
+    """Middleware pour journaliser les erreurs 403"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if response.status_code == 403:
+            print(f"403 Forbidden: {request.path} - Utilisateur : {request.user}")
+        return response
