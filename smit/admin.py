@@ -253,8 +253,8 @@ class EmployeeResource(resources.ModelResource):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     resource_class = EmployeeResource
-    list_display = ['qlook_id', 'user', 'gender', ]
-    search_fields = ['qlook_id', 'user__username']
+    list_display = ['qlook_id', 'user', 'phone', 'gender']
+    search_fields = ['qlook_id', 'phone', 'user__username']
 
 
 admin.site.register(Employee, EmployeeAdmin)
@@ -388,6 +388,6 @@ class DiagnosticAdmin(admin.ModelAdmin):
 
 @admin.register(Maladie)
 class MaladieAdmin(admin.ModelAdmin):
-    list_display = ('code_cim','nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
-    search_fields = ('code_cim','nom', 'categorie', 'patient__nom')
+    list_display = ('code_cim', 'nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
+    search_fields = ('code_cim', 'nom', 'categorie', 'patient__nom')
     list_filter = ('categorie', 'gravite', 'date_diagnostic')
