@@ -10,7 +10,7 @@ def fetch_medicaments(request):
     categorie_id = request.GET.get('categorie', '')
     molecule_id = request.GET.get('molecule', '')
     page_number = request.GET.get('page', 1)  # Numéro de la page
-    items_per_page = 10  # Nombre d'éléments par page
+    items_per_page = 12  # Nombre d'éléments par page
 
     # Filtrage des médicaments
     medicaments = Medicament.objects.all()

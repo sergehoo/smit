@@ -1,8 +1,10 @@
 from django.contrib import admin
 
 from core.models import CasContact
+from pharmacy.models import Medocsprescrits
 from smit.models import UniteHospitalisation, ChambreHospitalisation, BoxHospitalisation, LitHospitalisation, \
-    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution, Observation, HistoriqueMaladie
+    TypeAntecedent, SigneFonctionnel, HospitalizationIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, \
+    ParaclinicalExam
 
 
 # Register your models here.
@@ -71,7 +73,12 @@ class SigneFonctionnelAdmin(admin.ModelAdmin):
 
 @admin.register(PrescriptionExecution)
 class PrescriptionExecutionAdmin(admin.ModelAdmin):
-    list_display = ['prescription', 'scheduled_time']
+    list_display = ['prescription',
+                    'scheduled_time',
+                    'executed_at',
+                    'executed_by',
+                    'status'
+                    ]
 
 
 @admin.register(Observation)
@@ -90,4 +97,32 @@ class HistoriqueMaladieAdmin(admin.ModelAdmin):
 @admin.register(CasContact)
 class CaseContactAdmin(admin.ModelAdmin):
     list_display = ('patient', 'contact_person', 'relationship')
-    search_fields = ('patient__nom', 'contact_patient__nom', )
+    search_fields = ('patient__nom', 'contact_patient__nom',)
+
+
+@admin.register(Medocsprescrits)
+class MedocsprescritsAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'dosage', 'unitdosage', 'dosage_form')
+    search_fields = ('nom', 'dosage_form',)
+
+
+@admin.register(ParaclinicalExam)
+class ParaclinicalExamAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'exam_type', 'exam_name', 'prescribed_at', 'performed_at',"iteration", 'status')
+    list_filter = ('exam_type','exam_name', 'status', 'prescribed_at')
+    search_fields = ('patient__nom', 'exam_name','exam_type',)
+    ordering = ('-prescribed_at',)
+    date_hierarchy = 'prescribed_at'
+    fieldsets = (
+        ("Informations Générales", {
+            "fields": ("patient", "hospitalisation", "exam_type", 'exam_name', "status","iteration")
+        }),
+        ("Détails de l'Examen", {
+            "fields": ("prescribed_at", "performed_at","result_value", "result_text", 'created_by',"result_file")
+        }),
+    )
+
+    def get_queryset(self, request):
+        """Personnaliser la récupération des données."""
+        qs = super().get_queryset(request)
+        return qs.select_related("patient", "hospitalisation")

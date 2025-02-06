@@ -1,0 +1,237 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+                <div class="nk-content nk-content-fluid">
+
+
+
+
+
+
+                        <div class="nk-content-body">
+                            <div class="nk-block-head nk-block-head-sm">
+                                <div class="nk-block-between">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title page-title">Suivie de Soins</h3>
+                                        <div class="nk-block-des text-soft">
+                                            <p>  {% if result_count %}
+                                                <strong>{{ result_count }}</strong> patient(s) hospitalisé(s).
+                                            {% else %}
+                                                Aucun résultat trouvé.
+                                            {% endif %}</p>
+                                        </div>
+
+
+                                    </div><!-- .nk-block-head-content -->
+                                    <div class="nk-block-head-content">
+
+                                     <div class="toggle-wrap nk-block-tools-toggle">
+    <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em
+            class="icon ni ni-menu-alt-r"></em></a>
+    <div class="toggle-expand-content" data-content="pageMenu">
+        <ul class="nk-block-tools g-3">
+            <li>
+                <form method="get" action="{% url 'export_hospitalizations' %}">
+    <!-- Inclure les paramètres GET pour appliquer les filtres -->
+    <input type="hidden" name="maladie" value="{{ request.GET.maladie }}">
+    <input type="hidden" name="status" value="{{ request.GET.status }}">
+    <input type="hidden" name="nom_patient" value="{{ request.GET.nom_patient }}">
+    <button type="submit" class="btn btn-success"><i class=""></i><em class="icon ni ni-download-cloud"></em> Exporter</button>
+</form>
+            </li>
+            <li class="nk-block-tools-opt">
+                <div class="drodown">
+                    <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em
+                            class="icon ni ni-plus"></em></a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <ul class="link-list-opt no-bdr">
+                            <li><a href="{% url 'hospitalization_urgence_create' %}"><span>Urgence Hospitalisation</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+                                    </div><!-- .nk-block-head-content -->
+                                </div><!-- .nk-block-between -->
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+                                <div class="card card-bordered card-stretch">
+                                    <div class="card-inner-group">
+                                        <div class="card-inner position-relative card-tools-toggle pb-5">
+
+                                                       <form method="get" class="mb-4">
+    <div class="row g-3 mb-5">
+         <div class="col-md-3">
+            {{ search_form.nom_patient.label_tag }}
+            {{ search_form.nom_patient }}
+        </div>
+        <div class="col-md-3">
+            {{ search_form.unite.label_tag }}
+            {{ search_form.unite }}
+        </div>
+        <div class="col-md-3">
+            {{ search_form.maladie.label_tag }}
+            {{ search_form.maladie }}
+        </div>
+        <div class="col-md-3">
+            {{ search_form.status.label_tag }}
+            {{ search_form.status }}
+        </div>
+
+    </div>
+     <a href="{% url 'hospitalisation' %}" class="btn btn-secondary mt-3 float-right ml-5 ">Réinitialiser</a>
+    <button type="submit" class="btn btn-primary mt-3 float-right ">Rechercher</button>
+
+
+</form>
+
+                                            <div class="card-search search-wrap " data-search="search">
+                                                <div class="card-body">
+                                                    <div class="search-content">
+                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
+                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
+                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+
+                                                    </div>
+
+
+                                                </div>
+
+                                            </div><!-- .card-search -->
+                                        </div><!-- .card-inner -->
+
+
+
+                                        <div class="card-inner p-0">
+
+
+                                        <div id="accordion" class="accordion">
+    {% for unite, hospitalisations in grouped_suiviesoins.items %}
+        <div class="accordion-item">
+            <a href="#" class="accordion-head collapsed" data-toggle="collapse"
+               data-target="#unite-{{ forloop.counter }}">
+                <h6 class="title">
+                    {{ unite.nom }}  <span class="badge badge-info">{{ hospitalisations|length }}</span> Patients
+                </h6>
+                <span class="accordion-icon"></span>
+            </a>
+            <div class="accordion-body collapse" id="unite-{{ forloop.counter }}" data-parent="#accordion">
+                <div class="accordion-inner">
+                    <div class="nk-tb-list nk-tb-ulist is-compact">
+                        <div class="nk-tb-item nk-tb-head bg-light">
+                            <div class="nk-tb-col tb-col-sm text-nowrap"><span class="sub-text">Code Patient</span></div>
+                            <div class="nk-tb-col tb-col-sm"><span class="sub-text">Nom Patient</span></div>
+                            <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date Admission</span></div>
+                            <div class="nk-tb-col tb-col-md"><span class="sub-text">Chambre</span></div>
+                            <div class="nk-tb-col tb-col-lg"><span class="sub-text">Lit</span></div>
+                            <div class="nk-tb-col nk-tb-col-tools text-right">
+                                <span class="sub-text">Actions</span>
+                            </div>
+                        </div>
+                        {% for hospitalization in hospitalisations %}
+                                        <div class="nk-tb-item">
+                                            <div class="nk-tb-col tb-col-sm">
+                                                <span>{{ hospitalization.patient.code_patient }}</span>
+                                            </div>
+                                            <div class="nk-tb-col tb-col-sm">
+                                                <span>{{ hospitalization.patient }}</span>
+                                            </div>
+                                            <div class="nk-tb-col tb-col-sm">
+                                                <span>{{ hospitalization.admission_date|date:"d/m/Y H:i" }}</span>
+                                            </div>
+                                            <div class="nk-tb-col tb-col-md">
+                                                <span>{{ hospitalization.bed.box.chambre.nom }}</span>
+                                            </div>
+                                            <div class="nk-tb-col tb-col-lg">
+                                                <span>{{ hospitalization.bed.nom }}</span>
+                                            </div>
+                                            <div class="nk-tb-col nk-tb-col-tools text-right">
+                                                <a href="{% url 'suivie_soins_detail' hospitalization.pk %}" class="btn btn-sm btn-primary">Détails</a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+                                         <!-- .nk-tb-list -->
+                                        </div>
+
+                                       <div class="card-inner">
+                                            <ul class="pagination justify-content-center justify-content-md-start">
+                                                {% if page_obj.has_previous %}
+                                                    <li class="page-item"><a class="page-link"  href="hospitalisation/generale?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                                {% endif %}
+
+                                                {% for num in page_obj.paginator.page_range %}
+                                                    {% if page_obj.number == num %}
+                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                        <li class="page-item"><a class="page-link" href="hospitalisation/generale?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% if page_obj.has_next %}
+                                                    <li class="page-item"><a class="page-link" href="hospitalisation/generale?page={{ page_obj.next_page_number }}">Next</a></li>
+                                                {% else %}
+                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div><!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+                                </div><!-- .card -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+
+ <script>
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId; // ID du patient
+            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('i');
+
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+</script>
+{% endblock %}

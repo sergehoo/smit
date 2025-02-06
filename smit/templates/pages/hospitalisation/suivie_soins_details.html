@@ -10,12 +10,6 @@
     padding: 5px 5px; /* Uniformise le padding des boutons */
     font-size: 16px; /* Assure une taille de texte uniforme */
 }
-    .patient-name h3 {
-    word-wrap: break-word;
-    white-space: normal;
-    overflow-wrap: break-word;
-    max-width: 100%; /* Empêche le débordement */
-}
     </style>
     <div class="nk-content nk-content-fluid">
 
@@ -24,15 +18,17 @@
             <div class="nk-content-body">
 
                 <div class="nk-block-head nk-block-head-sm ">
-                    <div class="row rounded card-bordered mt-5" style="height: 220px;background-repeat: no-repeat; background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}')">
+                    <div class="row rounded card-bordered" style="height: 220px;background-repeat: no-repeat; background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}')">
                         <div class="nk-block-between mr-5 ">
                             <div class="nk-block-head-content ">
                                 <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation Patient</h1>
 
                                 <div class="nk-block-des ">
-                                     <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="patient-name"><h3 class="ml-5"> {{ hospitalisationdetail.patient|upper }}</h3></a>
+                                     <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
+                           class=""><h2 class="ml-5"> {{ hospitalisationdetail.patient|upper }}</h2></a>
                                     <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
-                                    <br><a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="text-primary mt-3"><em class="icon ni ni-folder-list"></em> Dossier Medical</a></h6>
+                                    <br><a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
+                           class="text-primary mt-3"><em class="icon ni ni-folder-list"></em> Dossier Medical</a></h6>
 {#                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ hospitalisationdetail.patient.code_vih }}</span></h6>#}
                                     {% if hospitalisationdetail.discharge_date %}
     <span class="h4 float-right" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
@@ -52,15 +48,13 @@
 
                             </div><!-- .nk-block-head-content -->
                         </div>
-                        <div class="p-1 col-lg-3 card-bordered d-flex justify-content-center align-items-center">
+<div class="col-lg-2 p-2 card-bordered d-flex justify-content-center align-items-center">
     <img class="mt-2" src="{{ hospitalisationdetail.patient.qr_code.url }}" height="160" alt="Hospitalization Image">
 </div>
-                        <div class="col-lg-4 col-md-3">
-                            <div class="d-flex align-items-center"><!-- Texte à gauche -->
-                                <div class="text-start">
-                                    <blockquote class="blockquote">
-                                       
-
+                    <div class="col-lg-4">
+                                   <div class="d-flex align-items-center"><!-- Texte à gauche -->
+    <div class="text-start">
+        <blockquote class="blockquote">
             <br class="mb-0">
                 Admis le :</br>
                 <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
@@ -78,34 +72,31 @@
                 </footer>
             {% endif %}
         </blockquote>
-                                </div>
-                                <div class=" mt-3">
+
+    </div>
+    <!-- Image à droite -->
+    <div class="me-3 mt-3">
         {% if not hospitalisationdetail.discharge_date %}
             <img src="{% static 'images/hospitalization-2.gif' %}" height="200" alt="Hospitalization Image">
         {% endif %}
 
     </div>
 
-                            </div>
-                        </div>
-                    <ul class="nav m-0 p-0 text-end">
-                        <li class="d-flex justify-content-between align-items-center"></li>
-                    </ul>
+
+</div>
+                                </div>
 
                     </div><!-- .nk-block-between -->
-                   
                     <div class="row pl-4 pb-4">
-                        <div class="mt-2 col-md-12 text-end">
-                            <ul class="nav m-0 p-0 text-end">
+                        <div class="mt-2 ">
 
                             {% if observations %}
-                                <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary" data-toggle="modal"
                                         data-target="#observationsModal">
                                     <em class="icon ni ni-eye"></em> Observations<span
                                         class="badge badge-info ml-1">{{ observationscount }}</span>
                                 </button>
-                                </li>
+
 
                             {% endif %}
                             <div class="modal fade" id="observationsModal" tabindex="-1"
@@ -170,14 +161,11 @@
                             </div>
 
                             {% if historiques_maladie %}
-
-                                        <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
                                         data-target="#historiqueModal">
                                     <em class="icon ni ni-book"></em>Histoire Maladie<span
                                         class="badge badge-info ml-1">{{ effets_indesirablescount }}</span>
                                 </button>
-                                        </li>
 
                             {% endif %}
                             <!-- Modal Historique -->
@@ -259,14 +247,11 @@
 
                             <!-- Button to Trigger Modal -->
                             {% if diagnostics %}
-
-                                        <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
                                         data-target="#diagnosticModal">
                                     <em class="icon ni ni-list"></em> Diagnostics<span
                                         class="badge badge-info ml-1">{{ diagnosticscount }}</span>
-                                </button>
-                                        </li>{% endif %}
+                                </button>{% endif %}
 
                             <!-- Modal Diagnostics -->
                             <div class="modal fade" id="diagnosticModal" tabindex="-1"
@@ -336,12 +321,11 @@
                                 </div>
                             </div>
                             {% if avis_medicaux %}
-                                 <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
                                         data-target="#voiravisMedicalModal">
                                     <em class="icon ni ni-edit-alt"></em> Avis medical<span
                                         class="badge badge-info ml-1">{{ avis_medicauxcount }}</span>
-                                </button></li>
+                                </button>
                             {% endif %}
                             <div class="modal fade" id="voiravisMedicalModal" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
@@ -394,12 +378,11 @@
                                 });
                             </script>
                             {% if effets_indesirables %}
-                                 <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
                                         data-target="#effetIndesirableModal">
                                     <em class="icon ni ni-edit-alt"></em> Effets indesirables <span
                                         class="badge badge-info">{{ effets_indesirablescount }}</span>
-                                </button></li>
+                                </button>
                             {% endif %}
 
                             <div class="modal fade" id="effetIndesirableModal" tabindex="-1" aria-hidden="true">
@@ -457,12 +440,11 @@
                                 });
                             </script>
                             {% if hopi_comment %}
-                                 <li class="d-flex justify-content-between align-items-center">
-                                <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
                                         data-target="#commentairesModal">
                                     <em class="icon ni ni-edit-alt"></em>Comment. <span
                                         class="badge badge-info">{{ hopi_commentcount }}</span>
-                                </button></li>
+                                </button>
                             {% endif %}
 
                             <div class="modal fade" id="commentairesModal" tabindex="-1" aria-hidden="true">
@@ -569,8 +551,8 @@
                                     </div>
                                 </div>
                             </div>
-</ul>
                         </div>
+
 
 
 
@@ -585,29 +567,35 @@
                                 {% else %}
 
                                 <div class="col-lg-3 text-end">
-                                <ul class="m-0 p-0 list-unstyled text-end">
-                                    <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-gray uniform-btn mt-2" data-toggle="modal" data-target="#addobservationModal">
+                                    <ul class="m-0 p-0 list-unstyled text-end">
+                                        <li class="d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-gray uniform-btn mt-2"
+                                                    data-toggle="modal" data-target="#addobservationModal">
                                                 <em class="icon ni ni-plus-circle-fill"></em>Observations
                                             </button>
-                                            <div class="modal fade" id="addobservationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter une Observations</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_observations' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ observationform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            <div class="modal fade" id="addobservationModal" tabindex="-1"
+                                                 aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Ajouter une Observations</h5>
+                                                            <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post"
+                                                                  action="{% url 'add_observations_suivi' hospitalisation_id=hospitalisationdetail.id %}">
+                                                                {% csrf_token %}
+                                                                {{ observationform.as_p }}
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    Enregistrer
+                                                                </button>
 
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             <script>
                                                 document.addEventListener('DOMContentLoaded', function () {
@@ -627,415 +615,78 @@
 
                                             <!-- Bouton pour le modal de prescription -->
                                         </li>
-                                    <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-info uniform-btn  mt-2"
-                                                    data-toggle="modal" data-target="#addhistoireModal">
-                                                <em class="icon ni ni-plus-circle-fill"></em> Histoire
+                                        <li class="d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-dark  uniform-btn mt-2"
+                                                    data-toggle="modal" data-target="#addcommentModal"><em
+                                                    class="icon ni ni-plus-circle-fill"></em> Commentaire
                                             </button>
-                                             <div class="modal fade" id="addhistoireModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Diagnostic</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_historique_maladie' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ historiquemaladieform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                                            <div class="modal fade" id="addcommentModal" tabindex="-1"
+                                                 aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Ajouter un commentaire</h5>
+                                                            <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post"
+                                                                  action="{% url 'add_coment_suivi' hospitalisation_id=hospitalisationdetail.id %}">
+                                                                {% csrf_token %}
+                                                                {{ hospicomment.as_p }}
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    Enregistrer
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                         </li>
-                                    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-dark  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addcommentModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Commentaire
-        </button>
-                    <div class="modal fade" id="addcommentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un commentaire</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ hospicomment.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-    </li>
                                     </ul>
                                 </div>
-                                <div class="col-lg-3 text-end">
-                                    <ul class="m-0 p-0 list-unstyled text-end">
-                                        <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-primary  uniform-btn mt-2" data-toggle="modal" data-target="#antecedentsModal">
-                                                <em class="icon ni ni-plus-circle-fill"></em> Antécédents </button>
-                                            <div class="modal fade" id="antecedentsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Antécédents Médicaux</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ antecedentshospi.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
 
-            </div>
-        </div>
-    </div>
-</div>
-                                        </li>
-                                        <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-warning  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addavisModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Signes Fonctionnels
-        </button>
-
-        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Avi medical</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ avismedicalform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addavisModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-avis',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-                                        <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-light  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addeffetindesirableModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Résumés
-        </button>
-        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un effet indesirable</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ effetindesirableform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-effet',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-
-</ul>
-
-                                </div>
-                                <div class="col-lg-3 text-end">
-
-                                   <ul class="m-0 p-0 list-unstyled text-end">
-                                       <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-secondary  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addeffetindesirableModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens Physiques
-        </button>
-        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un effet indesirable</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ effetindesirableform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-effet',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-primary  uniform-btn mt-2" data-toggle="modal" data-target="#adddiagnosticModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens des appareils
-        </button>
-
-        <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
-    
-            <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Diagnostic</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-           
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ diagnosticsform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    </li>
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-info  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addavisModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens Paraclinique
-        </button>
-
-        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Avi medical</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ avismedicalform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addavisModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-avis',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-
-
-</ul>
-
-                                </div>
-                                <div class="col-lg-3 text-end">
-
-                       <ul class="m-0 p-0 list-unstyled text-end">
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-danger  uniform-btn mt-2" data-toggle="modal" data-target="#adddiagnosticModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Diagnostic
-        </button>
-
-        <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Diagnostic</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ diagnosticsform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    </li>
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-success  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addavisModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Avis médical
-        </button>
-
-        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Avi medical</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ avismedicalform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addavisModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-avis',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-warning uniform-btn mt-2"
-                data-toggle="modal" data-target="#addeffetindesirableModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Effet indésirable
-        </button>
-        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un effet indesirable</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ effetindesirableform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-effet',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
-</ul>
-
-                                </div>
                              {% endif %}
 
                             </div>
                             <div class="row">
                                 <!-- Médicament manqué -->
                                 <div class="col-lg-6 mx-auto">
-    {% if missed_executions %}
-        <div class="card shadow-sm border-0 bg-light rounded-lg">
-            <div class="card-body">
-                <h5 class="text-danger font-weight-bold ">
-                    Médicaments Non Pris
-                </h5>
-                <div class="scrollable-container" style="max-height: 200px; overflow-y: auto;">
-                    <ul class="list-group">
-                        {% for execution in missed_executions %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ execution.prescription.medication }}</strong>
-                                    <br>
-                                    <span class="text-muted">Heure prévue : {{ execution.scheduled_time|date:"d/m/Y H:i" }}</span>
+                                    {% if missed_executions %}
+                                        <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
+                                            <div class="card-body">
+                                                <h5 class="text-danger font-weight-bold mb-3">
+                                                    Médicaments Non Pris
+                                                </h5>
+                                                <ul class="list-group">
+                                                    {% for execution in missed_executions %}
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>{{ execution.prescription.medication }}</strong>
+                                                                <br>
+                                                                <span class="text-muted">Heure prévue : {{ execution.scheduled_time|date:"d/m/Y H:i" }}</span>
+                                                            </div>
+                                                            <span class="badge badge-danger">Non pris</span>
+                                                        <form method="post" action="{% url 'mark_execution_taken' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="execution_id" value="{{ execution.id }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Attribuer</button>
+                                    </form>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="card shadow-sm border-0 bg-success text-white rounded-lg p-4">
+                                            <div class="card-body text-center">
+                                                <h5 class="font-weight-bold">Aucune Prise Manquée</h5>
+                                                <p class="mt-2">Toutes les prescriptions ont été suivies à temps.</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                <span class="badge bg-danger text-white">Non pris</span>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <div class="card shadow-sm border-0 bg-success text-white rounded-lg p-4">
-            <div class="card-body text-center">
-                <h5 class="font-weight-bold">Aucune Prise Manquée</h5>
-                <p class="mt-2">Toutes les prescriptions ont été suivies à temps.</p>
-            </div>
-        </div>
-    {% endif %}
-</div>
                                 <div class="col-lg-6 mx-auto">
                                     {% if next_execution %}
                                         <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
@@ -1205,15 +856,14 @@
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="constanteModalLabel">Nouvelles
-                                                        Constante</h5>
+                                                    <h5 class="modal-title" id="constanteModalLabel">Nouvelles Constante</h5>
                                                     <button type="button" class="btn btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close">X
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
                                                     <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
+                                                        <form method="post" action="{% url 'suivie_soins_detail' hospitalisationdetail.id %}">
                                                             {% csrf_token %}
                                                             <div class="row">
                                                                 {% for field in constante_form %}
@@ -1272,9 +922,9 @@
                                     Non prise
                                 {% endif %}
                             </td>
-                            <td>{{ execution.prescription.pendant }} Jours</td>
+                            <td>{{ execution.prescription.pendant }}</td>
                             <td>
-                                <span class="badge 
+                                <span class="badge
                                     {% if execution.status == 'Pending' %}badge-warning
                                     {% elif execution.status == 'Taken' %}badge-success
                                     {% else %}badge-danger{% endif %}">
@@ -1329,140 +979,7 @@
 </script>
 
                                     <!-- Prescription Card -->
-                                    <!-- Tableau des prescriptions -->
-                                    <div class="col-12 col-md-12 mb-5">
-                                        <div class="card text-black-100 border">
-                                            <div class="card-header">
-                                                Prescriptions
-                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="{% url 'generate_ordonnance_pdf' patient_id=hospitalisationdetail.patient.id hospitalisation_id=hospitalisationdetail.id %}"><em class="icon ni ni-printer-fill"></em></a>
-                                                <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#prescriptionModal">
-                                                    <em class="icon ni ni-plus-circle-fill"></em>
-                                                </button>
-                                            </div>
-                                            <div class="card-inner text-black-70">
-                                                <table class="table table-responsive-md">
-                                                    <thead>
-                                                    <tr>
 
-                                                        <th>Médicaments</th>
-                                                        <th>Quantités</th>
-                                                        <th>Posology</th>
-                                                        <th>Pendant</th>
-                                                        <th>Date creation</th>
-                                                        <th>Medecin</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-
-                                                    {% if prescriptions %}
-                                                        {% for prescription in prescriptions %}
-                                                            <tr class="{% if forloop.counter > 5 %}prescription-data d-none{% endif %}">
-                                                                <td>
-                                                                    {% if prescription.medication.dosage_form == 'comprime' %}
-                                                                        <img src="{% static 'images/comprimes.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'sirop' %}
-                                                                        <img src="{% static 'images/sirop.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'injection' %}
-                                                                        <img src="{% static 'images/seringue.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'gelule' %}
-                                                                        <img src="{% static 'images/gelules.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'creme' %}
-                                                                        <img src="{% static 'images/pommade.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'pommade' %}
-                                                                        <img src="{% static 'images/pommade.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'suppositoire' %}
-                                                                        <img src="{% static 'images/suppositoire.png' %}"
-                                                                             width="20">
-                                                                        {% elif prescription.medication.dosage_form == 'gouttes' %}
-                                                                        <img src="{% static 'images/goutte-deau.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'patch' %}
-                                                                        <img src="{% static 'images/patch.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'inhalateur' %}
-                                                                        <img src="{% static 'images/spray-de-peinture.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'solution' %}
-                                                                        <img src="{% static 'images/solution.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'suspension' %}
-                                                                        <img src="{% static 'images/suspension.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'poudre' %}
-                                                                        <img src="{% static 'images/poudre-de-talc.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'spray' %}
-                                                                        <img src="{% static 'images/spray-de-peinture.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'ovule' %}
-                                                                        <img src="{% static 'images/ovule.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'collyre' %}
-                                                                        <img src="{% static 'images/collyre.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'aerosol' %}
-                                                                        <img src="{% static 'images/aerosol.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'elixir' %}
-                                                                        <img src="{% static 'images/elixir.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'baume' %}
-                                                                        <img src="{% static 'images/baume.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'granule' %}
-                                                                        <img src="{% static 'images/granule.png' %}"
-                                                                             width="20">
-                                                                    {% elif prescription.medication.dosage_form == 'capsule' %}
-                                                                        <img src="{% static 'images/capsule.png' %}"
-                                                                             width="20">
-                                                                    {% endif %}
-                                                                    <span class="badge badge-dark">{{ prescription.medication }}</span><br>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge badge-outline-secondary"> {{ prescription.quantity }} {{ prescription.medication.dosage_form }}(s)</span>
-                                                                </td>
-                                                                <td><span>{{ prescription.posology }}</span></td>
-                                                                <td><span>{{ prescription.pendant }} Jours</span></td>
-                                                                <td><span>{{ prescription.created_at }}</span></td>
-
-                                                                <td>
-                                                                    <span>{{ prescription.created_by }}</span>
-                                                                </td>
-                                                                <td> <form method="post" action="{% url 'delete_prescription' prescription.id %}" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger btn-icon btn-round btn-xs" onclick="return confirm('Voulez-vous vraiment supprimer cette prescription ?')">
-            <em class="icon ni ni-trash-fill"></em>
-        </button>
-    </form>
-                                                                </td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        <tr>
-                                                            <td colspan="4" style="font-style: italic; text-align: center" class="text-white">
-                                                                Aucune donnée enregistrée
-                                                            </td>
-                                                        </tr>
-                                                    {% endif %}
-                                                    </tbody>
-                                                </table>
-                                                <!-- Bouton pour afficher plus ou moins de données -->
-                                                {% if prescriptions|length > 5 %}
-                                                    <div class="text-center mt-3">
-                                                        <button id="toggleButtonPrescriptions" class="btn btn-secondary">Voir plus
-                                                        </button>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
 
 
                                     <!-- JavaScript pour le tableau des prescriptions -->
@@ -1485,622 +1002,17 @@
                                         });
                                     </script>
 
-                                    <!-- Prescriptions Form Modal -->
-{#                                    <div class="modal fade" id="prescriptionModal" tabindex="-1" aria-labelledby="prescriptionModalLabel" aria-hidden="true">#}
-{#                                        <div class="modal-dialog modal-lg">#}
-{#                                            <div class="modal-content">#}
-{#                                                <div class="modal-header">#}
-{#                                                    <h5 class="modal-title" id="prescriptionModalLabel">Nouvelles Prescription</h5>#}
-{#                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>#}
-{#                                                </div>#}
-{#                                                <div class="modal-body">#}
-{#                                                    <div class="row">#}
-{#                                                        <form method="post" id="form-prescription" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">#}
-{#                                                            {% csrf_token %}#}
-{#                                                          #}
-{#                                                            <div class="row">#}
-{#                                                                {% for field in prescription_hospi_form %}#}
-{#                                                                    <div class="col-md-3 mb-3">#}
-{#                                                                        <div class="form-group">#}
-{#                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>#}
-{#                                                                            <div class="form-control-wrap">#}
-{#                                                                                {{ field }}#}
-{#                                                                            </div>#}
-{#                                                                        </div>#}
-{#                                                                    </div>#}
-{#                                                                {% endfor %}#}
-{#                                                            </div>#}
-{#                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>#}
-{#                                                        </form>#}
-{#                                                    </div>#}
-{##}
-{#                                                </div>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-                                <div class="modal fade" id="prescriptionModal" tabindex="-1" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="prescriptionModalLabel">Nouvelle Prescription</h5>
-                <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-            </div>
-            <div class="modal-body">
-                
-                <div x-data="prescriptionForm()" class="row">
-                    <div x-show="errorMessage" class="alert alert-danger">
-    <span x-text="errorMessage"></span>
-</div>
-                    <form method="post" id="form-prescription" x-on:submit.prevent="submitForm">
-                        {% csrf_token %}
-    <input type="hidden" name="patient_id" x-model="patientId">  <!-- ✅ Ajout du patient ID -->
-    <input type="hidden" name="hospitalisation_id" x-model="hospitalisationId">  <!-- ✅ Ajout de l'hospitalisation ID -->
-
-                        <div class="row">
-                            <!-- Champ de recherche dynamique pour le médicament -->
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Médicament</label>
-                                <input type="text" class="form-control" x-model="search" x-on:input="fetchMedications()"
-                                    placeholder="Ex: Nivaquine comprime 500 mg"
-                                    autocomplete="off"
-                                    required />
-                                <!-- Liste des suggestions -->
-                                <ul x-show="results.length > 0" class="list-group mt-2">
-                                    <template x-for="med in results" :key="med.id">
-                                        <li class="list-group-item list-group-item-action" x-text="`${med.nom} ${(med.dosage_form ? med.dosage_form : '')} ${(med.dosage ? med.dosage : '')} ${(med.unitdosage ? med.unitdosage : '')}`.trim()" x-on:click="selectMedication(med)">
-                                        </li>
-                                    </template>
-                                </ul>
-                            </div>
-
-                            <!-- Quantité -->
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Quantité</label>
-                                <input type="number" class="form-control" name="quantity" placeholder="Entrez la quantité" required />
-                            </div>
-
-                            <!-- Posologie -->
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Posologie</label>
-                                <select class="form-control" name="posology" required>
-                                    <option value="">Sélectionnez la posologie</option>
-                                    <option value="Une fois par jour">Une fois par jour</option>
-                                    <option value="Deux fois par jour">Deux fois par jour</option>
-                                    <option value="Trois fois par jour">Trois fois par jour</option>
-                                    <option value="Quatre fois par jour">Quatre fois par jour</option>
-                                    <option value="Toutes les 4 heures">Toutes les 4 heures</option>
-                                    <option value="Toutes les 6 heures">Toutes les 6 heures</option>
-                                    <option value="Toutes les 8 heures">Toutes les 8 heures</option>
-                                    <option value="Si besoin">Si besoin</option>
-                                    <option value="Avant les repas">Avant les repas</option>
-                                    <option value="Après les repas">Après les repas</option>
-                                    <option value="Au coucher">Au coucher</option>
-                                    <option value="Une fois par semaine">Une fois par semaine</option>
-                                    <option value="Deux fois par semaine">Deux fois par semaine</option>
-                                    <option value="Un jour sur deux">Un jour sur deux</option>,
-                                </select>
-                            </div>
-
-                            <!-- Pendant -->
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Pendant</label>
-                                <select class="form-control" name="pendant">
-                                    <option value="">Sélectionnez</option>
-                                    <option value="1">1 jours</option>
-                                    <option value="2">2 jours</option>
-                                    <option value="3">3 jours</option>
-                                    <option value="4">4 jours</option>
-                                    <option value="5">5 jours</option>
-                                    <option value="6">6 jours</option>
-                                    <option value="7">7 jours</option>
-                                    <option value="8">8 jours</option>
-                                    <option value="9">9 jours</option>
-                                    <option value="10">10 jours</option>
-                                    <option value="14">14 jours</option>
-                                    <option value="21">21 jours</option>
-                                    <option value="30">30 jours</option>
-                                </select>
-                            </div>
-
-                            <!-- À partir de -->
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">À partir de</label>
-                                <select class="form-control" name="a_partir_de">
-                                    <option value="">Sélectionnez</option>
-                                    <option value="0">Maintenant</option>
-                                    <option value="1">dans 1 heure</option>
-                                    <option value="2">dans 2 heures</option>
-                                    <option value="3">dans 3 heures</option>
-                                    <option value="4">dans 4 heures</option>
-                                    <option value="5">dans 5 heures</option>
-                                    <option value="6">dans 6 heures</option>
-                                    <option value="7">dans 7 heures</option>
-                                    <option value="8">dans 8 heures</option>
-                                    <option value="12">dans 12 heures</option>
-                                    <option value="24">dans 24 heures</option>
-                                    <option value="48">dans 48 heures</option>
-                                    <option value="72">dans 72 heures</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Champ caché pour indiquer si c'est un nouveau médicament -->
-                        <input type="hidden" name="is_new_medication" x-model="isNewMedication">
-                        <button type="submit" class="btn btn-success float-right">Enregistrer</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
                                 </div>
                             </div>
-                                <!-- Indicateurs Biologiques -->
-                                <div class="row m-4">
-
-                                    <h3 class="text-muted"> Indicateurs Biologiques </h3>
-
-                                    <div class="row col-12">
-                                        <!-- Indicateur Biologique Card -->
-                                        <div class="col-12 col-md-12 mb-5">
-                                        <div id="biological-chart"></div>
-                                        <div id="indicators-chart"></div>
-                                            <div class="card text-black-100 border">
-                                                <div class="card-header">
-                                                    Indicateurs Biologiques
-                                                    <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#indicateurbiologiqueformModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em>
-                                                    </button>
-                                                </div>
-                                                <div class="card-inner text-black-70">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Indicateurs</th>
-                                                            <th>Date</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% if indicateur_biologique %}
-                                                            {% for indicateur in indicateur_biologique %}
-                                                                <tr>
-                                                                    <td>
-                                                                        <span class="badge badge-dark">Globules Blancs: {{ indicateur.globules_blancs }}</span><br>
-                                                                        <span class="badge badge-dark">Hémoglobine: {{ indicateur.hemoglobine }}</span>
-                                                                    </td>
-                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
-                                                                    <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <tr>
-                                                                <td colspan="3" style="font-style: italic; text-align: center" class="text-white">
-                                                                    Aucune donnée enregistrée
-                                                                </td>
-                                                            </tr>
-                                                        {% endif %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                     <!-- Indicateur Form Modal -->
-                                    <div class="modal fade" id="indicateurbiologiqueformModal" tabindex="-1" aria-labelledby="indicateurbiologiqueformModalModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="indicateurbiologiqueformModalLabel">Indicateurs biologique</h5>
-                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="row">
-                                                                {% for field in indicateur_biologique_form %}
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <div class="form-group">
-                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">
-                                                                                {{ field }}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
-                                                        </form>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    </div>
-
-
-                                </div>
-                            <!-- Indicateurs  Fonctionnels  -->
-                                <div class="row m-4">
-
-                                    <h3 class="text-muted"> Indicateurs Fonctionnels </h3>
-
-                                    <div class="row col-12">
-                                        <!-- Signe Fonctionnel Card -->
-                                        <!-- Indicateur Fonctionnel Card -->
-                                    <div class="col-12 col-md-12 mb-5"><div id="functional-chart"></div></div>
-
-                                        <div class="col-12 col-md-12 mb-5">
-                                            <div class="card text-black-100 border">
-                                                <div class="card-header">
-                                                    Indicateurs Fonctionnels
-                                                    <button type="button"
-                                                            class="btn btn-dark btn-icon btn-round float-right"
-                                                            data-toggle="modal"
-                                                            data-target="#indicateurFonctionnelModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em>
-                                                    </button>
-                                                </div>
-                                                <div class="card-inner text-black-70">
-                                                    <table class="table">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Indicateurs</th>
-                                                            <th>Date</th>
-                                                            <th>Medecin</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        {% if indicateur_fonctionnel %}
-                                                            {% for indicateur in indicateur_fonctionnel %}
-                                                                <tr>
-                                                                    <td>
-                                                                        <span class="badge badge-dark">Mobilité: {{ indicateur.mobilite }}</span><br>
-                                                                        <span class="badge badge-dark">Conscience: {{ indicateur.conscience }}</span><br>
-                                                                        <span class="badge badge-dark">Débit urinaire: {{ indicateur.debit_urinaire }} L</span>
-                                                                    </td>
-                                                                    <td>{{ indicateur.date|date:"d/m/Y" }}</td>
-                                                                     <td>{{ indicateur.patient}}</td>
-                                                                    <td>
-                                    <span>
-                                        <a href="#" class="btn btn-primary btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-eye"></em></a>
-                                        <a href="#" class="btn btn-danger btn-icon btn-round btn-xs"><em
-                                                class="icon ni ni-trash-fill"></em></a>
-                                    </span>
-                                                                    </td>
-                                                                </tr>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <tr>
-                                                                <td colspan="3"
-                                                                    style="font-style: italic; text-align: center"
-                                                                    class="text-white">
-                                                                    Aucune donnée enregistrée
-                                                                </td>
-                                                            </tr>
-                                                        {% endif %}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                      <!-- Indicateur Fonctionnel Modal -->
-                                    <div class="modal fade" id="indicateurFonctionnelModal" tabindex="-1"
-                                         aria-labelledby="indicateurFonctionnelModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="indicateurFonctionnelModalLabel">Indicateurs Fonctionnels </h5>
-                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="row">
-                                                                {% for field in indicateur_fonctionnel_form %}
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <div class="form-group">
-                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">
-                                                                                {{ field }}
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
-                                                        </form>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-
-
-                                    </div>
-
-
-                                </div>
-
-
-
-                            <!-- Indicateurs  de Complications & de Traitement  -->
-
-                            <div class="row m-4">
-
-                                <h3 class="text-muted"> Indicateurs de Complications & de Traitement  </h3>
-
-
-                                <div class="row col-12">
-                                     <div class="col-12">
-                                <div id="complications-chart"></div>
-                            </div>
-                                    <div class="col-3 col-md-3 mb-5">
-                                        <div id="mental-state-chart"></div>
-                                    </div>
-                                    <div class="col-3 col-md-3 mb-5">
-                                        <div id="electrolytes-balance-chart"></div>
-                                    </div>
-
-                                    <div class="col-3 col-md-3 mb-5">
-                                        <div id="renal-function-chart"></div>
-                                    </div>
-                                    <div class="col-3 col-md-3 mb-5">
-                                        <div id="hepatic-function-chart"></div>
-                                    </div>
-                                </div>
-                                    <div class="col-12 col-md-12 mb-5">
-                                        <div class="card text-black-100 border">
-                                            <div class="card-header">
-                                                Indicateurs Autres
-                                                <button type="button"
-                                                        class="btn btn-dark btn-icon btn-round float-right"
-                                                        data-toggle="modal" data-target="#indicateurautresModal">
-                                                    <em class="icon ni ni-plus-circle-fill"></em>
-                                                </button>
-                                            </div>
-                                            <div class="card-inner text-black-70">
-                                                <h2 class="mb-4">Liste des Indicateurs d'Hospitalisation</h2>
-                                                <table class="table table-bordered table-responsive">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Niveau de Douleur</th>
-                                                        <th>État de Conscience</th>
-                                                        <th>Réponse au Traitement</th>
-                                                        <th>Effets Secondaires</th>
-                                                        <th>Observance</th>
-                                                        <th>Équilibre Électrolytique</th>
-                                                        <th>Fonction Rénale</th>
-                                                        <th>Fonction Hépatique</th>
-                                                        <th>Signes Vitaux Stables</th>
-                                                        <th>Douleur Contrôlée</th>
-                                                        <th>Capacité Fonctionnelle</th>
-                                                        <th>État Mental Stable</th>
-                                                        <th>Plan de Suivi</th>
-                                                        <th>Date de Création</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    {% for indicator in indicators %}
-                                                        <tr>
-                                                            <td>{{ indicator.pain_level }}</td>
-                                                            <td>{{ indicator.get_mental_state_display }}</td>
-                                                            <td>{{ indicator.treatment_response }}</td>
-                                                            <td>{{ indicator.side_effects }}</td>
-                                                            <td>{{ indicator.compliance|yesno:"Oui,Non" }}</td>
-                                                            <td>{{ indicator.electrolytes_balance }}</td>
-                                                            <td>{{ indicator.renal_function }}</td>
-                                                            <td>{{ indicator.hepatic_function }}</td>
-                                                            <td>{{ indicator.stable_vitals|yesno:"Oui,Non" }}</td>
-                                                            <td>{{ indicator.pain_controlled|yesno:"Oui,Non" }}</td>
-                                                            <td>{{ indicator.functional_ability|yesno:"Oui,Non" }}</td>
-                                                            <td>{{ indicator.mental_stability|yesno:"Oui,Non" }}</td>
-                                                            <td>{{ indicator.follow_up_plan }}</td>
-                                                            <td>{{ indicator.created_at|date:"d/m/Y H:i" }}</td>
-                                                        </tr>
-                                                    {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
 
                             </div>
 
-                        <div class="modal fade" id="indicateurautresModal" tabindex="-1" aria-labelledby="indicateurautresModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="indicateurautresModalLabel">Indicateurs autres</h5>
-                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <form method="post" action="{% url 'hospitalisationdetails' hospitalisationdetail.id %}">
-                                                            {% csrf_token %}
-                                                            <div class="row">
-                                                                {% for field in autresindicatorsform %}
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <div class="form-group">
-                                                                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                                                            <div class="form-control-wrap">{{ field }}</div>
-                                                                        </div>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary float-right">Enregistrer</button>
-                                                        </form>
-                                                    </div>
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- Indicateurs  de Traitement  -->
-
-                            <!-- Indicateurs  de Sortie  -->
-                            <div class="row m-4">
-
-                                <h3 class="text-muted"> Indicateurs de Sortie (Critères de décharge) </h3>
-
-                                <div class="row col-12">
-                                    <div class="col-12 col-md-12 mb-5">
-                                        <div class="card text-black-100 border">
-                                            <div class="card-header">
-                                                Indicateurs de Sortie - Aide à la Décision
-                                            </div>
-                                            <div class="card-inner text-black-70">
-
-                                                <div id="dischargeChart"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-
-
-                            </div>
                         </div><!-- .card-inner-group -->
                     </div><!-- .card -->
                 </div>
             </div>
     </div>
-{#   <script>#}
-{#    $(document).ready(function () {#}
-{#        $('#medication').select2({#}
-{#            tags: true,#}
-{#            tokenSeparators: [',', ' '],#}
-{#            placeholder: "Choisissez ou ajoutez un médicament",#}
-{#            allowClear: true,#}
-{#            ajax: {#}
-{#                url: "{% url 'add_medicament' %}",#}
-{#                type: "POST",#}
-{#                dataType: "json",#}
-{#                delay: 250,#}
-{#                data: function (params) {#}
-{#                    return {#}
-{#                        nom: params.term, // Nom du médicament saisi#}
-{#                        csrfmiddlewaretoken: '{{ csrf_token }}' // Sécurisation CSRF#}
-{#                    };#}
-{#                },#}
-{#                processResults: function (data) {#}
-{#                    if (data.success) {#}
-{#                        return {#}
-{#                            results: [{ id: data.id, text: data.nom }]#}
-{#                        };#}
-{#                    } else {#}
-{#                        alert(data.message);#}
-{#                        return { results: [] };#}
-{#                    }#}
-{#                },#}
-{#                error: function (xhr, status, error) {#}
-{#                    console.error("Erreur AJAX:", status, error);#}
-{#                    alert("Une erreur est survenue lors de la récupération des médicaments.");#}
-{#                }#}
-{#            },#}
-{#            createTag: function (params) {#}
-{#                let term = $.trim(params.term);#}
-{#                if (term === '') {#}
-{#                    return null;#}
-{#                }#}
-{#                return {#}
-{#                    id: term,#}
-{#                    text: term,#}
-{#                    newTag: true#}
-{#                };#}
-{#            },#}
-{#            multiple: true#}
-{#        });#}
-{#    });#}
-{#</script>#}
-<script>
-function prescriptionForm() {
-    return {
-        search: '',
-        results: [],
-        selectedMedication: null,
-        isNewMedication: false,
-        errorMessage: '',
-        patientId: "{{ hospitalisationdetail.patient.id }}",  
-        hospitalisationId: "{{ hospitalisationdetail.id }}",  
-
-
-        fetchMedications() {
-            if (this.search.length < 2) {
-                this.results = [];
-                return;
-            }
-
-            fetch(`/api/medicaments/?q=${this.search}`)
-                .then(response => response.json())
-                .then(data => {
-                    this.results = data;
-                    this.isNewMedication = this.results.length === 0;
-                })
-                .catch(error => console.error('❌ Erreur de récupération des médicaments:', error));
-        },
-
-        selectMedication(med) {
-            this.search = `${med.nom} ${(med.dosage_form ? med.dosage_form : '')} ${(med.dosage ? med.dosage : '')} ${(med.unitdosage ? med.unitdosage : '')}`.trim();
-            this.selectedMedication = med;
-            this.isNewMedication = false;
-            this.results = [];
-        },
-
-        submitForm() {
-            this.errorMessage = '';
-
-            let formData = new FormData(document.getElementById('form-prescription'));
-
-            // ✅ Ajout du patient ID
-            formData.append('patient_id', this.patientId);
-            formData.append('hospitalisation_id', this.hospitalisationId);
-            formData.append('medication', this.search);
-            formData.append('is_new_medication', this.isNewMedication);
-
-            fetch('/api/prescription/add/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("✅ Prescription enregistrée !");
-                    window.location.reload();
-                } else {
-                    console.error("❌ Erreur lors de l'enregistrement:", data.error);
-                    this.errorMessage = "⚠️ " + data.error;
-                }
-            })
-            .catch(error => {
-                console.error('❌ Erreur AJAX:', error);
-                this.errorMessage = "Erreur réseau. Vérifiez votre connexion.";
-            });
-        }
-    };
-}
-</script>
     <script>
         $(document).ready(function () {
             // Initialisation de Select2 avec l'option tags
@@ -2683,6 +1595,7 @@ function prescriptionForm() {
             chart.render();
         });
     </script>
+
     <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var booleanTypePairs = [

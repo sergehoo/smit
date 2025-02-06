@@ -124,7 +124,6 @@ class EmployeeListView(PermissionRequiredMixin, ListView):
     ordering = ['user__first_name', 'user__last_name']
     permission_required = 'core.can_view_employee'
 
-
     def get_queryset(self):
         # Récupérer tous les employés
         queryset = super().get_queryset()
@@ -264,7 +263,9 @@ def send_sms_view(request, employee_id):
 
 
 token = get_orange_access_token()
-print(f"Access Token : {token}")
+
+
+# print(f"Access Token : {token}")
 
 
 def check_sms_balance():
@@ -291,18 +292,9 @@ def check_sms_balance():
 
 
 # Exécutez la fonction
-check_sms_balance()
+# check_sms_balance()
 
 
-# def send_sms_view(request, employee_id):
-#     """Vue pour envoyer un SMS à un employé"""
-#     employee = get_object_or_404(Employee, id=employee_id)
-#
-#     if not employee.phone:
-#         return JsonResponse({"error": "L'employé n'a pas de numéro de téléphone."}, status=400)
-#
-#     send_sms_to_employee(employee)
-#     return JsonResponse({"success": "SMS envoyé avec succès."})
 class EmployeeCreateView(LoginRequiredMixin, CreateView):
     model = Employee
     form_class = EmployeeCreateForm

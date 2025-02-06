@@ -1,6 +1,8 @@
 import datetime
 import json
 import logging
+import random
+import re
 import traceback
 import uuid
 from collections import Counter
@@ -9,8 +11,10 @@ from decimal import Decimal
 from io import BytesIO
 
 import pandas as pd
+from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
+from django.db import IntegrityError, transaction
+from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -20,17 +24,21 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, make_naive, is_aware
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, TemplateView
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 from xhtml2pdf import pisa
 
-from core.models import Patient, ServiceSubActivity, Maladie
+from core.models import Patient, ServiceSubActivity, Maladie, Employee
+from pharmacy.models import Medicament, Medocsprescrits
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
     DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm, \
-    HospitalizationUrgenceForm
+    HospitalizationUrgenceForm, AntecedentsHospiForm, GroupedAntecedentsForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
     ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
@@ -115,8 +123,12 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
 
         # Appliquer les filtres de recherche
         maladie = self.request.GET.get('maladie')
+        unite = self.request.GET.get('unite')
         status = self.request.GET.get('status')
         nom_patient = self.request.GET.get('nom_patient')
+
+        if unite:
+            queryset = queryset.filter(bed__box__chambre__unite__id=unite)
 
         if maladie:
             queryset = queryset.filter(diagnostics__maladie__id=maladie,
@@ -136,14 +148,375 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         demande_hospi_nbr = demande_hospi.count()
         queryset = self.get_queryset()
 
+        nbr_patient = UniteHospitalisation.objects.annotate(
+            nb_patients_hospitalises=Count(
+                'chambres__boxes__lits__lit_hospy__id',
+                filter=Q(chambres__boxes__lits__lit_hospy__discharge_date__isnull=True)
+            )
+        )
+
         # Récupérer la dernière constante pour chaque patient
         context['search_form'] = PatientSearchForm(self.request.GET or None)
         context['demande_hospi'] = demande_hospi
         context['demande_hospi_nbr'] = demande_hospi_nbr
         context['demande_hospi_form'] = HospitalizationSendForm()
         context['result_count'] = queryset.count()
+        context['unites_hospitalisation'] = nbr_patient
 
         return context
+
+
+class SuivieSoinsListView(LoginRequiredMixin, ListView):
+    model = Hospitalization
+    template_name = "pages/hospitalisation/suivie_soins.html"
+    context_object_name = "suiviesoins"
+    paginate_by = 10
+    ordering = "-admission_date"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        queryset = Hospitalization.objects.select_related(
+            'patient', 'bed__box__chambre__unite'
+        ).filter(discharge_date__isnull=True)  # Filtrer uniquement les hospitalisations actives
+
+        # Regrouper les hospitalisations par unité
+        grouped_queryset = {}
+        for hospitalization in queryset:
+            unite = hospitalization.bed.box.chambre.unite
+            if unite not in grouped_queryset:
+                grouped_queryset[unite] = []
+            grouped_queryset[unite].append(hospitalization)
+
+        context['grouped_suiviesoins'] = grouped_queryset
+        return context
+
+
+@login_required
+def add_hospi_suivie_comment(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
+    if request.method == 'POST':
+        form = CommentaireInfirmierForm(request.POST)
+        if form.is_valid():
+            commentaire = form.save(commit=False)
+            commentaire.patient = hospitalisation.patient
+            commentaire.hospitalisation = hospitalisation
+            commentaire.medecin = request.user
+            commentaire.save()
+            messages.success(request, "Commentaire ajouté avec succès.")
+            return redirect('suivie_soins_detail', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout du commentaire. Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = CommentaireInfirmierForm()
+    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('suivie_soins_detail', pk=hospitalisation_id)
+
+
+@login_required
+def add_observations_suivi(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = ObservationForm(request.POST)
+        if form.is_valid():
+            observation = form.save(commit=False)
+            observation.hospitalisation = hospitalisation
+            observation.patient = hospitalisation.patient
+            # observation.date_enregistrement = timezone.now()  # Utilisation correcte du champ dans le modèle
+            observation.medecin = request.user  # Associe l'utilisateur actuel comme médecin
+            observation.save()
+            messages.success(request, "Observation ajoutée avec succès.")
+            return redirect('suivie_soins_detail', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout de l'observation. Veuillez corriger les erreurs.")
+
+    messages.error(request, "Erreur lors de l'ajout de l'observation. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('suivie_soins_detail', pk=hospitalisation_id)
+
+
+class SuivieSoinsDetailView(LoginRequiredMixin, DetailView):
+    model = Hospitalization
+    template_name = "pages/hospitalisation/suivie_soins_details.html"
+    context_object_name = "hospitalisationdetail"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        hospitalization = self.get_object()
+
+        # Initialiser labcompliq par défaut
+        labcompliq = {"indicators": []}
+
+        complications = hospitalization.indicateurs_compliques.first()  # supposons une seule entrée
+
+        # Si les complications existent, structure les données et les seuils
+        if complications:
+            indicators = {
+                "Sodium": {"value": complications.sodium, "range": ComplicationsIndicators.SODIUM_NORMAL_RANGE},
+                "Potassium": {"value": complications.potassium,
+                              "range": ComplicationsIndicators.POTASSIUM_NORMAL_RANGE},
+                "Chlorure": {"value": complications.chlorure, "range": ComplicationsIndicators.CHLORURE_NORMAL_RANGE},
+                "Calcium": {"value": complications.calcium, "range": ComplicationsIndicators.CALCIUM_NORMAL_RANGE},
+                "Magnésium": {"value": complications.magnesium,
+                              "range": ComplicationsIndicators.MAGNESIUM_NORMAL_RANGE},
+                "Phosphate": {"value": complications.phosphate,
+                              "range": ComplicationsIndicators.PHOSPHATE_NORMAL_RANGE},
+                "Créatinine": {"value": complications.creatinine,
+                               "range": ComplicationsIndicators.CREATININE_NORMAL_RANGE_MALE},
+                "BUN": {"value": complications.bun, "range": ComplicationsIndicators.BUN_NORMAL_RANGE},
+                "ALT": {"value": complications.alt, "range": ComplicationsIndicators.ALT_NORMAL_RANGE},
+                "AST": {"value": complications.ast, "range": ComplicationsIndicators.AST_NORMAL_RANGE},
+                "Bilirubine Totale": {"value": complications.bilirubine_totale,
+                                      "range": ComplicationsIndicators.BILIRUBINE_TOTAL_NORMAL_RANGE},
+                "Albumine": {"value": complications.albumine, "range": ComplicationsIndicators.ALBUMINE_NORMAL_RANGE},
+                "ALP": {"value": complications.alp, "range": ComplicationsIndicators.ALP_NORMAL_RANGE}
+            }
+
+            # Données finales pour le graphique, regroupées par segments
+            labcompliq = {
+                "indicators": []
+            }
+            for key, value in indicators.items():
+                min_normal = Decimal(value["range"][0])
+                max_normal = Decimal(value["range"][1])
+                actual = value["value"]
+
+                if actual is None:
+                    normal_part = max_normal - min_normal
+                    additional_part = Decimal(0)
+                    actual_within_range = Decimal(0)
+                else:
+                    actual = Decimal(actual)
+                    if min_normal <= actual <= max_normal:
+                        normal_part = actual - min_normal
+                        actual_within_range = max_normal - actual
+                        additional_part = Decimal(0)
+                    elif actual < min_normal:
+                        normal_part = Decimal(0)
+                        additional_part = min_normal - actual
+                        actual_within_range = max_normal - min_normal
+                    else:
+                        normal_part = max_normal - min_normal
+                        additional_part = actual - max_normal
+                        actual_within_range = Decimal(0)
+
+                labcompliq["indicators"].append({
+                    "name": key,
+                    "normal_part": float(normal_part),
+                    "within_range": float(actual_within_range),
+                    "additional_part": float(additional_part),
+                    "actual": float(actual)
+                })
+
+        complications_indicators = hospitalization.indicateurs_autres.all().order_by('created_at')
+
+        # Structure des données pour le graphique
+        complicbarre = {
+            "dates": [indicator.created_at.strftime('%Y-%m-%d') for indicator in complications_indicators],
+            "pain_level": [indicator.pain_level for indicator in complications_indicators],
+            "mental_state": [indicator.mental_state for indicator in complications_indicators],
+            "electrolytes_balance": [indicator.electrolytes_balance for indicator in complications_indicators],
+            "renal_function": [indicator.renal_function for indicator in complications_indicators],
+            "hepatic_function": [indicator.hepatic_function for indicator in complications_indicators]
+        }
+
+        # Récupération des indicateurs de complications
+
+        complications_indicators = hospitalization.indicateurs_autres.all()
+
+        # Compter les occurrences des valeurs pour chaque catégorie
+        mental_state_counts = dict(Counter([indicator.mental_state for indicator in complications_indicators]))
+        electrolytes_balance_counts = dict(
+            Counter([indicator.electrolytes_balance for indicator in complications_indicators]))
+        renal_function_counts = dict(Counter([indicator.renal_function for indicator in complications_indicators]))
+        hepatic_function_counts = dict(Counter([indicator.hepatic_function for indicator in complications_indicators]))
+
+        # Structurer les données pour les graphiques en camembert
+        complic = {
+            "mental_state": mental_state_counts,
+            "electrolytes_balance": electrolytes_balance_counts,
+            "renal_function": renal_function_counts,
+            "hepatic_function": hepatic_function_counts
+        }
+
+        # Récupération des indicateurs fonctionnels associés à l'hospitalisation
+
+        functional_indicators = hospitalization.indicateurs_fonctionnels.all().order_by('date')
+
+        # Structure des données pour le graphique
+        donnees = {
+            "dates": [indicator.date.strftime('%Y-%m-%d') for indicator in functional_indicators],
+            "mobilite": [indicator.mobilite for indicator in functional_indicators],
+            "conscience": [indicator.conscience for indicator in functional_indicators],
+            "debit_urinaire": [indicator.debit_urinaire for indicator in functional_indicators],
+        }
+
+        # Récupération des indicateurs biologiques associés à l'hospitalisation
+        hospitalization = self.get_object()
+        indicators = hospitalization.indicateurs_biologiques.all().order_by('date')
+
+        # Structure des données pour le graphique
+        data = {
+            "dates": [indicator.date.strftime('%Y-%m-%d') for indicator in indicators],
+            "globules_blancs": [indicator.globules_blancs for indicator in indicators],
+            "hemoglobine": [indicator.hemoglobine for indicator in indicators],
+            "plaquettes": [indicator.plaquettes for indicator in indicators],
+            "crp": [indicator.crp for indicator in indicators],
+            "glucose_sanguin": [indicator.glucose_sanguin for indicator in indicators],
+        }
+
+        # Conversion en JSON pour le template
+
+        # Récupérer l'enregistrement des indicateurs pour cette hospitalisation
+        indicators = hospitalization.indicateurs_autres.last()
+        # Préparer les données pour chaque indicateur de sortie
+        if indicators:
+            context['discharge_criteria'] = {
+                'stable_vitals': 1 if indicators.stable_vitals else 0,
+                'pain_controlled': 1 if indicators.pain_controlled else 0,
+                'functional_ability': 1 if indicators.functional_ability else 0,
+                'mental_stability': 1 if indicators.mental_stability else 0,
+                'follow_up_plan': 1 if bool(indicators.follow_up_plan) else 0,  # Vérifie si le plan de suivi existe
+            }
+        else:
+            context['discharge_criteria'] = {}
+
+        # Add forms to context
+        context['constante_form'] = ConstanteForm()
+        context['antecedentshospi'] = AntecedentsHospiForm()
+        context['prescription_hospi_form'] = PrescriptionHospiForm()
+        context['signe_fonctionnel_form'] = SigneFonctionnelForm()
+        context['indicateur_biologique_form'] = IndicateurBiologiqueForm()
+        context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
+        context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
+        context['autresindicatorsform'] = HospitalizationIndicatorsForm()
+
+        context['diagnosticsform'] = DiagnosticForm()
+        context['observationform'] = ObservationForm()
+        context['avismedicalform'] = AvisMedicalForm()
+        context['effetindesirableform'] = EffetIndesirableForm()
+        context['historiquemaladieform'] = HistoriqueMaladieForm()
+        context['hospicomment'] = CommentaireInfirmierForm()
+
+        context['observations'] = Observation.objects.filter(hospitalisation=self.object).order_by(
+            '-date_enregistrement')
+        context['observationscount'] = Observation.objects.filter(hospitalisation=self.object).count
+
+        context['historiques_maladie'] = HistoriqueMaladie.objects.filter(hospitalisation=self.object).order_by(
+            '-date_enregistrement')
+
+        context['diagnostics'] = Diagnostic.objects.filter(hospitalisation=self.object).order_by('-date_diagnostic')
+        context['diagnosticscount'] = Diagnostic.objects.filter(hospitalisation=self.object).count()
+
+        context['avis_medicaux'] = AvisMedical.objects.filter(hospitalisation=self.object).order_by('-date_avis')
+        context['avis_medicauxcount'] = AvisMedical.objects.filter(hospitalisation=self.object).count()
+
+        context['effets_indesirables'] = EffetIndesirable.objects.filter(hospitalisation=self.object).order_by(
+            '-date_signalement')
+        context['effets_indesirablescount'] = EffetIndesirable.objects.filter(hospitalisation=self.object).count()
+
+        context['hopi_comment'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).order_by(
+            '-date_commentaire')
+        context['hopi_commentcount'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).count()
+
+        context['constantes'] = Constante.objects.filter(hospitalisation=self.object)
+        # Retrieve related 'Constante' data for the current hospitalization
+        context['chart_data'] = json.dumps(data, cls=DjangoJSONEncoder)
+        context['functional_chart_data'] = json.dumps(donnees, cls=DjangoJSONEncoder)
+        context['complications_chart_data'] = json.dumps(complicbarre, cls=DjangoJSONEncoder)
+        context['pie_chart_data'] = json.dumps(complic)
+        context['lab_ink'] = json.dumps(labcompliq, cls=DjangoJSONEncoder)
+        context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
+        context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient)
+        context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization)
+        prescriptions = Prescription.objects.filter(hospitalisation=hospitalization)
+        executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions,
+                                                          scheduled_time__gte=now()).order_by('scheduled_time')
+
+        # context['prescriptions'] = prescriptions
+        context['executions'] = executions
+        # context['prescription_execution_form'] = PrescriptionExecutionForm()
+        context['signe_fonctionnel'] = SigneFonctionnel.objects.filter(hospitalisation=self.object)
+        context['indicateur_biologique'] = IndicateurBiologique.objects.filter(hospitalisation=self.object)
+        context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
+        context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
+        context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
+
+        # Récupérer toutes les exécutions liées à cette hospitalisation
+        executions = PrescriptionExecution.objects.filter(prescription__hospitalisation=hospitalization).order_by(
+            'scheduled_time')
+        # Trouver la prochaine prise
+        next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
+        # Trouver la dernière prise manquée
+        # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
+        missed_executions = executions.filter(scheduled_time__lt=now(), status='Pending'
+                                              ).order_by('-scheduled_time')
+        context['next_execution'] = next_execution
+        context['missed_executions'] = missed_executions
+        return context
+
+    def post(self, request, *args, **kwargs):
+        form_type = request.POST.get("form_type")  # Get the form type
+        hospitalisation = self.get_object()
+        constante_form = ConstanteForm(request.POST)
+        prescription_form = PrescriptionHospiForm(request.POST)
+        signe_fonctionnel_form = SigneFonctionnelForm(request.POST)
+        indicateur_biologique_form = IndicateurBiologiqueForm(request.POST)
+        indicateur_fonctionnel_form = IndicateurFonctionnelForm(request.POST)
+        indicateur_subjectif_form = IndicateurSubjectifForm(request.POST)
+        autresindicatorsform = HospitalizationIndicatorsForm()
+
+        # Check which form was submitted and process accordingly
+        if form_type == "constante" and constante_form.is_valid():
+            constante = constante_form.save(commit=False)
+            constante.hospitalisation = hospitalisation
+            constante.patient = hospitalisation.patient
+            constante.created_by = request.user.employee
+            constante.save()
+            messages.success(request, "Constante saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        elif form_type == "prescription" and prescription_form.is_valid():
+            prescription = prescription_form.save(commit=False)
+            prescription.patient = hospitalisation.patient
+            prescription.hospitalisation = hospitalisation
+            prescription.created_by = request.user.employee
+            prescription.status = "Pending"
+            prescription.save()
+            prescription.generate_executions()
+            messages.success(request, "Prescription saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        elif form_type == "signe_fonctionnel" and signe_fonctionnel_form.is_valid():
+            signe_fonctionnel = signe_fonctionnel_form.save(commit=False)
+            signe_fonctionnel.hospitalisation = hospitalisation
+            signe_fonctionnel.save()
+            messages.success(request, "Signe Fonctionnel saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        elif form_type == "indicateur_biologique" and indicateur_biologique_form.is_valid():
+            indicateur_biologique = indicateur_biologique_form.save(commit=False)
+            indicateur_biologique.hospitalisation = hospitalisation
+            indicateur_biologique.save()
+            messages.success(request, "Indicateur Biologique saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        elif form_type == "indicateur_fonctionnel" and indicateur_fonctionnel_form.is_valid():
+            indicateur_fonctionnel = indicateur_fonctionnel_form.save(commit=False)
+            indicateur_fonctionnel.hospitalisation = hospitalisation
+            indicateur_fonctionnel.save()
+            messages.success(request, "Indicateur Fonctionnel saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        elif form_type == "complication" and autresindicatorsform.is_valid():
+            complication = autresindicatorsform.save(commit=False)
+            complication.hospitalisation = hospitalisation
+            complication.save()
+            messages.success(request, "Indicateur de complications saved successfully.")
+            return redirect(reverse('suivie_soins_detail', args=[hospitalisation.id]))
+
+        # If none of the forms are valid or no form type matches, render the page with errors
+        return self.get(request, *args, **kwargs)
 
 
 class HospitalizationUrgenceCreateView(CreateView):
@@ -297,9 +670,52 @@ def update_hospitalisation_discharge(request, hospitalisation_id):
 #         'pages/hospitalisation/execute_prescription.html',
 #         {'form': form, 'prescription': prescription, 'hospitalisation': hospitalisation}
 #     )
+def adjust_future_executions(execution):
+    """
+    Ajuste les exécutions futures en cas de retard dans la prise d'un médicament.
+    """
+    prescription = execution.prescription
+    posology = prescription.posology.strip()
+
+    # 🔄 Mappage des posologies avec leurs intervalles en heures
+    POSOLOGY_MAPPING = {
+        'Une fois par jour': 24,
+        'Deux fois par jour': 12,
+        'Trois fois par jour': 8,
+        'Quatre fois par jour': 6,
+        'Toutes les 4 heures': 4,
+        'Toutes les 6 heures': 6,
+        'Toutes les 8 heures': 8,
+        'Une fois par semaine': 168,  # 7 jours
+        'Deux fois par semaine': 84,  # 3,5 jours
+        'Un jour sur deux': 48,  # 2 jours
+    }
+
+    # Vérifier si la posologie est bien définie
+    interval = POSOLOGY_MAPPING.get(posology)
+    if interval is None:
+        return  # Ne rien faire si la posologie ne suit pas un intervalle fixe
+
+    # 🔍 Récupérer les exécutions futures à ajuster
+    future_executions = PrescriptionExecution.objects.filter(
+        prescription=prescription,
+        scheduled_time__gt=execution.scheduled_time,
+        status='Pending'
+    ).order_by('scheduled_time')
+
+    # ✅ Ajuster chaque exécution future en fonction du retard
+    next_scheduled_time = execution.executed_at + datetime.timedelta(hours=interval)
+
+    with transaction.atomic():
+        for future_execution in future_executions:
+            future_execution.scheduled_time = next_scheduled_time
+            future_execution.save()
+            next_scheduled_time += datetime.timedelta(hours=interval)
+
+
 def mark_execution_taken(request):
     """
-    Vue pour marquer une exécution de prescription comme prise.
+    Vue pour marquer une exécution de prescription comme prise et ajuster les exécutions suivantes en cas de retard.
     """
     if request.method == "POST":
         execution_id = request.POST.get("execution_id")
@@ -311,13 +727,18 @@ def mark_execution_taken(request):
             messages.warning(request, "Cette exécution a déjà été marquée comme prise ou manquée.")
             return redirect(request.META.get('HTTP_REFERER', '/'))
 
-        # Marquer l'exécution comme prise
+        # Déterminer l'heure réelle d'exécution
+        execution_time = now()
         execution.status = "Taken"
-        execution.executed_at = now()
+        execution.executed_at = execution_time
         execution.executed_by = request.user.employee  # Associer l'utilisateur qui a marqué l'exécution
         execution.save()
 
-        messages.success(request, "Exécution marquée comme prise avec succès.")
+        # ✅ Ajuster les exécutions suivantes en fonction du retard
+        adjust_future_executions(execution)
+
+        messages.success(request,
+                         "Exécution marquée comme prise avec succès. Les prochaines exécutions ont été ajustées.")
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     # Retour en cas de méthode GET
@@ -407,6 +828,204 @@ def add_maladie(request):
         else:
             return JsonResponse({'success': False, 'message': 'Cette maladie existe déjà.'})
     return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'})
+
+
+def generate_unique_code_barre():
+    """ Génère un code-barre unique de 12 chiffres. """
+    while True:
+        code = str(random.randint(10 ** 11, 10 ** 12 - 1))
+        if not Medicament.objects.filter(codebarre=code).exists():
+            return code
+
+
+logger = logging.getLogger(__name__)
+
+
+#noouveau code pour alpine
+def search_medications(request):
+    query = request.GET.get('q', '')
+    if query:
+        medications = Medicament.objects.filter(nom__icontains=query).values('id', 'nom', 'dosage_form', 'dosage',
+                                                                             'unitdosage')
+
+        return JsonResponse(list(medications), safe=False)
+    return JsonResponse([], safe=False)
+
+
+def parse_medication_data(medication_str):
+    """
+    Analyse la chaîne saisie par l'utilisateur et extrait :
+    - nom : Nom du médicament
+    - dosage : Quantité numérique
+    - unitdosage : Unité de dosage (mg, ml, g, etc.)
+    - dosage_form : Forme pharmaceutique (comprimé, gélule, etc.)
+    """
+    try:
+        # Séparer la chaîne en mots
+        words = medication_str.split()
+
+        # Vérifier si le dernier mot est une unité de dosage connue
+        known_units = ["mg", "g", "ml", "mcg", "UI", "L", "meq", "µL", "µg", "cm³", "mL/kg", "mg/m²", "mg/kg", "g/L"]
+        known_forms = ["comprime", "gelule", "sirop", "injection", "ampoule", "pommade", "creme", "spray", "gouttes",
+                       "patch",
+                       "inhalateur",
+                       "solution",
+                       "suspension",
+                       "poudre",
+                       "ovule",
+                       "collyre",
+                       "aérosol",
+                       "elixir",
+                       "baume",
+                       "granulé",
+                       "capsule"]
+
+        name_parts = []
+        dosage = None
+        unitdosage = None
+        dosage_form = None
+
+        for word in words:
+            if word.isdigit():  # Vérifie si c'est un chiffre (dosage)
+                dosage = int(word)
+            elif word in known_units:  # Vérifie si c'est une unité de dosage
+                unitdosage = word
+            elif word in known_forms:  # Vérifie si c'est une forme pharmaceutique
+                dosage_form = word
+            else:
+                name_parts.append(word)  # Fait partie du nom du médicament
+
+        # Reconstruire le nom du médicament
+        nom = " ".join(name_parts)
+
+        logger.info(f"🔍 Médicament analysé : Nom={nom}, Dosage={dosage}, Unité={unitdosage}, Forme={dosage_form}")
+        return nom, dosage, unitdosage, dosage_form
+
+    except Exception as e:
+        logger.error(f"⚠️ Erreur lors de l'analyse du médicament : {str(e)}")
+        return medication_str, None, None, None  # Retourner la valeur brute si erreur
+
+
+@csrf_exempt
+@login_required  # ✅ Assurez-vous que l'utilisateur est connecté
+# ✅ Assurez-vous que l'utilisateur est connecté
+def add_prescription(request):
+    if request.method == 'POST':
+        try:
+            logger.info("🔵 Données reçues: %s", request.POST)
+
+            data = request.POST
+            patient_id = data.get('patient_id')  # ✅ Récupération du patient
+            hospitalisation_id = data.get('hospitalisation_id')  # ✅ Récupération de l'hospitalisation
+            medication_name = data.get('medication', '').strip()
+            quantity = data.get('quantity', '').strip()
+            posology = data.get('posology', '').strip()
+            pendant = data.get('pendant', '').strip()
+            a_partir_de = data.get('a_partir_de', '').strip()
+            is_new = data.get('is_new_medication', 'false') == 'true'
+
+            # ✅ Récupérer le docteur via `request.user`
+            try:
+                doctor = Employee.objects.get(user=request.user)
+                created_by = Employee.objects.get(user=request.user)
+            except Employee.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Docteur non trouvé pour cet utilisateur'}, status=400)
+            print(f'created{doctor}')
+            # 🛑 Vérification des champs obligatoires
+            if not patient_id:
+                return JsonResponse({'success': False, 'error': 'Le patient est obligatoire'}, status=400)
+            if not medication_name:
+                return JsonResponse({'success': False, 'error': 'Le médicament est obligatoire'}, status=400)
+            if not quantity:
+                return JsonResponse({'success': False, 'error': 'La quantité est obligatoire'}, status=400)
+
+            # 🔍 Vérification et récupération du patient
+            try:
+                patient = Patient.objects.get(id=patient_id)
+            except Patient.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Patient introuvable'}, status=400)
+
+            # 🔍 Vérification et récupération de l'hospitalisation (optionnel)
+            hospitalisation = None
+            if hospitalisation_id:
+                try:
+                    hospitalisation = Hospitalization.objects.get(id=hospitalisation_id)
+                except Hospitalization.DoesNotExist:
+                    return JsonResponse({'success': False, 'error': 'Hospitalisation introuvable'}, status=400)
+
+            # 🔍 Vérification de la quantité (doit être un nombre positif)
+            try:
+                quantity = int(quantity)
+                if quantity <= 0:
+                    return JsonResponse({'success': False, 'error': 'La quantité doit être un nombre positif'},
+                                        status=400)
+            except ValueError:
+                return JsonResponse({'success': False, 'error': 'Quantité invalide'}, status=400)
+
+            # ✅ Extraction des informations du médicament
+            nom, dosage, unitdosage, dosage_form = parse_medication_data(medication_name)
+
+            # 🔄 Création ou récupération du médicament avec les valeurs bien séparées
+            if is_new:
+                medication, created = Medicament.objects.get_or_create(
+                    nom=nom,
+                    defaults={'dosage': dosage, 'unitdosage': unitdosage, 'dosage_form': dosage_form}
+                )
+                logger.info("🟢 Nouveau médicament enregistré: %s (ID: %s)", medication.nom, medication.id)
+            else:
+                medication = Medicament.objects.filter(nom=nom).first()
+                if not medication:
+                    logger.warning("⚠️ Médicament introuvable: %s, enregistrement en tant que nouveau", nom)
+                    medication, created = Medicament.objects.get_or_create(
+                        nom=nom,
+                        defaults={'dosage': dosage, 'unitdosage': unitdosage, 'dosage_form': dosage_form}
+                    )
+
+            # 📝 Création de la prescription avec patient, docteur et hospitalisation
+            with transaction.atomic():
+                prescription = Prescription.objects.create(
+                    patient=patient,
+                    doctor=doctor,  # ✅ Ajout du docteur connecté
+                    created_by=created_by,  # ✅ Ajout du docteur connecté
+                    hospitalisation=hospitalisation,  # ✅ Ajout de l'hospitalisation
+                    medication=medication,
+                    quantity=quantity,
+                    posology=posology,
+                    pendant=pendant,
+                    a_partir_de=a_partir_de,
+                    status="Pending"
+                )
+
+                # ✅ Exécuter `generate_executions()` immédiatement après l'ajout
+                prescription.generate_executions()
+
+            logger.info("✅ Prescription enregistrée avec succès: ID %s", prescription.id)
+            return JsonResponse({'success': True, 'prescription_id': prescription.id})
+
+        except Exception as e:
+            logger.error("❌ ERREUR LORS DE L'ENREGISTREMENT DE LA PRESCRIPTION: %s", str(e))
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
+
+
+def validate_and_create_medicament(request):
+    if request.method == 'POST':
+        new_medicament = request.session.get('new_medicament')
+        if not new_medicament:
+            return JsonResponse({'success': False, 'message': 'Aucun médicament en attente de validation.'}, status=400)
+
+        medicament = Medicament.objects.create(
+            nom=new_medicament['nom'],
+            codebarre=new_medicament['codebarre']
+        )
+
+        del request.session['new_medicament']  # Nettoyer la session après création
+        return JsonResponse(
+            {'success': True, 'id': medicament.id, 'nom': medicament.nom, 'codebarre': medicament.codebarre})
+
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'}, status=405)
+
 
 @login_required
 def add_observations(request, hospitalisation_id):
@@ -518,6 +1137,84 @@ def add_historique_maladie(request, hospitalisation_id):
         form = HistoriqueMaladieForm()
     messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+def ajouter_antecedents_hospi(request, patient_id, hospitalisation_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
+    if request.method == 'POST':
+        form = AntecedentsHospiForm(request.POST)
+        if form.is_valid():
+            antecedent = form.save(commit=False)
+            antecedent.patient = patient
+            antecedent.hospitalisation = hospitalisation
+            antecedent.save()
+            return redirect('detail_patient', patient_id=patient.id)  # Redirection après l'enregistrement
+    else:
+        form = AntecedentsHospiForm()
+
+    return render(request, 'ajouter_antecedents.html',
+                  {'form': form, 'patient': patient, 'hospitalisation': hospitalisation})
+
+
+def generate_ordonnance_pdf(request, patient_id, hospitalisation_id):
+    """
+    Génère une ordonnance PDF pour un patient hospitalisé à partir de ses prescriptions.
+    """
+    # 🔍 Récupérer le patient, l'hospitalisation et ses prescriptions
+    patient = get_object_or_404(Patient, id=patient_id)
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    prescriptions = Prescription.objects.filter(patient=patient, hospitalisation=hospitalisation).order_by(
+        'prescribed_at')
+
+    # 📄 Configuration du PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ordonnance_{patient.nom}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
+    # 📌 Ajout d'un en-tête
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, height - 50, "Ordonnance Médicale")
+
+    p.setFont("Helvetica", 12)
+    p.drawString(100, height - 80, f"Patient : {patient.nom} {patient.prenoms}")
+    p.drawString(100, height - 100,
+                 f"Date : {prescriptions.first().prescribed_at.strftime('%d/%m/%Y') if prescriptions else 'N/A'}")
+
+    p.drawString(100, height - 120, f"Hôpital : {hospitalisation if hospitalisation else 'Non précisé'}")
+
+    # Ajout du médecin prescripteur
+    doctor = prescriptions.first().doctor if prescriptions else None
+    p.drawString(100, height - 140, f"Médecin : {doctor.nom if doctor else 'Inconnu'}")
+
+    # 📌 Lignes de séparation
+    p.line(100, height - 150, 500, height - 150)
+
+    # 📌 Génération des prescriptions
+    y_position = height - 180
+    p.setFont("Helvetica", 11)
+
+    for prescription in prescriptions:
+        text = f"- {prescription.medication.nom} ({prescription.medication.dosage_form} {prescription.medication.dosage} {prescription.medication.unitdosage})"
+        text += f" | Posologie : {prescription.posology} | Pendant : {prescription.pendant} jours"
+
+        # Vérification de l'espace sur la page
+        if y_position < 50:
+            p.showPage()
+            p.setFont("Helvetica", 11)
+            y_position = height - 50  # Nouvelle page, recommencer en haut
+
+        p.drawString(100, y_position, text)
+        y_position -= 20
+
+    # 📌 Fin du document
+    p.showPage()
+    p.save()
+
+    return response
 
 
 class HospitalisationDetailView(LoginRequiredMixin, DetailView):
@@ -668,6 +1365,8 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         # Add forms to context
         context['constante_form'] = ConstanteForm()
+        context['antecedentshospi'] = AntecedentsHospiForm()
+        # context['antecedentshospigroup'] = GroupedAntecedentsForm()
         context['prescription_hospi_form'] = PrescriptionHospiForm()
         context['signe_fonctionnel_form'] = SigneFonctionnelForm()
         context['indicateur_biologique_form'] = IndicateurBiologiqueForm()
@@ -681,6 +1380,7 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['effetindesirableform'] = EffetIndesirableForm()
         context['historiquemaladieform'] = HistoriqueMaladieForm()
         context['hospicomment'] = CommentaireInfirmierForm()
+        # context['antecedents'] = AntecedentsHospiForm()
 
         context['observations'] = Observation.objects.filter(hospitalisation=self.object).order_by(
             '-date_enregistrement')
@@ -711,10 +1411,12 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['pie_chart_data'] = json.dumps(complic)
         context['lab_ink'] = json.dumps(labcompliq, cls=DjangoJSONEncoder)
         context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
-        context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient)
-        context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization)
+        context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient).order_by('-created_at')
+        context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization).order_by(
+            '-created_at')
         prescriptions = Prescription.objects.filter(hospitalisation=hospitalization)
-        executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions).order_by('scheduled_time')
+        executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions,
+                                                          scheduled_time__gte=now()).order_by('scheduled_time')
         # context['prescriptions'] = prescriptions
         context['executions'] = executions
         # context['prescription_execution_form'] = PrescriptionExecutionForm()

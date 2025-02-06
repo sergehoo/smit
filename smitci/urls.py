@@ -22,7 +22,8 @@ from django.urls import path, include
 
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
     EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view
-from hospitalisation.views import HospitalizationUrgenceCreateView
+from hospitalisation.views import HospitalizationUrgenceCreateView, SuivieSoinsListView, SuivieSoinsDetailView, \
+    search_medications, add_prescription
 from smit import views
 from smit.views import HomePageView, PatientListView, PatientCreateView, RendezVousListView, RendezVousDetailView, \
     PatientDetailView, SalleAttenteListView, ServiceContentDetailView, consultation_send_create, \
@@ -47,6 +48,10 @@ urlpatterns = [
                   path('laboratoire/', include('laboratory.urls')),
                   path('api/', include('core.api.urls')),
                   path('tinymce/', include('tinymce.urls')),
+                  path("select2/", include("django_select2.urls")),
+
+                  path('api/medicaments/', search_medications, name='search_medications'),
+                  path('api/prescription/add/', add_prescription, name='add_prescription'),
 
                   path('user_role/', RoleListView.as_view(), name='user_role'),
                   path("roles/create/", RoleCreateView.as_view(), name="role_create"),
@@ -155,6 +160,8 @@ urlpatterns = [
                   path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(),
                        name='hospitalization_urgence_create'),
                   path('send_employee_sms/<int:employee_id>', send_sms_view, name='send_sms_view'),
+                  path('suivie_soins', SuivieSoinsListView.as_view(), name='suivie_soins_list'),
+                  path('suivie_soins/detail<int:pk>', SuivieSoinsDetailView.as_view(), name='suivie_soins_detail'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

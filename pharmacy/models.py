@@ -8,33 +8,35 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timezone import now
 from schedule.models import Calendar, Event
 from django.core.files.storage import default_storage
 
 FORME_MEDICAMENT_CHOICES = [
-    ('Comprimé', 'Comprimé'),
-    ('Sirop', 'Sirop'),
-    ('Injection', 'Injection'),
-    ('Gélule', 'Gélule'),
-    ('Crème', 'Crème'),
-    ('Pommade', 'Pommade'),
-    ('Suppositoire', 'Suppositoire'),
-    ('Gouttes', 'Gouttes'),
-    ('Patch', 'Patch'),
-    ('Inhalateur', 'Inhalateur'),
-    ('Solution', 'Solution'),
-    ('Suspension', 'Suspension'),
-    ('Poudre', 'Poudre'),
-    ('Spray', 'Spray'),
-    ('Ovule', 'Ovule'),
-    ('Collyre', 'Collyre'),  # pour les yeux
-    ('Aérosol', 'Aérosol'),
-    ('Élixir', 'Élixir'),
-    ('Baume', 'Baume'),
-    ('Granulé', 'Granulé'),
-    ('Capsule', 'Capsule'),
+    ('comprime', 'comprime'),
+    ('sirop', 'sirop'),
+    ('injection', 'injection'),
+    ('gelule', 'gelule'),
+    ('creme', 'creme'),
+    ('pommade', 'pommade'),
+    ('suppositoire', 'suppositoire'),
+    ('gouttes', 'gouttes'),
+    ('patch', 'patch'),
+    ('inhalateur', 'inhalateur'),
+    ('solution', 'solution'),
+    ('suspension', 'suspension'),
+    ('poudre', 'poudre'),
+    ('spray', 'spray'),
+    ('ovule', 'ovule'),
+    ('collyre', 'collyre'),  # pour les yeux
+    ('aérosol', 'aérosol'),
+    ('elixir', 'elixir'),
+    ('baume', 'baume'),
+    ('granulé', 'granulé'),
+    ('capsule', 'capsule'),
 ]
 
 UNITE_DOSAGE_CHOICES = [
@@ -147,6 +149,16 @@ class Medicament(models.Model):
         return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
 
 
+class Medocsprescrits(models.Model):
+    nom = models.CharField(max_length=355, null=True, blank=True, unique=True)
+    dosage = models.IntegerField(null=True, blank=True)
+    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,help_text="Ex: 500mg, 20mg/ml")
+    dosage_form = models.CharField(max_length=50, choices=FORME_MEDICAMENT_CHOICES, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
+
+
 class MouvementStock(models.Model):
     medicament = models.ForeignKey('Medicament', on_delete=models.CASCADE)
     patient = models.ForeignKey('core.Patient', on_delete=models.SET_NULL, null=True, blank=True)
@@ -223,14 +235,49 @@ class ArticleCommande(models.Model):
 
 
 class Commande(models.Model):
-    numero = models.PositiveIntegerField()
-    articles = models.ForeignKey(ArticleCommande, on_delete=models.CASCADE, related_name='articles')
+    # numero = models.PositiveIntegerField()
+    numero = models.PositiveIntegerField(unique=True, blank=True, null=True)
+    articles = models.ManyToManyField('ArticleCommande', related_name='commandes')
     date_commande = models.DateField()
+    created_at = models.DateField(auto_now=True)
     statut = models.CharField(max_length=50, choices=[
         ('Commandé', 'Commandé'),
         ('Reçu', 'Reçu'),
         ('En attente', 'En attente')
     ])
+
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            # Générer un numéro basé sur l'année et un compteur unique
+            last_commande = Commande.objects.filter(date_commande__year=now().year).order_by('numero').last()
+            if last_commande:
+                self.numero = last_commande.numero + 1
+            else:
+                self.numero = int(f"{now().year}0001")  # Commencer avec l'année et un compteur
+        super().save(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        from smit.forms import ArticleCommandeFormSet
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['articles_formset'] = ArticleCommandeFormSet(self.request.POST)
+        else:
+            context['articles_formset'] = ArticleCommandeFormSet(queryset=ArticleCommande.objects.none())
+        context['title'] = "Créer une nouvelle commande"
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        articles_formset = context['articles_formset']
+        if form.is_valid() and articles_formset.is_valid():
+            self.object = form.save()
+            articles = articles_formset.save(commit=False)
+            for article in articles:
+                article.save()
+                self.object.articles.add(article)
+            return redirect(self.success_url)
+        else:
+            return self.form_invalid(form)
 
     # class Meta:
     #     constraints = [
@@ -239,6 +286,14 @@ class Commande(models.Model):
 
     def __str__(self):
         return f"{self.articles} de {self.date_commande}"
+
+    def get_status_badge(self):
+        status_badges = {
+            'Commandé': 'badge-primary',
+            'Reçu': 'badge-success',
+            'En attente': 'badge-warning',
+        }
+        return f'<span class="badge {status_badges.get(self.statut, "badge-secondary")}">{self.statut}</span>'
 
     def get_absolute_url(self):
         return reverse('commande_detail', kwargs={'pk': self.pk})

@@ -15,7 +15,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 
 from pharmacy.models import Medicament, CathegorieMolecule, Molecule, MouvementStock, StockAlert, Commande, \
     ArticleCommande, RendezVous
-from smit.forms import MedicamentForm, RescheduleAppointmentForm, RendezVousForm, ArticleCommandeForm
+from smit.forms import MedicamentForm, RescheduleAppointmentForm, RendezVousForm, ArticleCommandeForm, CommandeForm, \
+    ArticleCommandeFormSet
 
 
 # Create your views here.
@@ -23,7 +24,7 @@ class PharmacyListView(LoginRequiredMixin, ListView):
     model = Medicament
     template_name = "pages/pharmacy/medicament_list.html"
     context_object_name = "medicament"
-    paginate_by = 50
+    paginate_by = 10
     ordering = ['-date_expiration']
 
     def get_context_data(self, **kwargs):
@@ -103,7 +104,7 @@ class MedicamentListView(ListView):
     model = Medicament
     template_name = 'pharmacy/medicament_list.html'
     context_object_name = "medicament"
-    paginate_by = 50
+    paginate_by = 12
     ordering = ['-date_expiration']
 
     def get_context_data(self, **kwargs):
@@ -215,9 +216,33 @@ class CommandeDetailView(DetailView):
 
 class CommandeCreateView(CreateView):
     model = Commande
-    fields = ['numero', 'articles', 'date_commande', 'statut']
+    form_class = CommandeForm
     template_name = 'pharmacy/commande_form.html'
-    success_url = reverse_lazy('commande_list')
+    success_url = reverse_lazy('commandes-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['articles_formset'] = ArticleCommandeFormSet(self.request.POST)
+        else:
+            context['articles_formset'] = ArticleCommandeFormSet(queryset=ArticleCommande.objects.none())
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        articles_formset = context['articles_formset']
+        if form.is_valid() and articles_formset.is_valid():
+            # Sauvegarder la commande
+            self.object = form.save()
+            # Sauvegarder les articles et les lier à la commande
+            articles = articles_formset.save(commit=False)
+            for article in articles:
+                article.save()
+                self.object.articles.add(article)
+            return redirect(self.success_url)
+        else:
+            return self.form_invalid(form)
+
 
 
 class CommandeUpdateView(UpdateView):

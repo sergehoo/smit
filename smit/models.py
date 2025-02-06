@@ -170,7 +170,7 @@ class Protocole(models.Model):
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
     molecules = models.ManyToManyField(Molecule)
-    medicament = models.ManyToManyField(Medicament, verbose_name="Médicaments et posologies",  blank=True)
+    medicament = models.ManyToManyField(Medicament, verbose_name="Médicaments et posologies", blank=True)
     maladies = models.ForeignKey(Maladie, related_name="protocolesmaladies", on_delete=models.SET_NULL,
                                  verbose_name="Maladies traitées", null=True, blank=True)
     examens = models.ManyToManyField('Examen', related_name="protocolesexam", blank=True, verbose_name="Examens requis")
@@ -192,7 +192,9 @@ class SuiviProtocole(models.Model):
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,blank=True, related_name='suivicreator')
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='suivicreator')
+
     def __str__(self):
         return f"{self.protocole.nom} - {self.nom}"
 
@@ -273,6 +275,8 @@ class TypeAntecedent(models.Model):
 
 class AntecedentsMedicaux(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiantecedents",
+                                        null=True, blank=True)
     nom = models.CharField(max_length=255, null=True, blank=True)
     type = models.ForeignKey(TypeAntecedent, on_delete=models.SET_NULL, null=True, blank=True)
     descriptif = models.CharField(max_length=255, null=True, blank=True)
@@ -660,58 +664,71 @@ class Prescription(models.Model):
 
     def generate_executions(self):
         """
-        Génère les prises de médicament en fonction de la posologie, de la durée du traitement, et du délai avant la première prise.
+        Génère ou ajuste les prises de médicament en fonction de la posologie,
+        de la durée du traitement et du délai avant la première prise.
         """
+
+        # 🔄 Mappage des posologies avec leurs intervalles en heures
         POSOLOGY_MAPPING = {
-            'une fois par jour': 24,
-            'deux fois par jour': 12,
-            'trois fois par jour': 8,
-            'quatre fois par jour': 6,
-            'toutes les 4 heures': 4,
-            'toutes les 6 heures': 6,
-            'toutes les 8 heures': 8,
-            'si besoin': None,
-            'avant les repas': None,
-            'après les repas': None,
-            'au coucher': None,
-            'une fois par semaine': None,
-            'deux fois par semaine': None,
-            'un jour sur deux': None,
+            'Une fois par jour': 24,
+            'Deux fois par jour': 12,
+            'Trois fois par jour': 8,
+            'Quatre fois par jour': 6,
+            'Toutes les 4 heures': 4,
+            'Toutes les 6 heures': 6,
+            'Toutes les 8 heures': 8,
+            'Si besoin': None,
+            'Avant les repas': None,
+            'Après les repas': None,
+            'Au coucher': None,
+            'Une fois par semaine': 168,  # 7 jours
+            'Deux fois par semaine': 84,  # 3,5 jours
+            'Un jour sur deux': 48,  # 2 jours
         }
 
-        # Normaliser la posologie
-        normalized_posology = self.normalize_string(self.posology)
+        # 🔍 Vérification de la posologie
+        normalized_posology = self.posology.strip()
         interval = POSOLOGY_MAPPING.get(normalized_posology)
 
         if interval is None:
-            # Si la posologie n'est pas basée sur un intervalle (ex. : "Si besoin"), ne rien générer
+            # Si la posologie ne suit pas un intervalle fixe, on ne génère pas d'exécutions
             return
 
-        # Calcul de la durée du traitement
+        # 🔍 Vérification et conversion de `pendant` en jours
         try:
             duration_days = int(self.pendant)
         except (TypeError, ValueError):
-            # Par défaut, limiter à 1 jour si `pendant` n'est pas défini ou invalide
-            duration_days = 1
+            duration_days = 1  # Si la valeur est invalide, par défaut 1 jour
 
-        # Calcul du délai avant la première prise
+        # 🔍 Vérification et conversion de `a_partir_de` en heures
         try:
-            delay_hours = int(self.a_partir_de)  # Convertir la valeur de `a_partir_de` en heures
+            delay_hours = int(self.a_partir_de)
         except (TypeError, ValueError):
-            delay_hours = 0  # Par défaut, aucune attente avant la première prise
+            delay_hours = 0  # Par défaut, aucune attente
 
-        start_time = self.prescribed_at + datetime.timedelta(hours=delay_hours)  # Ajoute le délai à la prescription
+        # ✅ Si `a_partir_de = 0` (Maintenant), accorder un délai de 10 minutes
+        if delay_hours == 0:
+            start_time = self.prescribed_at + datetime.timedelta(minutes=10)
+        else:
+            start_time = self.prescribed_at + datetime.timedelta(hours=delay_hours)
+
+        # 🔄 Définition de la fin du traitement
         end_time = self.prescribed_at + datetime.timedelta(days=duration_days)
 
-        # Récupérer toutes les exécutions existantes pour cette prescription
-        existing_executions = set(
-            PrescriptionExecution.objects.filter(prescription=self).values_list('scheduled_time', flat=True)
-        )
+        # 🔍 Récupération des exécutions existantes
+        existing_executions = PrescriptionExecution.objects.filter(prescription=self).order_by('scheduled_time')
 
-        # Génération des exécutions
+        # 🔄 Ajustement si une exécution a déjà été effectuée
+        last_execution_done = existing_executions.filter(status='Done').order_by('-scheduled_time').first()
+
+        if last_execution_done:
+            start_time = last_execution_done.scheduled_time + datetime.timedelta(hours=interval)
+
+        # 🔄 Génération des nouvelles exécutions
         new_executions = []
         while start_time < end_time:
-            if start_time not in existing_executions:
+            # Vérifie si l'exécution pour cet horaire existe déjà
+            if not existing_executions.filter(scheduled_time=start_time).exists():
                 new_executions.append(
                     PrescriptionExecution(
                         prescription=self,
@@ -721,7 +738,7 @@ class Prescription(models.Model):
                 )
             start_time += datetime.timedelta(hours=interval)
 
-        # Utiliser une transaction pour insérer toutes les nouvelles exécutions en une seule requête
+        # 🔄 Insérer les nouvelles exécutions en une seule transaction
         if new_executions:
             with transaction.atomic():
                 PrescriptionExecution.objects.bulk_create(new_executions)
@@ -1118,6 +1135,69 @@ class Vaccination(models.Model):
         verbose_name = _("Vaccination")
         verbose_name_plural = _("Vaccinations")
         ordering = ['-date_administration']
+
+
+class ParaclinicalExam(models.Model):
+    EXAM_TYPES = [
+        ('Hémogramme', 'Hémogramme'),
+        ('Ionogramme', 'Ionogramme'),
+        ('Bilan hépatique', 'Bilan hépatique'),
+        ('Bilan rénal', 'Bilan rénal'),
+        ('Urines', 'Examen d’urines'),
+        ('CRP', 'CRP'),
+        ('PCT', 'PCT'),
+        ('TP', 'TP'),
+        ('TCA', 'TCA'),
+        ('Glycémie', 'Glycémie'),
+        ('HbA1C', 'HbA1C'),
+        ('Tubage gastrique/Crachats', 'Tubage gastrique/Crachats'),
+        ('LCR', 'LCR'),
+        ('Gazometrie', 'Gazometrie'),
+        ('Marquer Cardiaques', 'Marquer Cardiaques'),
+        ('Selles', 'Selles'),
+        ('CrAg', 'CrAg'),
+        ('TB LAM', 'TB LAM'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="paraclinical_exams")
+    # doctor = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, related_name="prescribed_exams")
+    hospitalisation = models.ForeignKey("Hospitalization", on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name="hospitalization_exams")
+
+    exam_type = models.CharField(max_length=50, choices=EXAM_TYPES, verbose_name="Type d'Examen")
+    exam_name = models.CharField(max_length=50, verbose_name="nom de l'Examen" , null=True, blank=True)
+    prescribed_at = models.DateTimeField(default=timezone.now)
+    performed_at = models.DateTimeField(null=True, blank=True)
+
+    result_value = models.IntegerField(null=True, blank=True, help_text="Résultats de l'examen en chiffre.")
+    result_text = models.TextField(null=True, blank=True, help_text="Résultats de l'examen en texte.")
+    result_file = models.FileField(upload_to="paraclinical_results/", null=True, blank=True)
+
+    status = models.CharField(max_length=50, choices=[
+        ('Pending', 'En attente'),
+        ('Completed', 'Réalisé'),
+        ('Cancelled', 'Annulé')
+    ], default='Pending')
+    # Suivi de l'évolution (1ère, 2ème, 3ème fois)
+    iteration = models.PositiveIntegerField(default=1, help_text="Nombre de fois où cet examen a été réalisé.")
+
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        """
+        Avant de sauvegarder, déterminer l'iteration de cet examen pour le patient.
+        """
+        if not self.id:  # Uniquement pour les nouveaux examens
+            previous_exams = ParaclinicalExam.objects.filter(patient=self.patient, exam_type=self.exam_type).count()
+            self.iteration = previous_exams + 1  # Incrémente le nombre d'exécutions de cet examen
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.exam_type} (#{self.iteration}) - {self.patient.nom} ({self.get_status_display()})"
 
 
 class Hospitalization(models.Model):

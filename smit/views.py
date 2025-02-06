@@ -132,7 +132,6 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         return context
 
 
-
 @login_required
 def appointment_create(request):
     if request.method == 'POST':
@@ -860,13 +859,16 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
 
         # Création du patient
-        self.object = form.save()
+        self.object = form.save(commit=False)
+        self.object.created_by = self.request.user.employee
 
         # Gestion des informations de localité
         commune = form.cleaned_data.get('commune')
         if commune:
             self.object.localite = commune
             self.object.save()
+
+        self.object.save()
 
         messages.success(self.request, "Patient créé avec succès !")
         return redirect(self.success_url)

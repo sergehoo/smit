@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import datetime, timedelta
 
@@ -6,20 +7,23 @@ from allauth.account.forms import LoginForm
 from django import forms
 from django.contrib.auth.models import Permission, Group
 from django.core.exceptions import ValidationError
+from django.forms import modelformset_factory
 from django_countries.fields import CountryField
 from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
-    Patient_statut_choices, Location, Maladie, CasContact
+    Patient_statut_choices, CasContact, Location
 
 from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
-from pharmacy.models import Medicament, RendezVous, ArticleCommande
+from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
-    Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi
+    Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
+    UniteHospitalisation, TypeAntecedent
+from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
     ('Une fois par jour', 'Une fois par jour'),
@@ -231,13 +235,16 @@ class PatientCreateForm(forms.ModelForm):
     code_vih = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Code VIH', }))
 
+    cmu = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Numero CMU', }))
+
     class Meta:
         model = Patient
         fields = [
             'nom', 'prenoms', 'contact', 'situation_matrimoniale',
             'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
             'profession', 'nbr_enfants', 'groupe_sanguin', 'niveau_etude',
-            'employeur', 'commune', 'code_vih'
+            'employeur', 'commune', 'code_vih', 'cmu'
         ]
         widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
 
@@ -695,6 +702,13 @@ class ConstanteForm(forms.ModelForm):
         }
 
 
+class MedicationWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        "nom__icontains",
+
+    ]
+
+
 class PrescriptionHospiForm(forms.ModelForm):
     form_type = forms.CharField(initial="prescription", widget=forms.HiddenInput())
 
@@ -705,54 +719,30 @@ class PrescriptionHospiForm(forms.ModelForm):
             'medication': 'Médicament',
             'quantity': 'Quantité',
             'posology': 'Posologie',
+            'pendant': 'Pendant',
+            'a_partir_de': 'À partir de'
         }
         widgets = {
-            'medication': forms.Select(
-                attrs={
-                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                    'data-search': 'on',
-                    'id': 'medication',
-                }
-            ),
-            'quantity': forms.NumberInput(
+            'medication': forms.TextInput(
                 attrs={
                     'class': 'form-control',
-                    'value': '0',
-                    'placeholder': 'Entrez la quantité',
-                    'type': 'number'
+                    'placeholder': 'Tapez un médicament (Ex: Nivaquine Comprimé 500 mg)',
+                    'autocomplete': 'off',
+                    'x-model': 'search',
+                    'x-on:input': 'fetchMedications()',
                 }
             ),
-            'posology': forms.Select(
-                attrs={
-                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                    'data-search': 'on',
-                    'id': 'posology'
-                }
-            ),
-
-            'pendant': forms.Select(
-                attrs={
-                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                    'data-search': 'on',
-                    'id': 'pendant'
-                }
-            ),
-
-            'a_partir_de': forms.Select(
-                attrs={
-                    'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-                    'data-search': 'on',
-                    'id': 'a_partir_de'
-                }
-            ),
-            'form_type': forms.CharField(initial="prescription", widget=forms.HiddenInput())
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Quantité', 'min': '1'}),
+            'posology': forms.Select(attrs={'class': 'form-control'}),
+            'pendant': forms.Select(attrs={'class': 'form-control'}),
+            'a_partir_de': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add an empty label as a placeholder for Select fields
-        self.fields['medication'].empty_label = "Sélectionnez un médicament"
         self.fields['posology'].empty_label = "Sélectionnez la posologie"
+        self.fields['pendant'].empty_label = "Sélectionnez la durée"
+        self.fields['a_partir_de'].empty_label = "Sélectionnez le début"
 
 
 class SigneFonctionnelForm(forms.ModelForm):
@@ -1062,9 +1052,10 @@ class DiagnosticForm(forms.ModelForm):
         model = Diagnostic
         fields = ['type_diagnostic', 'maladie', 'remarques']
         widgets = {
-            'type_diagnostic': forms.Select(attrs={'class': 'form-control', 'type': 'select'}),
+            'type_diagnostic': forms.Select(attrs={'class': 'form-control ', 'type': 'select2'}),
             'maladie': forms.Select(
-                attrs={'class': 'form-control form-select select2', 'data-tags': 'false', 'data-search': 'on'}),
+                attrs={'class': 'form-control form-control-lg form-control-outlined form-select select2 ',
+                       'data-search': 'on', 'id': 'maladie'}),
             'remarques': TinyMCE(attrs={'class': 'tinymce-basic', 'cols': 65, 'rows': 10}),
         }
 
@@ -1303,10 +1294,18 @@ class RendezVousForm(forms.ModelForm):
 
 
 class PatientSearchForm(forms.Form):
+    from core.models import Maladie
     maladie = forms.ModelChoiceField(
         queryset=Maladie.objects.all(),
         required=False,
         label="Maladie",
+        widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on',
+                                   'placeholder': 'Sélectionner une maladie'})
+    )
+    unite = forms.ModelChoiceField(
+        queryset=UniteHospitalisation.objects.all(),
+        required=False,
+        label="Unite",
         widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on',
                                    'placeholder': 'Sélectionner une maladie'})
     )
@@ -1323,6 +1322,17 @@ class PatientSearchForm(forms.Form):
     )
 
 
+class CommandeForm(forms.ModelForm):
+    class Meta:
+        model = Commande
+        fields = ['numero', 'date_commande', 'statut']
+        widgets = {
+            'numero': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date_commande': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'statut': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
 class ArticleCommandeForm(forms.ModelForm):
     class Meta:
         model = ArticleCommande
@@ -1333,6 +1343,14 @@ class ArticleCommandeForm(forms.ModelForm):
             'fournisseur': forms.Select(attrs={'class': 'form-control'}),
             'statut': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+# Formset pour les articles
+ArticleCommandeFormSet = modelformset_factory(ArticleCommande,
+                                              form=ArticleCommandeForm,
+                                              extra=1,
+                                              # Nombre de formulaires supplémentaires pour les nouveaux articles
+                                              )
 
 
 class RdvSuiviForm(forms.ModelForm):
@@ -1540,3 +1558,47 @@ class CasContactForm(forms.ModelForm):
             'prevention_measures': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'details': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+
+class AntecedentsHospiForm(forms.ModelForm):
+    class Meta:
+        model = AntecedentsMedicaux
+        fields = ['type', 'nom', 'descriptif', 'date_debut']
+        widgets = {
+            'type': forms.Select(attrs={'class': 'form-control'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom'}),
+            'descriptif': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Description'}),
+            'date_debut': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+        labels = {
+            'type': "Type d'antécédents (Médicaux)",
+            'nom': 'Nom',
+            'descriptif': 'Descriptif',
+            'date_debut': 'Date de début',
+        }
+
+
+class GroupedAntecedentsForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Récupérer tous les types d'antécédents
+        types = TypeAntecedent.objects.all()
+
+        # Pour chaque type, ajouter dynamiquement les champs au formulaire
+        for type_antecedent in types:
+            self.fields[f"{type_antecedent.id}"] = forms.CharField(label=f"{type_antecedent.nom}", required=False,
+                                                                   widget=forms.TextInput(
+                                                                       attrs={"class": "form-control",
+                                                                              "placeholder": "Nom"})
+
+                                                                   )
+            # self.fields[f"{type_antecedent.id}_descriptif"] = forms.CharField(
+            #     label=f"{type_antecedent.nom} - Descriptif",
+            #     required=False,
+            #     widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Descriptif"})
+            # )
+            self.fields[f"{type_antecedent.id}"] = forms.DateField(
+                label=f"{type_antecedent.nom} - Date de début",
+                required=False,
+                widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
+            )

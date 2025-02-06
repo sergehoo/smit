@@ -24,128 +24,142 @@
                     </div>
                 </div>
             </div>
-            <div class="nk-block">
-                <div class="card card-bordered card-stretch">
-                    <div class="card-inner">
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <input type="text" id="searchField" class="form-control"
-                                       placeholder="Rechercher par médicament ou fournisseur...">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-inner p-0">
-                        <table class="table table-striped" id="commandeTable">
-                            <thead>
-                                <tr>
-                                    <th>Fournisseur</th>
-                                    <th>Médicament</th>
-                                    <th>Quantité</th>
-                                    <th>Date de Commande</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for commande in commandes %}
-                                    <tr>
-                                        <td>{{ commande.fournisseur.nom }}</td>
-                                        <td>
-                                            {% for article in commande.articles.all %}
-                                                <p>{{ article.medicament.nom }} ({{ article.quantite }})</p>
-                                            {% endfor %}
-                                        </td>
-                                        <td>{{ commande.quantite_commandee }}</td>
-                                        <td>{{ commande.date_commande }}</td>
-                                        <td>
-                                            <span class="badge
-                                                {% if commande.statut == 'Commandé' %}badge-warning
-                                                {% elif commande.statut == 'Reçu' %}badge-success
-                                                {% elif commande.statut == 'En attente' %}badge-secondary
-                                                {% endif %}">
-                                                {{ commande.get_statut_display }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if commande.statut == 'Commandé' %}
-{#                                                <a href="{% url 'commande_receptionner' commande.id %}" class="btn btn-success btn-sm">Marquer comme Reçu</a>#}
-                                            {% endif %}
-                                            <a href="{% url 'commandes-update' commande.id %}" class="btn btn-warning btn-sm">Modifier</a>
-                                            <a href="{% url 'commandes-delete' commande.id %}" class="btn btn-danger btn-sm">Supprimer</a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card-inner">
-                        <div class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
-                            {% endif %}
-                            {% for num in page_obj.paginator.page_range %}
-                                {% if page_obj.number == num %}
-                                    <span class="page-link active">{{ num }}</span>
-                                {% else %}
-                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                {% endif %}
-                            {% endfor %}
-                            {% if page_obj.has_next %}
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
-                            {% endif %}
-                        </div>
-                    </div>
+           <div class="nk-block">
+    <div class="card card-bordered card-stretch">
+        <div class="card-inner">
+            <!-- Barre de recherche -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" id="searchField" class="form-control"
+                           placeholder="Rechercher par médicament ou fournisseur...">
                 </div>
+            </div>
+        </div>
+        <div class="card-inner p-0">
+            <!-- Tableau des commandes -->
+            <table class="table table-striped" id="commandeTable">
+                <thead>
+                    <tr>
+                        <th>N Commande</th>
+                        <th>Date de Commande</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for commande in commandes %}
+                        <tr>
+                            <td>{{ commande.numero }}</td>
+                            <td>{{ commande.created_at }}</td>
+                            <td>{{ commande.statut }}</td>
+                            <td>{{ commande.date_commande }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if commande.statut == 'Commandé' %}badge-warning
+                                    {% elif commande.statut == 'Reçu' %}badge-success
+                                    {% elif commande.statut == 'En attente' %}badge-secondary
+                                    {% endif %}">
+                                    {{ commande.get_statut_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if commande.statut == 'Commandé' %}
+{#                                    <a href="{% url 'commande_receptionner' commande.id %}" class="btn btn-success btn-sm">Reçu</a>#}
+                                {% endif %}
+{#                                <a href="{% url 'commandes-update' commande.id %}" class="btn btn-warning btn-sm">Modifier</a>#}
+{#                                <a href="{% url 'commandes-delete' commande.id %}" class="btn btn-danger btn-sm">Supprimer</a>#}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <div class="card-inner">
+            <div class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="page-link active">{{ num }}</span>
+                    {% else %}
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+        </div>
+    </div>
+</div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    const searchField = document.getElementById('searchField');
-    const tableBody = document.getElementById('rendezvousTableBody');
+    document.getElementById('searchField').addEventListener('input', function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#commandeTable tbody tr');
 
-    searchField.addEventListener('keyup', function () {
-        const query = searchField.value;
+        rows.forEach(row => {
+            const fournisseur = row.querySelector('td:nth-child(1)').innerText.toLowerCase();
+            const medicament = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
 
-        fetch(`/pharmacy/search_rendezvous/?query=${encodeURIComponent(query)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (Array.isArray(data)) {
-                    tableBody.innerHTML = '';
-
-                    if (data.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Aucun rendez-vous trouvé.</td></tr>`;
-                    } else {
-                        data.forEach(rdv => {
-                            const row = `
-                                <tr>
-                                    <td>${rdv.patient}</td>
-                                    <td>${rdv.medicaments}</td>
-                                    <td>${rdv.date}</td>
-                                    <td>${rdv.time}</td>
-                                    <td>
-                                        <span class="badge badge-${rdv.status_class}">${rdv.status}</span>
-                                    </td>
-                                    <td>${rdv.actions}</td>
-                                </tr>
-                            `;
-                            tableBody.insertAdjacentHTML('beforeend', row);
-                        });
-                    }
-                } else {
-                    console.error('Unexpected response format:', data);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching search results:', error);
-            });
+            if (fournisseur.includes(searchValue) || medicament.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
-});
-    </script>
+</script>
+{#    <script>#}
+{#        document.addEventListener('DOMContentLoaded', function () {#}
+{#    const searchField = document.getElementById('searchField');#}
+{#    const tableBody = document.getElementById('rendezvousTableBody');#}
+{##}
+{#    searchField.addEventListener('keyup', function () {#}
+{#        const query = searchField.value;#}
+{##}
+{#        fetch(`/pharmacy/search_rendezvous/?query=${encodeURIComponent(query)}`)#}
+{#            .then(response => {#}
+{#                if (!response.ok) {#}
+{#                    throw new Error(`HTTP error! Status: ${response.status}`);#}
+{#                }#}
+{#                return response.json();#}
+{#            })#}
+{#            .then(data => {#}
+{#                if (Array.isArray(data)) {#}
+{#                    tableBody.innerHTML = '';#}
+{##}
+{#                    if (data.length === 0) {#}
+{#                        tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Aucun rendez-vous trouvé.</td></tr>`;#}
+{#                    } else {#}
+{#                        data.forEach(rdv => {#}
+{#                            const row = `#}
+{#                                <tr>#}
+{#                                    <td>${rdv.patient}</td>#}
+{#                                    <td>${rdv.medicaments}</td>#}
+{#                                    <td>${rdv.date}</td>#}
+{#                                    <td>${rdv.time}</td>#}
+{#                                    <td>#}
+{#                                        <span class="badge badge-${rdv.status_class}">${rdv.status}</span>#}
+{#                                    </td>#}
+{#                                    <td>${rdv.actions}</td>#}
+{#                                </tr>#}
+{#                            `;#}
+{#                            tableBody.insertAdjacentHTML('beforeend', row);#}
+{#                        });#}
+{#                    }#}
+{#                } else {#}
+{#                    console.error('Unexpected response format:', data);#}
+{#                }#}
+{#            })#}
+{#            .catch(error => {#}
+{#                console.error('Error fetching search results:', error);#}
+{#            });#}
+{#    });#}
+{#});#}
+{#    </script>#}
 {% endblock %}

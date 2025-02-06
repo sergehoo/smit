@@ -11,7 +11,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
     ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
-    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole
+    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -391,3 +391,8 @@ class MaladieAdmin(admin.ModelAdmin):
     list_display = ('code_cim', 'nom', 'categorie', 'gravite', 'date_diagnostic', 'medecin_responsable')
     search_fields = ('code_cim', 'nom', 'categorie', 'patient__nom')
     list_filter = ('categorie', 'gravite', 'date_diagnostic')
+
+
+@admin.register(BoxHospitalisation)
+class BoxHospitalisationAdmin(ImportExportModelAdmin):
+    list_display = ('chambre', 'capacite', 'nom', 'occuper', 'occupant')

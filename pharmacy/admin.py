@@ -17,7 +17,7 @@ from pharmacy.models import RendezVous, Medicament, MouvementStock, CathegorieMo
 
 @admin.register(Medicament)
 class MedicamentAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'stock', 'dosage', 'dosage_form', 'categorie', 'date_expiration')
+    list_display = ('nom', 'stock', 'dosage', 'dosage_form', 'unitdosage','categorie', 'date_expiration')
     search_fields = ('nom', 'codebarre')
     list_filter = ('categorie', 'date_expiration', 'dosage_form')
     ordering = ('-date_expiration',)
@@ -44,9 +44,15 @@ class MoleculeAdmin(admin.ModelAdmin):
 
 @admin.register(Commande)
 class CommandeAdmin(admin.ModelAdmin):
-    list_display = ('numero', 'articles', 'date_commande')
-    search_fields = ('articles', 'fournisseur__nom')
-    # list_filter = ('statut', 'date_commande')
+    list_display = ('numero', 'get_articles', 'date_commande', 'statut')
+    search_fields = ('articles__medicament__nom', 'articles__fournisseur__nom')
+    list_filter = ('statut', 'date_commande')
+
+    def get_articles(self, obj):
+        # Retourne une liste d'articles sous forme de chaîne
+        return ", ".join([str(article) for article in obj.articles.all()])
+
+    get_articles.short_description = "Articles"
 
 
 @admin.register(ArticleCommande)

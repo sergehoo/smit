@@ -1,5 +1,6 @@
 {% load static %}
 {% load unicorn %}
+
 <!DOCTYPE html>
 <html lang="fr-FR" class="js">
 
@@ -36,6 +37,8 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script>
         tinymce.init({
             selector: 'textarea',
@@ -174,7 +177,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 
-
 <script>
     var input = document.querySelector("#phone");
     var iti = window.intlTelInput(input, {
@@ -202,6 +204,8 @@
         });
     });
 </script>
+
+
 
 </body>
 
