@@ -316,4 +316,4 @@ HANDLER403 = 'core.views.custom_403_view'
 # }
 
 # Tell select2 which cache configuration to use:
-SELECT2_CACHE_BACKEND = "select2"
+# SELECT2_CACHE_BACKEND = "select2"
