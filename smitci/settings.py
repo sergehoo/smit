@@ -107,7 +107,7 @@ INSTALLED_APPS = [
     'django_filters',
     'guardian',
     'phonenumber_field',
-    'django_select2',
+    # 'django_select2',
 
 ]
 
@@ -304,16 +304,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HANDLER403 = 'core.views.custom_403_view'
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-    },
-    "select2": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",
-    }
-}
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#     },
+#     "select2": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/2",
+#     }
+# }
 
 # Tell select2 which cache configuration to use:
 SELECT2_CACHE_BACKEND = "select2"
