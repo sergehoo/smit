@@ -114,25 +114,35 @@ def consult_number():
 
 
 class Appointment(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True)
-    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
-    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="appointments")
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, related_name="appointments")
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name="doctor_appointments")
+    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True,
+                                 related_name="calendar_appointments")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, null=True, blank=True, related_name="event_appointments")
     date = models.DateField()
     time = models.TimeField()
     reason = models.CharField(max_length=255)
-    status = models.CharField(max_length=50, choices=[
+
+    STATUS_CHOICES = [
         ('Scheduled', 'Scheduled'),
         ('Completed', 'Completed'),
         ('Cancelled', 'Cancelled')
-    ])
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default="Scheduled")
+
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='appointments_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Rendez-vous"
+        verbose_name_plural = "Rendez-vous"
+
     def __str__(self):
-        return f"{self.patient.nom} - {self.date} {self.time}"
+        return f"{self.patient.nom} - {self.date} {self.time} ({self.status})"
 
 
 class Emergency(models.Model):
@@ -1165,7 +1175,7 @@ class ParaclinicalExam(models.Model):
                                         related_name="hospitalization_exams")
 
     exam_type = models.CharField(max_length=50, choices=EXAM_TYPES, verbose_name="Type d'Examen")
-    exam_name = models.CharField(max_length=50, verbose_name="nom de l'Examen" , null=True, blank=True)
+    exam_name = models.CharField(max_length=50, verbose_name="nom de l'Examen", null=True, blank=True)
     prescribed_at = models.DateTimeField(default=timezone.now)
     performed_at = models.DateTimeField(null=True, blank=True)
 
@@ -1209,8 +1219,8 @@ class Hospitalization(models.Model):
     discharge_date = models.DateTimeField(null=True, blank=True)
     discharge_reason = models.CharField(max_length=700, null=True, blank=True)
     room = models.CharField(max_length=500)
-    bed = models.ForeignKey('LitHospitalisation', related_name='lit_hospy', on_delete=models.SET_NULL, null=True,
-                            blank=True)
+    bed = models.ForeignKey('LitHospitalisation', related_name='lit_hospy', on_delete=models.RESTRICT, null=False,
+                            blank=False)
     reason_for_admission = models.TextField()
     status = models.CharField(max_length=50, choices=Patient_statut_choices, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1693,3 +1703,54 @@ class CommentaireInfirmier(models.Model):
         verbose_name = "Commentaire Infirmier"
         verbose_name_plural = "Commentaires Infirmiers"
         ordering = ['-date_commentaire']  # Trie par date décroissante
+
+
+class CathegorieEchantillon(models.Model):
+    nom = models.CharField(max_length=100, null=True, blank=True)
+    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.CASCADE)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return f"{self.nom} - {self.parent}"
+
+
+class TypeEchantillon(models.Model):
+    nom = models.CharField(max_length=100, null=True, blank=True)
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.nom
+
+
+class Echantillon(models.Model):
+    code_echantillon = models.CharField(null=True, blank=True, max_length=10)
+    examen_demande = models.ForeignKey(Examen, null=True, blank=True, on_delete=models.CASCADE,
+                                       related_name='examen_demandee')
+    type = models.ForeignKey('TypeEchantillon', null=True, blank=True, on_delete=models.CASCADE)
+    cathegorie = models.ForeignKey('CathegorieEchantillon', null=True, blank=True, on_delete=models.CASCADE)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='echantillon_for_patient')
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE,
+                                     related_name='echantillon_for_consultation')
+    date_collect = models.DateTimeField(null=True, blank=True)
+    site_collect = models.CharField(null=True, blank=True, max_length=100)
+    agent_collect = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.CASCADE)
+    status_echantillons = models.CharField(null=True, blank=True, max_length=10)
+    storage_information = models.CharField(null=True, blank=True, max_length=100)
+    storage_location = models.CharField(null=True, blank=True, max_length=100)
+    storage_temperature = models.CharField(null=True, blank=True, max_length=100)
+    volume = models.FloatField(null=True, blank=True, max_length=100, verbose_name='Volume de l\'échantillon (ml)')
+    expiration_date = models.CharField(null=True, blank=True, max_length=100)
+    linked = models.BooleanField(default=False, null=True, blank=True)
+    used = models.BooleanField(default=False, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    history = HistoricalRecords()
+
+    # @property
+    # def accusereception(self):
+    #     """
+    #     Renvoie les instances d'AccuseReception associées à cet échantillon.
+    #     """
+    #     return self.accusereception_set.all()
+
+    def __str__(self):
+        return f"{self.code_echantillon} - {self.examen_demande}"

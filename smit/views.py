@@ -1175,10 +1175,86 @@ class ConsultationListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
 
+@login_required
+def test_rapide_consultation_generale_create(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    if request.method == 'POST':
+        form = TestRapideVIHForm(request.POST)
+        if form.is_valid():
+            test_rapide = form.save(commit=False)
+            test_rapide.patient = consultation.patient
+            test_rapide.consultation = consultation
+            test_rapide.test_type = form.cleaned_data['test_type']
+            test_rapide.commentaire = form.cleaned_data['commentaire']
+
+            test_rapide.save()
+            messages.success(request, 'Rendez-vous ajouté avec succès!')
+            return redirect('consultation_detail', pk=consultation.id)
+    else:
+        form = TestRapideVIHForm()
+        messages.error(request, 'Le test a echoué!')
+    return redirect('consultation_detail', pk=consultation.id)
+
+
+@login_required
+def delete_test_rapide_consultation_generale(request, test_id, consultation_id):
+    # Récupérer l'objet TestRapideVIH avec l'id fourni
+    test_rapide = get_object_or_404(TestRapideVIH, id=test_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+
+    # Vérifie que la requête est bien une requête POST (pour éviter les suppressions accidentelles)
+
+    test_rapide.delete()
+    messages.success(request, 'Le test rapide VIH a été supprimé avec succès.')
+    # Redirection après suppression (à personnaliser selon vos besoins)
+    return redirect('consultation_detail', pk=consultation.id)
+
+
+@login_required
+def Examens_Consultation_generale_create(request, consultation_id):
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    if request.method == 'POST':
+        form = ExamenForm(request.POST)
+        if form.is_valid():
+            examen = form.save(commit=False)
+            examen.patients_requested = consultation.patient
+            examen.consultation = consultation
+            examen.save()
+            consultation.examens = examen
+            consultation.save()
+            messages.success(request, 'Examen ajouté avec succès!')
+            return redirect('consultation_detail', pk=consultation.id)
+        else:
+            messages.error(request, 'Erreur lors de la création de l\'examen.')
+    else:
+        form = ExamenForm()
+    return redirect('consultation_detail', pk=consultation.id)
+
+
 class ConsultationDetailView(LoginRequiredMixin, DetailView):
     model = Consultation
     template_name = 'consultations/consultation_detail.html'
     context_object_name = 'consultationsdupatient'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # context['service'] = self.object.service  # Ajoutez le service parent au contexte
+        context['formconsult'] = ConsultationCreateForm()  # Ajoutez le service parent au contexte
+        context['examen_form'] = ExamenForm()
+        context['prescription_form'] = PrescriptionForm()
+        context['antecedentsMedicaux_form'] = AntecedentsMedicauxForm()
+        context['allergies_form'] = AllergiesForm()
+        context['conseils_form'] = ConseilsForm()
+        # context['EnqueteVihForm'] = EnqueteVihForm()
+        context['hospit_form'] = HospitalizationSendForm()
+        context['hospit_request'] = HospitalizationForm()
+        context['depistage_form'] = TestRapideVIHForm()
+        context['prelevement_form'] = EchantillonForm()
+        context['suivisform'] = SuiviSendForm()
+
+        context['symptomes_form'] = SymptomesForm()
+        context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
+        return context
 
 
 class ConsultationUpdateView(LoginRequiredMixin, UpdateView):

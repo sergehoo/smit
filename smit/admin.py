@@ -4,14 +4,13 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from core.models import Location, PolesRegionaux, HealthRegion, DistrictSanitaire, Maladie
-from laboratory.models import Echantillon
 from pharmacy.models import CathegorieMolecule, Medicament
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     ServiceSubActivity, Consultation, Protocole, Evaluation, Molecule, Allergies, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
     ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
-    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation
+    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation, Echantillon
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -23,12 +22,41 @@ admin.empty_value_display = '**Empty**'
 
 @admin.register(Echantillon)
 class EchantillonAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('code_echantillon', 'patient', 'examen_demande', 'date_collect', 'status_echantillons', 'used')
+    list_filter = ('status_echantillons', 'used', 'date_collect')
+    search_fields = ('code_echantillon', 'patient__nom', 'examen_demande__nom')
+    ordering = ('-created_at',)
+    autocomplete_fields = ('patient', 'examen_demande', 'consultation', 'agent_collect')
+
+    fieldsets = (
+        ("Informations générales", {
+            "fields": ("code_echantillon", "patient", "examen_demande", "consultation", "date_collect", "site_collect", "agent_collect")
+        }),
+        ("Stockage et état", {
+            "fields": ("status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume", "expiration_date")
+        }),
+        ("État de l'échantillon", {
+            "fields": ("linked", "used")
+        }),
+    )
 
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('patient', 'doctor', 'service', 'date', 'time', 'status', 'created_at')
+    list_filter = ('status', 'date', 'service', 'doctor')
+    search_fields = ('patient__nom', 'patient__prenoms', 'doctor__nom', 'doctor__prenoms', 'reason')
+    ordering = ('-created_at',)
+    date_hierarchy = 'date'
+    list_per_page = 25
+
+    fieldsets = (
+        ('Informations du patient', {'fields': ('patient', 'reason')}),
+        ('Détails du rendez-vous', {'fields': ('service', 'doctor', 'date', 'time', 'status')}),
+        ('Informations de création', {'fields': ('created_by', 'created_at', 'updated_at')}),
+    )
+
+    readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(Service)

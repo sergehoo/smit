@@ -34,7 +34,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     ConsultationListView, ConsultationDetailView, ConsultationUpdateView, ConsultationDeleteView, \
     delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
     RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, \
-    create_rdv, UrgenceListView, UrgenceCreateView
+    create_rdv, UrgenceListView, UrgenceCreateView, test_rapide_consultation_generale_create, \
+    delete_test_rapide_consultation_generale, Examens_Consultation_generale_create
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -81,14 +82,19 @@ urlpatterns = [
                        name='appointment_update'),
                   path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
 
-                  # Consultation
-                  path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
 
+
+ # Consultation VIH
+                  path('test_rapide/<int:consultation_id>', test_rapide_consultation_generale_create, name='test_depistage_generale_create'),
                   path('consultation_delete/<int:consultation_id>', consultation_delete, name='delete_consult'),
+                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_consultation_generale,name='delete_test_rapide_generale'),
 
-                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih,
-                       name='delete_test_rapide_vih'),
+#Consultation generale
+                  path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
+                  path('consultation_delete/<int:consultation_id>', consultation_delete, name='delete_consult'),
+                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih, name='delete_test_rapide_vih'),
 
+#Hospitalisation
                   path('hospitalisation/<int:consultation_id>/<int:patient_id>', mark_consultation_as_hospitalised,
                        name='mark_hospitalisation'),
 
@@ -111,6 +117,7 @@ urlpatterns = [
                   path('Suivi/rdv/create<int:suivi_id>', create_rdv, name='suivis-rdv-create'),
 
                   path('consultations/<int:pk>/', ConsultationDetailView.as_view(), name='consultation_detail'),
+
                   path('consultations/<int:pk>/modifier/', ConsultationUpdateView.as_view(),
                        name='consultation_update'),
                   path('consultations/<int:pk>/supprimer/', ConsultationDeleteView.as_view(),
@@ -126,10 +133,13 @@ urlpatterns = [
 
                   path('enquete_create/<int:consultation_id>', enquete_create, name='enquete_create'),
                   path('Allergies_create/create/<int:consultation_id>', Allergies_create, name='Allergies_create'),
-                  path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
 
-                  path('delete_examen/<int:examen_id>/create/<int:consultation_id>', delete_examen,
-                       name='Examens_delete'),
+                  path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
+                  path('delete_examen/<int:examen_id>/create/<int:consultation_id>', delete_examen, name='Examens_delete'),
+
+
+                  path('Examens_generale_create/create/<int:consultation_id>',Examens_Consultation_generale_create, name='Examens_generale_create'),
+
 
                   path('Conseils_add/create/<int:consultation_id>', Conseils_add, name='Conseils_add'),
                   path('Rendezvous_create/create/<int:consultation_id>', Rendezvous_create, name='Rendezvous_create'),

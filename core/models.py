@@ -923,7 +923,7 @@ class Location(models.Model):
 
 
 class Patient(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     code_patient = models.CharField(max_length=100, unique=True)
     code_vih = models.CharField(max_length=100, blank=True, unique=True)
     nom = models.CharField(max_length=225)

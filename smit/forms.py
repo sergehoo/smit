@@ -15,14 +15,14 @@ from core.models import situation_matrimoniales_choices, villes_choices, Sexe_ch
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
     Patient_statut_choices, CasContact, Location
 
-from laboratory.models import Echantillon, TypeEchantillon, CathegorieEchantillon
+
 from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
     Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
-    UniteHospitalisation, TypeAntecedent
+    UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon
 from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
@@ -580,14 +580,14 @@ class AntecedentsMedicauxForm(forms.ModelForm):
 class TestRapideVIHForm(forms.ModelForm):
     test_type = forms.ChoiceField(choices=RAPID_HIV_TEST_TYPES, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
-               'id': 'test_type'}))
+               'id': 'test_type', 'required':'true'}))
 
     class Meta:
         model = TestRapideVIH
         fields = ['resultat', 'commentaire']
         widgets = {
             # 'patient': forms.Select(attrs={'class': 'form-control'}),
-            'resultat': forms.Select(attrs={'class': 'form-control'}),
+            'resultat': forms.Select(attrs={'class': 'form-control', 'required':'true'}),
             # 'laboratoire': forms.TextInput(attrs={'class': 'form-control'}),
             'commentaire': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }

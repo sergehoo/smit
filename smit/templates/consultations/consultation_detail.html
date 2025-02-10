@@ -372,7 +372,7 @@
                                                             </td>
                                                             <td>
                                                                 <a class="btn btn-outline-danger  btn-icon btn-round btn-xs mr-1"
-                                                                   href="{% url 'delete_test_rapide_vih' test_id=test.id consultation_id=consultationsdupatient.id %}"><em
+                                                                   href="{% url 'delete_test_rapide_generale' test_id=test.id consultation_id=consultationsdupatient.id %}"><em
                                                                         class="icon ni ni-trash  "></em></a>
                                                                 <a class="btn btn-outline-info  btn-icon btn-round btn-xs mr-1" href=""><em class="icon ni ni-download-cloud "></em></a>
 
@@ -432,10 +432,7 @@
                                         <div class="card text-black-100 border">
 
                                             <div class="card-header">Examens
-                                                <button type="button"
-                                                        class="btn btn-dark  btn-icon btn-round float-right"
-                                                        data-toggle="modal" data-target="#rendezvous"><em
-                                                        class="icon ni ni-plus-circle-fill"></em></button>
+                                                <button type="button" class="btn btn-dark  btn-icon btn-round float-right" data-toggle="modal" data-target="#rendezvous"><em class="icon ni ni-plus-circle-fill"></em></button>
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table">
@@ -478,9 +475,7 @@
                                         <div class="card text-black-100 border">
                                             <div class="card-header">Prélèvement
 
-                                                <button type="button"
-                                                        class="btn btn-dark  btn-icon btn-round float-right"
-                                                        data-toggle="modal" data-target="#diagnosis"><em
+                                                <button type="button" class="btn btn-dark  btn-icon btn-round float-right"  data-toggle="modal" data-target="#diagnosis"><em
                                                         class="icon ni ni-plus-circle-fill"></em></button>
                                             </div>
                                             <div class="card-inner text-black-70">
@@ -495,15 +490,12 @@
                                                     <tbody>
                                                     {% for preleve in consultationsdupatient.echantillon_for_consultation.all %}
                                                         <tr>
-
                                                             <td>{{ preleve.code_echantillon }}</td>
                                                             <td>{{ preleve.type }}</td>
                                                             <td>{{ preleve.created_at }}</td>
                                                             <td>{{ preleve.status_echantillons }}</td>
                                                             <td>
-                                                                <a class="btn btn-outline-danger  btn-icon btn-round mr-5"
-                                                                   href="{% url 'delete_echantillon' echantillon_id=preleve.id consultation_id=consultationsdupatient.id %}"><em
-                                                                        class="icon ni ni-trash ml-10 "></em></a>
+                                                                <a class="btn btn-outline-danger  btn-icon btn-round mr-5" href="{% url 'delete_echantillon_consultation_generale' echantillon_id=preleve.id consultation_id=consultationsdupatient.id %}"><em class="icon ni ni-trash ml-10 "></em></a>
                                                             </td>
                                                         </tr>
                                                     {% endfor %}
@@ -527,7 +519,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title"> Depistage rapide</h5>
                                             </div>
-                                            <form method="post" action="{% url 'test_depistage-Rapide' consultation_id=consultationsdupatient.id %}">
+                                            <form method="post" action="{% url 'test_depistage_generale_create' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="fiagnosique">
@@ -569,7 +561,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Prélèvements</h5>
                                             </div>
-                                            <form method="post" action="{% url 'create_echantillon' consultation_id=consultationsdupatient.id %}">
+                                            <form method="post" action="{% url 'create_echantillon_consultation_generale' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="fiagnosique">
@@ -642,9 +634,7 @@
                                                             </div>
                                                         {% endfor %}
                                                     </div>
-                                                    <button type="button" id="add-symptome" class="btn btn-secondary">
-                                                        Ajouter <i class="fa-solid fa-plus-circle fa-lg ml-5"> </i>
-                                                    </button>
+
                                                 </div>
                                                 <div class="modal-footer bg-light">
                                                     <div class="col-md-12 float-right mb-10">
@@ -875,7 +865,7 @@
                                                 <h5 class="modal-title">Examens</h5>
                                             </div>
 
-                                            <form action="{% url 'Examens_create' consultation_id=consultationsdupatient.id %}"
+                                            <form action="{% url 'Examens_generale_create' consultation_id=consultationsdupatient.id %}"
                                                   method="post">
                                                 {% csrf_token %}
                                                 <div class="modal-body">

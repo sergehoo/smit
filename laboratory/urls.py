@@ -3,14 +3,17 @@ from django.urls import path
 
 from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateView, AnalyseDeleteView, \
     AnalyseUpdateView, ExamenListView, ExamenDetailView, ExamenCreateView, ExamenUpdateView, ExamenDeleteView, \
-    ExamenResultatsListView, create_echantillon, delete_echantillon, EchantillonListView
+    ExamenResultatsListView, create_echantillon, delete_echantillon, EchantillonListView, \
+    create_echantillon_consultation_generale, delete_echantillon_consultation_generale
 from smitci import settings
 
 urlpatterns = [
                   # URLS pour Analyse
                   path('analyses/', AnalyseListView.as_view(), name='analyse_list'),
                   path('analyses/<int:pk>/', AnalyseDetailView.as_view(), name='analyse_detail'),
+
                   path('analyses/create/', AnalyseCreateView.as_view(), name='analyse_create'),
+
                   path('analyses/<int:pk>/update/', AnalyseUpdateView.as_view(), name='analyse_update'),
                   path('analyses/<int:pk>/delete/', AnalyseDeleteView.as_view(), name='analyse_delete'),
 
@@ -32,6 +35,11 @@ urlpatterns = [
 
                   path('examen/<int:consultation_id>/echantillon/create/', create_echantillon, name='create_echantillon'),
                   path('examen/<int:consultation_id>/echantillon/<int:echantillon_id>/delete/', delete_echantillon, name='delete_echantillon'),
+
+                  path('examen/<int:consultation_id>/echantillon/create/', create_echantillon_consultation_generale,
+                       name='create_echantillon_consultation_generale'),
+                  path('examen/<int:consultation_id>/echantillon/<int:echantillon_id>/delete/', delete_echantillon_consultation_generale,
+                       name='delete_echantillon_consultation_generale'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

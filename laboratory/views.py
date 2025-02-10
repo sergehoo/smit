@@ -3,9 +3,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 
-from laboratory.models import Echantillon
+
 from smit.forms import EchantillonForm
-from smit.models import Examen, Analyse, Consultation
+from smit.models import Examen, Analyse, Consultation, Echantillon
 
 
 # Create your views here.
@@ -43,6 +43,42 @@ def delete_echantillon(request, echantillon_id, consultation_id):
     messages.success(request, 'L\'echantillon a été supprimé avec succès.')
     # Redirection après suppression (à personnaliser selon vos besoins)
     return redirect('detail_consultation', pk=consultation.id)
+
+
+def create_echantillon_consultation_generale(request, consultation_id):
+    # Récupération de l'examen associé à l'échantillon
+    # examen = get_object_or_404(Examen, id=echantillon_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+
+    if request.method == 'POST':
+        form = EchantillonForm(request.POST)
+        if form.is_valid():
+            echantillon = form.save(commit=False)
+            # echantillon.analysedemande = examen  # Associe l'examen à l'échantillon
+            echantillon.patient = consultation.patient  # Associe l'examen à l'échantillon
+            echantillon.consultation = consultation  # Associe l'examen à l'échantillon
+            echantillon.save()
+            messages.success(request, 'Échantillon créé avec succès.')
+            return redirect('consultation_detail', pk=consultation.id)  # Redirige vers la page de détail de l'examen
+        else:
+            messages.error(request, 'Erreur lors de la création de l\'échantillon.')
+    else:
+        form = EchantillonForm()  # Affiche un formulaire vide pour la création
+
+    return redirect('consultation_detail', pk=consultation.id)
+
+
+def delete_echantillon_consultation_generale(request, echantillon_id, consultation_id):
+    # Récupérer l'objet TestRapideVIH avec l'id fourni
+    echantillon = get_object_or_404(Echantillon, id=echantillon_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+
+    # Vérifie que la requête est bien une requête POST (pour éviter les suppressions accidentelles)
+
+    echantillon.delete()
+    messages.success(request, 'L\'echantillon a été supprimé avec succès.')
+    # Redirection après suppression (à personnaliser selon vos besoins)
+    return redirect('consultation_detail', pk=consultation.id)
 
 
 class ExamenListView(ListView):
