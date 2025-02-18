@@ -112,8 +112,8 @@
         </span>
     {% endfor %}
 </div>
-
-<div class="d-flex flex-wrap gap-3 mb-5 mt-1">
+<div class="col-1" style="height: 10px"></div>
+<div class="d-flex flex-wrap gap-3 mb-5 mt-5">
     <a href="{% url 'export_hospitalized_patients' '0-18' %}" class="btn btn-outline-primary mb-2">
         Patient de 0-18 ans | <strong class="text-danger">{{ age_counts|get_item:"0-18" }}</strong>
     </a>
@@ -130,7 +130,8 @@
         Patient de 60+ ans | <strong class="text-danger">{{ age_counts|get_item:"60-plus" }}</strong>
     </a>
 </div>
-                                        <div class="card-inner p-0 mt-5">
+                                    <div class="col-1" style="height: 2px"></div>
+                                        <div class="card-inner p-0 mt-2">
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
 
