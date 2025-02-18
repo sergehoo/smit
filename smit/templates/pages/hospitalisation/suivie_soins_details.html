@@ -18,83 +18,69 @@
             <div class="nk-content-body">
 
                 <div class="nk-block-head nk-block-head-sm ">
-                    <div class="row rounded card-bordered" style="height: 220px;background-repeat: no-repeat; background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}')">
-                        <div class="nk-block-between mr-5 ">
-                            <div class="nk-block-head-content ">
-                                <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation Patient</h1>
+                     <div class="row rounded card-bordered mt-5 p-3 d-flex align-items-center" style="background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}'); background-size: cover; background-position: center;">
 
-                                <div class="nk-block-des ">
-                                     <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
-                           class=""><h2 class="ml-5"> {{ hospitalisationdetail.patient|upper }}</h2></a>
-                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
-                                    <br><a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}"
-                           class="text-primary mt-3"><em class="icon ni ni-folder-list"></em> Dossier Medical</a></h6>
-{#                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ hospitalisationdetail.patient.code_vih }}</span></h6>#}
-                                    {% if hospitalisationdetail.discharge_date %}
-    <span class="h4 float-right" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
-        Patient Sorti {{ hospitalisationdetail.discharge_date|naturaltime }}
-    </span>
-{% else %}
-    <a href="" data-toggle="modal" data-target="#hospitalisationout"
-       class="btn btn-outline-warning float-right position-absolute ml-5">
-        <i class="fa-solid fa-sign-out "></i> Sortir ?
-    </a>
-{% endif %}
+    <!-- Colonne : Informations du patient -->
+    <div class="col-lg-6 col-md-6 col-sm-6 d-flex flex-column justify-content-center">
+        <h3 class="nk-block-title page-title text-lg-right text-center text-dark">Détails Hospitalisation Patient</h3>
+        <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="patient-name">
+            <h3 class="text-primary">{{ hospitalisationdetail.patient|upper }}</h3>
+        </a>
+        <h6>
+            Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
+            <br>
+            <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="text-primary mt-2">
+                <em class="icon ni ni-folder-list"></em> Dossier Médical
+            </a>
+        </h6>
 
+        {% if hospitalisationdetail.discharge_date %}
+            <span class="h4 text-success" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
+                Patient sorti {{ hospitalisationdetail.discharge_date|naturaltime }}
+            </span>
+        {% else %}
+            <a href="#" data-toggle="modal" data-target="#hospitalisationout" class="btn btn-outline-warning">
+                <i class="fa-solid fa-sign-out"></i> Sortir ?
+            </a>
+        {% endif %}
+    </div>
 
+    <!-- Colonne : QR Code Patient -->
+    <div class="col-lg-2 col-md-3 col-sm-6 d-flex justify-content-center">
+        <img class="img-fluid" src="{{ hospitalisationdetail.patient.qr_code.url }}" height="140" alt="QR Code Patient">
+    </div>
 
-                                </div>
-
-
-                            </div><!-- .nk-block-head-content -->
-                        </div>
-<div class="col-lg-2 p-2 card-bordered d-flex justify-content-center align-items-center">
-    <img class="mt-2" src="{{ hospitalisationdetail.patient.qr_code.url }}" height="160" alt="Hospitalization Image">
-</div>
-                    <div class="col-lg-4">
-                                   <div class="d-flex align-items-center"><!-- Texte à gauche -->
-    <div class="text-start">
-        <blockquote class="blockquote">
-            <br class="mb-0">
-                Admis le :</br>
-                <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
-            </p>
+    <!-- Colonne : Informations hospitalisation -->
+    <div class="col-lg-2 col-md-6 col-sm-6">
+        <blockquote class="blockquote text-start">
+            <p class="mb-0">Admis le :</p>
+            <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
             <footer class="blockquote-footer">{{ hospitalisationdetail.reason_for_admission }}</footer>
 
             {% if hospitalisationdetail.discharge_date %}
-                <p class="mb-0 mt-3">
-                    Sortie le:</br>
-                    <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
-                </p>
+                <p class="mb-0 mt-3">Sortie le :</p>
+                <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
                 <footer class="blockquote-footer">
-                <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span></br>
+                    <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span><br>
                     {{ hospitalisationdetail.discharge_reason }}
                 </footer>
             {% endif %}
         </blockquote>
-
     </div>
-    <!-- Image à droite -->
-    <div class="me-3 mt-3">
+
+    <!-- Colonne : Image animée -->
+    <div class="col-lg-2 col-md-3 col-sm-6 d-flex justify-content-center">
         {% if not hospitalisationdetail.discharge_date %}
-            <img src="{% static 'images/hospitalization-2.gif' %}" height="200" alt="Hospitalization Image">
+            <img src="{% static 'images/hospitalization-2.gif' %}" class="img-fluid" height="140" alt="Hospitalization Image">
         {% endif %}
-
     </div>
-
-
 </div>
-                                </div>
-
-                    </div><!-- .nk-block-between -->
+               <!-- .nk-block-between -->
                     <div class="row pl-4 pb-4">
                         <div class="mt-2 ">
-
                             {% if observations %}
-                                <button class="btn btn-outline-primary" data-toggle="modal"
-                                        data-target="#observationsModal">
-                                    <em class="icon ni ni-eye"></em> Observations<span
-                                        class="badge badge-info ml-1">{{ observationscount }}</span>
+                                <button class="btn btn-outline-primary mb-3" data-toggle="modal" data-target="#observationsModal">
+                                    <em class="icon ni ni-eye"></em> Observations<span class="badge badge-info ml-1">{{ observationscount }}</span>
                                 </button>
 
 
@@ -161,7 +147,7 @@
                             </div>
 
                             {% if historiques_maladie %}
-                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2 mb-3" data-toggle="modal"
                                         data-target="#historiqueModal">
                                     <em class="icon ni ni-book"></em>Histoire Maladie<span
                                         class="badge badge-info ml-1">{{ effets_indesirablescount }}</span>
@@ -247,7 +233,7 @@
 
                             <!-- Button to Trigger Modal -->
                             {% if diagnostics %}
-                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2 mb-3" data-toggle="modal"
                                         data-target="#diagnosticModal">
                                     <em class="icon ni ni-list"></em> Diagnostics<span
                                         class="badge badge-info ml-1">{{ diagnosticscount }}</span>
@@ -321,7 +307,7 @@
                                 </div>
                             </div>
                             {% if avis_medicaux %}
-                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2 mb-3" data-toggle="modal"
                                         data-target="#voiravisMedicalModal">
                                     <em class="icon ni ni-edit-alt"></em> Avis medical<span
                                         class="badge badge-info ml-1">{{ avis_medicauxcount }}</span>
@@ -378,7 +364,7 @@
                                 });
                             </script>
                             {% if effets_indesirables %}
-                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2 mb-3" data-toggle="modal"
                                         data-target="#effetIndesirableModal">
                                     <em class="icon ni ni-edit-alt"></em> Effets indesirables <span
                                         class="badge badge-info">{{ effets_indesirablescount }}</span>
@@ -440,7 +426,7 @@
                                 });
                             </script>
                             {% if hopi_comment %}
-                                <button class="btn btn-outline-primary ml-2" data-toggle="modal"
+                                <button class="btn btn-outline-primary ml-2 mb-3" data-toggle="modal"
                                         data-target="#commentairesModal">
                                     <em class="icon ni ni-edit-alt"></em>Comment. <span
                                         class="badge badge-info">{{ hopi_commentcount }}</span>
@@ -552,10 +538,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
-
                     </div>
 
 
@@ -648,7 +630,6 @@
                                 </div>
 
                              {% endif %}
-
                             </div>
                             <div class="row">
                                 <!-- Médicament manqué -->
@@ -659,6 +640,7 @@
                                                 <h5 class="text-danger font-weight-bold mb-3">
                                                     Médicaments Non Pris
                                                 </h5>
+                                             <div class="scrollable-container" style="max-height: 200px; overflow-y: auto;">
                                                 <ul class="list-group">
                                                     {% for execution in missed_executions %}
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -671,11 +653,12 @@
                                                         <form method="post" action="{% url 'mark_execution_taken' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="execution_id" value="{{ execution.id }}">
-                                        <button type="submit" class="btn btn-primary btn-sm">Attribuer</button>
+                                        <button type="submit" class="btn btn-primary btn-xs ml-1">Attribuer</button>
                                     </form>
                                                         </li>
                                                     {% endfor %}
                                                 </ul>
+                                             </div>
                                             </div>
                                         </div>
                                     {% else %}
@@ -1006,7 +989,6 @@
                             </div>
 
                             </div>
-
 
                         </div><!-- .card-inner-group -->
                     </div><!-- .card -->
@@ -1627,4 +1609,5 @@
         });
     });
 </script>
+    </div>
 {% endblock %}

@@ -115,7 +115,7 @@ def consult_number():
 
 class Appointment(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="appointments")
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, related_name="appointments")
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, related_name="appointmentsservice")
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
                                related_name="doctor_appointments")
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, null=True, blank=True,
@@ -278,6 +278,11 @@ class EnqueteVih(models.Model):
 
 class TypeAntecedent(models.Model):
     nom = models.CharField(max_length=255, unique=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name="sous_types")
+
+    def get_all_sous_types(self):
+        """Récupérer tous les sous-types d'un type d'antécédent."""
+        return self.sous_types.all()
 
     def __str__(self):
         return self.nom
@@ -295,6 +300,85 @@ class AntecedentsMedicaux(models.Model):
 
     def __str__(self):
         return f"Antecedents Medicaux for {self.patient.nom} on {self.created_at}"
+
+
+class ModeDeVieCategorie(models.Model):
+    """Catégories de mode de vie (ex: Consommation, Environnement, Sexualité, Loisirs)"""
+    nom = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.nom
+
+
+class ModeDeVie(models.Model):
+    """Informations sur le mode de vie du patient"""
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="modes_de_vie_patients")
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospimodedevie",
+                                        null=True, blank=True)
+    categorie = models.ForeignKey(ModeDeVieCategorie, on_delete=models.CASCADE, related_name="modes_de_vie")
+    description = models.TextField(null=True, blank=True, help_text="Détails sur le mode de vie")
+    frequence = models.CharField(
+        max_length=100, choices=[
+            ('quotidien', 'Quotidien'),
+            ('hebdomadaire', 'Hebdomadaire'),
+            ('mensuel', 'Mensuel'),
+            ('occasionnel', 'Occasionnel'),
+            ('rare', 'Rare'),
+        ], null=True, blank=True
+    )
+    niveau_impact = models.CharField(
+        max_length=50, choices=[
+            ('aucun', 'Aucun'),
+            ('faible', 'Faible'),
+            ('modéré', 'Modéré'),
+            ('élevé', 'Élevé'),
+        ], null=True, blank=True, help_text="Impact sur la santé"
+    )
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='mode_vie_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.categorie.nom}"
+
+
+class AppareilType(models.Model):
+    """Appareil du corps humain (ex: Respiratoire, Digestif, Cardiaque...)"""
+    nom = models.CharField(max_length=255, null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
+                               related_name="sous_types_appareil")
+
+    def __str__(self):
+        return self.nom
+
+
+class Appareil(models.Model):
+    """Appareil du corps humain (ex: Respiratoire, Digestif, Cardiaque...)"""
+    hospitalisation = models.ForeignKey("Hospitalization", on_delete=models.CASCADE, related_name="examens_appareils",
+                                        null=True, blank=True)  # ✅ Ajout du lien avec l'hospitalisation
+    type_appareil = models.ForeignKey(AppareilType, on_delete=models.SET_NULL, null=True, blank=True)
+    nom = models.CharField(max_length=255)
+    etat = models.CharField(
+        max_length=50,
+        choices=[
+            ('normal', 'Normal'),
+            ('altéré', 'Altéré'),
+            ('anormal', 'Anormal'),
+            ('non-applicable', 'non-applicable')
+        ], default='normal'
+    )
+    observation = models.TextField(help_text="Détails de l'examen clinique de l'organe")
+
+    # class Meta:
+    # unique_together = ('hospitalisation', 'nom')  # ✅ Évite la duplication
+
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,
+                                   related_name='appareil_control_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nom
 
 
 class Allergies(models.Model):
@@ -767,11 +851,25 @@ class PrescriptionExecution(models.Model):
         ('Pending', 'Pending'),
         ('Taken', 'Taken'),
         ('Missed', 'Missed'),
+        ('Cancelled', 'Cancelled'),
     ], default='Pending')
     observations = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.prescription.medication.nom} - {self.scheduled_time} - {self.status}"
+
+    @classmethod
+    def update_missed_executions(cls):
+        """
+        Met à jour toutes les exécutions en attente ("Pending") dont l'heure prévue est dépassée.
+        """
+        with transaction.atomic():
+            nb_updated = cls.objects.filter(
+                scheduled_time__lt=now(),
+                status="Pending"
+            ).update(status="Missed")
+
+        print(f"📌 {nb_updated} exécutions de prescription mises à jour en 'Missed'.")
 
 
 class WaitingRoom(models.Model):
@@ -1240,6 +1338,31 @@ class Hospitalization(models.Model):
         dernier = self.diagnostics.order_by('-date_diagnostic').first()
         return dernier
 
+    def save(self, *args, **kwargs):
+        """Annule les prescriptions restantes lorsqu'un patient est sorti."""
+        previous_hospitalization = None
+        if self.pk:
+            previous_hospitalization = Hospitalization.objects.filter(pk=self.pk).first()
+
+        # Sauvegarde de l'objet hospitalisation
+        super().save(*args, **kwargs)
+
+        # Vérifier si le patient vient d'être sorti (discharge_date vient d'être rempli)
+        if previous_hospitalization and previous_hospitalization.discharge_date is None and self.discharge_date:
+            self.annuler_prescriptions_restantes()
+
+    def annuler_prescriptions_restantes(self):
+        """Annule les exécutions restantes des prescriptions lorsque le patient quitte l'hôpital."""
+        # import PrescriptionExecution  # Importer ici pour éviter les imports circulaires
+
+        with transaction.atomic():
+            PrescriptionExecution.objects.filter(
+                prescription__hospitalisation=self,
+                status="Pending"
+            ).update(status="Cancelled")
+
+        print(f"📢 Toutes les exécutions en attente du patient {self.patient.nom} ont été annulées.")
+
 
 class Diagnostic(models.Model):
     DIAGNOSTIC_TYPE_CHOICES = [
@@ -1334,11 +1457,7 @@ class HistoriqueMaladie(models.Model):
                                         db_index=True)  # Médecin ayant ajouté l'observation
 
     date_enregistrement = models.DateTimeField(auto_now_add=True)  # Date d'enregistrement
-    description = models.TextField()  # Détails de l'évolution de la maladie
-    antecedents = models.TextField(blank=True, null=True)  # Antécédents médicaux pertinents
-    diagnostics_associes = models.TextField(blank=True, null=True)  # Diagnostics liés
-    traitements_precedents = models.TextField(blank=True, null=True)  # Traitements administrés par le passé
-    observations = models.TextField(blank=True, null=True)  # Autres observations médicales
+    description = HTMLField()  # Détails de l'évolution de la maladie
 
     class Meta:
         verbose_name = "Historique de la Maladie"
@@ -1347,6 +1466,147 @@ class HistoriqueMaladie(models.Model):
 
     def __str__(self):
         return f"Historique de {self.patient} ({self.date_enregistrement.strftime('%d/%m/%Y')})"
+
+
+class ResumeSyndromique(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True,
+                                related_name='patient_resume_syndromique'
+                                , db_index=True)  # Associe l'historique au patient
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='resume_maladie_hospi',
+                                        db_index=True)  # Médecin ayant ajouté l'observation
+    description = HTMLField()  # Détails de l'évolution de la maladie
+
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='resumer_reccorder')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "resume syndromique de la Maladie"
+        # verbose_name_plural = "Historiques de Maladies"
+        ordering = ['-created_at']  # Trie par défaut par date descendante
+
+    def __str__(self):
+        return f"resume de {self.patient} ({self.created_at.strftime('%d/%m/%Y')})"
+
+
+class ProblemePose(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=True, blank=True,
+                                related_name='patient_maladie_probleme'
+                                , db_index=True)  # Associe l'historique au patient
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='probleme_maladie_hospi',
+                                        db_index=True)  # Médecin ayant ajouté l'observation
+    description = HTMLField()  # Détails de l'évolution de la maladie
+
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,
+                                   related_name='probleme_creator')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "resume syndromique de la Maladie"
+        # verbose_name_plural = "Historiques de Maladies"
+        ordering = ['-created_at']  # Trie par défaut par date descendante
+
+    def __str__(self):
+        return f"resume de {self.patient} ({self.created_at.strftime('%d/%m/%Y')})"
+
+
+class TypeBilanParaclinique(models.Model):
+    nom = models.CharField(max_length=250, unique=True, verbose_name="Nom du type de bilan")
+
+    def __str__(self):
+        return self.nom
+
+
+class ExamenStandard(models.Model):
+    type_examen = models.ForeignKey(TypeBilanParaclinique, on_delete=models.CASCADE, null=True, blank=True,
+                                    verbose_name="Type d'examen")
+    nom = models.CharField(max_length=250, unique=True, verbose_name="Nom de l'examen")
+
+    def __str__(self):
+        return self.nom
+
+
+class BilanParaclinique(models.Model):
+    STATUT_CHOICES = [
+        ('pending', 'En attente'),
+        ('completed', 'Terminé'),
+        ('cancelled', 'Annulé'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="bilans",
+                                verbose_name="bilanparacliniquepatient", null=True, blank=True, )
+    hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE, related_name="bilans",
+                                        verbose_name="hospitalisation_bilan_paraclinique", null=True, blank=True, )
+    examen = models.ForeignKey(ExamenStandard, on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name="Examen demandé")
+
+    description = models.TextField(null=True, blank=True, verbose_name="Description de l'examen")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    result = models.CharField(max_length=250, null=True, blank=True, verbose_name="Résultat")
+    result_date = models.DateTimeField(verbose_name="Date du résultat", null=True, blank=True, )
+    reference_range = models.CharField(max_length=250, null=True, blank=True, verbose_name="Valeur de référence")
+    unit = models.CharField(max_length=50, null=True, blank=True, verbose_name="Unité de mesure")
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name="bilans_medecin",
+                               verbose_name="Médecin prescripteur")
+    comment = models.TextField(null=True, blank=True, verbose_name="Commentaire du médecin")
+    status = models.CharField(max_length=20, choices=STATUT_CHOICES, default='pending',
+                              verbose_name="Statut de l'examen")
+    report_file = models.FileField(upload_to="bilans/", null=True, blank=True, verbose_name="Fichier du rapport")
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.examen.nom if self.examen else 'Examen non spécifié'} -- {self.examen.type_examen.nom} ({self.get_status_display()})"
+
+
+class TypeImagerie(models.Model):
+    nom = models.CharField(max_length=250, unique=True, verbose_name="Type d'imagerie")
+
+    def __str__(self):
+        return self.nom
+
+
+class ImagerieMedicale(models.Model):
+    STATUT_CHOICES = [
+        ('pending', 'En attente'),
+        ('in_progress', 'En cours d’analyse'),
+        ('completed', 'Terminé'),
+        ('cancelled', 'Annulé'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="imageriespatient",
+                                verbose_name="Patient")
+    hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="imagerieshospi",
+                                        verbose_name="Hospitalisation", null=True, blank=True)
+    type_imagerie = models.ForeignKey(TypeImagerie, on_delete=models.CASCADE, verbose_name="Type d'imagerie")
+    prescription = models.TextField(verbose_name="Motif de la demande", null=True, blank=True)
+
+    # Stockage des images et fichiers DICOM
+    image_file = models.FileField(upload_to="imagerie/images/", null=True, blank=True,
+                                  verbose_name="Fichier d'imagerie")
+    dicom_file = models.FileField(upload_to="imagerie/dicom/", null=True, blank=True, verbose_name="Fichier DICOM")
+
+    # Résultat & rapport
+    interpretation = models.TextField(verbose_name="Interprétation du radiologue", null=True, blank=True)
+    rapport_file = models.FileField(upload_to="imagerie/rapports/", null=True, blank=True,
+                                    verbose_name="Fichier du rapport")
+
+    # Informations supplémentaires
+    status = models.CharField(max_length=20, choices=STATUT_CHOICES, default='pending',
+                              verbose_name="Statut de l'examen")
+    date_examen = models.DateTimeField(auto_now_add=True, verbose_name="Date de l'examen")
+    medecin_prescripteur = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                             related_name="medecin_imagerie", verbose_name="Médecin prescripteur")
+    radiologue = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="radiologue",
+                                   verbose_name="Radiologue")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière mise à jour")
+
+    def __str__(self):
+        return f"{self.patient.nom} - {self.type_imagerie.nom} ({self.get_status_display()})"
 
 
 class Observation(models.Model):

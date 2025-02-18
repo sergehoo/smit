@@ -15,14 +15,14 @@ from core.models import situation_matrimoniales_choices, villes_choices, Sexe_ch
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
     Patient_statut_choices, CasContact, Location
 
-
 from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
     Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
-    UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon
+    UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon, ModeDeVie, Appareil, \
+    ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale
 from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
@@ -580,14 +580,14 @@ class AntecedentsMedicauxForm(forms.ModelForm):
 class TestRapideVIHForm(forms.ModelForm):
     test_type = forms.ChoiceField(choices=RAPID_HIV_TEST_TYPES, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
-               'id': 'test_type', 'required':'true'}))
+               'id': 'test_type', 'required': 'true'}))
 
     class Meta:
         model = TestRapideVIH
         fields = ['resultat', 'commentaire']
         widgets = {
             # 'patient': forms.Select(attrs={'class': 'form-control'}),
-            'resultat': forms.Select(attrs={'class': 'form-control', 'required':'true'}),
+            'resultat': forms.Select(attrs={'class': 'form-control', 'required': 'true'}),
             # 'laboratoire': forms.TextInput(attrs={'class': 'form-control'}),
             'commentaire': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -1116,47 +1116,16 @@ class EffetIndesirableForm(forms.ModelForm):
 class HistoriqueMaladieForm(forms.ModelForm):
     class Meta:
         model = HistoriqueMaladie
-        fields = ['description', 'antecedents', 'diagnostics_associes',
-                  'traitements_precedents', 'observations']
+        fields = ['description']
         widgets = {
             # 'patient': forms.Select(attrs={'class': 'form-control'}),
             # 'medecin': forms.Select(attrs={'class': 'form-control'}),
             # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 5,
-                'placeholder': 'Description de l\'évolution de la maladie'
-            }),
-            'antecedents': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Antécédents médicaux pertinents'
-            }),
-            'diagnostics_associes': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Diagnostics associés'
-            }),
-            'traitements_precedents': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Traitements administrés par le passé'
-            }),
-            'observations': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Observations médicales'
-            }),
+            'description': TinyMCE(attrs={'class': 'tinymce-effet', 'cols': 65, 'rows': 10}),
+
         }
         labels = {
-            'patient': 'Patient',
-            'medecin': 'Médecin',
-            'hospitalisation': 'Hospitalisation',
-            'description': 'Description',
-            'antecedents': 'Antécédents médicaux',
-            'diagnostics_associes': 'Diagnostics associés',
-            'traitements_precedents': 'Traitements précédents',
-            'observations': 'Observations',
+            'description': 'Details',
         }
 
 
@@ -1578,6 +1547,91 @@ class AntecedentsHospiForm(forms.ModelForm):
         }
 
 
+class ModeDeVieForm(forms.ModelForm):
+    class Meta:
+        model = ModeDeVie
+        fields = ['categorie', 'description', 'frequence', 'niveau_impact']
+        widgets = {
+            'categorie': forms.Select(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'frequence': forms.Select(attrs={'class': 'form-control'}),
+            'niveau_impact': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'categorie': 'Catégorie de mode de vie',
+            'description': 'Détails',
+            'frequence': 'Fréquence',
+            'niveau_impact': 'Impact sur la santé',
+        }
+
+
+class AppareilForm(forms.ModelForm):
+    class Meta:
+        model = Appareil
+        fields = ['type_appareil', 'nom', 'etat', 'observation']
+        widgets = {
+            'type_appareil': forms.Select(attrs={'class': 'form-control'}),
+            'nom': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de l\'appareil'}),
+            'etat': forms.Select(attrs={'class': 'form-control'}),
+            'observation': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Détails'}),
+        }
+        labels = {
+            'type_appareil': 'Type d\'Appareil',
+            'nom': 'Nom de l\'Appareil',
+            'etat': 'État de l\'Appareil',
+            'observation': 'Observations Médicales',
+        }
+
+
+class ResumeSyndromiqueForm(forms.ModelForm):
+    class Meta:
+        model = ResumeSyndromique
+        fields = [ 'description']
+        widgets = {
+            # 'patient': forms.Select(attrs={'class': 'form-control'}),
+            # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
+            'description': TinyMCE(attrs={'class': 'tinymce-effet', 'cols': 65, 'rows': 10}),
+            # 'created_by': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            # 'patient': "Patient",
+            # 'hospitalisation': "Hospitalisation",
+            'description': "Résumé Syndromique",
+            # 'created_by': "Ajouté par",
+        }
+
+
+class ProblemePoseForm(forms.ModelForm):
+    class Meta:
+        model = ProblemePose
+        fields = [ 'description']
+        widgets = {
+            # 'patient': forms.Select(attrs={'class': 'form-control'}),
+            # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
+            'description': TinyMCE(attrs={'class': 'tinymce-effet', 'cols': 65, 'rows': 10}),
+            # 'created_by': forms.Select(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            # 'patient': "Patient",
+            # 'hospitalisation': "Hospitalisation",
+            'description': "Problème posé",
+            # 'created_by': "Ajouté par",
+        }
+
+class BilanParacliniqueMultiForm(forms.Form):
+    # patient = forms.ModelChoiceField(queryset=Patient.objects.all(), label="Patient")
+    # hospitalisation = forms.ModelChoiceField(queryset=Hospitalization.objects.all(), label="Hospitalisation")
+    examens = forms.ModelMultipleChoiceField(
+        queryset=ExamenStandard.objects.all(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=True,
+        label="Sélectionnez les examens"
+    )
+
+class ImagerieMedicaleForm(forms.ModelForm):
+    class Meta:
+        model = ImagerieMedicale
+        fields = ["type_imagerie", "prescription", "image_file", "dicom_file"]
 class GroupedAntecedentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1602,3 +1656,4 @@ class GroupedAntecedentsForm(forms.Form):
                 required=False,
                 widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
             )
+

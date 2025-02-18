@@ -3,18 +3,27 @@
 {% load humanize %}
 {% block content %}
     <style>
-    .uniform-btn {
-    width: 100%;
-    min-width: 100px; /* Définit une largeur minimale pour tous les boutons */
-    text-align: left; /* Centre le texte dans les boutons */
-    padding: 5px 5px; /* Uniformise le padding des boutons */
-    font-size: 16px; /* Assure une taille de texte uniforme */
-}
-    .patient-name h3 {
-    word-wrap: break-word;
-    white-space: normal;
-    overflow-wrap: break-word;
-    max-width: 100%; /* Empêche le débordement */
+        .uniform-btn {
+            width: 100%;
+            min-width: 100px; /* Définit une largeur minimale pour tous les boutons */
+            text-align: left; /* Centre le texte dans les boutons */
+            padding: 5px 5px; /* Uniformise le padding des boutons */
+            font-size: 16px; /* Assure une taille de texte uniforme */
+        }
+
+        .patient-name h3 {
+            word-wrap: break-word;
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 100%; /* Empêche le débordement */
+        }
+
+        .custom-checkbox {
+    width: 20px; /* Largeur du checkbox */
+    height: 20px; /* Hauteur du checkbox */
+    cursor: pointer; /* Curseur cliquable */
+    transform: scale(1.5); /* Agrandit le checkbox */
+    margin-right: 40px; /* Espacement avec le texte */
 }
     </style>
     <div class="nk-content nk-content-fluid">
@@ -24,75 +33,64 @@
             <div class="nk-content-body">
 
                 <div class="nk-block-head nk-block-head-sm ">
-                    <div class="row rounded card-bordered mt-5" style="height: 220px;background-repeat: no-repeat; background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}')">
-                        <div class="nk-block-between mr-5 ">
-                            <div class="nk-block-head-content ">
-                                <h1 class="nk-block-title page-title ml-20 sm" style="color: black; text-align: right" > Details Hospitalisation Patient</h1>
+                
+                <div class="row rounded card-bordered mt-5 p-3 d-flex align-items-center" style="background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}'); background-size: cover; background-position: center;">
+    
+    <!-- Colonne : Informations du patient -->
+    <div class="col-lg-6 col-md-6 col-sm-6 d-flex flex-column justify-content-center">
+        <h3 class="nk-block-title page-title text-lg-right text-center text-dark">Détails Hospitalisation Patient</h3>
+        <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="patient-name">
+            <h3 class="text-primary">{{ hospitalisationdetail.patient|upper }}</h3>
+        </a>
+        <h6>
+            Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
+            <br>
+            <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="text-primary mt-2">
+                <em class="icon ni ni-folder-list"></em> Dossier Médical
+            </a>
+        </h6>
 
-                                <div class="nk-block-des ">
-                                     <a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="patient-name"><h3 class="ml-5"> {{ hospitalisationdetail.patient|upper }}</h3></a>
-                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ hospitalisationdetail.patient.code_patient }}</span>
-                                    <br><a href="{% url 'detail_patient' hospitalisationdetail.patient.pk %}" class="text-primary mt-3"><em class="icon ni ni-folder-list"></em> Dossier Medical</a></h6>
-{#                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ hospitalisationdetail.patient.code_vih }}</span></h6>#}
-                                    {% if hospitalisationdetail.discharge_date %}
-    <span class="h4 float-right" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
-        Patient Sorti {{ hospitalisationdetail.discharge_date|naturaltime }}
-    </span>
-{% else %}
-    <a href="" data-toggle="modal" data-target="#hospitalisationout"
-       class="btn btn-outline-warning float-right position-absolute ml-5">
-        <i class="fa-solid fa-sign-out "></i> Sortir ?
-    </a>
-{% endif %}
+        {% if hospitalisationdetail.discharge_date %}
+            <span class="h4 text-success" data-toggle="tooltip" title="{{ hospitalisationdetail.discharge_date }}">
+                Patient sorti {{ hospitalisationdetail.discharge_date|naturaltime }}
+            </span>
+        {% else %}
+            <a href="#" data-toggle="modal" data-target="#hospitalisationout" class="btn btn-outline-warning">
+                <i class="fa-solid fa-sign-out"></i> Sortir ?
+            </a>
+        {% endif %}
+    </div>
 
+    <!-- Colonne : QR Code Patient -->
+    <div class="col-lg-2 col-md-3 col-sm-6 d-flex justify-content-center">
+        <img class="img-fluid" src="{{ hospitalisationdetail.patient.qr_code.url }}" height="140" alt="QR Code Patient">
+    </div>
 
-
-                                </div>
-
-
-                            </div><!-- .nk-block-head-content -->
-                        </div>
-                        <div class="p-1 col-lg-3 card-bordered d-flex justify-content-center align-items-center">
-    <img class="mt-2" src="{{ hospitalisationdetail.patient.qr_code.url }}" height="160" alt="Hospitalization Image">
-</div>
-                        <div class="col-lg-4 col-md-3">
-                            <div class="d-flex align-items-center"><!-- Texte à gauche -->
-                                <div class="text-start">
-                                    <blockquote class="blockquote">
-                                       
-
-            <br class="mb-0">
-                Admis le :</br>
-                <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
-            </p>
+    <!-- Colonne : Informations hospitalisation -->
+    <div class="col-lg-2 col-md-6 col-sm-6">
+        <blockquote class="blockquote text-start">
+            <p class="mb-0">Admis le :</p>
+            <strong class="text-primary">{{ hospitalisationdetail.created_at }}</strong>
             <footer class="blockquote-footer">{{ hospitalisationdetail.reason_for_admission }}</footer>
 
             {% if hospitalisationdetail.discharge_date %}
-                <p class="mb-0 mt-3">
-                    Sortie le:</br>
-                    <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
-                </p>
+                <p class="mb-0 mt-3">Sortie le :</p>
+                <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
                 <footer class="blockquote-footer">
-                <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span></br>
+                    <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span><br>
                     {{ hospitalisationdetail.discharge_reason }}
                 </footer>
             {% endif %}
         </blockquote>
-                                </div>
-                                <div class=" mt-3">
-        {% if not hospitalisationdetail.discharge_date %}
-            <img src="{% static 'images/hospitalization-2.gif' %}" height="200" alt="Hospitalization Image">
-        {% endif %}
-
     </div>
 
-                            </div>
-                        </div>
-                    <ul class="nav m-0 p-0 text-end">
-                        <li class="d-flex justify-content-between align-items-center"></li>
-                    </ul>
-
-                    </div><!-- .nk-block-between -->
+    <!-- Colonne : Image animée -->
+    <div class="col-lg-2 col-md-3 col-sm-6 d-flex justify-content-center">
+        {% if not hospitalisationdetail.discharge_date %}
+            <img src="{% static 'images/hospitalization-2.gif' %}" class="img-fluid" height="140" alt="Hospitalization Image">
+        {% endif %}
+    </div>
+</div>
                    
                     <div class="row pl-4 pb-4">
                         <div class="mt-2 col-md-12 text-end">
@@ -204,25 +202,12 @@
                                                                         <span class="badge bg-info text-dark">Par {{ historique.medecin.get_full_name|default:"Médecin inconnu" }}</span>
                                                                     </h6>
                                                                     <p class="mb-1">
-                                                                        <strong>Description
-                                                                            :</strong> {{ historique.description }}
+                                                                        <strong>Details
+                                                                            :</strong>
                                                                     </p>
-                                                                    <p class="mb-1">
-                                                                        <strong>Antécédents
-                                                                            :</strong> {{ historique.antecedents|default:"Non spécifiés" }}
-                                                                    </p>
-                                                                    <p class="mb-1">
-                                                                        <strong>Diagnostics Associés
-                                                                            :</strong> {{ historique.diagnostics_associes|default:"Non spécifiés" }}
-                                                                    </p>
-                                                                    <p class="mb-1">
-                                                                        <strong>Traitements Précédents
-                                                                            :</strong> {{ historique.traitements_precedents|default:"Non spécifiés" }}
-                                                                    </p>
-                                                                    <p class="mb-1">
-                                                                        <strong>Observations
-                                                                            :</strong> {{ historique.observations|default:"Non spécifiées" }}
-                                                                    </p>
+                                                                     {{ historique.description|safe }}
+
+
                                                                 </div>
                                                                 <div>
                                                                     {% if historique.medecin == request.user %}
@@ -267,7 +252,6 @@
                                         class="badge badge-info ml-1">{{ diagnosticscount }}</span>
                                 </button>
                                         </li>{% endif %}
-
                             <!-- Modal Diagnostics -->
                             <div class="modal fade" id="diagnosticModal" tabindex="-1"
                                  aria-labelledby="diagnosticModalLabel" aria-hidden="true">
@@ -335,7 +319,199 @@
                                     </div>
                                 </div>
                             </div>
-                            {% if avis_medicaux %}
+
+                                {% if antecedents_par_type %}
+                                    <li class="d-flex justify-content-between align-items-center">
+                                        <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                                data-target="#antecedentsViewModal">
+                                            <em class="icon ni ni-list"></em> Antécédents
+                                            <span class="badge badge-info ml-1">{{ antecedentscount }}</span>
+                                        </button>
+                                    </li>
+                                {% endif %}
+
+                                <!-- Modal Affichage des Antécédents -->
+                                <div class="modal fade" id="antecedentsViewModal" tabindex="-1"
+                                     aria-labelledby="antecedentsModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="antecedentsModalLabel">Antécédents
+                                                    Médicaux</h5>
+                                                <button type="button" class="btn-close" data-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if antecedents_par_type %}
+                                                    <div class="accordion" id="accordionAntecedents">
+                                                        {% for type_nom, antecedents in antecedents_par_type.items %}
+                                                            <div class="accordion-item">
+                                                                <h2 class="accordion-header"
+                                                                    id="heading{{ forloop.counter }}">
+                                                                    <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
+                                                                            type="button" data-toggle="collapse"
+                                                                            data-target="#collapse{{ forloop.counter }}"
+                                                                            aria-expanded="false"
+                                                                            aria-controls="collapse{{ forloop.counter }}">
+                                                                        {{ type_nom }} ({{ antecedents|length }})
+                                                                    </button>
+                                                                </h2>
+                                                                <div id="collapse{{ forloop.counter }}"
+                                                                     class="accordion-collapse collapse"
+                                                                     aria-labelledby="heading{{ forloop.counter }}"
+                                                                     data-parent="#accordionAntecedents">
+                                                                    <div class="accordion-body">
+                                                                        <ul class="list-group">
+                                                                            {% for antecedent in antecedents %}
+                                                                                <li class="list-group-item">
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <div>
+                                                                                            <h6 class="mb-1">
+                                                                                                <strong>{{ antecedent.date_debut|default:"Date inconnue" }}</strong>
+                                                                                                -
+                                                                                                <span class="badge bg-info text-dark">{{ antecedent.nom }}</span>
+                                                                                            </h6>
+                                                                                            <p class="mb-1">
+                                                                                                <strong>Description
+                                                                                                    :</strong> {{ antecedent.descriptif|default:"Aucune description" }}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            {% if request.user == antecedent.hospitalisation.medecin_responsable %}
+                                                                                                <!-- Bouton Supprimer -->
+                                                                                                <form method="post"
+                                                                                                      action="{% url 'delete_antecedent' antecedent.id %}"
+                                                                                                      style="display:inline;">
+                                                                                                    {% csrf_token %}
+                                                                                                    <button type="submit"
+                                                                                                            class="btn btn-danger btn-sm"
+                                                                                                            onclick="return confirm('Voulez-vous vraiment supprimer cet antécédent ?')">
+                                                                                                        <em class="icon ni ni-trash"></em>
+                                                                                                    </button>
+                                                                                                </form>
+                                                                                            {% endif %}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </li>
+                                                                            {% endfor %}
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <div class="alert alert-info text-center">
+                                                        Aucun antécédent enregistré pour cette hospitalisation.
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Fermer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if modedevies_by_categories %}
+                                    <li class="d-flex justify-content-between align-items-center">
+                                        <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
+                                                data-target="#modeDeVieviewModal">
+                                            <em class="icon ni ni-list"></em> Mode de vies
+                                            <span class="badge badge-info ml-1">{{ modedevies_count }}</span>
+                                        </button>
+                                    </li>
+                                {% endif %}
+
+
+                                <!-- Modal d'Affichage des Modes de Vie -->
+                                <div class="modal fade" id="modeDeVieviewModal" tabindex="-1"
+                                     aria-labelledby="modeDeVieModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modes de Vie du Patient</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if modedevies_by_categories %}
+                                                    <div class="accordion" id="accordionModeDeVie">
+                                                        {% for categorie, modedevies in modedevies_by_categories.items %}
+                                                            <div class="accordion-item">
+                                                                <h2 class="accordion-header"
+                                                                    id="heading{{ forloop.counter }}">
+                                                                    <button class="accordion-button collapsed btn btn-outline-primary uniform-btn "
+                                                                            type="button"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#collapse{{ forloop.counter }}"
+                                                                            aria-expanded="false"
+                                                                            aria-controls="collapse{{ forloop.counter }}">
+                                                                        {{ categorie }} ({{ modedevies|length }})
+                                                                    </button>
+                                                                </h2>
+                                                                <div id="collapse{{ forloop.counter }}"
+                                                                     class="accordion-collapse collapse"
+                                                                     aria-labelledby="heading{{ forloop.counter }}"
+                                                                     data-bs-parent="#accordionModeDeVie">
+                                                                    <div class="accordion-body">
+                                                                        <ul class="list-group">
+                                                                            {% for mode in modedevies %}
+                                                                                <li class="list-group-item">
+                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                        <div>
+                                                                                            <h6 class="mb-1">
+                                                                                                <strong>{{ mode.date_enregistrement|date:"d M Y" }}</strong>
+                                                                                                -
+                                                                                                <span class="badge bg-info text-dark">{{ mode.get_frequence_display }}</span>
+                                                                                            </h6>
+                                                                                            <p class="mb-1"><strong>Description
+                                                                                                :</strong> {{ mode.description|default:"Aucune description" }}
+                                                                                            </p>
+                                                                                            <p class="mb-1"><strong>Impact
+                                                                                                :</strong> {{ mode.get_niveau_impact_display }}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <form method="post"
+                                                                                                  action=""
+                                                                                                  style="display:inline;">
+                                                                                                {% csrf_token %}
+                                                                                                <button type="submit"
+                                                                                                        class="btn btn-danger btn-sm"
+                                                                                                        onclick="return confirm('Voulez-vous vraiment supprimer ce mode de vie ?')">
+                                                                                                    <em class="icon ni ni-trash"></em>
+                                                                                                </button>
+                                                                                            </form>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </li>
+                                                                            {% endfor %}
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <div class="alert alert-info text-center">
+                                                        Aucun mode de vie enregistré pour cette hospitalisation.
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Fermer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                {% if avis_medicaux %}
                                  <li class="d-flex justify-content-between align-items-center">
                                 <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
                                         data-target="#voiravisMedicalModal">
@@ -407,8 +583,7 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">Effets Indésirables</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
                                             <input type="text" id="searchEffetsIndesirables" class="form-control mb-3"
@@ -560,8 +735,7 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="discharge_reason">Commentaires</label>
-                                                    <textarea class="form-control" id="discharge_reason"
-                                                              name="discharge_reason" rows="4" required></textarea>
+                                                    <textarea class="form-control" id="discharge_reason" name="discharge_reason" rows="4" required></textarea>
                                                 </div>
                                                 <button type="submit" class="btn btn-primary">Sortir</button>
                                             </form>
@@ -586,58 +760,21 @@
 
                                 <div class="col-lg-3 text-end">
                                 <ul class="m-0 p-0 list-unstyled text-end">
-                                    <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-gray uniform-btn mt-2" data-toggle="modal" data-target="#addobservationModal">
-                                                <em class="icon ni ni-plus-circle-fill"></em>Observations
-                                            </button>
-                                            <div class="modal fade" id="addobservationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter une Observations</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_observations' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ observationform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-                                            <script>
-                                                document.addEventListener('DOMContentLoaded', function () {
-                                                    // Reinitialiser TinyMCE quand le modal est affiché
-                                                    $('#addobservationModal').on('shown.bs.modal', function () {
-                                                        tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                                                        tinymce.init({
-                                                            selector: '.tinymce-obs',
-                                                            plugins: 'advlist autolink lists link charmap print preview anchor',
-                                                            toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                                                            menubar: false,
-                                                            height: 300,
-                                                        });
-                                                    });
-                                                });
-                                            </script>
-
-                                            <!-- Bouton pour le modal de prescription -->
-                                        </li>
-                                    <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-info uniform-btn  mt-2"
+                                      <!-- Historique Maladie -->
+                                         <li class="d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-primary uniform-btn  mt-2"
                                                     data-toggle="modal" data-target="#addhistoireModal">
-                                                <em class="icon ni ni-plus-circle-fill"></em> Histoire
+                                                <em class="icon ni ni-plus-circle-fill"></em> Histoire maladie
                                             </button>
-                                             <div class="modal fade" id="addhistoireModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+                                             <div class="modal fade" id="addhistoireModal"  data-backdrop="static"   role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Diagnostic</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">Historique de la maladie</h5>
+                 <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+
             </div>
             <div class="modal-body">
                 <form method="post" action="{% url 'add_historique_maladie' hospitalisation_id=hospitalisationdetail.id  %}">
@@ -648,116 +785,308 @@
             </div>
         </div>
     </div>
-</div>
-
-                                        </li>
-                                    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-dark  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addcommentModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Commentaire
-        </button>
-                    <div class="modal fade" id="addcommentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un commentaire</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ hospicomment.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-    </li>
-                                    </ul>
-                                </div>
-                                <div class="col-lg-3 text-end">
-                                    <ul class="m-0 p-0 list-unstyled text-end">
-                                        <li class="d-flex justify-content-between align-items-center">
-                                            <button type="button" class="btn btn-primary  uniform-btn mt-2" data-toggle="modal" data-target="#antecedentsModal">
-                                                <em class="icon ni ni-plus-circle-fill"></em> Antécédents </button>
-                                            <div class="modal fade" id="antecedentsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Antécédents Médicaux</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ antecedentshospi.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-
-            </div>
-        </div>
-    </div>
-</div>
-                                        </li>
-                                        <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-warning  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addavisModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Signes Fonctionnels
-        </button>
-
-        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Avi medical</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ avismedicalform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-         <script>
+                                                  <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addavisModal').on('shown.bs.modal', function () {
+            $('#addhistoireModal').on('shown.bs.modal', function () {
                 tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
                 tinymce.init({
-                    selector: '.tinymce-avis',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    selector: '.tinymce-effet',
+                    plugins: 'advlist autolink lists link charmap print preview anchor image media table paste wordcount',
                     toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
                     menubar: false,
                     height: 300,
+                    browser_spellcheck: true,
+                    contextmenu: false ,
                 });
             });
         });
     </script>
-    </li>
+</div>
+
+                                        </li>
+                                     <!-- Button antecedent  -->
+               <li class="d-flex justify-content-between align-items-center">
+    <button type="button" class="btn btn-primary uniform-btn mt-2"
+            data-toggle="modal" data-target="#antecedentsModal">
+        <em class="icon ni ni-plus-circle-fill"></em> Antécédents
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="antecedentsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Antécédents Médicaux</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form method="post" action="{% url 'add_antecedent_hospi' hospitalisation_id=hospitalisationdetail.id %}">
+                        {% csrf_token %}
+
+                        <!-- Initialisation Alpine.js avec les types chargés dynamiquement -->
+                        <div x-data="antecedentsForm(JSON.parse('{{ types_antecedents_json|safe|escapejs }}'))">
+                            <template x-for="(group, index) in groups" :key="index">
+                                <div class="mb-4 p-3 border rounded">
+                                    <h5 x-text="group.label" class="mb-3"></h5>
+
+                                    <template x-for="(antecedent, idx) in group.antecedents" :key="idx">
+                                        <div class="mb-3">
+                                            <input type="hidden" :name="'type_' + index + '_' + idx" x-model="group.id">
+
+                                            <input type="text" class="form-control mb-2" placeholder="Nom"
+                                                   :name="'nom_' + index + '_' + idx" x-model="antecedent.nom">
+
+                                            <input type="text" class="form-control mb-2" placeholder="Description"
+                                                   :name="'descriptif_' + index + '_' + idx"
+                                                   x-model="antecedent.descriptif">
+
+                                            <input type="date" class="form-control mb-2"
+                                                   :name="'date_debut_' + index + '_' + idx"
+                                                   x-model="antecedent.date_debut">
+
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    @click="removeAntecedent(index, idx)">Supprimer
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <button type="button" class="btn btn-success btn-sm"
+                                            @click="addAntecedent(index)">Ajouter un champ
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</li>
+
+<!-- Alpine.js Script -->
+<script>
+    function antecedentsForm(typesAntecedents) {
+        return {
+            groups: typesAntecedents.map(type => ({
+                label: type.nom,  // Utilisation du nom du type
+                id: type.id,  // ID du type pour la relation ForeignKey
+                antecedents: [{ nom: "", descriptif: "", date_debut: "" }]
+            })),
+            addAntecedent(index) {
+                this.groups[index].antecedents.push({ nom: "", descriptif: "", date_debut: "" });
+            },
+            removeAntecedent(index, idx) {
+                if (this.groups[index].antecedents.length > 1) {
+                    this.groups[index].antecedents.splice(idx, 1);
+                }
+            }
+        };
+    }
+</script>
+
+ <!-- Mode de vie  -->
+<li class="d-flex justify-content-between align-items-center">
+    <button type="button" class="btn btn-primary uniform-btn mt-2"
+            data-bs-toggle="modal" data-bs-target="#modeDeVieModal">
+        <em class="icon ni ni-plus-circle-fill"></em> Mode de Vie
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modeDeVieModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mode de Vie du Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <form method="post" action="{% url 'ajouter_mode_de_vie' hospitalisation_id=hospitalisationdetail.id %}">
+                        {% csrf_token %}
+
+                        <!-- Initialisation Alpine.js -->
+                        <div x-data="modeDeVieForm(JSON.parse('{{ categorie_modedevie_json|safe|escapejs }}'))">
+                            <template x-for="(group, index) in groups" :key="index">
+                                <div class="mb-4 p-3 border rounded">
+                                    <h5 x-text="group.label" class="mb-3"></h5>
+
+                                    <template x-for="(mode, idx) in group.modes" :key="idx">
+                                        <div class="mb-3">
+                                            <input type="hidden"
+                                                   :name="'categorie_' + index + '_' + idx"
+                                                   x-model="group.id">
+
+                                            <select class="form-control mb-2"
+                                                    :name="'frequence_' + index + '_' + idx"
+                                                    x-model="mode.frequence">
+                                                <option value="">Sélectionner la fréquence</option>
+                                                <option value="quotidien">Quotidien</option>
+                                                <option value="hebdomadaire">Hebdomadaire</option>
+                                                <option value="mensuel">Mensuel</option>
+                                                <option value="occasionnel">Occasionnel</option>
+                                                <option value="rare">Rare</option>
+                                            </select>
+
+                                            <select class="form-control mb-2"
+                                                    :name="'impact_' + index + '_' + idx"
+                                                    x-model="mode.impact">
+                                                <option value="">Impact sur la santé</option>
+                                                <option value="faible">Faible</option>
+                                                <option value="modéré">Modéré</option>
+                                                <option value="élevé">Élevé</option>
+                                            </select>
+
+                                            <textarea class="form-control mb-2"
+                                                      placeholder="Détails"
+                                                      :name="'description_' + index + '_' + idx"
+                                                      x-model="mode.description"></textarea>
+
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    @click="removeMode(index, idx)">
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <button type="button"
+                                            class="btn btn-success btn-sm"
+                                            @click="addMode(index)">Ajouter un champ
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">
+                            Enregistrer
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</li>
+
+<!-- Alpine.js Script -->
+<script>
+    function modeDeVieForm(categories) {
+        return {
+            groups: categories.map(cat => ({
+                label: cat.nom,  // Nom de la catégorie
+                id: cat.id,  // ID de la catégorie
+                modes: [{ description: "", frequence: "", impact: "" }]
+            })),
+            addMode(index) {
+                this.groups[index].modes.push({
+                    description: "",
+                    frequence: "",
+                    impact: ""
+                });
+            },
+            removeMode(index, idx) {
+                if (this.groups[index].modes.length > 1) {
+                    this.groups[index].modes.splice(idx, 1);
+                }
+            }
+        };
+    }
+</script>
+
+
+                                </ul>
+                                </div>
+                                <div class="col-lg-3 text-end">
+                                    <ul class="m-0 p-0 list-unstyled text-end">
+                                         <!-- Examen Physique  -->
                                         <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-light  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addeffetindesirableModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Résumés
+        <button type="button" class="btn btn-success  uniform-btn mt-2"
+                data-toggle="modal" data-target="#examensphysiqueModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Examens Physiques
         </button>
-        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="examensphysiqueModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ajouter un effet indesirable</h5>
+                <h5 class="modal-title">Examens des Apareils</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ effetindesirableform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
+            <form method="post" action="{% url 'add_examen_apareil' hospitalisation_id=hospitalisationdetail.id %}">
+    {% csrf_token %}
+
+    <div x-data="appareilForm(JSON.parse('{{ types_appareils_json|safe|escapejs }}'))">
+        <template x-for="(group, index) in groups" :key="index">
+            <div class="mb-4 p-3 border rounded">
+                <h5 x-text="group.label" class="mb-3"></h5>
+
+                <template x-for="(sousType, idx) in group.sous_types" :key="idx">
+                    <div class="mb-3 p-2 border rounded bg-light">
+                        <h6 x-text="sousType.nom" class="mb-2 text-primary"></h6>
+
+                        <input type="hidden" :name="'type_appareil_' + index + '_' + idx" x-model="sousType.id">
+
+                        <input type="text" class="form-control mb-2" placeholder="Nom de l'Appareil"
+                               :name="'nom_' + index + '_' + idx" x-model="sousType.nom" required>
+
+                        <select class="form-control mb-2" :name="'etat_' + index + '_' + idx" x-model="sousType.etat">
+                            <option value="normal">Normal</option>
+                            <option value="altéré">Altéré</option>
+                            <option value="anormal">Anormal</option>
+                            <option value="non-applicable">Non-applicable</option>
+                        </select>
+
+                        <textarea class="form-control mb-2" placeholder="Détails de l'examen"
+                                  :name="'observation_' + index + '_' + idx" x-model="sousType.observation"></textarea>
+
+                        <button type="button" class="btn btn-danger btn-sm"
+                                @click="removeAppareil(index, idx)">Supprimer</button>
+                    </div>
+                </template>
+
+                <button type="button" class="btn btn-success btn-sm"
+                        @click="addAppareil(index)">Ajouter un champ</button>
+            </div>
+        </template>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Enregistrer</button>
+</form>
+                <!-- Alpine.js Script -->
+<script>
+    function appareilForm(typesAppareils) {
+        return {
+            groups: typesAppareils.map(type => ({
+                label: type.nom,  // Nom du type parent
+                id: type.id,  // ID du type parent
+                sous_types: type.sous_types.map(sous_type => ({
+                    id: sous_type.id,
+                    nom: sous_type.nom,
+                    etat: "normal",
+                    observation: ""
+                }))
+            })),
+            addAppareil(index) {
+                this.groups[index].sous_types.push({
+                    id: null,
+                    nom: "",
+                    etat: "normal",
+                    observation: ""
+                });
+            },
+            removeAppareil(index, idx) {
+                if (this.groups[index].sous_types.length > 1) {
+                    this.groups[index].sous_types.splice(idx, 1);
+                }
+            }
+        };
+    }
+</script>
             </div>
         </div>
     </div>
@@ -779,64 +1108,288 @@
     </script>
     </li>
 
-</ul>
+                                         <!-- Resume Syndromique  -->
+                                         <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-success  uniform-btn mt-2"
+                data-toggle="modal" data-target="#resumesyndromiqueModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Résumés Syndromique
+        </button>
+        <div class="modal fade" id="resumesyndromiqueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un résumé</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_resume_syndromique' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ resumesyndromiqueform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Reinitialiser TinyMCE quand le modal est affiché
+            $('#resumesyndromiqueModal').on('shown.bs.modal', function () {
+                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                tinymce.init({
+                    selector: '.tinymce-effet',
+                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                    menubar: false,
+                    height: 300,
+                });
+            });
+        });
+    </script>
+    </li>
+
+                                        <!-- Problemes posés  -->
+                                         <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-success  uniform-btn mt-2"
+                data-toggle="modal" data-target="#problemesposerModal">
+            <em class="icon ni ni-plus-circle-fill"></em>Problèmes posés
+        </button>
+        <div class="modal fade" id="problemesposerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rediger le Problèmes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_problemes_pose' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ problemesposerform.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Reinitialiser TinyMCE quand le modal est affiché
+            $('#problemesposerModal').on('shown.bs.modal', function () {
+                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
+                tinymce.init({
+                    selector: '.tinymce-effet',
+                    plugins: 'advlist autolink lists link charmap print preview anchor',
+                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
+                    menubar: false,
+                    height: 300,
+                });
+            });
+        });
+    </script>
+    </li>
+
+                                    </ul>
 
                                 </div>
                                 <div class="col-lg-3 text-end">
 
                                    <ul class="m-0 p-0 list-unstyled text-end">
-                                       <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-secondary  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addeffetindesirableModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens Physiques
+
+ <!-- Bilan Paraclinique -->
+    <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-danger  uniform-btn mt-2"
+                data-toggle="modal" data-target="#bilanModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Bilan Paraclinique
         </button>
-        <div class="modal fade" id="addeffetindesirableModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+
+        <div class="modal fade" id="bilanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ajouter un effet indesirable</h5>
+                <h5 class="modal-title">Ajouter des Examens Paracliniques</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form method="post" action="{% url 'add_effet_indesirable' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ effetindesirableform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
+                <form @submit.prevent="submitForm">
+    {% csrf_token %}
+
+    <div x-data="bilanForm(JSON.parse('{{ types_examens_json|safe|escapejs }}'))">
+        <template x-for="(type, index) in types" :key="index">
+            <div class="mb-4 p-3 border rounded">
+                <h5 class="mb-3 text-primary" x-text="type.nom"></h5>
+
+                <template x-for="(examen, idx) in type.examens" :key="idx">
+                    <label class="d-flex align-items-center mb-4">
+                        <input type="checkbox" class="form-check-input custom-checkbox me-2"
+                               :value="examen.id"
+                               x-model="selectedExamens">
+                        <span x-text="examen.nom" class="ml-3"></span>
+                    </label>
+                </template>
+            </div>
+        </template>
+
+        <!-- Bouton d'enregistrement -->
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary" @click.prevent="submitForm">
+                Enregistrer les examens
+            </button>
+        </div>
+    </div>
+</form>
             </div>
         </div>
     </div>
 </div>
         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-effet',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
+  function bilanForm(data) {
+    return {
+        types: data,  // Liste des types d'examens et examens associés
+        selectedExamens: [],  // Examens sélectionnés
+
+        submitForm() {
+            if (this.selectedExamens.length === 0) {
+                alert("Veuillez sélectionner au moins un examen.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("csrfmiddlewaretoken", document.querySelector("[name=csrfmiddlewaretoken]").value);
+
+            this.selectedExamens.forEach(id => {
+                formData.append("examens", id);
             });
-        });
-    </script>
+
+            let url = "{% url 'add_bilan_paraclinique' hospitalisation_id=0 %}".replace("0", "{{ hospitalisationdetail.id }}");
+
+            fetch(url, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert("Erreur lors de l'enregistrement : " + error);
+            });
+        }
+    };
+}
+</script>
     </li>
+     <!-- Imagerie -->
     <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-primary  uniform-btn mt-2" data-toggle="modal" data-target="#adddiagnosticModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens des appareils
+        <button type="button" class="btn btn-danger  uniform-btn mt-2"
+                data-toggle="modal" data-target="#imagerieModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Imagerie
         </button>
 
-        <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
-    
-            <div class="modal-dialog">
+        <div class="modal fade" id="imagerieModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une Imagerie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="submitForm">
+                    {% csrf_token %}
+
+                    <div x-data="imagerieForm(JSON.parse('{{ types_imagerie_json|safe|escapejs }}'))">
+                        <label>Type d'Imagerie :</label>
+                        <select class="form-select mb-3" x-model="selectedType">
+                            <template x-for="(type, index) in types" :key="index">
+                                <option :value="type.id" x-text="type.nom"></option>
+                            </template>
+                        </select>
+
+                        <label>Motif :</label>
+                        <textarea class="form-control mb-3" x-model="prescription"></textarea>
+
+                        <label>Fichier Image :</label>
+                        <input type="file" class="form-control mb-3" @change="handleFileUpload">
+
+                        <!-- Bouton d'enregistrement -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                Enregistrer l'Imagerie
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function imagerieForm(types) {
+        return {
+            types: types,
+            selectedType: '',
+            prescription: '',
+            imageFile: null,
+
+            handleFileUpload(event) {
+                this.imageFile = event.target.files[0];
+            },
+
+            submitForm() {
+                if (!this.selectedType) {
+                    alert("Veuillez sélectionner un type d'imagerie.");
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append("csrfmiddlewaretoken", document.querySelector("[name=csrfmiddlewaretoken]").value);
+                formData.append("type_imagerie", this.selectedType);
+                formData.append("prescription", this.prescription);
+                if (this.imageFile) {
+                    formData.append("image_file", this.imageFile);
+                }
+
+                fetch("{% url 'add_imagerie' hospitalisation_id=hospitalisationdetail.id %}", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert("Erreur lors de l'enregistrement.");
+                    }
+                });
+            }
+        };
+    }
+</script>
+
+    </li>
+
+  <!-- Diagnostique -->
+ <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-danger  uniform-btn mt-2" data-toggle="modal" data-target="#adddiagnosticModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Diagnostic
+        </button>
+
+   <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Ajouter un Diagnostic</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-           
             <div class="modal-body">
                 <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
                     {% csrf_token %}
@@ -848,45 +1401,7 @@
     </div>
 </div>
     </li>
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-info  uniform-btn mt-2"
-                data-toggle="modal" data-target="#addavisModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Examens Paraclinique
-        </button>
 
-        <div class="modal fade" id="addavisModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Avi medical</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_avis_medical' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ avismedicalform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Reinitialiser TinyMCE quand le modal est affiché
-            $('#addavisModal').on('shown.bs.modal', function () {
-                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                tinymce.init({
-                    selector: '.tinymce-avis',
-                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                    menubar: false,
-                    height: 300,
-                });
-            });
-        });
-    </script>
-    </li>
 
 
 </ul>
@@ -895,31 +1410,9 @@
                                 <div class="col-lg-3 text-end">
 
                        <ul class="m-0 p-0 list-unstyled text-end">
+  <!-- avis medical -->
     <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-danger  uniform-btn mt-2" data-toggle="modal" data-target="#adddiagnosticModal">
-            <em class="icon ni ni-plus-circle-fill"></em> Diagnostic
-        </button>
-
-        <div class="modal fade" id="adddiagnosticModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter un Diagnostic</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="{% url 'add_diagnostic' hospitalisation_id=hospitalisationdetail.id  %}">
-                    {% csrf_token %}
-                    {{ diagnosticsform.as_p }}
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-    </li>
-    <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-success  uniform-btn mt-2"
+        <button type="button" class="btn btn-light  uniform-btn mt-2"
                 data-toggle="modal" data-target="#addavisModal">
             <em class="icon ni ni-plus-circle-fill"></em> Avis médical
         </button>
@@ -958,8 +1451,9 @@
     </script>
     </li>
 
+  <!-- effet indesirable -->
     <li class="d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-warning uniform-btn mt-2"
+        <button type="button" class="btn btn-light uniform-btn mt-2"
                 data-toggle="modal" data-target="#addeffetindesirableModal">
             <em class="icon ni ni-plus-circle-fill"></em> Effet indésirable
         </button>
@@ -995,6 +1489,31 @@
             });
         });
     </script>
+    </li>
+                             <!-- Commentaire -->
+   <li class="d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-light  uniform-btn mt-2"
+                data-toggle="modal" data-target="#addcommentModal">
+            <em class="icon ni ni-plus-circle-fill"></em> Commentaire / update
+        </button>
+                    <div class="modal fade" id="addcommentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un commentaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id  %}">
+                    {% csrf_token %}
+                    {{ hospicomment.as_p }}
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
     </li>
 </ul>
 
@@ -1062,29 +1581,80 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                                <script>
-                                    {% if next_execution %}
-                                        // Script pour le compte à rebours
-                                        const nextExecutionTime = new Date("{{ next_execution.scheduled_time|date:"Y-m-d H:i:s" }}").getTime();
-                                        const countdownElement = document.getElementById("countdown");
+                            <script>
+    {% if next_execution %}
+        // Récupère la date de la prochaine exécution
+        const nextExecutionTime = new Date("{{ next_execution.scheduled_time|date:'Y-m-d H:i:s' }}").getTime();
+        const countdownElement = document.getElementById("countdown");
 
-                                        const countdown = setInterval(function () {
-                                            const now = new Date().getTime();
-                                            const distance = nextExecutionTime - now;
+        const countdown = setInterval(function () {
+            const now = new Date().getTime();
+            const distance = nextExecutionTime - now;
 
-                                            if (distance <= 0) {
-                                                clearInterval(countdown);
-                                                countdownElement.innerHTML = "Prise de médicament en cours ou en retard.";
-                                            } else {
-                                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (distance <= 0) {
+                clearInterval(countdown);
+                countdownElement.innerHTML = "Prise de médicament en cours ou en retard.";
 
-                                                countdownElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
-                                            }
-                                        }, 1000);
-                                    {% endif %}
-                                </script>
+                // ⚠️ Lancer la requête AJAX pour marquer comme "Missed"
+                updateMissedExecution("{{ next_execution.id }}");
+            } else {
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+            }
+        }, 1000);
+
+        // Fonction AJAX pour mettre à jour le statut en "Missed"
+        function updateMissedExecution(executionId) {
+            fetch("{% url 'update_execution_status' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    execution_id: executionId,
+                    new_status: "Missed"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("La prise de médicament a été marquée comme 'Missed'.");
+                    location.reload();  // Recharge la page pour afficher la mise à jour
+                } else {
+                    console.error("Erreur de mise à jour :", data.message);
+                }
+            })
+            .catch(error => console.error("Erreur AJAX :", error));
+        }
+    {% endif %}
+</script>
+{#                                <script>#}
+{#                                    {% if next_execution %}#}
+{#                                        // Script pour le compte à rebours#}
+{#                                        const nextExecutionTime = new Date("{{ next_execution.scheduled_time|date:"Y-m-d H:i:s" }}").getTime();#}
+{#                                        const countdownElement = document.getElementById("countdown");#}
+{##}
+{#                                        const countdown = setInterval(function () {#}
+{#                                            const now = new Date().getTime();#}
+{#                                            const distance = nextExecutionTime - now;#}
+{##}
+{#                                            if (distance <= 0) {#}
+{#                                                clearInterval(countdown);#}
+{#                                                countdownElement.innerHTML = "Prise de médicament en cours ou en retard.";#}
+{#                                            } else {#}
+{#                                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));#}
+{#                                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));#}
+{#                                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);#}
+{##}
+{#                                                countdownElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;#}
+{#                                            }#}
+{#                                        }, 1000);#}
+{#                                    {% endif %}#}
+{#                                </script>#}
 
                             </div>
 
@@ -1108,13 +1678,13 @@
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
                                                 Constantes
-                                                <a class="btn btn-outline-info btn-icon btn-round mr-5" href="#"><em
-                                                        class="icon ni ni-download-cloud ml-10"></em></a>
+                                              {% if not hospitalisationdetail.discharge_date %}
                                                 <button type="button"
                                                         class="btn btn-dark btn-icon btn-round float-right"
                                                         data-toggle="modal" data-target="#constanteModal">
                                                     <em class="icon ni ni-plus-circle-fill"></em>
                                                 </button>
+                                                {% endif %}
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table">
@@ -1243,9 +1813,7 @@
     <div class="card text-black-100 border">
         <div class="card-header d-flex justify-content-between">
             <h5 class="card-title">Suivi des soins prescrits</h5>
-            <a class="btn btn-outline-info btn-icon btn-round" href="#">
-                <em class="icon ni ni-download-cloud"></em>
-            </a>
+
         </div>
         <div class="card-inner text-black-70">
             <table class="table table-bordered table-responsive-md">
@@ -1274,7 +1842,7 @@
                             </td>
                             <td>{{ execution.prescription.pendant }} Jours</td>
                             <td>
-                                <span class="badge 
+                                <span class="badge
                                     {% if execution.status == 'Pending' %}badge-warning
                                     {% elif execution.status == 'Taken' %}badge-success
                                     {% else %}badge-danger{% endif %}">
@@ -1295,8 +1863,9 @@
                                         <input type="hidden" name="execution_id" value="{{ execution.id }}">
                                         <button type="submit" class="btn btn-primary btn-sm">Marquer comme pris</button>
                                     </form>
+                                
                                 {% else %}
-                                    <button class="btn btn-secondary btn-sm" disabled>Déjà pris</button>
+                                    <button class="btn btn-secondary btn-sm" disabled>Inactif</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -1335,9 +1904,11 @@
                                             <div class="card-header">
                                                 Prescriptions
                                                 <a class="btn btn-outline-info btn-icon btn-round mr-5" href="{% url 'generate_ordonnance_pdf' patient_id=hospitalisationdetail.patient.id hospitalisation_id=hospitalisationdetail.id %}"><em class="icon ni ni-printer-fill"></em></a>
+                                                {% if not hospitalisationdetail.discharge_date %}
                                                 <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#prescriptionModal">
                                                     <em class="icon ni ni-plus-circle-fill"></em>
                                                 </button>
+                                                {% endif %}
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table table-responsive-md">
@@ -1526,7 +2097,7 @@
                 <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
             </div>
             <div class="modal-body">
-                
+
                 <div x-data="prescriptionForm()" class="row">
                     <div x-show="errorMessage" class="alert alert-danger">
     <span x-text="errorMessage"></span>
@@ -1535,7 +2106,6 @@
                         {% csrf_token %}
     <input type="hidden" name="patient_id" x-model="patientId">  <!-- ✅ Ajout du patient ID -->
     <input type="hidden" name="hospitalisation_id" x-model="hospitalisationId">  <!-- ✅ Ajout de l'hospitalisation ID -->
-
                         <div class="row">
                             <!-- Champ de recherche dynamique pour le médicament -->
                             <div class="col-md-8 mb-3">
@@ -1648,9 +2218,11 @@
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Biologiques
+                                                    {% if not hospitalisationdetail.discharge_date %}
                                                     <button type="button" class="btn btn-dark btn-icon btn-round float-right" data-toggle="modal" data-target="#indicateurbiologiqueformModal">
                                                         <em class="icon ni ni-plus-circle-fill"></em>
                                                     </button>
+                                                    {% endif %}
                                                 </div>
                                                 <div class="card-inner text-black-70">
                                                     <table class="table">
@@ -1744,12 +2316,14 @@
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
                                                     Indicateurs Fonctionnels
+                                                    {% if not hospitalisationdetail.discharge_date %}
                                                     <button type="button"
                                                             class="btn btn-dark btn-icon btn-round float-right"
                                                             data-toggle="modal"
                                                             data-target="#indicateurFonctionnelModal">
                                                         <em class="icon ni ni-plus-circle-fill"></em>
                                                     </button>
+                                                    {% endif %}
                                                 </div>
                                                 <div class="card-inner text-black-70">
                                                     <table class="table">
@@ -1869,11 +2443,13 @@
                                         <div class="card text-black-100 border">
                                             <div class="card-header">
                                                 Indicateurs Autres
+                                                {% if not hospitalisationdetail.discharge_date %}
                                                 <button type="button"
                                                         class="btn btn-dark btn-icon btn-round float-right"
                                                         data-toggle="modal" data-target="#indicateurautresModal">
                                                     <em class="icon ni ni-plus-circle-fill"></em>
                                                 </button>
+                                                {% endif %}
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <h2 class="mb-4">Liste des Indicateurs d'Hospitalisation</h2>
@@ -1978,7 +2554,8 @@
 
 
                             </div>
-                        </div><!-- .card-inner-group -->
+                        </div>
+                    <!-- .card-inner-group -->
                     </div><!-- .card -->
                 </div>
             </div>
@@ -2714,4 +3291,5 @@ function prescriptionForm() {
         });
     });
 </script>
+    
 {% endblock %}

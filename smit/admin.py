@@ -156,10 +156,6 @@ class AllergiesAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(AntecedentsMedicaux)
-class AllergiesAdmin(admin.ModelAdmin):
-    pass
-
 
 @admin.register(Symptomes)
 class AllergiesAdmin(admin.ModelAdmin):

@@ -5,7 +5,7 @@ import random
 import re
 import traceback
 import uuid
-from collections import Counter
+from collections import Counter, defaultdict, OrderedDict
 from datetime import date, timedelta
 from decimal import Decimal
 from io import BytesIO
@@ -38,11 +38,13 @@ from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm,
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
     DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm, \
-    HospitalizationUrgenceForm, AntecedentsHospiForm, GroupedAntecedentsForm
+    HospitalizationUrgenceForm, AntecedentsHospiForm, GroupedAntecedentsForm, ModeDeVieForm, AppareilForm, \
+    ResumeSyndromiqueForm, ProblemePoseForm, BilanParacliniqueMultiForm, ImagerieMedicaleForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
     ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
-    EffetIndesirable, CommentaireInfirmier
+    EffetIndesirable, CommentaireInfirmier, TypeAntecedent, AntecedentsMedicaux, ModeDeVieCategorie, ModeDeVie, \
+    AppareilType, Appareil, BilanParaclinique, ExamenStandard, TypeBilanParaclinique
 
 
 def render_to_pdf(template_src, context_dict={}):
@@ -119,7 +121,10 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
     ordering = "-admission_date"
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('patient').prefetch_related('diagnostics')
+        queryset = super().get_queryset() \
+            .select_related('patient') \
+            .prefetch_related('diagnostics') \
+            .filter(discharge_date__isnull=True)  # ➡ Filtrer uniquement les hospitalisations en cours
 
         # Appliquer les filtres de recherche
         maladie = self.request.GET.get('maladie')
@@ -152,6 +157,64 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
             nb_patients_hospitalises=Count(
                 'chambres__boxes__lits__lit_hospy__id',
                 filter=Q(chambres__boxes__lits__lit_hospy__discharge_date__isnull=True)
+            )
+        )
+
+        # Récupérer la dernière constante pour chaque patient
+        context['search_form'] = PatientSearchForm(self.request.GET or None)
+        context['demande_hospi'] = demande_hospi
+        context['demande_hospi_nbr'] = demande_hospi_nbr
+        context['demande_hospi_form'] = HospitalizationSendForm()
+        context['result_count'] = queryset.count()
+        context['unites_hospitalisation'] = nbr_patient
+
+        return context
+
+
+class HospitalisedPatientListView(LoginRequiredMixin, ListView):
+    model = Hospitalization
+    template_name = "pages/hospitalisation/hospitalised_patient.html"
+    context_object_name = "hospitalisationgenerale"
+    paginate_by = 10
+    ordering = "-admission_date"
+
+    def get_queryset(self):
+        queryset = super().get_queryset() \
+            .select_related('patient') \
+            .prefetch_related('diagnostics') \
+            .filter(discharge_date__isnull=False)  # ➡ Filtrer uniquement les hospitalisations en cours
+
+        # Appliquer les filtres de recherche
+        maladie = self.request.GET.get('maladie')
+        unite = self.request.GET.get('unite')
+        status = self.request.GET.get('status')
+        nom_patient = self.request.GET.get('nom_patient')
+
+        if unite:
+            queryset = queryset.filter(bed__box__chambre__unite__id=unite)
+
+        if maladie:
+            queryset = queryset.filter(diagnostics__maladie__id=maladie,
+                                       diagnostics__type_diagnostic='final')  # Utilisation de l'ID pour éviter ambiguïtés
+        if status:
+            queryset = queryset.filter(patient__status=status)
+        if nom_patient:
+            queryset = queryset.filter(
+                Q(patient__nom__icontains=nom_patient) | Q(patient__prenoms__icontains=nom_patient))
+
+        return queryset.distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = date.today()
+        demande_hospi = Consultation.objects.filter(hospitalised=1).order_by('created_at')
+        demande_hospi_nbr = demande_hospi.count()
+        queryset = self.get_queryset()
+
+        nbr_patient = UniteHospitalisation.objects.annotate(
+            nb_patients_hospitalises=Count(
+                'chambres__boxes__lits__lit_hospy__id',
+                filter=Q(chambres__boxes__lits__lit_hospy__discharge_date__isnull=False)
             )
         )
 
@@ -383,6 +446,7 @@ class SuivieSoinsDetailView(LoginRequiredMixin, DetailView):
 
         # Add forms to context
         context['constante_form'] = ConstanteForm()
+
         context['antecedentshospi'] = AntecedentsHospiForm()
         context['prescription_hospi_form'] = PrescriptionHospiForm()
         context['signe_fonctionnel_form'] = SigneFonctionnelForm()
@@ -390,6 +454,7 @@ class SuivieSoinsDetailView(LoginRequiredMixin, DetailView):
         context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
         context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
         context['autresindicatorsform'] = HospitalizationIndicatorsForm()
+
 
         context['diagnosticsform'] = DiagnosticForm()
         context['observationform'] = ObservationForm()
@@ -449,7 +514,7 @@ class SuivieSoinsDetailView(LoginRequiredMixin, DetailView):
         next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
         # Trouver la dernière prise manquée
         # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
-        missed_executions = executions.filter(scheduled_time__lt=now(), status='Pending'
+        missed_executions = executions.filter(scheduled_time__lt=now(), status='Missed'
                                               ).order_by('-scheduled_time')
         context['next_execution'] = next_execution
         context['missed_executions'] = missed_executions
@@ -1139,25 +1204,260 @@ def add_historique_maladie(request, hospitalisation_id):
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
 
-def ajouter_antecedents_hospi(request, patient_id, hospitalisation_id):
-    patient = get_object_or_404(Patient, id=patient_id)
+def ajouter_mode_de_vie(request, hospitalisation_id):
+    """Vue pour ajouter un mode de vie à un patient"""
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == "POST":
+        for key, value in request.POST.items():
+            if key.startswith("categorie_"):
+                _, index, idx = key.split("_")  # Récupérer les index du champ
+                categorie_id = request.POST.get(f"categorie_{index}_{idx}")
+                description = request.POST.get(f"description_{index}_{idx}")
+                frequence = request.POST.get(f"frequence_{index}_{idx}")
+                impact = request.POST.get(f"impact_{index}_{idx}")
+
+                if categorie_id and description:
+                    categorie_obj = ModeDeVieCategorie.objects.get(pk=categorie_id)
+                    mode_de_vie = ModeDeVie(
+                        patient=hospitalisation.patient,
+                        categorie=categorie_obj,
+                        description=description,
+                        frequence=frequence if frequence else None,
+                        niveau_impact=impact if impact else None,
+                        created_by=request.user.employee
+                    )
+                    mode_de_vie.save()
+
+        messages.success(request, "Le mode de vie a été ajouté avec succès.")
+        return redirect('hospitalisationdetails', pk=hospitalisation_id)  # Redirection après soumission
+
+    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_antecedents_hospi(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == "POST":
+        for key, value in request.POST.items():
+            if key.startswith("type_"):
+                _, index, idx = key.split("_")  # Récupérer les index du champ
+                type_id = request.POST.get(f"type_{index}_{idx}")
+                nom = request.POST.get(f"nom_{index}_{idx}")
+                descriptif = request.POST.get(f"descriptif_{index}_{idx}")
+                date_debut = request.POST.get(f"date_debut_{index}_{idx}")
+
+                if nom and type_id:
+                    type_obj = TypeAntecedent.objects.get(pk=type_id)
+                    antecedent = AntecedentsMedicaux(
+                        hospitalisation_id=hospitalisation_id,
+                        type=type_obj,
+                        nom=nom,
+                        descriptif=descriptif,
+                        date_debut=date_debut if date_debut else None,
+                        patient=hospitalisation.patient,
+
+                    )
+                    antecedent.save()
+        messages.success(request, "Antecedents ajoutes avec succes.")
+        return redirect('hospitalisationdetails', pk=hospitalisation_id)  # Redirection après soumission
+
+    # Reprendre le contexte avec les types pour l'affichage du formulaire
+    messages.error(request, "Erreur. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+@login_required
+def add_examen_apareil(request, hospitalisation_id):
+    """Ajoute un examen d'appareil pour une hospitalisation donnée."""
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
 
+    if request.method == "POST":
+        appareils_ajoutes = 0
+        erreurs_detectees = []
+
+        print("📥 Données reçues du formulaire :", request.POST)  # ✅ Debugging
+
+        # ✅ Utilisation d'une REGEX pour capturer les bons index
+        pattern = re.compile(r"type_appareil_(\d+)_(\d+)")
+
+        for key, value in request.POST.items():
+            match = pattern.match(key)  # ✅ Vérifier si la clé suit le bon format
+
+            if match:
+                try:
+                    index, idx = match.groups()  # ✅ Extraction des indices numériques
+
+                    # Récupération et nettoyage des valeurs
+                    type_id = request.POST.get(f"type_appareil_{index}_{idx}", "").strip()
+                    nom = request.POST.get(f"nom_{index}_{idx}", "").strip()
+                    etat = request.POST.get(f"etat_{index}_{idx}", "normal").strip()
+                    observation = request.POST.get(f"observation_{index}_{idx}", "").strip()
+
+                    # 🚨 Vérification des entrées vides
+                    if not type_id or not nom:
+                        erreurs_detectees.append(
+                            f"⚠️ Données incomplètes pour {key} (Type: {type_id}, Nom: {nom}) - Ignoré")
+                        continue  # ✅ Ignore cette entrée sans erreur fatale
+
+                    print(
+                        f"🔄 Traitement : Type: {type_id}, Nom: {nom}, État: {etat}, Observation: {observation}")  # ✅ Debugging
+
+                    # Récupérer l'objet `AppareilType`
+                    type_obj = get_object_or_404(AppareilType, pk=int(type_id))
+
+                    # ✅ Vérifier si un appareil avec ce nom et cette hospitalisation existe déjà
+                    if Appareil.objects.filter(hospitalisation=hospitalisation, nom=nom).exists():
+                        erreurs_detectees.append(
+                            f"⚠️ L'appareil '{nom}' existe déjà pour cette hospitalisation - Ignoré.")
+                        continue  # ✅ Ignore cette entrée sans erreur fatale
+
+                    # ✅ Création d'un nouvel appareil
+                    Appareil.objects.create(
+                        type_appareil=type_obj,
+                        hospitalisation=hospitalisation,
+                        nom=nom,
+                        etat=etat,
+                        observation=observation
+                    )
+
+                    appareils_ajoutes += 1  # ✅ Incrémenter seulement si l'ajout a réussi
+
+                except ValueError as e:
+                    erreurs_detectees.append(f"❌ Erreur ValueError sur {key} - {str(e)}")
+                except Exception as e:
+                    erreurs_detectees.append(f"❌ Erreur générale sur {key} - {str(e)}")
+
+        print(f"✅ Appareils ajoutés : {appareils_ajoutes}")
+        if erreurs_detectees:
+            print(f"⚠️ Erreurs détectées : {erreurs_detectees}")
+
+        if appareils_ajoutes > 0:
+            messages.success(request, f"✅ {appareils_ajoutes} nouvel(s) examen(s) des appareils ajouté(s) avec succès.")
+        else:
+            messages.error(request, "⚠️ Aucun appareil enregistré. Vérifiez les données du formulaire.")
+
+        return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+    messages.error(request, "❌ Erreur lors de l'ajout de l'examen.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+@login_required
+def add_resume_syndromique(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
     if request.method == 'POST':
-        form = AntecedentsHospiForm(request.POST)
+        form = ResumeSyndromiqueForm(request.POST)
         if form.is_valid():
-            antecedent = form.save(commit=False)
-            antecedent.patient = patient
-            antecedent.hospitalisation = hospitalisation
-            antecedent.save()
-            return redirect('detail_patient', patient_id=patient.id)  # Redirection après l'enregistrement
+            resume = form.save(commit=False)
+            resume.patient = hospitalisation.patient
+            resume.hospitalisation = hospitalisation
+            resume.created_by = request.user.employee  # Associe le médecin connecté
+            resume.save()
+            messages.success(request, "Résumé  ajouté avec succès.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
     else:
-        form = AntecedentsHospiForm()
+        form = HistoriqueMaladieForm()
+    messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
-    return render(request, 'ajouter_antecedents.html',
-                  {'form': form, 'patient': patient, 'hospitalisation': hospitalisation})
+@login_required
+def add_problemes_pose(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method == 'POST':
+        form = ProblemePoseForm(request.POST)
+        if form.is_valid():
+            probleme = form.save(commit=False)
+            probleme.patient = hospitalisation.patient
+            probleme.hospitalisation = hospitalisation
+            probleme.created_by = request.user.employee  # Associe le médecin connecté
+            probleme.save()
+            messages.success(request, "Problemes ajouté avec succès.")
+            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        else:
+            messages.error(request, "Erreur lors de l'ajout du Problemes. Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = HistoriqueMaladieForm()
+    messages.error(request, "Erreur lors de l'ajout du Problemes. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
 
+@csrf_exempt  # Désactive CSRF pour tester (à sécuriser avec le token dans les headers)
+def update_execution_status(request):
+    """
+    Vue pour mettre à jour le statut d'une PrescriptionExecution.
+    """
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            execution_id = data.get("execution_id")
+            new_status = data.get("new_status")
+
+            execution = PrescriptionExecution.objects.get(id=execution_id)
+
+            # Vérifie que l'exécution est bien en attente et que le temps est dépassé
+            if execution.status == "Pending" and execution.scheduled_time < now():
+                execution.status = new_status
+                execution.save()
+                return JsonResponse({"success": True, "message": "Mise à jour effectuée."})
+            else:
+                return JsonResponse({"success": False, "message": "Statut non modifié."}, status=400)
+
+        except PrescriptionExecution.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Exécution introuvable."}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Requête invalide."}, status=400)
+
+    return JsonResponse({"success": False, "message": "Méthode non autorisée."}, status=405)
+@login_required
+def add_bilan_paraclinique(request, hospitalisation_id):
+    """
+    Vue pour enregistrer les examens sélectionnés dans un bilan paraclinique.
+    """
+    if request.method == "POST":
+        examens_ids = request.POST.getlist("examens")  # Récupérer la liste des examens sélectionnés
+        hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+        patient = hospitalisation.patient
+
+        if not examens_ids:
+            return JsonResponse({'success': False, 'message': "Aucun examen sélectionné."}, status=400)
+
+        try:
+            for examen_id in examens_ids:
+                examen = get_object_or_404(ExamenStandard, id=examen_id)
+                BilanParaclinique.objects.create(
+                    patient=patient,
+                    hospitalisation=hospitalisation,
+                    examen=examen,
+                    doctor=request.user.employee
+                )
+            return JsonResponse({'success': True, 'message': "Bilans ajoutés avec succès."})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f"Erreur: {str(e)}"}, status=500)
+
+    return JsonResponse({'success': False, 'message': "Méthode non autorisée."}, status=405)
+
+@login_required
+def add_imagerie(request, hospitalisation_id):
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    patient = hospitalisation.patient
+
+    if request.method == "POST":
+        form = ImagerieMedicaleForm(request.POST, request.FILES)
+        if form.is_valid():
+            imagerie = form.save(commit=False)
+            imagerie.patient = patient
+            imagerie.hospitalisation = hospitalisation
+            imagerie.medecin_prescripteur = request.user
+            imagerie.save()
+            messages.success(request, "Imagerie enregistrée avec succès.")
+            return redirect("hospitalisationdetails", pk=hospitalisation_id)
+    else:
+        form = ImagerieMedicaleForm()
+
+    return render(request, "pages/imagerie/add_imagerie.html", {"form": form, "hospitalisation": hospitalisation})
 def generate_ordonnance_pdf(request, patient_id, hospitalisation_id):
     """
     Génère une ordonnance PDF pour un patient hospitalisé à partir de ses prescriptions.
@@ -1365,14 +1665,62 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         # Add forms to context
         context['constante_form'] = ConstanteForm()
+        # Charger tous les types d'antécédents sous forme de liste de dictionnaires
+        types_antecedents = list(TypeAntecedent.objects.values("id", "nom"))
+        context['types_antecedents_json'] = json.dumps(types_antecedents, cls=DjangoJSONEncoder)
         context['antecedentshospi'] = AntecedentsHospiForm()
+
+        # Récupérer les catégories de mode de vie
+        categorie_modedevie = list(ModeDeVieCategorie.objects.values("id", "nom"))
+        context['categorie_modedevie_json'] = json.dumps(categorie_modedevie, cls=DjangoJSONEncoder)
+        context['modedevieform'] = ModeDeVieForm()
+
+        # Charger les types d'appareils avec leurs sous-types
+        types_parents = AppareilType.objects.filter(parent__isnull=True).prefetch_related('sous_types_appareil')
+
+        # Convertir les données en JSON pour Alpine.js
+        types_appareils = [
+            {
+                "id": type_.id,
+                "nom": type_.nom,
+                "sous_types": [{"id": sous_type.id, "nom": sous_type.nom} for sous_type in
+                               type_.sous_types_appareil.all()]
+            }
+            for type_ in types_parents
+        ]
+
+        # Passer les données JSON au template
+        context['types_appareils_json'] = json.dumps(types_appareils, cls=DjangoJSONEncoder)
+
+        # Récupérer tous les types de bilans avec leurs examens associés
+        types_examens = TypeBilanParaclinique.objects.prefetch_related('examenstandard_set').all()
+
+        # Transformer les données pour Alpine.js
+        types_examens_json = [
+            {
+                "id": type_bilan.id,
+                "nom": type_bilan.nom,
+                "examens": [{"id": exam.id, "nom": exam.nom} for exam in type_bilan.examenstandard_set.all()]
+            }
+            for type_bilan in types_examens
+        ]
+
+        # Ajouter les examens au contexte en format JSON
+        context["types_examens_json"] = json.dumps(types_examens_json, ensure_ascii=False)
+        context['bilanForm'] = BilanParacliniqueMultiForm()
+
+        context['appareilForm'] = AppareilForm()
+        context['problemesposerform'] = ProblemePoseForm()
         # context['antecedentshospigroup'] = GroupedAntecedentsForm()
         context['prescription_hospi_form'] = PrescriptionHospiForm()
         context['signe_fonctionnel_form'] = SigneFonctionnelForm()
+
         context['indicateur_biologique_form'] = IndicateurBiologiqueForm()
         context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
         context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
         context['autresindicatorsform'] = HospitalizationIndicatorsForm()
+
+        context['resumesyndromiqueform'] = ResumeSyndromiqueForm()
 
         context['diagnosticsform'] = DiagnosticForm()
         context['observationform'] = ObservationForm()
@@ -1388,6 +1736,29 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         context['historiques_maladie'] = HistoriqueMaladie.objects.filter(hospitalisation=self.object).order_by(
             '-date_enregistrement')
+
+        # Récupérer tous les modes de vie liés à cette hospitalisation
+        modedevies = ModeDeVie.objects.filter(hospitalisation=hospitalization).select_related('categorie')
+
+        # Regrouper les modes de vie par catégorie
+        modedevies_par_categorie = defaultdict(list)
+        for modevie in modedevies:
+            modedevies_par_categorie[modevie.categorie.nom].append(modevie)
+
+        # Trier les catégories pour un affichage ordonné
+        context['modedevies_by_categories'] = OrderedDict(sorted(modedevies_par_categorie.items()))
+        context['modedevies_count'] = modedevies.count()
+
+        # Regrouper les antécédents par type
+        antecedents = AntecedentsMedicaux.objects.filter(hospitalisation=hospitalization)
+
+        antecedents_par_type = defaultdict(list)
+        for antecedent in antecedents:
+            antecedents_par_type[antecedent.type.nom].append(antecedent)
+
+        # Trier par type pour un affichage ordonné
+        context['antecedents_par_type'] = dict(antecedents_par_type)
+        context['antecedentscount'] = AntecedentsMedicaux.objects.filter(hospitalisation=self.object).count()
 
         context['diagnostics'] = Diagnostic.objects.filter(hospitalisation=self.object).order_by('-date_diagnostic')
         context['diagnosticscount'] = Diagnostic.objects.filter(hospitalisation=self.object).count()
@@ -1434,7 +1805,7 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
         # Trouver la dernière prise manquée
         # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
-        missed_executions = executions.filter(scheduled_time__lt=now(), status='Pending'
+        missed_executions = executions.filter(scheduled_time__lt=now(), status='Missed'
                                               ).order_by('-scheduled_time')
         context['next_execution'] = next_execution
         context['missed_executions'] = missed_executions

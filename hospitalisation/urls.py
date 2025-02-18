@@ -7,12 +7,15 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     release_bed, mark_as_out_of_service, mark_as_cleaning, delete_bed, set_cleaning_false, hospitalisation_lit_reserved, \
     LitDetailView, mark_execution_taken, delete_prescription, add_diagnostic, add_avis_medical, add_effet_indesirable, \
     add_historique_maladie, add_observations, add_hospi_comment, ExportHospitalizationView, add_maladie, \
-    add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf
+    add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf, add_antecedents_hospi, \
+    ajouter_mode_de_vie, add_examen_apareil, HospitalisedPatientListView, add_problemes_pose, add_resume_syndromique, \
+    add_bilan_paraclinique, add_imagerie, update_execution_status
 from smit.views import add_cas_contact
 from smitci import settings
 
 urlpatterns = [
-                  path('generale', HospitalisationListView.as_view(), name='hospitalisation'),
+                  path('generale/hospitalisation', HospitalisationListView.as_view(), name='hospitalisation'),
+                  path('generale/hospitalised', HospitalisedPatientListView.as_view(), name='hospitalised_patient'),
                   path('hospitalisation/export/', ExportHospitalizationView.as_view(), name='export_hospitalizations'),
 
                   path('details/<int:pk>/hospi/', HospitalisationDetailView.as_view(), name='hospitalisationdetails'),
@@ -47,18 +50,37 @@ urlpatterns = [
                   path('prescription/delete/<int:prescription_id>/', delete_prescription, name='delete_prescription'),
 
                   path('add-diagnostic/<int:hospitalisation_id>', add_diagnostic, name='add_diagnostic'),
+
+                  path('add-antecedents/<int:hospitalisation_id>', add_antecedents_hospi, name='add_antecedent_hospi'),
+
+                  path('add_mode_de_vie/<int:hospitalisation_id>/', ajouter_mode_de_vie, name='ajouter_mode_de_vie'),
+
+                  path('add_examen_apareil/<int:hospitalisation_id>/', add_examen_apareil, name='add_examen_apareil'),
+
                   path('add-observations/<int:hospitalisation_id>', add_observations, name='add_observations'),
-                  path('add-observations-suivi/<int:hospitalisation_id>', add_observations_suivi, name='add_observations_suivi'),
+                  path('add-observations-suivi/<int:hospitalisation_id>', add_observations_suivi,
+                       name='add_observations_suivi'),
                   path('add-hospi-comment/<int:hospitalisation_id>', add_hospi_comment, name='add_coment'),
-                  path('add-hospi-suivi-comment/<int:hospitalisation_id>', add_hospi_suivie_comment, name='add_coment_suivi'),
+                  path('add-hospi-suivi-comment/<int:hospitalisation_id>', add_hospi_suivie_comment,
+                       name='add_coment_suivi'),
 
                   path('add-avis-medical/<int:hospitalisation_id>', add_avis_medical, name='add_avis_medical'),
-                  path('add-effet-indesirable/<int:hospitalisation_id>', add_effet_indesirable, name='add_effet_indesirable'),
-                  path('add-historique-maladie/<int:hospitalisation_id>', add_historique_maladie, name='add_historique_maladie'),
+                  path('add-effet-indesirable/<int:hospitalisation_id>', add_effet_indesirable,
+                       name='add_effet_indesirable'),
+                  path('add-historique-maladie/<int:hospitalisation_id>', add_historique_maladie,
+                       name='add_historique_maladie'),
                   path('add-maladie/', add_maladie, name='add_maladie'),
+                  path('add-add_problemes_pose/<int:hospitalisation_id>', add_problemes_pose, name='add_problemes_pose'),
+                  path('add_resume_syndromique/<int:hospitalisation_id>', add_resume_syndromique, name='add_resume_syndromique'),
+
+                  path("hospitalisation/<int:hospitalisation_id>/add_bilan/", add_bilan_paraclinique,  name="add_bilan_paraclinique"),
+                  path("add_imagerie/<int:hospitalisation_id>", add_imagerie,  name="add_imagerie"),
 
                   path('patient/<int:patient_id>/add-cas-contact/', add_cas_contact, name='add_cas_contact'),
-                  path('ordonnance/<int:patient_id>/<int:hospitalisation_id>', generate_ordonnance_pdf, name='generate_ordonnance_pdf'),
+                  path('ordonnance/<int:patient_id>/<int:hospitalisation_id>', generate_ordonnance_pdf,
+                       name='generate_ordonnance_pdf'),
+
+                  path("update-execution-status/", update_execution_status, name="update_execution_status"),
 
                   # path('hospitalisation/<int:hospitalisation_id>prescription/<int:prescription_id>/execute/', execute_prescription, name='nurse_execute'),
 

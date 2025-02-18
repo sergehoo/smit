@@ -2,6 +2,7 @@ import json
 
 import requests
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import PermissionDenied
@@ -115,7 +116,11 @@ class AssignRoleView(LoginRequiredMixin, FormView):
         employee.user.groups.add(role)
         return super().form_valid(form)
 
-
+@login_required
+def employee_profile(request):
+    """Affiche le profil de l'employé connecté"""
+    employee = get_object_or_404(Employee, user=request.user)
+    return render(request, "employees/profile.html", {"employee": employee})
 class EmployeeListView(PermissionRequiredMixin, ListView):
     model = Employee
     template_name = "employees/employee_list.html"

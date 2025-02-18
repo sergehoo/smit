@@ -16,7 +16,10 @@ def menu_processor(request):
     appointments_today = Appointment.objects.filter(date=today, status='Scheduled').count()
     patient_nbr = Patient.objects.all().count()
     appointments_all = Appointment.objects.all().count()
-    Hospitaliza = Hospitalization.objects.all().count()
+
+
+    hospitalized_count = Hospitalization.objects.filter(discharge_date__isnull=True).count()
+    discharged_count = Hospitalization.objects.filter(discharge_date__isnull=False).count()
     consultations = Consultation.objects.all().count()
     suivi = Suivi.objects.all().count()
     # vih_consult = Consultation.objects.filter(service='VIH-SIDA').count()
@@ -24,7 +27,8 @@ def menu_processor(request):
     return {'apointments_nbr': appointments_today,
             'patient_nbr': patient_nbr,
             'appointments_all': appointments_all,
-            'hoapi_nbr': Hospitaliza,
+            'Hospitaliza_encours': hospitalized_count,
+            'discharged_count': discharged_count,
             'consul_nbr': consultations,
             'suivi_nbr': suivi
             }

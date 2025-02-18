@@ -275,6 +275,7 @@
                         <ul class="link-list-opt no-bdr">
                             <li><a href="{% url 'appointment_detail' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Detail</span></a></li>
                             <li><a href="{% url 'appointment_update' patient.pk %}"><em class="icon ni ni-shield-star"></em><span>Modifier</span></a></li>
+                            <li><a href="{% url 'appointment_delete' patient.pk %}"><em class="icon ni ni-shield-star"></em><span>Supprimer</span></a></li>
                             <li class="divider"></li>
                             <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
                         </ul>

@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sélectionner tous les champs de formulaire avec la classe 'dynamic-field'
     const fields = document.querySelectorAll('.bedid');
-    
+
     fields.forEach((field, index) => {
         // Générer un ID unique et l'attribuer à chaque champ
         const uniqueId = generateUniqueId();
@@ -333,8 +333,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <div class="nk-tb-col tb-col-sm text-nowrap"><span class="sub-text">Code Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
                                                     <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date admission</span></div>
-{#                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Date sorti</span></div>#}
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Diagnostique final</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Date sorti</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Diagnostique</span></div>
                                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Chambre</span></div>
                                                     <div class="nk-tb-col"><span class="sub-text">Unité</span></div>
                                                     <div class="nk-tb-col nk-tb-col-tools text-right">
@@ -381,7 +381,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                           
+                                                        <div class="nk-tb-col tb-col-sm">
+                                                            {% if patient.discharge_date is none %}
+                                                                <small>Aucune sortie</small>
+                                                            {% else %}
+                                                                <span data-toggle="tooltip" data-placement="top"
+                                                                      title="{{ patient.discharge_date }}"><em class="icon ni ni-arrow-down-right text-primary"></em> {{ patient.discharge_date|naturaltime }}</span>
+                                                            {% endif %}
+                                                        </div>
 
                                                         <div class="nk-tb-col tb-col-md">
                                                         <span>

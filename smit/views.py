@@ -811,8 +811,7 @@ class PatientDetailView(LoginRequiredMixin, DetailView):
 
         # Récupérer les éléments liés au patient
         context["consultations"] = patient.consultation_set.all().order_by('-created_at')
-        # context["hospitalizations"] = patient.hospitalized.all().order_by('-created_at')
-        context["appointments"] = patient.appointment_set.all().order_by('-created_at')
+        context["appointments"] = patient.appointments.all().order_by('-created_at')
         context["suivis"] = patient.suivimedecin.all()
         context['case_contacts'] = self.object.case_contacts.all()
         context['cascontactsForm'] = CasContactForm()
@@ -952,6 +951,15 @@ class RendezVousDetailView(LoginRequiredMixin, DetailView):
     ordering = ['-id']
 
 
+class AppointmentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Appointment
+    template_name = "pages/appointments/appointment_confirm_delete.html"  # Fichier HTML de confirmation
+    success_url = reverse_lazy("rendezvous")  # Redirection après suppression
+
+    def get_queryset(self):
+        return Appointment.objects.filter(created_by=self.request.user)
+
+
 class RendezVousConsultationUpdateView(LoginRequiredMixin, UpdateView):
     model = Appointment
     form_class = AppointmentUpdateForm
@@ -991,48 +999,6 @@ class SalleAttenteListView(LoginRequiredMixin, ListView):
         context['ConsultationSendForm'] = ConsultationSendForm()
 
         return context
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     today = date.today()
-    #     appointments = Appointment.objects.filter(date=today).order_by('time')
-    #
-    #     # Récupérer la dernière constante pour chaque patient
-    #     constantes = {appointment.patient.id: Constante.objects.filter(patient=appointment.patient).order_by('-created_at').first() for appointment in appointments}
-    #
-    #     # Vérification des valeurs de constantes et génération des alertes
-    #     alerts = {}
-    #     for patient_id, constante in constantes.items():
-    #         if constante:
-    #             patient_alerts = []
-    #             if constante.tension_systolique and (
-    #                     constante.tension_systolique < 90 or constante.tension_systolique > 120):
-    #                 patient_alerts.append(('tension_systolique', 'Tension artérielle systolique anormale.'))
-    #             if constante.tension_diastolique and (
-    #                     constante.tension_diastolique < 60 or constante.tension_diastolique > 80):
-    #                 patient_alerts.append(('tension_diastolique', 'Tension artérielle diastolique anormale.'))
-    #             if constante.frequence_cardiaque and (
-    #                     constante.frequence_cardiaque < 60 or constante.frequence_cardiaque > 100):
-    #                 patient_alerts.append(('frequence_cardiaque', 'Fréquence cardiaque anormale.'))
-    #             if constante.frequence_respiratoire and (
-    #                     constante.frequence_respiratoire < 12 or constante.frequence_respiratoire > 20):
-    #                 patient_alerts.append(('frequence_respiratoire', 'Fréquence respiratoire anormale.'))
-    #             if constante.temperature and (constante.temperature < 36.1 or constante.temperature > 37.2):
-    #                 patient_alerts.append(('temperature', 'Température anormale.'))
-    #             if constante.saturation_oxygene and (
-    #                     constante.saturation_oxygene < 95 or constante.saturation_oxygene > 100):
-    #                 patient_alerts.append(('saturation_oxygene', 'Saturation en oxygène anormale.'))
-    #             if constante.glycemie and (constante.glycemie < 70 or constante.glycemie > 140):
-    #                 patient_alerts.append(('glycemie', 'Glycémie anormale.'))
-    #
-    #             if patient_alerts:
-    #                 alerts[patient_id] = patient_alerts
-    #
-    #     context['salleattente'] = appointments
-    #     context['constantes'] = constantes
-    #     context['constanteform'] = ConstantesForm()
-    #     context['alerts'] = alerts
-    #
-    #     return context
 
 
 class PatientRecuListView(LoginRequiredMixin, ListView):

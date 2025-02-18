@@ -21,7 +21,7 @@ from django.shortcuts import redirect
 from django.urls import path, include
 
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
-    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view
+    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view, employee_profile
 from hospitalisation.views import HospitalizationUrgenceCreateView, SuivieSoinsListView, SuivieSoinsDetailView, \
     search_medications, add_prescription
 from smit import views
@@ -35,7 +35,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
     RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, \
     create_rdv, UrgenceListView, UrgenceCreateView, test_rapide_consultation_generale_create, \
-    delete_test_rapide_consultation_generale, Examens_Consultation_generale_create
+    delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -57,6 +57,9 @@ urlpatterns = [
                   path('user_role/', RoleListView.as_view(), name='user_role'),
                   path("roles/create/", RoleCreateView.as_view(), name="role_create"),
                   path("roles/delete/<int:pk>", RoleDeleteView.as_view(), name="role_delete"),
+
+
+                  path("profile/", employee_profile, name="employee_profile"),
 
                   path("employees/", EmployeeListView.as_view(), name="employee_list"),
                   path("employees/create/", EmployeeCreateView.as_view(), name="employee_create"),
@@ -82,19 +85,20 @@ urlpatterns = [
                        name='appointment_update'),
                   path('appointments/<int:pk>/delete/', views.appointment_delete, name='appointment_delete'),
 
-
-
- # Consultation VIH
-                  path('test_rapide/<int:consultation_id>', test_rapide_consultation_generale_create, name='test_depistage_generale_create'),
+                  # Consultation VIH
+                  path('test_rapide/<int:consultation_id>', test_rapide_consultation_generale_create,
+                       name='test_depistage_generale_create'),
                   path('consultation_delete/<int:consultation_id>', consultation_delete, name='delete_consult'),
-                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_consultation_generale,name='delete_test_rapide_generale'),
+                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>',
+                       delete_test_rapide_consultation_generale, name='delete_test_rapide_generale'),
 
-#Consultation generale
+                  #Consultation generale
                   path('test_rapide/<int:consultation_id>', test_rapide_vih_create, name='test_depistage-Rapide'),
                   path('consultation_delete/<int:consultation_id>', consultation_delete, name='delete_consult'),
-                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih, name='delete_test_rapide_vih'),
+                  path('test-rapide-vih/<int:test_id>/delete/<int:consultation_id>', delete_test_rapide_vih,
+                       name='delete_test_rapide_vih'),
 
-#Hospitalisation
+                  #Hospitalisation
                   path('hospitalisation/<int:consultation_id>/<int:patient_id>', mark_consultation_as_hospitalised,
                        name='mark_hospitalisation'),
 
@@ -135,14 +139,16 @@ urlpatterns = [
                   path('Allergies_create/create/<int:consultation_id>', Allergies_create, name='Allergies_create'),
 
                   path('Examens_create/create/<int:consultation_id>', Examens_create, name='Examens_create'),
-                  path('delete_examen/<int:examen_id>/create/<int:consultation_id>', delete_examen, name='Examens_delete'),
+                  path('delete_examen/<int:examen_id>/create/<int:consultation_id>', delete_examen,
+                       name='Examens_delete'),
 
-
-                  path('Examens_generale_create/create/<int:consultation_id>',Examens_Consultation_generale_create, name='Examens_generale_create'),
-
+                  path('Examens_generale_create/create/<int:consultation_id>', Examens_Consultation_generale_create,
+                       name='Examens_generale_create'),
 
                   path('Conseils_add/create/<int:consultation_id>', Conseils_add, name='Conseils_add'),
                   path('Rendezvous_create/create/<int:consultation_id>', Rendezvous_create, name='Rendezvous_create'),
+                  path('rendez-vous/<int:pk>/delete/', AppointmentDeleteView.as_view(), name='appointment_delete'),
+
                   path('Protocoles_create/create/<int:consultation_id>', Protocoles_create, name='Protocoles_create'),
 
                   path('symptome_delete/<int:consultation_id>/<int:symp>', symptome_delete, name='symptome_delete'),

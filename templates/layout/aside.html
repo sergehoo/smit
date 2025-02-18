@@ -99,22 +99,29 @@
                         </li>
                         <li class="nk-menu-item">
                             <a href="{% url 'hospitalisation' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-bed-pulse"></i></span>
-                                <span class="nk-menu-text">Patient</span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ hoapi_nbr }}</span>
+                                <span class="nk-menu-icon"><i class="fa-solid fa-bed-pulse "></i></span>
+                                <span class="nk-menu-text">En cours d'hospitalisation</span>
+                                <span class="nk-menu-badge bg-danger text-white">{{ Hospitaliza_encours }}</span>
                             </a>
                         </li>
                     <li class="nk-menu-item">
                             <a href="{% url 'suivie_soins_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-server"></i></span>
-                                <span class="nk-menu-text">Suivi soins</span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ hoapi_nbr }}</span>
+                                <span class="nk-menu-icon"><i class="fa-solid fa-clock-rotate-left "></i></span>
+                                <span class="nk-menu-text">Suivi soins hospitalisation</span>
+                                <span class="nk-menu-badge bg-danger text-white">{{ Hospitaliza_encours }}</span>
+                            </a>
+                        </li>
+                     <li class="nk-menu-item">
+                            <a href="{% url 'hospitalised_patient' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><i class="fa-solid fa-bed "></i></span>
+                                <span class="nk-menu-text">Patients hospitalisés</span>
+                                <span class="nk-menu-badge">{{ discharged_count }}</span>
                             </a>
                         </li>
                         <li class="nk-menu-item">
                             <a href="{% url 'hospi_unites' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-bed"></i></span>
-                                <span class="nk-menu-text">Unités</span>
+                                <span class="nk-menu-text">Unités d'hospitalisation</span>
                             </a>
                         </li>
                      <!-- Section Paramètres sous-menu pour Hospitalisation -->
@@ -156,7 +163,7 @@
 
                         <!-- Section Spécialités -->
                         <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Spécialités</h6>
+                            <h6 class="overline-title text-primary-alt">Maladies sous surveillance</h6>
                         </li>
                         {% for maladie in services %}
                         <li class="nk-menu-item has-sub">

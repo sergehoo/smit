@@ -80,7 +80,8 @@ LOGGING = {
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
-
+    "decouple",
+    "django.contrib.sites",
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -218,15 +219,20 @@ LOGIN_REDIRECT_URL = 'home'
 # }
 
 ACCOUNT_LOGIN_METHODS = {'username'}
+# ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Vérification d'e-mail obligatoire
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 #
 AXES_FAILURE_LIMIT = 5  # Bloquer après 5 essais
 AXES_COOLOFF_TIME = 1  # 1 heure d'attente après échec
 
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_CHANGE_PASSWORD_REDIRECT_URL = "/accounts/password/change/"
+ACCOUNT_RESET_PASSWORD_REDIRECT_URL = "/accounts/password/reset/done/"
 #
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -321,6 +327,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HANDLER403 = 'core.views.custom_403_view'
+
+# Configuration de l'e-mail via fichier .env
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = config("EMAIL_PORT", cast=int, default=587)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool, default=False)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 
 # CACHES = {
 #     "default": {
