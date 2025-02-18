@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/hospitalisation/templatetags/custom_filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/hospitalised_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/hospitalised_patient.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/django_errors.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" afterDir="false" />
-    </list>
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -198,7 +188,7 @@
       <workItem from="1737375403106" duration="104745000" />
       <workItem from="1738659131169" duration="27942000" />
       <workItem from="1738763194375" duration="66471000" />
-      <workItem from="1739358674510" duration="63597000" />
+      <workItem from="1739358674510" duration="63999000" />
     </task>
     <servers />
   </component>
@@ -256,12 +246,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2039</line>
+          <line>2041</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1317</line>
+          <line>1319</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -286,7 +276,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>783</line>
+          <line>785</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -326,7 +316,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1857</line>
+          <line>1859</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
