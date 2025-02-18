@@ -14,3 +14,8 @@ def attr(field, attr):
     attrs = field.field.widget.attrs.copy()
     attrs[attr_name] = attr_value
     return field.as_widget(attrs=attrs)
+
+@register.filter
+def get_item(dictionary, key):
+    """Retourne la valeur d'un dictionnaire pour une clé donnée"""
+    return dictionary.get(key, 0)

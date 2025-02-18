@@ -9,7 +9,7 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     add_historique_maladie, add_observations, add_hospi_comment, ExportHospitalizationView, add_maladie, \
     add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf, add_antecedents_hospi, \
     ajouter_mode_de_vie, add_examen_apareil, HospitalisedPatientListView, add_problemes_pose, add_resume_syndromique, \
-    add_bilan_paraclinique, add_imagerie, update_execution_status
+    add_bilan_paraclinique, add_imagerie, update_execution_status, export_hospitalized_patients
 from smit.views import add_cas_contact
 from smitci import settings
 
@@ -81,6 +81,9 @@ urlpatterns = [
                        name='generate_ordonnance_pdf'),
 
                   path("update-execution-status/", update_execution_status, name="update_execution_status"),
+
+                  path('export/hospitalized/<str:age_group>/', export_hospitalized_patients,
+                       name='export_hospitalized_patients'),
 
                   # path('hospitalisation/<int:hospitalisation_id>prescription/<int:prescription_id>/execute/', execute_prescription, name='nurse_execute'),
 

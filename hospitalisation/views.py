@@ -160,6 +160,30 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
             )
         )
 
+        # Définition des tranches d'âge
+        age_ranges = {
+            "0-18": (today - datetime.timedelta(days=18 * 365), today),
+            "18-30": (today - datetime.timedelta(days=30 * 365), today - datetime.timedelta(days=18 * 365)),
+            "30-45": (today - datetime.timedelta(days=45 * 365), today - datetime.timedelta(days=30 * 365)),
+            "45-60": (today - datetime.timedelta(days=60 * 365), today - datetime.timedelta(days=45 * 365)),
+            "60-plus": (None, today - datetime.timedelta(days=60 * 365)),
+        }
+
+        # Compter les patients hospitalisés dans chaque tranche d'âge
+        age_counts = {}
+        for key, (min_date, max_date) in age_ranges.items():
+            query = Hospitalization.objects.filter(discharge_date__isnull=True)
+
+            if min_date and max_date:
+                query = query.filter(patient__date_naissance__range=(min_date, max_date))
+            elif max_date:
+                query = query.filter(patient__date_naissance__lte=max_date)
+
+            age_counts[key] = query.count()
+
+        # Ajouter les données au contexte
+        context['age_counts'] = age_counts
+
         # Récupérer la dernière constante pour chaque patient
         context['search_form'] = PatientSearchForm(self.request.GET or None)
         context['demande_hospi'] = demande_hospi
@@ -169,6 +193,75 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         context['unites_hospitalisation'] = nbr_patient
 
         return context
+
+
+def calculate_patient_age(date_naissance):
+    """Retourne l'âge d'un patient à partir de sa date de naissance."""
+    if not date_naissance:
+        return None
+    today = datetime.date.today()
+    return (today - date_naissance).days // 365
+
+
+def export_hospitalized_patients(request, age_group):
+    """
+    Exporte les patients hospitalisés selon une tranche d'âge définie.
+    """
+    today = datetime.date.today()
+
+    age_ranges = {
+        "0-18": (0, 18),
+        "18-30": (18, 30),
+        "30-45": (30, 45),
+        "45-60": (45, 60),
+        "60-plus": (60, 150),  # Supposons un âge maximum de 150 ans
+    }
+
+    if age_group not in age_ranges:
+        return HttpResponse("Tranche d'âge invalide.", status=400)
+
+    min_age, max_age = age_ranges[age_group]
+
+    # Filtrer les patients en fonction de leur âge
+    queryset = Hospitalization.objects.filter(discharge_date__isnull=True).select_related("patient", "doctor")
+
+    # Filtrer en fonction de l'âge
+    filtered_patients = [
+        hospi for hospi in queryset
+        if hospi.patient.date_naissance and min_age <= calculate_patient_age(hospi.patient.date_naissance) < max_age
+    ]
+
+    # Vérifier s'il y a des résultats
+    if not filtered_patients:
+        return HttpResponse("Aucun patient trouvé pour cette tranche d'âge.", status=204)
+
+    # Création du DataFrame
+    data = [
+        {
+            "Nom du Patient": hospi.patient.nom,
+            "Prénom": hospi.patient.prenoms,
+            "Date de Naissance": hospi.patient.date_naissance,
+            "Sexe": hospi.patient.sexe,
+            "Âge": calculate_patient_age(hospi.patient.date_naissance),
+            "Médecin Responsable": hospi.doctor.nom if hospi.doctor else "N/A",
+            "Date d'Admission": hospi.admission_date,
+            "Chambre": hospi.room,
+            "Lit": hospi.bed.id if hospi.bed else "N/A",
+            "Motif d'Admission": hospi.reason_for_admission,
+        }
+        for hospi in filtered_patients
+    ]
+
+    df = pd.DataFrame(data)
+
+    # Création du fichier Excel
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Patients_Hospitalisés_{age_group}.xlsx"'
+
+    with pd.ExcelWriter(response, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name="Hospitalisations")
+
+    return response
 
 
 class HospitalisedPatientListView(LoginRequiredMixin, ListView):
@@ -217,6 +310,34 @@ class HospitalisedPatientListView(LoginRequiredMixin, ListView):
                 filter=Q(chambres__boxes__lits__lit_hospy__discharge_date__isnull=False)
             )
         )
+
+        today = date.today()
+        queryset = self.get_queryset()
+
+        # Dictionnaire pour stocker le nombre de patients par tranche d'âge
+        age_counts = {
+            "0-18": 0,
+            "18-30": 0,
+            "30-45": 0,
+            "45-60": 0,
+            "60+": 0
+        }
+
+        # Calculer l'âge des patients hospitalisés
+        for hosp in queryset:
+            age = today.year - hosp.patient.date_naissance.year
+            if age <= 18:
+                age_counts["0-18"] += 1
+            elif 18 < age <= 30:
+                age_counts["18-30"] += 1
+            elif 30 < age <= 45:
+                age_counts["30-45"] += 1
+            elif 45 < age <= 60:
+                age_counts["45-60"] += 1
+            else:
+                age_counts["60+"] += 1
+
+        context['age_counts'] = age_counts  # Ajout des données au contexte
 
         # Récupérer la dernière constante pour chaque patient
         context['search_form'] = PatientSearchForm(self.request.GET or None)
@@ -454,7 +575,6 @@ class SuivieSoinsDetailView(LoginRequiredMixin, DetailView):
         context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
         context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
         context['autresindicatorsform'] = HospitalizationIndicatorsForm()
-
 
         context['diagnosticsform'] = DiagnosticForm()
         context['observationform'] = ObservationForm()
@@ -1342,6 +1462,7 @@ def add_examen_apareil(request, hospitalisation_id):
     messages.error(request, "❌ Erreur lors de l'ajout de l'examen.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
+
 @login_required
 def add_resume_syndromique(request, hospitalisation_id):
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
@@ -1361,6 +1482,7 @@ def add_resume_syndromique(request, hospitalisation_id):
         form = HistoriqueMaladieForm()
     messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
 
 @login_required
 def add_problemes_pose(request, hospitalisation_id):
@@ -1410,6 +1532,8 @@ def update_execution_status(request):
             return JsonResponse({"success": False, "message": "Requête invalide."}, status=400)
 
     return JsonResponse({"success": False, "message": "Méthode non autorisée."}, status=405)
+
+
 @login_required
 def add_bilan_paraclinique(request, hospitalisation_id):
     """
@@ -1439,6 +1563,7 @@ def add_bilan_paraclinique(request, hospitalisation_id):
 
     return JsonResponse({'success': False, 'message': "Méthode non autorisée."}, status=405)
 
+
 @login_required
 def add_imagerie(request, hospitalisation_id):
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
@@ -1458,6 +1583,8 @@ def add_imagerie(request, hospitalisation_id):
         form = ImagerieMedicaleForm()
 
     return render(request, "pages/imagerie/add_imagerie.html", {"form": form, "hospitalisation": hospitalisation})
+
+
 def generate_ordonnance_pdf(request, patient_id, hospitalisation_id):
     """
     Génère une ordonnance PDF pour un patient hospitalisé à partir de ses prescriptions.
