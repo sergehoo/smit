@@ -241,7 +241,7 @@ def export_hospitalized_patients(request, age_group):
             "Nom du Patient": hospi.patient.nom,
             "Prénom": hospi.patient.prenoms,
             "Date de Naissance": hospi.patient.date_naissance,
-            "Sexe": hospi.patient.sexe,
+            "Genre": hospi.patient.genre,
             "Âge": calculate_patient_age(hospi.patient.date_naissance),
             "Médecin Responsable": hospi.doctor.nom if hospi.doctor else "N/A",
             "Date d'Admission": hospi.admission_date,
