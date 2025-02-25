@@ -1317,8 +1317,8 @@ class Hospitalization(models.Model):
     discharge_date = models.DateTimeField(null=True, blank=True)
     discharge_reason = models.CharField(max_length=700, null=True, blank=True)
     room = models.CharField(max_length=500)
-    bed = models.ForeignKey('LitHospitalisation', related_name='lit_hospy', on_delete=models.RESTRICT, null=False,
-                            blank=False)
+    bed = models.ForeignKey('LitHospitalisation', related_name='lit_hospy', on_delete=models.RESTRICT, null=True,
+                            blank=True)
     reason_for_admission = models.TextField()
     status = models.CharField(max_length=50, choices=Patient_statut_choices, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -35,7 +35,8 @@ from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
-    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm
+    HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm, \
+    PatientUpdateForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole
 
@@ -875,42 +876,42 @@ class PatientCreateView(LoginRequiredMixin, CreateView):
 
 class PatientUpdateView(LoginRequiredMixin, UpdateView):
     model = Patient
-    form_class = PatientCreateForm
+    form_class = PatientUpdateForm
     template_name = "pages/patient_update.html"
 
     def get_success_url(self):
-        # Redirige vers une page de confirmation ou de détail du patient
-        return reverse('global_search')
+        return reverse_lazy('global_search')
 
     def form_valid(self, form):
+        patient = form.instance
         nom = form.cleaned_data['nom'].upper()
         prenoms = form.cleaned_data['prenoms'].upper()
-        date_naissance = form.cleaned_data['date_naissance']
+        date_naissance = form.cleaned_data.get('date_naissance')
         contact = form.cleaned_data['contact']
 
-        # Vérification des doublons pour les autres patients que celui en cours de modification
-        if Patient.objects.exclude(pk=self.object.pk).filter(
+        # Vérification des doublons (autres patients sauf celui en cours de modification)
+        if Patient.objects.exclude(pk=patient.pk).filter(
                 nom__iexact=nom, prenoms__iexact=prenoms, date_naissance=date_naissance
         ).exists():
-            messages.error(self.request,
-                           'Un autre patient avec les mêmes nom, prénoms et date de naissance existe déjà.')
+            messages.error(self.request, "Un autre patient avec les mêmes nom, prénoms et date de naissance existe déjà.")
             return self.form_invalid(form)
 
-        if Patient.objects.exclude(pk=self.object.pk).filter(contact=contact).exists():
-            messages.error(self.request, 'Un autre patient avec ce contact existe déjà.')
+        if Patient.objects.exclude(pk=patient.pk).filter(contact=contact).exists():
+            messages.error(self.request, "Un autre patient avec ce contact existe déjà.")
             return self.form_invalid(form)
 
-        # Traitement de la localité
-        location_data = {
-            'contry': form.cleaned_data['pays'],
-            'commune': form.cleaned_data['commune']
-        }
-        location_instance, created = Location.objects.get_or_create(**location_data)
-        self.object.localite = location_instance
-        self.object.save()
+        # Mise à jour de la localité
+        commune = form.cleaned_data.get('localite')
+        if commune:
+            location_instance, _ = Location.objects.get_or_create(name=commune)
+            patient.localite = location_instance
 
-        messages.success(self.request, 'Informations du patient mises à jour avec succès!')
-        return redirect(self.get_success_url())
+        # Regénérer le QR Code si les données changent
+        if 'nom' in form.changed_data or 'prenoms' in form.changed_data or 'contact' in form.changed_data:
+            patient.generate_qr_code()
+
+        messages.success(self.request, "Informations du patient mises à jour avec succès!")
+        return super().form_valid(form)
 
 
 @login_required

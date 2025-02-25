@@ -9,7 +9,8 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     add_historique_maladie, add_observations, add_hospi_comment, ExportHospitalizationView, add_maladie, \
     add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf, add_antecedents_hospi, \
     ajouter_mode_de_vie, add_examen_apareil, HospitalisedPatientListView, add_problemes_pose, add_resume_syndromique, \
-    add_bilan_paraclinique, add_imagerie, update_execution_status, export_hospitalized_patients
+    add_bilan_paraclinique, add_imagerie, update_execution_status, export_hospitalized_patients, \
+    HospitalisationDeleteView
 from smit.views import add_cas_contact
 from smitci import settings
 
@@ -19,6 +20,8 @@ urlpatterns = [
                   path('hospitalisation/export/', ExportHospitalizationView.as_view(), name='export_hospitalizations'),
 
                   path('details/<int:pk>/hospi/', HospitalisationDetailView.as_view(), name='hospitalisationdetails'),
+                  path('delete/<int:pk>/hospi/', HospitalisationDeleteView.as_view(), name='hospitalisationdelete'),
+
                   path('lit/detail<int:pk>/hospi/', LitDetailView.as_view(), name='litdetails'),
                   path('unites', HospitalisationUniteListView.as_view(), name='hospi_unites'),
                   path('set_cleaning_false/<int:lit_id>/', set_cleaning_false, name='set_cleaning_false'),

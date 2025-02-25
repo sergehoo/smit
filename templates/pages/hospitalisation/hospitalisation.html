@@ -428,6 +428,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                                     <a href="{% url 'hospitalisationdetails' patient.pk %}"><em
                                                                                             class="icon ni ni-file-check"></em><span>Detail de l'Hospitalisation</span></a>
                                                                                 </li>
+                                                                                
+                                                                                  <li>
+                                                                                    <a href="{% url 'hospitalisationdelete' patient.pk %}"><em
+                                                                                            class="icon ni ni-file-check text-danger"></em><span class="text-danger">Supprimer</span></a>
+                                                                                </li>
 
                                                                             </ul>
                                                                         </div>

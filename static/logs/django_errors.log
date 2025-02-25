@@ -7888,3 +7888,679 @@ Traceback (most recent call last):
     return datetime.date.fromisoformat(value)
 TypeError: fromisoformat: argument must be str
 [35;1mHTTP GET /hospitalisation/export/hospitalized/18-30/ 500 [0.05, 127.0.0.1:58314][0m
+Internal Server Error: /hospitalisation/315/361
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (5, 2025-02-19 00:00:00+00, null, null, , fffrg, Admis, 2025-02-19 15:16:32.423281+00, 2025-02-19 15:16:32.423296+00, null, null, null, 361).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 496, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (5, 2025-02-19 00:00:00+00, null, null, , fffrg, Admis, 2025-02-19 15:16:32.423281+00, 2025-02-19 15:16:32.423296+00, null, null, null, 361).
+
+[35;1mHTTP POST /hospitalisation/315/361 500 [0.10, 127.0.0.1:60787][0m
+Internal Server Error: /hospitalisation/314/364
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (6, 2025-02-19 00:00:00+00, null, null, , de, Admis, 2025-02-19 15:17:08.736879+00, 2025-02-19 15:17:08.736887+00, null, null, null, 364).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 496, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (6, 2025-02-19 00:00:00+00, null, null, , de, Admis, 2025-02-19 15:17:08.736879+00, 2025-02-19 15:17:08.736887+00, null, null, null, 364).
+
+[35;1mHTTP POST /hospitalisation/314/364 500 [0.07, 127.0.0.1:60811][0m
+Internal Server Error: /modifierPatient/365
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 208, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 908, in form_valid
+    location_instance, created = Location.objects.get_or_create(**location_data)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 623, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'commune' into field. Choices are: district, district_id, id, name, patient, patientadresses, population, source, type
+[35;1mHTTP POST /modifierPatient/365 500 [0.11, 127.0.0.1:49982][0m
+Internal Server Error: /modifierPatient/365
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 208, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 908, in form_valid
+    location_instance, created = Location.objects.get_or_create(**location_data)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 623, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'localite' into field. Choices are: district, district_id, id, name, patient, patientadresses, population, source, type
+[35;1mHTTP POST /modifierPatient/365 500 [0.13, 127.0.0.1:53133][0m
+Internal Server Error: /modifierPatient/365
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 208, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 908, in form_valid
+    location_instance, created = Location.objects.get_or_create(**location_data)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 623, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'localite' into field. Choices are: district, district_id, id, name, patient, patientadresses, population, source, type
+[35;1mHTTP POST /modifierPatient/365 500 [0.08, 127.0.0.1:53133][0m
+Internal Server Error: /modifierPatient/365
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 208, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 908, in form_valid
+    location_instance, created = Location.objects.get_or_create(**location_data)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 623, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'localite' into field. Choices are: district, district_id, id, name, patient, patientadresses, population, source, type
+[35;1mHTTP POST /modifierPatient/365 500 [0.06, 127.0.0.1:53904][0m
+Internal Server Error: /modifierPatient/365
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 208, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 906, in form_valid
+    location_instance, _ = Location.objects.get_or_create(commune=commune)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 623, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'commune' into field. Choices are: district, district_id, id, name, patient, patientadresses, population, source, type
+[35;1mHTTP POST /modifierPatient/365 500 [0.09, 127.0.0.1:54164][0m
+Internal Server Error: /hospitalisation/316/364
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (7, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:15:56.656219+00, 2025-02-25 13:15:56.656233+00, null, null, null, 364).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 497, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (7, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:15:56.656219+00, 2025-02-25 13:15:56.656233+00, null, null, null, 364).
+
+[35;1mHTTP POST /hospitalisation/316/364 500 [0.13, 127.0.0.1:55372][0m
+Internal Server Error: /hospitalisation/316/364
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (8, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:48.744623+00, 2025-02-25 13:17:48.744633+00, null, null, null, 364).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 497, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (8, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:48.744623+00, 2025-02-25 13:17:48.744633+00, null, null, null, 364).
+
+[35;1mHTTP POST /hospitalisation/316/364 500 [0.15, 127.0.0.1:55494][0m
+Internal Server Error: /hospitalisation/316/364
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (9, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:51.541643+00, 2025-02-25 13:17:51.541647+00, null, null, null, 364).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 497, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (9, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:51.541643+00, 2025-02-25 13:17:51.541647+00, null, null, null, 364).
+
+[35;1mHTTP POST /hospitalisation/316/364 500 [0.08, 127.0.0.1:55494][0m
+Internal Server Error: /hospitalisation/316/364
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.NotNullViolation: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (10, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:57.237449+00, 2025-02-25 13:17:57.237467+00, null, null, null, 364).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 497, in mark_consultation_as_hospitalised
+    hospitalization.save()
+  File "/Users/ogahserge/Documents/smitci/smit/models.py", line 1348, in save
+    super().save(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1020, in _save_table
+    results = self._do_insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/base.py", line 1061, in _do_insert
+    return manager._insert(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1805, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1822, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.IntegrityError: null value in column "bed_id" of relation "smit_hospitalization" violates not-null constraint
+DETAIL:  Failing row contains (10, 2025-02-25 00:00:00+00, null, null, , www, Admis, 2025-02-25 13:17:57.237449+00, 2025-02-25 13:17:57.237467+00, null, null, null, 364).
+
+[35;1mHTTP POST /hospitalisation/316/364 500 [0.08, 127.0.0.1:55494][0m
+Internal Server Error: /hospitalisation/delete/11/hospi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 278, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 285, in form_valid
+    return HttpResponseRedirect(success_url)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/http/response.py", line 616, in __init__
+    self["Location"] = iri_to_uri(redirect_to)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/encoding.py", line 137, in iri_to_uri
+    iri = str(iri)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/functional.py", line 155, in __text_cast
+    return func(*self.__args, **self.__kw)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'hospitalisation_list' not found. 'hospitalisation_list' is not a valid view function or pattern name.
+[35;1mHTTP POST /hospitalisation/delete/11/hospi/ 500 [0.18, 127.0.0.1:56391][0m
+Internal Server Error: /hospitalisation/delete/13/hospi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 278, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 285, in form_valid
+    return HttpResponseRedirect(success_url)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/http/response.py", line 616, in __init__
+    self["Location"] = iri_to_uri(redirect_to)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/encoding.py", line 137, in iri_to_uri
+    iri = str(iri)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/functional.py", line 155, in __text_cast
+    return func(*self.__args, **self.__kw)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'hospitalisation_list' not found. 'hospitalisation_list' is not a valid view function or pattern name.
+[35;1mHTTP POST /hospitalisation/delete/13/hospi/ 500 [0.08, 127.0.0.1:56446][0m

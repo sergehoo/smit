@@ -1,0 +1,74 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load unicorn %}
+{% load group_permissions %}
+{% block content %}
+    <style>
+    .card {
+    border-radius: 12px; /* Coins arrondis */
+    overflow: hidden;    /* Assure que l'image ne dépasse pas */
+}
+
+.card-title {
+    font-weight: bold;
+}
+
+.card img {
+    object-fit: cover;
+    height: 100%; /* Ajuster la hauteur si nécessaire */
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+    </style>
+<div class="container mt-5">
+    <div class="nk-content nk-content-fluid">
+        <div class="nk-content-body">
+            <div class="nk-block-head nk-block-head-sm mb-4 text-center">
+                <h3 class="nk-block-title page-title text-primary">Gestion de l'hospitalisation</h3>
+                <p class="text-muted">Hospitalisation {{ object }}.</p>
+            </div>
+
+            <!-- Formulaire de suppression -->
+            <div class="card shadow-sm">
+                <div class="row no-gutters">
+                    <!-- Illustration -->
+
+                    <!-- Contenu -->
+                    <div class="col-lg-12 text-center">
+                        <div class="card-body text-center">
+                             <img src="{% static 'images/trash-bin.gif' %}" width="300px" class="img-fluid" alt="Suppression de rôle">
+                            <h4 class="card-title text-danger">Confirmer la Suppression</h4>
+                            <h4 class="card-text text-muted mb-5">
+                                Êtes-vous sûr de vouloir supprimer l'hospitalisation de<br>
+                                <strong class="text-danger">{{ object }}</strong> ?
+                                <br><strong class="text-danger">Attention ! </strong>Cette action est <strong>irréversible</strong>.
+                            </h4>
+                            <form method="post" class="d-inline-block">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-lg me-3">
+                                    <em class="icon ni ni-trash"></em> Supprimer
+                                </button>
+                                <a href="{% url 'hospitalisation' %}" class="btn btn-secondary btn-lg ml-5">
+                                    <em class="icon ni ni-arrow-left "></em> Annuler
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -27,7 +27,7 @@ from django.utils.timezone import now, make_naive, is_aware
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, DetailView, CreateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, TemplateView, DeleteView
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from xhtml2pdf import pisa
@@ -195,6 +195,17 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         return context
 
 
+class HospitalisationDeleteView(LoginRequiredMixin, DeleteView):
+    model = Hospitalization
+    template_name = "pages/hospitalisation/hospitalisationdelete.html"
+    context_object_name = "hospitalisationgenerale"
+
+    def get_success_url(self):
+        messages.success(self.request, "L'hospitalisation a été supprimée avec succès.")
+        return reverse_lazy("hospitalisation")  # Redirigez vers la liste des hospitalisations
+
+
+
 def calculate_patient_age(date_naissance):
     """Retourne l'âge d'un patient à partir de sa date de naissance."""
     if not date_naissance:
@@ -222,7 +233,7 @@ def export_hospitalized_patients(request, age_group):
 
     min_age, max_age = age_ranges[age_group]
 
-    # Filtrer les patients en fonction de leur âge
+    # Filtrer les hospitalisations actives
     queryset = Hospitalization.objects.filter(discharge_date__isnull=True).select_related("patient", "doctor")
 
     # Filtrer en fonction de l'âge
@@ -235,7 +246,7 @@ def export_hospitalized_patients(request, age_group):
     if not filtered_patients:
         return HttpResponse("Aucun patient trouvé pour cette tranche d'âge.", status=204)
 
-    # Création du DataFrame
+    # Création du DataFrame avec suppression des timezones
     data = [
         {
             "Nom du Patient": hospi.patient.nom,
@@ -244,7 +255,7 @@ def export_hospitalized_patients(request, age_group):
             "Genre": hospi.patient.genre,
             "Âge": calculate_patient_age(hospi.patient.date_naissance),
             "Médecin Responsable": hospi.doctor.nom if hospi.doctor else "N/A",
-            "Date d'Admission": hospi.admission_date,
+            "Date d'Admission": hospi.admission_date.replace(tzinfo=None) if hospi.admission_date else None,
             "Chambre": hospi.room,
             "Lit": hospi.bed.id if hospi.bed else "N/A",
             "Motif d'Admission": hospi.reason_for_admission,
