@@ -1,4 +1,7 @@
+import base64
+import io
 import json
+from datetime import timedelta
 
 import requests
 from django.contrib import messages
@@ -6,13 +9,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import PermissionDenied
+from django.db import models
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.timezone import now
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, FormView
+from matplotlib import pyplot as plt
 
-from core.models import Employee
+from core.models import Employee, VisitCounter
 from smit.forms import RoleForm, AssignRoleForm, EmployeeCreateForm
 from twilio.rest import Client
 import random
@@ -335,6 +341,7 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+
 class EmployeeUpdateView(LoginRequiredMixin, UpdateView):
     model = Employee
     form_class = EmployeeCreateForm
@@ -359,3 +366,43 @@ class EmployeeDeleteView(LoginRequiredMixin, DeleteView):
         response = super().form_valid(form)
         messages.success(self.request, "Employee supprimer avec successfully")
         return response
+
+
+def generate_visit_chart():
+    """ Génère un graphique des visites sur les 7 derniers jours. """
+    last_week = now() - timedelta(days=7)
+    visits_per_day = (
+        VisitCounter.objects.filter(timestamp__gte=last_week)
+        .extra({'day': "date(timestamp)"})
+        .values('day')
+        .annotate(total_visits=models.Count('id'))
+        .order_by('day')
+    )
+
+    days = [entry['day'] for entry in visits_per_day]
+    visit_counts = [entry['total_visits'] for entry in visits_per_day]
+
+    # Générer le graphique
+    plt.figure(figsize=(8, 4))
+    plt.plot(days, visit_counts, marker="o", linestyle="-", color="blue", label="Visites")
+    plt.xlabel("Date")
+    plt.ylabel("Nombre de visites")
+    plt.title("Nombre de visites par jour (7 derniers jours)")
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Convertir l'image en base64
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+
+    graphic = base64.b64encode(image_png)
+    return graphic.decode("utf-8")
+
+def dashboard_view(request):
+    """ Vue du tableau de bord """
+    visit_chart = generate_visit_chart()
+    return render(request, "admin/dashboard.html", {"visit_chart": visit_chart})

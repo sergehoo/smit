@@ -80,6 +80,7 @@ LOGGING = {
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
+    'django.contrib.gis',
     "decouple",
     "django.contrib.sites",
     'django.contrib.auth',
@@ -108,6 +109,7 @@ INSTALLED_APPS = [
     'django_filters',
     'guardian',
     'phonenumber_field',
+    'django_user_agents',
     # 'django_select2',
 
 ]
@@ -135,6 +137,7 @@ MIDDLEWARE = [
     'simple_history.middleware.HistoryRequestMiddleware',
     'smit.middlewares.SessionTimeoutMiddleware',
     'smit.middlewares.LogForbiddenMiddleware',
+    'core.middleware.VisitCounterMiddleware',
 
 ]
 

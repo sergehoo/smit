@@ -3,12 +3,15 @@ import io
 import json
 import random
 import uuid
+
+import requests
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.db.models import Max
+from django.utils.html import format_html
 from django.utils.timezone import now
 from django_countries.fields import CountryField
 from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
@@ -17,6 +20,7 @@ from simple_history.models import HistoricalRecords
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 import qrcode
+
 
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
     # Taille de l'image
@@ -1246,8 +1250,8 @@ class Maladie(models.Model):
         ('modere', 'Modéré'),
         ('grave', 'Grave'),
     ]
-    code_cim = models.CharField(max_length=50, unique=True,blank=True, null=True)  # Code CIM-10
-    urlcim = models.CharField(max_length=100, unique=True,blank=True, null=True)  # Code CIM-10
+    code_cim = models.CharField(max_length=50, unique=True, blank=True, null=True)  # Code CIM-10
+    urlcim = models.CharField(max_length=100, unique=True, blank=True, null=True)  # Code CIM-10
     nom = models.CharField(max_length=255)  # Nom de la maladie
     categorie = models.CharField(
         max_length=50,
@@ -1288,3 +1292,73 @@ class Maladie(models.Model):
         verbose_name = "Maladie"
         verbose_name_plural = "Maladies"
         ordering = ['categorie', 'nom']
+
+
+class VisitCounter(models.Model):
+    ip_address = models.GenericIPAddressField()  # Adresse IP du visiteur
+    user_agent = models.TextField(blank=True, null=True)  # Infos sur le navigateur
+    timestamp = models.DateTimeField(default=now)  # Date et heure de la visite
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Utilisateur (si connecté)
+
+    # Localisation
+    country = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    region = models.CharField(max_length=100, blank=True, null=True)
+    postal_code = models.CharField(max_length=20, blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    isp = models.CharField(max_length=255, blank=True, null=True)  # Fournisseur d'accès Internet
+
+    # Type d'appareil
+    is_mobile = models.BooleanField(default=False)
+    is_tablet = models.BooleanField(default=False)
+    is_pc = models.BooleanField(default=False)
+
+    def __str__(self):
+        device = "Mobile" if self.is_mobile else "Tablette" if self.is_tablet else "PC"
+        return f"Visite de {self.ip_address} ({device}, {self.city}, {self.country}) - {self.timestamp}"
+
+    @staticmethod
+    def get_location(ip):
+        """Utilise une API externe pour récupérer la localisation de l'IP."""
+        try:
+            response = requests.get(f"http://ip-api.com/json/{ip}")
+            data = response.json()
+            if data['status'] == 'success':
+                return {
+                    "country": data.get("country"),
+                    "city": data.get("city"),
+                    "region": data.get("regionName"),
+                    "postal_code": data.get("zip"),
+                    "latitude": data.get("lat"),
+                    "longitude": data.get("lon"),
+                    "isp": data.get("isp"),
+                }
+        except requests.RequestException:
+            pass
+        return {}
+
+    def save(self, *args, **kwargs):
+        """Remplit les informations de localisation et le type d'appareil avant de sauvegarder."""
+        if not self.country and self.ip_address:
+            location_data = self.get_location(self.ip_address)
+            self.country = location_data.get("country")
+            self.city = location_data.get("city")
+            self.region = location_data.get("region")
+            self.postal_code = location_data.get("postal_code")
+            self.latitude = location_data.get("latitude")
+            self.longitude = location_data.get("longitude")
+            self.isp = location_data.get("isp")
+
+        super().save(*args, **kwargs)
+
+    def get_map_url(self):
+        """Génère un lien vers Google Maps ou OpenStreetMap"""
+        if self.latitude and self.longitude:
+            return format_html(
+                '<a href="https://www.google.com/maps?q={},{}" target="_blank">📍 Voir sur la carte</a>',
+                self.latitude, self.longitude
+            )
+        return "🌍 Localisation non disponible"
+
+    get_map_url.short_description = "Carte"
