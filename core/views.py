@@ -122,11 +122,14 @@ class AssignRoleView(LoginRequiredMixin, FormView):
         employee.user.groups.add(role)
         return super().form_valid(form)
 
+
 @login_required
 def employee_profile(request):
     """Affiche le profil de l'employé connecté"""
     employee = get_object_or_404(Employee, user=request.user)
     return render(request, "employees/profile.html", {"employee": employee})
+
+
 class EmployeeListView(PermissionRequiredMixin, ListView):
     model = Employee
     template_name = "employees/employee_list.html"
@@ -341,7 +344,6 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-
 class EmployeeUpdateView(LoginRequiredMixin, UpdateView):
     model = Employee
     form_class = EmployeeCreateForm
@@ -369,22 +371,19 @@ class EmployeeDeleteView(LoginRequiredMixin, DeleteView):
 
 
 def generate_visit_chart():
-    """ Génère un graphique des visites sur les 7 derniers jours. """
     last_week = now() - timedelta(days=7)
     visits_per_day = (
         VisitCounter.objects.filter(timestamp__gte=last_week)
-        .extra({'day': "date(timestamp)"})
-        .values('day')
+        .values('timestamp__date')
         .annotate(total_visits=models.Count('id'))
-        .order_by('day')
+        .order_by('timestamp__date')
     )
 
-    days = [entry['day'] for entry in visits_per_day]
+    days = [entry['timestamp__date'].strftime('%Y-%m-%d') for entry in visits_per_day]
     visit_counts = [entry['total_visits'] for entry in visits_per_day]
 
-    # Générer le graphique
     plt.figure(figsize=(8, 4))
-    plt.plot(days, visit_counts, marker="o", linestyle="-", color="blue", label="Visites")
+    plt.plot(days, visit_counts, marker="o", linestyle="-", label="Visites")
     plt.xlabel("Date")
     plt.ylabel("Nombre de visites")
     plt.title("Nombre de visites par jour (7 derniers jours)")
@@ -392,17 +391,15 @@ def generate_visit_chart():
     plt.xticks(rotation=45)
     plt.tight_layout()
 
-    # Convertir l'image en base64
     buffer = io.BytesIO()
     plt.savefig(buffer, format="png")
     buffer.seek(0)
-    image_png = buffer.getvalue()
+    graphic = base64.b64encode(buffer.getvalue()).decode("utf-8")
     buffer.close()
 
-    graphic = base64.b64encode(image_png)
-    return graphic.decode("utf-8")
+    return graphic
+
 
 def dashboard_view(request):
-    """ Vue du tableau de bord """
     visit_chart = generate_visit_chart()
     return render(request, "admin/dashboard.html", {"visit_chart": visit_chart})

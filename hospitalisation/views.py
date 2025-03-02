@@ -4,6 +4,7 @@ import logging
 import random
 import re
 import traceback
+import unicodedata
 import uuid
 from collections import Counter, defaultdict, OrderedDict
 from datetime import date, timedelta
@@ -33,7 +34,7 @@ from reportlab.pdfgen import canvas
 from xhtml2pdf import pisa
 
 from core.models import Patient, ServiceSubActivity, Maladie, Employee
-from pharmacy.models import Medicament, Medocsprescrits
+from pharmacy.models import Medicament, Medocsprescrits, FORME_MEDICAMENT_CHOICES
 from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
@@ -203,7 +204,6 @@ class HospitalisationDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         messages.success(self.request, "L'hospitalisation a été supprimée avec succès.")
         return reverse_lazy("hospitalisation")  # Redirigez vers la liste des hospitalisations
-
 
 
 def calculate_patient_age(date_naissance):
@@ -1048,33 +1048,117 @@ def search_medications(request):
     return JsonResponse([], safe=False)
 
 
+# def parse_medication_data(medication_str):
+#     """
+#     Analyse la chaîne saisie par l'utilisateur et extrait :
+#     - nom : Nom du médicament
+#     - dosage : Quantité numérique
+#     - unitdosage : Unité de dosage (mg, ml, g, etc.)
+#     - dosage_form : Forme pharmaceutique (comprimé, gélule, etc.)
+#     """
+#     try:
+#         # Séparer la chaîne en mots
+#         words = medication_str.split()
+#
+#         # Vérifier si le dernier mot est une unité de dosage connue
+#         known_units = ["mg", "g", "ml", "mcg", "UI", "L", "meq", "µL", "µg", "cm³", "mL/kg", "mg/m²", "mg/kg", "g/L"]
+#         known_forms = ["comprime", "gelule", "sirop", "injection", "ampoule", "pommade", "creme", "spray", "gouttes",
+#                        "patch",
+#                        "inhalateur",
+#                        "solution",
+#                        "suspension",
+#                        "poudre",
+#                        "ovule",
+#                        "collyre",
+#                        "aérosol",
+#                        "elixir",
+#                        "baume",
+#                        "granulé",
+#                        "capsule"]
+#
+#         name_parts = []
+#         dosage = None
+#         unitdosage = None
+#         dosage_form = None
+#
+#         for word in words:
+#             if word.isdigit():  # Vérifie si c'est un chiffre (dosage)
+#                 dosage = int(word)
+#             elif word in known_units:  # Vérifie si c'est une unité de dosage
+#                 unitdosage = word
+#             elif word in known_forms:  # Vérifie si c'est une forme pharmaceutique
+#                 dosage_form = word
+#             else:
+#                 name_parts.append(word)  # Fait partie du nom du médicament
+#
+#         # Reconstruire le nom du médicament
+#         nom = " ".join(name_parts)
+#
+#         logger.info(f"🔍 Médicament analysé : Nom={nom}, Dosage={dosage}, Unité={unitdosage}, Forme={dosage_form}")
+#         return nom, dosage, unitdosage, dosage_form
+#
+#     except Exception as e:
+#         logger.error(f"⚠️ Erreur lors de l'analyse du médicament : {str(e)}")
+#         return medication_str, None, None, None  # Retourner la valeur brute si erreur
+# Extraction des noms de formes (en minuscule sans accents)
+
+KNOWN_FORMS = {unicodedata.normalize('NFKD', f[0]).encode('ascii', 'ignore').decode('ascii') for f in
+               FORME_MEDICAMENT_CHOICES}
+
+
+# Normalisation des mots (supprime accents, minuscule, et espaces)
+def normalize_string(value):
+    if not value:
+        return None
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    return ' '.join(value.lower().split())
+
+
+# Gestion des pluriels courants
+def singularize(word):
+    irregular_plural = {
+        "comprimés": "comprime",
+        "gélules": "gelule",
+        "ampoules": "ampoule",
+        "crèmes": "creme",
+        "pommades": "pommade",
+        "suppositoires": "suppositoire",
+        "gouttes": "gouttes",  # Pluriel inchangé
+        "patchs": "patch",
+        "inhalateurs": "inhalateur",
+        "solutions": "solution",
+        "suspensions": "suspension",
+        "poudres": "poudre",
+        "sprays": "spray",
+        "ovules": "ovule",
+        "collyres": "collyre",
+        "aérosols": "aérosol",
+        "élixirs": "elixir",
+        "baumes": "baume",
+        "granulés": "granulé",
+        "capsules": "capsule"
+    }
+    return irregular_plural.get(word, word)
+
+
 def parse_medication_data(medication_str):
     """
-    Analyse la chaîne saisie par l'utilisateur et extrait :
-    - nom : Nom du médicament
-    - dosage : Quantité numérique
-    - unitdosage : Unité de dosage (mg, ml, g, etc.)
-    - dosage_form : Forme pharmaceutique (comprimé, gélule, etc.)
+    Analyse la chaîne saisie et extrait :
+    - Nom du médicament
+    - Dosage (quantité numérique)
+    - Unité de dosage (mg, ml, etc.)
+    - Forme pharmaceutique (comprimé, gélule, etc.)
     """
     try:
-        # Séparer la chaîne en mots
+        if not medication_str:
+            return None, None, None, None
+
+        # Normalisation de l'entrée
+        medication_str = normalize_string(medication_str)
         words = medication_str.split()
 
-        # Vérifier si le dernier mot est une unité de dosage connue
-        known_units = ["mg", "g", "ml", "mcg", "UI", "L", "meq", "µL", "µg", "cm³", "mL/kg", "mg/m²", "mg/kg", "g/L"]
-        known_forms = ["comprime", "gelule", "sirop", "injection", "ampoule", "pommade", "creme", "spray", "gouttes",
-                       "patch",
-                       "inhalateur",
-                       "solution",
-                       "suspension",
-                       "poudre",
-                       "ovule",
-                       "collyre",
-                       "aérosol",
-                       "elixir",
-                       "baume",
-                       "granulé",
-                       "capsule"]
+        # Liste des unités de dosage reconnues
+        known_units = {"mg", "g", "ml", "mcg", "ui", "l", "meq", "µl", "µg", "cm3", "ml/kg", "mg/m2", "mg/kg", "g/l"}
 
         name_parts = []
         dosage = None
@@ -1082,16 +1166,18 @@ def parse_medication_data(medication_str):
         dosage_form = None
 
         for word in words:
-            if word.isdigit():  # Vérifie si c'est un chiffre (dosage)
-                dosage = int(word)
-            elif word in known_units:  # Vérifie si c'est une unité de dosage
-                unitdosage = word
-            elif word in known_forms:  # Vérifie si c'est une forme pharmaceutique
-                dosage_form = word
+            if word.isdigit():
+                dosage = int(word)  # Détecte un dosage numérique
+            elif word in known_units:
+                unitdosage = word  # Détecte une unité de dosage
             else:
-                name_parts.append(word)  # Fait partie du nom du médicament
+                singular_word = singularize(word)
+                if singular_word in KNOWN_FORMS:
+                    dosage_form = singular_word  # Associe la forme pharmaceutique
+                else:
+                    name_parts.append(word)  # Ajoute au nom du médicament
 
-        # Reconstruire le nom du médicament
+        # Reconstruction du nom du médicament
         nom = " ".join(name_parts)
 
         logger.info(f"🔍 Médicament analysé : Nom={nom}, Dosage={dosage}, Unité={unitdosage}, Forme={dosage_form}")
@@ -1099,7 +1185,7 @@ def parse_medication_data(medication_str):
 
     except Exception as e:
         logger.error(f"⚠️ Erreur lors de l'analyse du médicament : {str(e)}")
-        return medication_str, None, None, None  # Retourner la valeur brute si erreur
+        return medication_str, None, None, None
 
 
 @csrf_exempt
@@ -1653,6 +1739,35 @@ def generate_ordonnance_pdf(request, patient_id, hospitalisation_id):
     p.save()
 
     return response
+
+
+@login_required
+def stop_traitement(request, prescription_id):
+    prescription = get_object_or_404(Prescription, id=prescription_id)
+
+    if request.method == "POST":
+        cancellation_reason = request.POST.get("cancellation_reason", "").strip()
+
+        if not cancellation_reason:
+            messages.error(request, "Vous devez fournir un motif d'annulation.")
+            return redirect(request.META.get("HTTP_REFERER", "/"))  # Retour à la page précédente
+
+        with transaction.atomic():
+            # Annulation de la prescription
+            prescription.status = "Cancelled"
+            prescription.cancellation_reason = cancellation_reason
+            prescription.cancellation_date = now()
+            prescription.cancellation_by = request.user.employee
+            prescription.updated_at = now()
+            prescription.save()
+
+            # Suppression des exécutions non encore effectuées (status = 'Pending')
+            PrescriptionExecution.objects.filter(prescription=prescription, status="Pending").delete()
+
+        messages.success(request, "La prescription a été annulée et les exécutions non effectuées ont été supprimées.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))  # Retour à la page précédente
+
+    return redirect("/")  # Rediriger en cas d'accès direct à cette vue
 
 
 class HospitalisationDetailView(LoginRequiredMixin, DetailView):

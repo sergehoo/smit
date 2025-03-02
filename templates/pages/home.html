@@ -5,169 +5,236 @@
 {% block content %}
 
      <!-- content @s -->
-             <div class="nk-content nk-content-fluid">
+
+<div class="nk-content nk-content-fluid">
     <div class="container-xl wide-lg">
         <div class="nk-content-body">
 
             <!-- Page Header -->
-            <div class="nk-block-head nk-block-head-lg">
-                <div class="nk-block-between">
-                    <div class="nk-block-head-content">
-                        <h3 class="nk-block-title page-title">SMIT Dashboard</h3>
-                        <p class="nk-block-des text-soft">Bienvenue sur le tableau de bord KENEYA.</p>
+            <div class="nk-block-head nk-block-head-lg text-center">
+                <h3 class="nk-block-title page-title">SMIT Dashboard</h3>
+                <p class="nk-block-des text-soft">Bienvenue sur le tableau de bord KENEYA.</p>
+            </div>
+
+            <div class="row g-gs">
+                <!-- Monthly Trends Section -->
+                <div class="col-lg-8">
+                    <div class="card card-bordered h-100">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">Tendances Mensuelles</h4>
+                            <canvas id="monthlyTrendsChart"></canvas>
+                            <p class="sub-text mt-2">Consultations et Rendez-vous par Mois</p>
+                        </div>
                     </div>
-                    <div class="nk-block-head-content">
-                        <div class="nk-block-tools">
-                            <a href="#" class="btn btn-primary"><em class="icon ni ni-download-cloud"></em><span>Exporter</span></a>
-                            <a href="#" class="btn btn-outline-secondary"><em class="icon ni ni-reports"></em><span>Rapports</span></a>
+                </div>
+                <div class="col-lg-4">
+
+                        <div class="card card-bordered h-100">
+                        <div class="card-header">
+                            <ul class="d-flex flex-row justify-content-between align-items-center gap-3 list-unstyled">
+    <li class="d-flex flex-column text-center">
+        <span>Total Patients</span>
+        <span class="text-primary">{{ total_patients }}</span>
+    </li>
+    <li class=" d-flex flex-column text-center">
+        <span>Hommes</span>
+        <span class="text-success">{{ total_patients_homme }}</span>
+    </li>
+    <li class="d-flex flex-column text-center">
+        <span>Femmes</span>
+        <span class="text-danger">{{ total_patients_femme }}</span>
+    </li>
+</ul></div>
+    <div class="card-inner">
+{#        <h4 class="nk-block-title">Répartition des Patients par Tranche d'Âge et Sexe</h4>#}
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>âge</th>
+                    <th>Hommes</th>
+                    <th>Femmes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for age_group, data in patient_age_distribution.items %}
+                <tr>
+                    <td>{{ age_group }}</td>
+                    <td>{{ data.Hommes }}</td>
+                    <td>{{ data.Femmes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+
+        <div class="row g-gs mt-4">
+                <div class="col-lg-4">
+                    <div class="card card-bordered text-center bg-primary-dim">
+                        <div class="card-inner">
+                            <h3 class="text-info">{{ total_scheduled_appointments }}</h3>
+                            <p class="sub-text">Rendez-vous Planifiés</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col-lg-4">
+                    <div class="card card-bordered text-center bg-primary-dim">
+                        <div class="card-inner">
+                            <h3 class="text-primary">{{ average_age|floatformat:0|default:"-" }} ans</h3>
+                            <p class="sub-text">Âge Moyen</p>
+                        </div>
+                    </div>
+                </div>
+                  <div class="col-lg-4">
+                    <div class="card card-bordered text-center bg-primary-dim">
+                        <div class="card-inner">
+                            <h3 class="text-warning">{{ current_hospitalizations }}</h3>
+                            <p class="sub-text">Hospitalisations en cours</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Monthly Trends Section -->
-            <div class="nk-block">
-                <h4 class="nk-block-title">Tendances Mensuelles</h4>
-                <div class="row g-gs align-items-center">
-                    <div class="col-lg-8">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <canvas id="monthlyTrendsChart"></canvas>
-                                <p class="sub-text mt-2">Consultations et Rendez-vous par Mois</p>
-                            </div>
+    <div class="row g-gs mt-4">
+         <div class="col-lg-12">
+             <div class="card card-bordered h-100">
+                 <div class="card-header"> <h4 class="nk-block-title">Statistiques des Hospitalisations</h4></div>
+                 <div class="card-inner">
+                         <div id="hospitalization_chart"></div>
+
+
+
+                 </div>
+             </div>
+         </div>
+
+
+    </div>
+            <div class="row g-gs mt-4">
+                <div class="col-lg-6">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">Répartition par Statut</h4>
+                            <canvas id="patientStatusChart"></canvas>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="card card-bordered h-100">
+                </div>
+                 <div class="col-lg-6">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">État des Rendez-vous</h4>
+                            <canvas id="appointmentStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row g-gs mt-4">
+                <div class="col-lg-4">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">Consultations par Service</h4>
+                            <canvas id="consultationsByServiceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+
+             <div class="col-lg-4">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">Raisons des Hospitalisations</h4>
+                            <canvas id="hospitalizationReasonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                   <div class="col-lg-4">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+                            <h4 class="nk-block-title">Top Services Utilisés</h4>
                             <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Total des Patients</span>
-                                    <h3 class="text-primary">{{ total_patients }}</h3>
+                                {% for service in top_services %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ service.nom }}</span>
+                                    <span class="text-muted">{{ service.total_use }} utilisations</span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Total des Hommes</span>
-                                    <h3 class="text-success">{{ total_patients_homme }}</h3>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Total des Femmes</span>
-                                    <h3 class="text-danger">{{ total_patients_femme }}</h3>
-                                </li>
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Patient Statistics Section -->
-            <div class="nk-block">
-                <h4 class="nk-block-title">Statistiques des Patients</h4>
-                <div class="row g-gs">
-                    <div class="col-lg-4">
-                        <div class="card card-bordered">
-                            <div class="card-inner text-center">
-                                <h3 class="text-primary">{{ average_age|floatformat:0|default:"-" }} ans</h3>
-                                <p class="sub-text">Âge Moyen</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <canvas id="patientStatusChart"></canvas>
-                                <p class="sub-text mt-2">Répartition par Statut</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Service Utilization Section -->
-            <div class="nk-block">
-                <h4 class="nk-block-title">Utilisation des Services</h4>
-                <div class="row g-gs">
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <canvas id="consultationsByServiceChart"></canvas>
-                                <p class="sub-text mt-2">Consultations par Service</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <h6 class="title">Top Services Utilisés</h6>
-                                <ul class="list-group">
-                                    {% for service in top_services %}
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>{{ service.nom }}</span>
-                                        <span class="text-muted">{{ service.total_use }} utilisations</span>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Appointments Summary Section -->
-            <div class="nk-block">
-                <h4 class="nk-block-title">Résumé des Rendez-vous</h4>
-                <div class="row g-gs">
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner text-center">
-                                <h3 class="text-info">{{ total_scheduled_appointments }}</h3>
-                                <p class="sub-text">Rendez-vous Planifiés</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <canvas id="appointmentStatusChart"></canvas>
-                                <p class="sub-text mt-2">État des Rendez-vous</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="row g-gs mt-4">
 
-            <!-- Hospitalizations Overview Section -->
-            <div class="nk-block">
-                <h4 class="nk-block-title">Aperçu des Hospitalisations</h4>
-                <div class="row g-gs">
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner text-center">
-                                <h3 class="text-warning">{{ current_hospitalizations }}</h3>
-                                <p class="sub-text">Patients Hospitalisés Actuellement</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card card-bordered">
-                            <div class="card-inner">
-                                <canvas id="hospitalizationReasonChart"></canvas>
-                                <p class="sub-text mt-2">Raisons des Hospitalisations</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
+            </div>
         </div>
     </div>
 </div>
-
                 <!-- content @e -->
 
 
 
 
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("{% url 'hospitalization_chart_data' %}")  // Récupération des données JSON depuis Django
+            .then(response => response.json())
+            .then(data => {
+                let periods = data.map(item => item.periode);
+                let hospitalized = data.map(item => item.total_hospitalized);
+                let deaths = data.map(item => item.total_deaths);
+                let recovered = data.map(item => item.total_recovered);
+                let transferred = data.map(item => item.total_transferred);
+                let scam = data.map(item => item.total_scam);
+                let evaded = data.map(item => item.total_evade);
 
+                var options = {
+                    series: [
+                        { name: "Hospitalisés", data: hospitalized },
+                        { name: "Décès", data: deaths },
+                        { name: "Guéris", data: recovered },
+                        { name: "Transférés", data: transferred },
+                        { name: "SCAM", data: scam },
+                        { name: "Évadés", data: evaded }
+                    ],
+                    chart: {
+                        type: "bar",
+                        height: 400
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: "50%"
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    xaxis: {
+                        categories: periods
+                    },
+                    colors: ["#00E396", "#FF4560", "#008FFB", "#775DD0", "#FEB019", "#FF66B2"],
+                    title: {
+                        text: "Statistiques des Hospitalisations par Période"
+                    }
+                };
+
+                var chart = new ApexCharts(document.querySelector("#hospitalization_chart"), options);
+                chart.render();
+            });
+    });
+</script>
 
     <script>
         new Chart(document.getElementById('consultationsByServiceChart'), {

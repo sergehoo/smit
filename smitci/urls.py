@@ -35,7 +35,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     delete_test_rapide_vih, delete_examen, ConstanteUpdateView, consultation_delete, PatientUpdateView, \
     RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, \
     create_rdv, UrgenceListView, UrgenceCreateView, test_rapide_consultation_generale_create, \
-    delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView
+    delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
+    hospitalization_chart_data
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -50,6 +51,8 @@ urlpatterns = [
                   path('api/', include('core.api.urls')),
                   path('tinymce/', include('tinymce.urls')),
                   path("select2/", include("django_select2.urls")),
+                  path('api/hospitalization_chart_data/', hospitalization_chart_data,
+                       name='hospitalization_chart_data'),
 
                   path('api/medicaments/', search_medications, name='search_medications'),
                   path('api/prescription/add/', add_prescription, name='add_prescription'),

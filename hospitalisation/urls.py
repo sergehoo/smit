@@ -10,7 +10,7 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf, add_antecedents_hospi, \
     ajouter_mode_de_vie, add_examen_apareil, HospitalisedPatientListView, add_problemes_pose, add_resume_syndromique, \
     add_bilan_paraclinique, add_imagerie, update_execution_status, export_hospitalized_patients, \
-    HospitalisationDeleteView
+    HospitalisationDeleteView, stop_traitement
 from smit.views import add_cas_contact
 from smitci import settings
 
@@ -51,6 +51,7 @@ urlpatterns = [
                   path('lit/<int:bed_id>/delete/', delete_bed, name='delete_bed'),
                   path('prescription/mark_taken/', mark_execution_taken, name='mark_execution_taken'),
                   path('prescription/delete/<int:prescription_id>/', delete_prescription, name='delete_prescription'),
+                  path('stop/traitement/<int:prescription_id>/', stop_traitement, name='stop_traitement'),
 
                   path('add-diagnostic/<int:hospitalisation_id>', add_diagnostic, name='add_diagnostic'),
 

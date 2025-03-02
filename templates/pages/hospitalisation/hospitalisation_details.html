@@ -1916,10 +1916,10 @@
                                                     <tr>
 
                                                         <th>Médicaments</th>
-                                                        <th>Quantités</th>
                                                         <th>Posology</th>
-                                                        <th>Pendant</th>
+{#                                                        <th>Pendant</th>#}
                                                         <th>Date creation</th>
+                                                        <th>Status</th>
                                                         <th>Medecin</th>
                                                         <th>Actions</th>
                                                     </tr>
@@ -1996,22 +1996,64 @@
                                                                     {% endif %}
                                                                     <span class="badge badge-dark">{{ prescription.medication }}</span><br>
                                                                 </td>
-                                                                <td>
-                                                                    <span class="badge badge-outline-secondary"> {{ prescription.quantity }} {{ prescription.medication.dosage_form }}(s)</span>
-                                                                </td>
-                                                                <td><span>{{ prescription.posology }}</span></td>
-                                                                <td><span>{{ prescription.pendant }} Jours</span></td>
-                                                                <td><span>{{ prescription.created_at }}</span></td>
 
+                                                                <td> {{ prescription.quantity }} {{ prescription.medication.dosage_form }}(s),{{ prescription.posology }}, {{ prescription.pendant }} Jours</td>
+{#                                                                <td><span>{{ prescription.pendant }} Jours</span></td>#}
+
+                                                                <td><span>{{ prescription.created_at }}</span></td>
                                                                 <td>
-                                                                    <span>{{ prescription.created_by }}</span>
+    <span class="badge badge-xs
+{% if prescription.status == 'Pending' %}badge-warning
+                                    {% elif prescription.status == 'Taken' %}badge-success
+                                    {% else %}badge-danger{% endif %}">
+    {% if prescription.status == 'Cancelled' %}
+
+        <span data-toggle="tooltip" data-placement="top"
+              data-bs-original-title="Annuler le {{ prescription.cancellation_date }} pour motif : {{ prescription.cancellation_reason }} par : {{ prescription.cancellation_by }} ">{{ prescription.get_status_display }}</span>
+
+    {% else %}
+        {{ prescription.get_status_display }}
+    {% endif %}
+                                </span>
                                                                 </td>
-                                                                <td> <form method="post" action="{% url 'delete_prescription' prescription.id %}" style="display:inline;">
+                                                                <td>
+                                                                    <span>{{ prescription.created_by.user.get_full_name }}</span>
+                                                                </td>
+                                                                <td> 
+                                                                    {% if prescription.status == "Pending" %}
+                                                                    <form method="post" action="{% url 'delete_prescription' prescription.id %}" style="display:inline;">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger btn-icon btn-round btn-xs" onclick="return confirm('Voulez-vous vraiment supprimer cette prescription ?')">
             <em class="icon ni ni-trash-fill"></em>
         </button>
     </form>
+                                                                    {% endif %}
+                                                                   <form method="post" action="{% url 'stop_traitement' prescription.id %}" style="display:inline;">
+                                                                       
+    {% csrf_token %}
+    <button type="button" class="btn btn-primary btn-icon btn-round btn-xs ml-2"
+            onclick="askCancellationReason(event, this)">
+        <em class="icon ni ni-stop-fill"></em>
+    </button>
+    <input type="hidden" name="cancellation_reason" id="cancellation_reason_{{ prescription.id }}">
+</form>
+
+<script>
+function askCancellationReason(event, button) {
+    event.preventDefault();  // Empêche la soumission automatique du formulaire
+
+    let reason = prompt("Veuillez entrer un motif pour l'annulation de cette prescription :");
+
+    if (reason !== null && reason.trim() !== "") {
+        let form = button.closest("form");  // Trouve le formulaire parent
+        let inputField = form.querySelector("[name='cancellation_reason']");
+        inputField.value = reason;
+        form.submit();  // Soumet le formulaire avec la raison
+    } else {
+        alert("L'annulation a été annulée car aucun motif n'a été fourni.");
+    }
+}
+</script>
                                                                 </td>
                                                             </tr>
                                                         {% endfor %}

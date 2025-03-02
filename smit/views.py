@@ -1,5 +1,6 @@
 import datetime
 import os
+from collections import defaultdict
 from datetime import date, timedelta
 from datetime import datetime
 from itertools import groupby
@@ -42,11 +43,114 @@ from smit.models import Patient, Appointment, Constante, Service, ServiceSubActi
 
 
 # Create your views here.
+# Vue API pour envoyer les données à ApexCharts en JSON
+def hospitalization_chart_data(request):
+    view = HomePageView()
+    stats = view.get_hospitalization_statistics()
+    return JsonResponse(stats, safe=False)
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
     # form_class = LoginForm
     template_name = "pages/home.html"
+
+    def get_patient_age_distribution(self):
+        """
+        Retourne le nombre de patients par tranche d'âge et sexe.
+        """
+        current_year = datetime.now().year
+
+        # Définition des tranches d'âge avec leurs limites inférieures et supérieures
+        age_groups = [
+            ("0-18 ans", 0, 18),
+            ("19-25 ans", 19, 25),
+            ("26-35 ans", 26, 35),
+            ("36-45 ans", 36, 45),
+            ("46-60 ans", 46, 60),
+            ("61-75 ans", 61, 75),
+            ("75 ans et plus", 76, 120),
+        ]
+
+        # Initialisation des compteurs
+        age_distribution = {group[0]: {"Hommes": 0, "Femmes": 0} for group in age_groups}
+
+        # Récupération des patients avec leur âge et genre
+        patients = Patient.objects.values('date_naissance', 'genre')
+
+        for patient in patients:
+            if patient['date_naissance']:
+                age = current_year - patient['date_naissance'].year
+                genre = "Hommes" if patient['genre'] == "Homme" else "Femmes"
+
+                for group_name, min_age, max_age in age_groups:
+                    if min_age <= age <= max_age:
+                        age_distribution[group_name][genre] += 1
+                        break
+
+        return age_distribution
+
+    def get_hospitalization_statistics(self):
+        """
+        Retourne les statistiques des hospitalisations par période et détaille les statuts spécifiques.
+        """
+        current_year = datetime.now().year
+
+        # Définition des périodes
+        periods = [
+            ("Cette semaine", datetime.now() - timedelta(days=7)),
+            ("Ce mois", datetime.now().replace(day=1)),
+            ("Cette année", datetime(current_year, 1, 1))
+        ]
+
+        stats = []
+
+        for label, start_date in periods:
+            total_hospitalized = Hospitalization.objects.filter(admission_date__gte=start_date).count()
+
+            # Comptage des cas spécifiques
+            total_deaths = Hospitalization.objects.filter(admission_date__gte=start_date, status="DCD").count()
+            total_recovered = Hospitalization.objects.filter(admission_date__gte=start_date,
+                                                             status="Gueris-EXEA").count()
+            total_transferred = Hospitalization.objects.filter(admission_date__gte=start_date,
+                                                               status="Transféré-TRANSF").count()
+            total_scam = Hospitalization.objects.filter(admission_date__gte=start_date, status="SCAM").count()
+            total_evade = Hospitalization.objects.filter(admission_date__gte=start_date, status="EVADE").count()
+
+            death_rate = (total_deaths / total_hospitalized * 100) if total_hospitalized else 0
+
+            stats.append({
+                "periode": label,
+                "total_hospitalized": total_hospitalized,
+                "total_deaths": total_deaths,
+                "total_recovered": total_recovered,
+                "total_transferred": total_transferred,
+                "total_scam": total_scam,
+                "total_evade": total_evade,
+                "death_rate": round(death_rate, 2)
+            })
+
+        # Taux global
+        total_hospitalized_all = Hospitalization.objects.count()
+        total_deaths_all = Hospitalization.objects.filter(status="DCD").count()
+        total_recovered_all = Hospitalization.objects.filter(status="Gueris-EXEA").count()
+        total_transferred_all = Hospitalization.objects.filter(status="Transféré-TRANSF").count()
+        total_scam_all = Hospitalization.objects.filter(status="SCAM").count()
+        total_evade_all = Hospitalization.objects.filter(status="EVADE").count()
+
+        global_death_rate = (total_deaths_all / total_hospitalized_all * 100) if total_hospitalized_all else 0
+
+        stats.append({
+            "periode": "Global",
+            "total_hospitalized": total_hospitalized_all,
+            "total_deaths": total_deaths_all,
+            "total_recovered": total_recovered_all,
+            "total_transferred": total_transferred_all,
+            "total_scam": total_scam_all,
+            "total_evade": total_evade_all,
+            "death_rate": round(global_death_rate, 2)
+        })
+
+        return stats
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -112,6 +216,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
             appointment_counts[entry['month'] - 1] = entry['count']
 
         context.update({
+            "hospitalization_statistics": self.get_hospitalization_statistics(),
+            "patient_age_distribution": self.get_patient_age_distribution(),
             "monthly_counts": monthly_counts,
             "total_patients": total_patients,
             "total_patients_femme": total_patients_femme,
@@ -893,7 +999,8 @@ class PatientUpdateView(LoginRequiredMixin, UpdateView):
         if Patient.objects.exclude(pk=patient.pk).filter(
                 nom__iexact=nom, prenoms__iexact=prenoms, date_naissance=date_naissance
         ).exists():
-            messages.error(self.request, "Un autre patient avec les mêmes nom, prénoms et date de naissance existe déjà.")
+            messages.error(self.request,
+                           "Un autre patient avec les mêmes nom, prénoms et date de naissance existe déjà.")
             return self.form_invalid(form)
 
         if Patient.objects.exclude(pk=patient.pk).filter(contact=contact).exists():

@@ -1295,10 +1295,10 @@ class Maladie(models.Model):
 
 
 class VisitCounter(models.Model):
-    ip_address = models.GenericIPAddressField()  # Adresse IP du visiteur
-    user_agent = models.TextField(blank=True, null=True)  # Infos sur le navigateur
-    timestamp = models.DateTimeField(default=now)  # Date et heure de la visite
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Utilisateur (si connecté)
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(default=now)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Localisation
     country = models.CharField(max_length=100, blank=True, null=True)
@@ -1307,7 +1307,7 @@ class VisitCounter(models.Model):
     postal_code = models.CharField(max_length=20, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
-    isp = models.CharField(max_length=255, blank=True, null=True)  # Fournisseur d'accès Internet
+    isp = models.CharField(max_length=255, blank=True, null=True)
 
     # Type d'appareil
     is_mobile = models.BooleanField(default=False)
@@ -1322,9 +1322,10 @@ class VisitCounter(models.Model):
     def get_location(ip):
         """Utilise une API externe pour récupérer la localisation de l'IP."""
         try:
-            response = requests.get(f"http://ip-api.com/json/{ip}")
+            response = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
+            response.raise_for_status()
             data = response.json()
-            if data['status'] == 'success':
+            if data.get('status') == 'success':
                 return {
                     "country": data.get("country"),
                     "city": data.get("city"),
@@ -1335,25 +1336,16 @@ class VisitCounter(models.Model):
                     "isp": data.get("isp"),
                 }
         except requests.RequestException:
-            pass
-        return {}
+            return {}
 
     def save(self, *args, **kwargs):
-        """Remplit les informations de localisation et le type d'appareil avant de sauvegarder."""
         if not self.country and self.ip_address:
             location_data = self.get_location(self.ip_address)
-            self.country = location_data.get("country")
-            self.city = location_data.get("city")
-            self.region = location_data.get("region")
-            self.postal_code = location_data.get("postal_code")
-            self.latitude = location_data.get("latitude")
-            self.longitude = location_data.get("longitude")
-            self.isp = location_data.get("isp")
-
+            for key, value in location_data.items():
+                setattr(self, key, value)
         super().save(*args, **kwargs)
 
     def get_map_url(self):
-        """Génère un lien vers Google Maps ou OpenStreetMap"""
         if self.latitude and self.longitude:
             return format_html(
                 '<a href="https://www.google.com/maps?q={},{}" target="_blank">📍 Voir sur la carte</a>',
@@ -1362,3 +1354,5 @@ class VisitCounter(models.Model):
         return "🌍 Localisation non disponible"
 
     get_map_url.short_description = "Carte"
+
+

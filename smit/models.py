@@ -734,6 +734,10 @@ class Prescription(models.Model):
         ('Dispensed', 'Dispensed'),
         ('Cancelled', 'Cancelled')
     ])
+    cancellation_reason = models.TextField(null=True, blank=True)  # Ajout du champ pour le motif
+    cancellation_date = models.DateTimeField(null=True, blank=True)  # Ajout du champ pour la date du motif
+    cancellation_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,
+                                        related_name='prescription_cancelled_by')  # Ajout du champ pour la date du motif
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescription_creator')
 
     executed_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True,
