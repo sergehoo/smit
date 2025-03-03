@@ -562,28 +562,45 @@
                                         </div>
 
                                        <div class="card-inner">
-                                            <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link"  href="hospitalisation/generale?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                                {% endif %}
+    <ul class="pagination justify-content-center justify-content-md-start">
+        {% with request.path as current_path %}
 
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
-                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="hospitalisation/generale?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    Prev
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Prev</span></li>
+        {% endif %}
 
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="hospitalisation/generale?page={{ page_obj.next_page_number }}">Next</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                                {% endif %}
-                                            </ul>
-                                        </div><!-- .card-inner -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+
+        {% endwith %}
+    </ul>
+</div>
+                                        <!-- .card-inner -->
                                     </div><!-- .card-inner-group -->
                                 </div><!-- .card -->
                             </div><!-- .nk-block -->

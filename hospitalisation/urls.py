@@ -15,7 +15,7 @@ from smit.views import add_cas_contact
 from smitci import settings
 
 urlpatterns = [
-                  path('generale/hospitalisation', HospitalisationListView.as_view(), name='hospitalisation'),
+                  path('generale/', HospitalisationListView.as_view(), name='hospitalisation'),
                   path('generale/hospitalised', HospitalisedPatientListView.as_view(), name='hospitalised_patient'),
                   path('hospitalisation/export/', ExportHospitalizationView.as_view(), name='export_hospitalizations'),
 
