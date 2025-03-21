@@ -187,7 +187,7 @@ class AnalyseAdmin(admin.ModelAdmin):
 
 @admin.register(Hospitalization)
 class HospitalizationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'patient']
+    list_display = ['id', 'patient','bed']
 
 
 @admin.register(Prescription)

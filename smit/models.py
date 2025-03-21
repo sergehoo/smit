@@ -4,10 +4,17 @@ import random
 import unicodedata
 import uuid
 
+import cv2
+import torch
+import torchvision
+import torchvision.models as torch_models
+from django.urls import reverse
+from torchvision.transforms import functional as F
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import Max
 from django.db.models.signals import post_save
@@ -19,6 +26,9 @@ from schedule.models import Calendar, Event
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 from tinymce.models import HTMLField
+from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from torchvision.transforms import transforms
+from ultralytics import YOLO
 
 from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices, Maladie
 from pharmacy.models import Medicament, Molecule, RendezVous
@@ -376,6 +386,7 @@ class Appareil(models.Model):
                                    related_name='appareil_control_creator')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.nom
@@ -1509,7 +1520,7 @@ class ProblemePose(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "resume syndromique de la Maladie"
+        verbose_name = "problème posé lors de l'hospitalisation"
         # verbose_name_plural = "Historiques de Maladies"
         ordering = ['-created_at']  # Trie par défaut par date descendante
 
@@ -1572,6 +1583,360 @@ class TypeImagerie(models.Model):
         return self.nom
 
 
+#
+# # Charger ResNet50 pour la classification
+classification_model = torch_models.resnet50(pretrained=True)
+classification_model.eval()
+
+# Charger Faster R-CNN pour la détection des organes
+detection_model = fasterrcnn_resnet50_fpn(pretrained=True)
+detection_model.eval()
+
+# Transformation des images
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+# Base des catégories médicales fictives (à remplacer par des classes réelles)
+CATEGORIES_MEDICALES = {
+    0: "Image normale - Aucun signe anormal",
+    1: "Opacité pulmonaire suspecte - Vérification d'une infection ou inflammation",
+    2: "Fracture osseuse détectée - Vérifier l'intégrité osseuse",
+    3: "Masse anormale détectée - Analyse approfondie nécessaire",
+    4: "Calcification suspecte - Vérification des tissus calcifiés",
+    5: "Lésion possible - Demander confirmation du radiologue"
+}
+
+# Liste simplifiée des organes détectables (idéalement entraînée sur un dataset médical)
+# ORGANES_DETECTES = {
+#     # Système respiratoire
+#     1: "Poumon",
+#     2: "Bronches",
+#     3: "Trachée",
+#     4: "Diaphragme",
+#
+#     # Système cardiovasculaire
+#     5: "Cœur",
+#     6: "Aorte",
+#     7: "Veine cave supérieure",
+#     8: "Veine cave inférieure",
+#     9: "Artères coronaires",
+#
+#     # Système digestif
+#     10: "Foie",
+#     11: "Vésicule biliaire",
+#     12: "Pancréas",
+#     13: "Estomac",
+#     14: "Intestin grêle",
+#     15: "Côlon",
+#     16: "Rectum",
+#     17: "Œsophage",
+#
+#     # Système urinaire
+#     18: "Reins",
+#     19: "Uretères",
+#     20: "Vessie",
+#     21: "Urètre",
+#
+#     # Système nerveux
+#     22: "Encéphale",
+#     23: "Cerveau",
+#     24: "Cervelet",
+#     25: "Tronc cérébral",
+#     26: "Moelle épinière",
+#
+#     # Système musculo-squelettique
+#     27: "Colonne vertébrale",
+#     28: "Vertèbres cervicales",
+#     29: "Vertèbres thoraciques",
+#     30: "Vertèbres lombaires",
+#     31: "Sacrum",
+#     32: "Coccyx",
+#     33: "Crâne",
+#     34: "Mandibule",
+#     35: "Clavicule",
+#     36: "Omoplate",
+#     37: "Humérus",
+#     38: "Radius",
+#     39: "Cubitus",
+#     40: "Carpe (poignet)",
+#     41: "Métacarpiens",
+#     42: "Phalanges",
+#     43: "Fémur",
+#     44: "Rotule",
+#     45: "Tibia",
+#     46: "Fibula",
+#     47: "Tarse (cheville)",
+#     48: "Métatarses",
+#     49: "Phalanges des pieds",
+#
+#     # Système reproducteur masculin
+#     50: "Testicules",
+#     51: "Épididyme",
+#     52: "Canal déférent",
+#     53: "Prostate",
+#     54: "Vésicules séminales",
+#     55: "Pénis",
+#
+#     # Système reproducteur féminin
+#     56: "Ovaires",
+#     57: "Trompes de Fallope",
+#     58: "Utérus",
+#     59: "Col de l’utérus",
+#     60: "Vagin",
+#     61: "Glandes mammaires (seins)",
+#
+#     # Système endocrinien
+#     62: "Hypophyse",
+#     63: "Thyroïde",
+#     64: "Parathyroïdes",
+#     65: "Surrénales",
+#
+#     # Système lymphatique
+#     66: "Ganglions lymphatiques",
+#     67: "Rate",
+#     68: "Moelle osseuse",
+#     69: "Thymus",
+#
+#     # Système sensoriel
+#     70: "Globe oculaire",
+#     71: "Rétine",
+#     72: "Cristallin",
+#     73: "Nerf optique",
+#     74: "Oreille interne",
+#     75: "Oreille moyenne",
+#     76: "Oreille externe",
+#     77: "Nez",
+#     78: "Langue",
+#
+#     # Articulations majeures
+#     79: "Épaule",
+#     80: "Coude",
+#     81: "Poignet",
+#     82: "Hanche",
+#     83: "Genou",
+#     84: "Cheville",
+# }
+ORGANES_DETECTES = {
+    # Respiratory System
+    1: "Lung",
+    2: "Bronchi",
+    3: "Trachea",
+    4: "Diaphragm",
+
+    # Cardiovascular System
+    5: "Heart",
+    6: "Aorta",
+    7: "Superior vena cava",
+    8: "Inferior vena cava",
+    9: "Coronary arteries",
+
+    # Digestive System
+    10: "Liver",
+    11: "Gallbladder",
+    12: "Pancreas",
+    13: "Stomach",
+    14: "Small intestine",
+    15: "Colon",
+    16: "Rectum",
+    17: "Esophagus",
+
+    # Urinary System
+    18: "Kidneys",
+    19: "Ureters",
+    20: "Bladder",
+    21: "Urethra",
+
+    # Nervous System
+    22: "Encephalon",
+    23: "Brain",
+    24: "Cerebellum",
+    25: "Brainstem",
+    26: "Spinal cord",
+
+    # Musculoskeletal System
+    27: "Spinal column",
+    28: "Cervical vertebrae",
+    29: "Thoracic vertebrae",
+    30: "Lumbar vertebrae",
+    31: "Sacrum",
+    32: "Coccyx",
+    33: "Skull",
+    34: "Mandible",
+    35: "Clavicle",
+    36: "Scapula",
+    37: "Humerus",
+    38: "Radius",
+    39: "Ulna",
+    40: "Carpals (Wrist)",
+    41: "Metacarpals",
+    42: "Phalanges (Fingers)",
+    43: "Femur",
+    44: "Patella",
+    45: "Tibia",
+    46: "Fibula",
+    47: "Tarsals (Ankle)",
+    48: "Metatarsals",
+    49: "Phalanges (Toes)",
+
+    # Male Reproductive System
+    50: "Testicles",
+    51: "Epididymis",
+    52: "Vas deferens",
+    53: "Prostate",
+    54: "Seminal vesicles",
+    55: "Penis",
+
+    # Female Reproductive System
+    56: "Ovaries",
+    57: "Fallopian tubes",
+    58: "Uterus",
+    59: "Cervix",
+    60: "Vagina",
+    61: "Mammary glands (Breasts)",
+
+    # Endocrine System
+    62: "Pituitary gland",
+    63: "Thyroid gland",
+    64: "Parathyroid glands",
+    65: "Adrenal glands",
+
+    # Lymphatic System
+    66: "Lymph nodes",
+    67: "Spleen",
+    68: "Bone marrow",
+    69: "Thymus",
+
+    # Sensory System
+    70: "Eyeball",
+    71: "Retina",
+    72: "Lens",
+    73: "Optic nerve",
+    74: "Inner ear",
+    75: "Middle ear",
+    76: "Outer ear",
+    77: "Nose",
+    78: "Tongue",
+
+    # Major Joints
+    79: "Shoulder",
+    80: "Elbow",
+    81: "Wrist",
+    82: "Hip",
+    83: "Knee",
+    84: "Ankle",
+}
+
+
+def analyser_image(image_path):
+    """
+    ✅ Analyse une image médicale :
+    - Classification (anomalie)
+    - Détection des organes présents
+    """
+    img = Image.open(image_path).convert('RGB')
+    img_t = transform(img)
+    img_t = img_t.unsqueeze(0)
+
+    # Classification de l'image
+    with torch.no_grad():
+        output_classification = classification_model(img_t)
+        prediction = torch.argmax(output_classification, dim=1).item()
+        probabilite_anomalie = round(
+            torch.nn.functional.softmax(output_classification, dim=1)[0][prediction].item() * 100, 2)
+
+    # Détection des organes avec Faster R-CNN
+    img_t_detection = transforms.ToTensor()(img).unsqueeze(0)
+    with torch.no_grad():
+        output_detection = detection_model(img_t_detection)
+
+    # Filtrer les organes détectés avec un seuil de confiance (ex: 80%)
+    organes_detectes = [
+        ORGANES_DETECTES.get(label.item(), "Inconnu")
+        for label, score in zip(output_detection[0]['labels'], output_detection[0]['scores'])
+        if score.item() > 0.80
+    ]
+
+    # Définir la classification de l'image
+    categorie = CATEGORIES_MEDICALES.get(prediction, "Analyse indéterminée")
+
+    # Niveau de risque basé sur la probabilité d'anomalie
+    if probabilite_anomalie < 20:
+        niveau_risque = "🟢 Normal"
+    elif 20 <= probabilite_anomalie < 50:
+        niveau_risque = "🟡 Suspect - Vérification conseillée"
+    elif 50 <= probabilite_anomalie < 80:
+        niveau_risque = "🟠 Alerte - Examen approfondi recommandé"
+    else:
+        niveau_risque = "🔴 Critique - Intervention médicale urgente"
+
+    return {
+        "prediction": prediction,
+        "probabilite": probabilite_anomalie,
+        "categorie": categorie,
+        "niveau_risque": niveau_risque,
+        "organes_detectes": organes_detectes if organes_detectes else ["Non identifié"]
+    }
+
+
+# Charger YOLOv8 pré-entraîné (ou un modèle custom)
+# model_yolo = YOLO("yolov8n.pt")  # Remplace par un modèle médical si disponible
+#
+# # Liste des organes détectables (exemple)
+# CATEGORIES_MEDICALES = {
+#     0: "Poumon",
+#     1: "Cœur",
+#     2: "Foie",
+#     3: "Reins",
+#     4: "Colonne vertébrale",
+#     5: "Crâne"
+# }
+#
+#
+# def detecter_organes(image_path):
+#     """
+#     ✅ Détecte les organes visibles sur une image avec YOLOv8.
+#     """
+#     image = cv2.imread(image_path)
+#     results = model_yolo(image)
+#
+#     organes_detectes = []
+#     for r in results:
+#         for box in r.boxes:
+#             classe = int(box.cls[0])
+#             score = float(box.conf[0])
+#             if score > 0.75:  # Seulement si confiance > 75%
+#                 organes_detectes.append(CATEGORIES_MEDICALES.get(classe, "Inconnu"))
+#
+#     return list(set(organes_detectes)) if organes_detectes else ["Non identifié"]
+#
+#
+# # Charger Mask R-CNN pré-entraîné
+# model_maskrcnn = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+# model_maskrcnn.eval()
+#
+#
+# def segmenter_image(image_path):
+#     """
+#     ✅ Segmente les anomalies visibles dans une image d’imagerie médicale.
+#     """
+#     img = Image.open(image_path).convert("RGB")
+#     img_t = F.to_tensor(img).unsqueeze(0)
+#
+#     with torch.no_grad():
+#         prediction = model_maskrcnn(img_t)
+#
+#     anomalies_detectees = []
+#     for i in range(len(prediction[0]["scores"])):
+#         score = prediction[0]["scores"][i].item()
+#         if score > 0.7:  # Seulement si confiance > 70%
+#             anomalies_detectees.append(f"Anomalie détectée avec {round(score * 100, 2)}% de confiance")
+#
+#     return anomalies_detectees if anomalies_detectees else ["Aucune anomalie détectée"]
+
+
 class ImagerieMedicale(models.Model):
     STATUT_CHOICES = [
         ('pending', 'En attente'),
@@ -1596,6 +1961,8 @@ class ImagerieMedicale(models.Model):
     interpretation = models.TextField(verbose_name="Interprétation du radiologue", null=True, blank=True)
     rapport_file = models.FileField(upload_to="imagerie/rapports/", null=True, blank=True,
                                     verbose_name="Fichier du rapport")
+    interpretation_ia = models.TextField(verbose_name="Interprétation IA", null=True, blank=True)
+    organes_detectes = models.TextField(verbose_name="Organes détectés", null=True, blank=True)
 
     # Informations supplémentaires
     status = models.CharField(max_length=20, choices=STATUT_CHOICES, default='pending',
@@ -1608,6 +1975,52 @@ class ImagerieMedicale(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière mise à jour")
+
+    def save(self, *args, **kwargs):
+        """
+        ✅ Exécute l'IA après l'upload d'une image et enregistre :
+        - L'interprétation détaillée de l'IA
+        - Les organes détectés
+        """
+        if not self.pk:
+            super().save(*args, **kwargs)  # Sauvegarde initiale
+
+        if self.image_file and not self.interpretation_ia:
+            image_path = default_storage.path(self.image_file.name)
+            resultats_ia = analyser_image(image_path)
+
+            # Mise à jour avec une interprétation détaillée
+            self.interpretation_ia = (
+                f"📌 **Interprétation IA** : {resultats_ia['categorie']}\n"
+                f"⚠️ **Probabilité d'anomalie** : {resultats_ia['probabilite']}%\n"
+                f"🚦 **Niveau de risque** : {resultats_ia['niveau_risque']}"
+            )
+
+            # Sauvegarde des organes détectés
+            self.organes_detectes = ", ".join(resultats_ia["organes_detectes"])
+            super().save(update_fields=["interpretation_ia", "organes_detectes"])
+
+    # def save(self, *args, **kwargs):
+    #     """
+    #     ✅ Exécute l’IA pour :
+    #     - Détecter les organes avec YOLOv8
+    #     - Segmenter et détecter les anomalies avec Mask R-CNN
+    #     """
+    #     super().save(*args, **kwargs)  # Sauvegarde initiale
+    #
+    #     if self.image_file and not self.interpretation_ia:
+    #         image_path = default_storage.path(self.image_file.name)
+    #
+    #         # Exécution des modèles IA
+    #         organes = detecter_organes(image_path)
+    #         anomalies = segmenter_image(image_path)
+    #
+    #         # Mise à jour du modèle
+    #         self.organes_detectes = ", ".join(organes)
+    #         self.anomalies_detectees = "\n".join(anomalies)
+    #         self.interpretation_ia = f"📌 Organes détectés : {self.organes_detectes}\n⚠️ Anomalies : {self.anomalies_detectees}"
+    #
+    #         super().save(update_fields=["interpretation_ia", "organes_detectes", "anomalies_detectees"])
 
     def __str__(self):
         return f"{self.patient.nom} - {self.type_imagerie.nom} ({self.get_status_display()})"

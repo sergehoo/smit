@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
 from core.models import CasContact
 from pharmacy.models import Medocsprescrits
@@ -38,20 +39,29 @@ class AppareilAdmin(admin.ModelAdmin):
 
 @admin.register(ResumeSyndromique)
 class ResumeSyndromiqueAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'hospitalisation', 'created_by', 'created_at')
+    list_display = ('patient', 'hospitalisation', 'created_by', 'created_at', 'actions')
     list_filter = ('created_at', 'patient', 'created_by')
     search_fields = ('patient__nom', 'description', 'created_by__nom')
     ordering = ('-created_at',)
-    date_hierarchy = 'created_at'
+    date_hierarchy = 'created_at'  # ✅ Correction : doit être une chaîne
+    readonly_fields = ('created_at', 'updated_at')
+
+    def short_description(self, obj):
+        """Afficher une version courte de la description"""
+        return format_html(f"{obj.description[:100]}...") if obj.description else "Aucune description"
+
+    short_description.short_description = "Description"
 
 
 @admin.register(ProblemePose)
 class ProblemePoseAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'hospitalisation', 'created_by', 'created_at')
+    list_display = ('patient', 'hospitalisation', 'created_by', 'created_at', 'actions')
     list_filter = ('created_at', 'patient', 'created_by')
-    search_fields = ('patient__nom', 'description', 'created_by__nom')
-    ordering = ('-created_at',)
-    date_hierarchy = 'created_at'
+    search_fields = (
+    'patient__full_name', 'description', 'created_by__full_name')  # Assurez-vous que ces champs existent
+    # ordering = ('-created_at',)
+    # date_hierarchy = ('created_at',)
+    # readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(AntecedentsMedicaux)
@@ -191,12 +201,15 @@ class BilanParacliniqueAdmin(admin.ModelAdmin):
     search_fields = ("patient__nom", "examen__nom", "doctor__nom")
     list_filter = ("status", "examen__type_examen")
 
+
 @admin.register(TypeImagerie)
 class TypeImagerieAdmin(admin.ModelAdmin):
     list_display = ("nom",)
+
 
 @admin.register(ImagerieMedicale)
 class ImagerieMedicaleAdmin(admin.ModelAdmin):
     list_display = ("patient", "type_imagerie", "status", "date_examen", "radiologue")
     list_filter = ("status", "type_imagerie")
     search_fields = ("patient__nom", "radiologue__username")
+    autocomplete_fields = ['patient']

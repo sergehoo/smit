@@ -3,524 +3,188 @@
 {% load humanize %}
 {% block content %}
 
-                <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title">Demande d'analyse </h3>
-                                        <div class="nk-block-des text-soft">
-                                            <p> Liste des demandes d'Analyses </p>
-                                        </div>
-                                    </div><!-- .nk-block-head-content -->
-                                    <div class="nk-block-head-content">
-                                       {% include 'layout/toggleoption.html' %}
-                                    </div><!-- .nk-block-head-content -->
-                                </div><!-- .nk-block-between -->
-                            </div><!-- .nk-block-head -->
-                            <div class="nk-block">
-                                <div class="card card-bordered card-stretch">
-                                    <div class="card-inner-group">
-                                        <div class="card-inner position-relative card-tools-toggle">
-                                            <div class="card-title-group">
-                                                <div class="card-tools">
-                                                    <div class="form-inline flex-nowrap gx-3">
-                                                        <div class="form-wrap w-150px">
-                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Bulk Action">
-                                                                <option value="">Bulk Action</option>
-                                                                <option value="email">Send Email</option>
-                                                                <option value="group">Change Group</option>
-                                                                <option value="suspend">Suspend User</option>
-                                                                <option value="delete">Delete User</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="btn-wrap">
-                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
-                                                            <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
-                                                        </div>
-                                                    </div><!-- .form-inline -->
-                                                </div><!-- .card-tools -->
-                                                <div class="card-tools mr-n1">
-                                                    <ul class="btn-toolbar gx-1">
-                                                        <li>
-                                                            <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
-                                                        </li><!-- li -->
-                                                        <li class="btn-toolbar-sep"></li><!-- li -->
-                                                        <li>
-                                                            <div class="toggle-wrap">
-                                                                <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
-                                                                <div class="toggle-content" data-content="cardTools">
-                                                                    <ul class="btn-toolbar gx-1">
-                                                                        <li class="toggle-close">
-                                                                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-arrow-left"></em></a>
-                                                                        </li><!-- li -->
-                                                                        <li>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
-                                                                                    <div class="dot dot-primary"></div>
-                                                                                    <em class="icon ni ni-filter-alt"></em>
-                                                                                </a>
-                                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
-                                                                                    <div class="dropdown-head">
-                                                                                        <span class="sub-title dropdown-title">Filter Users</span>
-                                                                                        <div class="dropdown">
-                                                                                            <a href="#" class="btn btn-sm btn-icon">
-                                                                                                <em class="icon ni ni-more-h"></em>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-body dropdown-body-rg">
-                                                                                        <div class="row gx-6 gy-3">
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasBalance">
-                                                                                                    <label class="custom-control-label" for="hasBalance"> Have Balance</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasKYC">
-                                                                                                    <label class="custom-control-label" for="hasKYC"> KYC Verified</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Role</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Role</option>
-                                                                                                        <option value="investor">Investor</option>
-                                                                                                        <option value="seller">Seller</option>
-                                                                                                        <option value="buyer">Buyer</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Status</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Status</option>
-                                                                                                        <option value="active">Active</option>
-                                                                                                        <option value="pending">Pending</option>
-                                                                                                        <option value="suspend">Suspend</option>
-                                                                                                        <option value="deleted">Deleted</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-12">
-                                                                                                <div class="form-group">
-                                                                                                    <button type="button" class="btn btn-secondary">Filter</button>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-foot between">
-                                                                                        <a class="clickable" href="#">Reset Filter</a>
-                                                                                        <a href="#">Save Filter</a>
-                                                                                    </div>
-                                                                                </div><!-- .filter-wg -->
-                                                                            </div><!-- .dropdown -->
-                                                                        </li><!-- li -->
-                                                                        <li>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
-                                                                                    <em class="icon ni ni-setting"></em>
-                                                                                </a>
-                                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                                    <ul class="link-check">
-                                                                                        <li><span>Show</span></li>
-                                                                                        <li class="active"><a href="#">10</a></li>
-                                                                                        <li><a href="#">20</a></li>
-                                                                                        <li><a href="#">50</a></li>
-                                                                                    </ul>
-                                                                                    <ul class="link-check">
-                                                                                        <li><span>Order</span></li>
-                                                                                        <li class="active"><a href="#">DESC</a></li>
-                                                                                        <li><a href="#">ASC</a></li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </div><!-- .dropdown -->
-                                                                        </li><!-- li -->
-                                                                    </ul><!-- .btn-toolbar -->
-                                                                </div><!-- .toggle-content -->
-                                                            </div><!-- .toggle-wrap -->
-                                                        </li><!-- li -->
-                                                    </ul><!-- .btn-toolbar -->
-                                                </div><!-- .card-tools -->
-                                            </div><!-- .card-title-group -->
-                                            <div class="card-search search-wrap" data-search="search">
-                                                <div class="card-body">
-                                                    <div class="search-content">
-                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
-                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .card-search -->
-                                        </div><!-- .card-inner -->
-                                        <div class="card-inner p-0">
-                                            <div class="nk-tb-list nk-tb-ulist is-compact">
-                                                <div class="nk-tb-item nk-tb-head">
+    <div class="nk-content nk-content-fluid">
+        <div class="container-xl wide-lg">
+            <div class="nk-content-body">
+                <div class="nk-block-head nk-block-head-sm">
+                    <div class="nk-block-between">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title">Demande d'analyse </h3>
+                            <div class="nk-block-des text-soft">
+                                <p> Liste des demandes d'Analyses </p>
+                            </div>
+                        </div><!-- .nk-block-head-content -->
+                        <div class="nk-block-head-content">
+                            {% include 'layout/toggleoption.html' %}
+                        </div><!-- .nk-block-head-content -->
+                    </div><!-- .nk-block-between -->
+                </div><!-- .nk-block-head -->
+                <div class="nk-block">
+    <div class="card card-bordered card-stretch">
+        <div class="card-inner-group">
+            <div class="accordion" id="examensAccordion">
+                {% for type_bilan, examens in examens_by_type.items %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                            <button class="accordion-button collapsed btn btn-outline-secondary uniform-btn w-100"
+                                    type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ forloop.counter }}"
+                                    aria-expanded="false"
+                                    aria-controls="collapse{{ forloop.counter }}">
+                                {{ type_bilan }} <strong class="ml-2 float-right">({{ examens|length }})</strong>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ forloop.counter }}"
+                             class="accordion-collapse collapse"
+                             aria-labelledby="heading{{ forloop.counter }}"
+                             data-bs-parent="#examensAccordion">
+                            <div class="accordion-body">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <form id="examen-form">
+                                            {% csrf_token %}
+                                            <table class="table table-striped">
+                                                <thead class="thead-light">
+                                                <tr>
+                                                    <th>Code</th>
+                                                    <th>Patient</th>
+                                                    <th>Examen</th>
+                                                    <th>Médecin</th>
+                                                    <th>Résultat</th>
+                                                    <th>Date Résultat</th>
+                                                    <th>Commentaire</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for entry in examens %}
+                                                    <tr id="exam-{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
+                                                        <td>{{ entry.examen.id }}</td>  <!-- ✅ Corrigé -->
+                                                        <td>{{ entry.examen.patient.nom|upper }} {{ entry.examen.patient.prenoms|upper }}</td>
+                                                        <td><span class="text-primary">{{ entry.examen.examen }}</span>
+                                                        </td>
+                                                        <td>{{ entry.examen.doctor }}</td>
 
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code demande </span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Medecin</span></div>
-                                                    <div class="nk-tb-col"><span class="sub-text">Status</span></div>
+                                                        <!-- ✅ Résultat -->
+                                                        <td>
+                                                            <input type="text" class="form-control result-input"
+                                                                   name="result"
+                                                                   value="{{ entry.examen.result|default_if_none:'' }}"
+                                                                   data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
+                                                        </td>
 
-                                                    <div class="nk-tb-col nk-tb-col-tools text-right">
-                                                        <div class="dropdown">
-                                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                <ul class="link-tidy sm no-bdr">
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="bl">
-                                                                            <label class="custom-control-label" for="bl">Balance</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="ph">
-                                                                            <label class="custom-control-label" for="ph">Phone</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="vri">
-                                                                            <label class="custom-control-label" for="vri">Verified</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="st">
-                                                                            <label class="custom-control-label" for="st">Status</label>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div><!-- .nk-tb-item -->
+                                                        <!-- ✅ Date Résultat -->
+                                                        <td>
+                                                            <input type="datetime-local"
+                                                                   class="form-control result-date"
+                                                                   name="result_date"
+                                                                   value="{{ entry.examen.result_date|date:'Y-m-d\TH:i' }}"
+                                                                   data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
+                                                        </td>
 
-                                                {% for exam in examens.all %}
-                                                <div class="nk-tb-item">
-                                                <div class="nk-tb-col tb-col-md">
-                                                          <span class="tb-status text-gray">{{ exam.request_number }} </span>
-                                                    </div>
+                                                        <!-- ✅ Commentaire -->
+                                                        <td>
+            <textarea class="form-control result-comment"
+                      name="comment"
+                      rows="2"
+                      data-id="{{ entry.examen.id }}">{{ entry.examen.comment|default_if_none:'' }}</textarea>
+                                                            <!-- ✅ Corrigé -->
+                                                        </td>
 
-
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span><i class="fa-solid fa-user-alt"></i> {{ exam.patients_requested|upper }}</span>
-
-                                                    </div>
-                                                    <div class="nk-tb-col">
-                                                        <div class="user-card">
-                                                            <div class="user-name">
-                                                                <span class="tb-lead"><i class="fa-solid fa-calendar-check"></i> {{ exam.created_at|naturalday }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <span><i class="fa-solid fa-user-doctor"></i>{{ exam.employe }}</span>
-                                                    </div>
-
-
-                                                    <div class="nk-tb-col">
-                                                      <span class="tb-status text-gray">{{ exam.status }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col nk-tb-col-tools">
-                                                        <ul class="nk-tb-actions gx-2">
-
-                                                            <li>
-                                                                <div class="drodown">
-                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                                        <ul class="link-list-opt no-bdr">
-                                                                            <li><a href=""><em class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-repeat"></em><span>Reprendre les Constantes</span></a></li>
-                                                                            <li class="divider"></li>
-                                                                            <li><a href=""><em class="fa fa-edit mr-1"></em><span>Consulter</span></a></li>
-                                                                            <li><a href="#"><em class="fa fa-bed-pulse mr-1"></em><span>Hospitaliser</span></a></li>
-                                                                            <li><a href="#"><em class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                <!-- Modal Trigger Code -->
-
-
-
-<div class="modal fade" tabindex="-1" id="constante{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Patient : <span class="text-primary">{{ patient.patient}}</span>   <span class="ml-20 text-gray">Prise de constantes</span> </h5>
-
-            </div>
-            <div class="modal-body">
-                <form method="post">
-            {% csrf_token %}
-            <div class="row m-4">
-                {% for field in constanteform %}
-                <div class="col-4 col-md-4 mb-3 ">
-
-                    <label for="{{ field.label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-
-                    {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            <div class="col-md-12 float-right mb-10">
-            <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
-            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
-            </div>
-            </div>
-                </form>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" tabindex="-1" id="constanteover{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Overview des constante du Patient : <span class="text-primary">{{ patient.patient}}</span> </h5>
-            </div>
-            <div class="modal-body">
-                <div class="nk-block card card-bordered">
-
-                     {% if patient.patient.latest_constante %}
-                     <h4>Deniere constante enregistrée le : {{ patient.patient.latest_constante.created_at }} </h4>
-                            <table class="table table-ulogs">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th class="tb-col-os"><span class="overline-title">Libélé <span class="d-sm-none">/ IP</span></span>
-                                    </th>
-                                    <th class="tb-col-ip"><span class="overline-title">Valeure</span></th>
-                                    <th class="tb-col-time"><span class="overline-title">Observation</span></th>
-
-                                </tr>
-                                </thead>
-                                <tbody>
-
-
-
-
-
-                                <tr>
-                                    <td class="tb-col-os">Tension systolique</td>
-                                    <td class="tb-col-ip">
-                                        <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
-                                    </td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                        </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Tension diastolique</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
-                                    <td class="tb-col-time">
-
-                                        {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                            {% endif %}</td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence cardiaque</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence respiratoire</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Temperature</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.temperature }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Saturation oxygene</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Glycemie</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">poids</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.poids }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">taille</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.taille }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                    <tr>
-                                    <td class="tb-col-os">pouls</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.pouls }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">IMC</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.imc }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                </tbody>
-                            </table>
-
-                    {% else %}
-                        Pas de constantes enregistrées
-                    {% endif %}
-                </div>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                                </div>
+                                                        <td>
+                                                            <button class="btn btn-primary btn-sm save-btn"
+                                                                    data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
+                                                                Enregistrer
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                    <tr>
+                                                        <td colspan="8" class="text-center">
+                                                            Aucun examen en attente de résultat.
+                                                        </td>
+                                                    </tr>
                                                 {% endfor %}
-
-
-                                            </div>
-                                        </div><!-- .card-inner -->
-                                       <div class="card-inner">
-                                            <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.previous_page_number }}">Prev</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                                {% endif %}
-
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
-                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="salle_attente/?page={{ num }}">{{ num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
-
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.next_page_number }}">Next</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                                {% endif %}
-                                            </ul>
-                                        </div><!-- .card-inner -->
-                                    </div><!-- .card-inner-group -->
-                                </div><!-- .card -->
-                            </div><!-- .nk-block -->
+                                                </tbody>
+                                            </table>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% empty %}
+                    <div class="alert alert-warning text-center">Aucun examen trouvé.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+    console.log("✅ DOM entièrement chargé !");
+
+    document.querySelectorAll(".save-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const examenId = this.getAttribute("data-id");
+
+            if (!examenId) {
+                alert("⚠️ ID d'examen manquant !");
+                return;
+            }
+
+            // ✅ Construire dynamiquement l'URL
+            const updateUrl = "{% url 'update_examen_result' 0 %}".replace("0", examenId);
+
+            // ✅ Sélection des champs liés à l'examen
+            const resultInput = document.querySelector(`.result-input[data-id="${examenId}"]`);
+            const resultDateInput = document.querySelector(`.result-date[data-id="${examenId}"]`);
+            const commentInput = document.querySelector(`.result-comment[data-id="${examenId}"]`);
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+            // Vérification des champs
+            if (!resultInput || !resultDateInput || !commentInput) {
+                alert("⚠️ Un ou plusieurs champs sont introuvables.");
+                return;
+            }
+
+            // ✅ Création des données à envoyer
+            const formData = new FormData();
+            formData.append("csrfmiddlewaretoken", csrfToken);
+            formData.append("result", resultInput.value);
+            formData.append("result_date", resultDateInput.value);
+            formData.append("comment", commentInput.value);
+
+            // ✅ Envoi de la requête
+            fetch(updateUrl, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert("✅ Résultat enregistré avec succès !");
+                    location.reload();
+                } else {
+                    alert("❌ Erreur : " + JSON.stringify(data.errors));
+                }
+            })
+            .catch(error => {
+                console.error("❌ Erreur de requête :", error);
+                alert("Erreur lors de l'envoi des données.");
+            });
+        });
+    });
+});
+</script>
 
 
 {% endblock %}

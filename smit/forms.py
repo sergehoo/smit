@@ -22,7 +22,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
     Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
     UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon, ModeDeVie, Appareil, \
-    ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale
+    ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale, BilanParaclinique
 from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
@@ -1715,7 +1715,7 @@ class BilanParacliniqueMultiForm(forms.Form):
 class ImagerieMedicaleForm(forms.ModelForm):
     class Meta:
         model = ImagerieMedicale
-        fields = ["type_imagerie", "prescription", "image_file", "dicom_file"]
+        fields = ["type_imagerie", "prescription", "image_file"]
 
 
 class GroupedAntecedentsForm(forms.Form):
@@ -1742,3 +1742,15 @@ class GroupedAntecedentsForm(forms.Form):
                 required=False,
                 widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
             )
+
+
+# 📌 Formulaire pour soumettre les résultats des examens
+class BilanParacliniqueResultForm(forms.ModelForm):
+    class Meta:
+        model = BilanParaclinique
+        fields = ["result", "result_date", "comment"]
+        widgets = {
+            "result": forms.TextInput(attrs={"class": "form-control", "placeholder": "Résultat"}),
+            "result_date": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+            "comment": forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Commentaire"}),
+        }

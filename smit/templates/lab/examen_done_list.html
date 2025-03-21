@@ -1,0 +1,83 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load django_tables2 %}
+{% load custom_filter %}
+{% block content %}
+
+                <div class="nk-content nk-content-fluid">
+                    <div class="container-xl wide-lg">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head nk-block-head-sm">
+                                <div class="nk-block-between">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title page-title">Analyses effectués</h3>
+                                        <div class="nk-block-des text-soft">
+                                            <p> Liste des Analyses dont les résultats sont disponibles</p>
+                                        </div>
+                                    </div><!-- .nk-block-head-content -->
+                                    <div class="nk-block-head-content">
+                                       {% include 'layout/toggleoption.html' %}
+                                    </div><!-- .nk-block-head-content -->
+                                </div><!-- .nk-block-between -->
+                            </div><!-- .nk-block-head -->
+
+{#                <div class="nk-block">#}
+{#                    <div class="card card-bordered card-stretch">#}
+{#                    {% render_table table %}#}
+{#                        {% if page_obj.has_other_pages %}#}
+{#{% endif %}#}
+{##}
+{#                    </div> <!-- .card -->#}
+{#                </div>#}
+                            <div class="nk-block">
+                                <h5 class="mb-3">📊 Résumés par type de bilan :</h5>
+<div class="row mb-4">
+    {% for bilan in type_bilans_counts %}
+        <div class="col-md-3">
+            <div class="card text-white bg-info shadow-sm mb-2">
+                <div class="card-body py-2 px-3">
+                    <strong>{{ bilan.examen__type_examen__nom|default:"Autres" }}</strong>
+                    <span class="badge bg-light text-dark float-end">{{ bilan.count }}</span>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-muted">Aucun examen trouvé.</div>
+    {% endfor %}
+</div>
+
+                            <form method="get" action="{% url 'examen_done_list' %}" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">{{ filter.form.type_examen.label_tag }} {{ filter.form.type_examen }}</div>
+        <div class="col-md-3">{{ filter.form.doctor.label_tag }} {{ filter.form.doctor }}</div>
+        <div class="col-md-3">{{ filter.form.patient.label_tag }} {{ filter.form.patient }}</div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            <a href="{% url 'examen_done_list' %}" class="btn btn-danger ml-3 w-100">Reset</a>
+        </div>
+    </div>
+</form>
+    <div class="card card-bordered card-stretch">
+    <div class="d-flex justify-content-end mb-3">
+    <a href="{% url 'export_examens_done' 'csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline-primary me-2">
+        <i class="fa fa-file-csv me-1"></i> Export CSV
+    </a>
+    <a href="{% url 'export_examens_done' 'xls' %}?{{ request.GET.urlencode }}" class="btn btn-outline-success">
+        <i class="fa fa-file-excel me-1"></i> Export Excel
+    </a>
+</div>
+        <div class="card-inner-group">
+{% render_table table %}
+
+
+        </div> <!-- .card-inner-group -->
+    </div> <!-- .card -->
+</div> <!-- .nk-block --><!-- .card -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+
+
+
+{% endblock %}

@@ -110,6 +110,8 @@ INSTALLED_APPS = [
     'guardian',
     'phonenumber_field',
     'django_user_agents',
+    'django_tables2',
+
     # 'django_select2',
 
 ]
@@ -177,27 +179,27 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #     }
 # }
 # local one
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': 'smitciv2',
-#         'USER': 'postgres',
-#         'PASSWORD': 'weddingLIFE18',
-#         'HOST': 'localhost',
-#         'PORT': '5433',
-#     }
-# }
-#prod
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'smitciv2',
+        'USER': 'postgres',
+        'PASSWORD': 'weddingLIFE18',
+        'HOST': 'localhost',
+        'PORT': '5433',
     }
 }
+#prod
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
+#         'NAME': os.environ.get('DATABASE_NAME'),
+#         'USER': os.environ.get('DATABASE_USER'),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_HOST'),
+#         'PORT': os.environ.get('DATABASE_PORT'),
+#     }
+# }
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
 
@@ -226,7 +228,7 @@ ACCOUNT_LOGIN_METHODS = {'username'}
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
 #
 AXES_FAILURE_LIMIT = 5  # Bloquer après 5 essais
 AXES_COOLOFF_TIME = 1  # 1 heure d'attente après échec
@@ -260,8 +262,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 #gdal-config --libs >---commande linux ou mac os
 
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 LANGUAGES = [
     ('fr', 'Français'),
     ('en', 'English'),

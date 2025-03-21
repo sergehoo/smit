@@ -1,0 +1,51 @@
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Médecin</th>
+                <th>Examen</th>
+                <th>Résultat</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in page_obj %}
+                <tr>
+                    <td>{{ exam.id }}</td>
+                    <td>{{ exam.patient.nom|upper }} {{ exam.patient.prenoms|upper }}</td>
+                    <td>{{ exam.created_at|date:"d M Y" }}</td>
+                    <td>{{ exam.doctor }}</td>
+                    <td>{{ exam.examen }}</td>
+                    <td><span class="badge bg-info">{{ exam.get_status_display }}</span></td>
+                    <td>{% include 'partials/exam_actions.html' with exam=exam %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- ✅ Pagination dynamique -->
+    <nav>
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a hx-get="{% url 'examens_by_type_paginated' type_bilan %}?page={{ page_obj.previous_page_number }}"
+                       hx-target="#content-{{ type_bilan|slugify }}"
+                       hx-swap="innerHTML"
+                       class="page-link">Précédent</a>
+                </li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a hx-get="{% url 'examens_by_type_paginated' type_bilan %}?page={{ page_obj.next_page_number }}"
+                       hx-target="#content-{{ type_bilan|slugify }}"
+                       hx-swap="innerHTML"
+                       class="page-link">Suivant</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>

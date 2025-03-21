@@ -35,7 +35,7 @@
                             <a href="{% url 'global_search' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><em class="icon ni ni-search"></em></span>
                                 <span class="nk-menu-text">Recherche</span>
-                                <span class="nk-menu-badge badge-danger">{{ patient_nbr }}</span>
+                                <span class="nk-menu-badge">{{ patient_nbr }}</span>
                             </a>
                         </li>
 
@@ -55,7 +55,7 @@
                             <a href="{% url 'appointment_over' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><em class="icon ni ni-calendar-check"></em></span>
                                 <span class="nk-menu-text">Patients réçus</span>
-                                <span class="nk-menu-badge badge-danger">{{ appointments_all }}</span>
+                                <span class="nk-menu-badge">{{ appointments_all }}</span>
                             </a>
                         </li>
 
@@ -63,7 +63,7 @@
                             <a href="{% url 'appointment_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
                                 <span class="nk-menu-text">Rendez-vous</span>
-                                <span class="nk-menu-badge badge-danger">{{ appointments_all }}</span>
+                                <span class="nk-menu-badge">{{ appointments_all }}</span>
                             </a>
                         </li>
 
@@ -77,7 +77,7 @@
                             <a href="{% url 'consultation_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-stethoscope"></i></span>
                                 <span class="nk-menu-text">Liste Consultations</span>
-                                <span class="nk-menu-badge badge-danger">{{ consul_nbr }}</span>
+                                <span class="nk-menu-badge ">{{ consul_nbr }}</span>
                             </a>
                         </li>
 
@@ -89,7 +89,7 @@
                             <a href="{% url 'urgences_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-ambulance text-danger"></i></span>
                                 <span class="nk-menu-text">Liste des Urgences </span>
-{#                                <span class="nk-menu-badge badge-danger">{{ consul_nbr }}</span>#}
+                                <span class="nk-menu-badge">{{ urgencehospi }}</span>
                             </a>
                         </li>
 
@@ -154,7 +154,7 @@
                             <a href="{% url 'suivi_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-folder-tree"></i></span>
                                 <span class="nk-menu-text">Suivi des Patients </span>
-                                <span class="nk-menu-badge badge-danger">{{ suivi_nbr }}</span>
+                                <span class="nk-menu-badge bg-danger text-white">{{ suivi_nbr }}</span>
                             </a>
                         </li>
 
@@ -197,7 +197,16 @@
                         <li class="nk-menu-item">
                             <a href="{% url 'examen_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-flask-vial"></i></span>
-                                <span class="nk-menu-text">Demande d'Analyse</span>
+                                <span class="nk-menu-text">Demande d'Analyse </span>
+                                <span class="nk-menu-badge bg-danger text-white">{{ examencount }}</span>
+                            </a>
+                        </li>
+                    
+                    <li class="nk-menu-item">
+                            <a href="{% url 'examen_done_list' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><i class="fa-solid fa-flask-vial"></i></span>
+                                <span class="nk-menu-text">Analyses effectués </span>
+                                <span class="nk-menu-badge">{{ examensdonecount }}</span>
                             </a>
                         </li>
 

@@ -5,47 +5,48 @@ import random
 import re
 import traceback
 import unicodedata
-import uuid
+
 from collections import Counter, defaultdict, OrderedDict
 from datetime import date, timedelta
 from decimal import Decimal
 from io import BytesIO
 
 import pandas as pd
-from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import IntegrityError, transaction
-from django.db.models import Q, Count, Prefetch
+from django.db import transaction
+from django.db.models import Q, Count
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, make_naive, is_aware
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import ListView, DetailView, CreateView, TemplateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from simple_history.utils import update_change_reason
 from xhtml2pdf import pisa
 
-from core.models import Patient, ServiceSubActivity, Maladie, Employee
-from pharmacy.models import Medicament, Medocsprescrits, FORME_MEDICAMENT_CHOICES
-from smit.forms import HospitalizationSendForm, ConstanteForm, PrescriptionForm, SigneFonctionnelForm, \
+from core.models import Patient, Maladie, Employee
+from pharmacy.models import Medicament, FORME_MEDICAMENT_CHOICES
+from smit.forms import HospitalizationSendForm, ConstanteForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
     DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm, \
-    HospitalizationUrgenceForm, AntecedentsHospiForm, GroupedAntecedentsForm, ModeDeVieForm, AppareilForm, \
+    HospitalizationUrgenceForm, AntecedentsHospiForm, ModeDeVieForm, AppareilForm, \
     ResumeSyndromiqueForm, ProblemePoseForm, BilanParacliniqueMultiForm, ImagerieMedicaleForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
     ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
     EffetIndesirable, CommentaireInfirmier, TypeAntecedent, AntecedentsMedicaux, ModeDeVieCategorie, ModeDeVie, \
-    AppareilType, Appareil, BilanParaclinique, ExamenStandard, TypeBilanParaclinique
+    AppareilType, Appareil, BilanParaclinique, ExamenStandard, TypeBilanParaclinique, ResumeSyndromique, ProblemePose, \
+    ImagerieMedicale, TypeImagerie
 
 
 def render_to_pdf(template_src, context_dict={}):
@@ -1441,7 +1442,8 @@ def ajouter_mode_de_vie(request, hospitalisation_id):
                         description=description,
                         frequence=frequence if frequence else None,
                         niveau_impact=impact if impact else None,
-                        created_by=request.user.employee
+                        created_by=request.user.employee,
+                        hospitalisation=hospitalisation
                     )
                     mode_de_vie.save()
 
@@ -1484,80 +1486,102 @@ def add_antecedents_hospi(request, hospitalisation_id):
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
 
+def delete_appareil(request, appareil_id):
+    appareil = get_object_or_404(Appareil, id=appareil_id)
+
+    if request.method == "POST":
+        appareil.delete()
+        messages.success(request, f"L'appareil '{appareil.nom}' a été supprimé avec succès.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
+
+
 @login_required
 def add_examen_apareil(request, hospitalisation_id):
-    """Ajoute un examen d'appareil pour une hospitalisation donnée."""
+    """Ajoute un examen d'appareil pour une hospitalisation ou met à jour s'il existe déjà."""
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
 
     if request.method == "POST":
-        appareils_ajoutes = 0
+        appareils_a_creer = []
+        appareils_mis_a_jour = 0
         erreurs_detectees = []
-
-        print("📥 Données reçues du formulaire :", request.POST)  # ✅ Debugging
-
-        # ✅ Utilisation d'une REGEX pour capturer les bons index
         pattern = re.compile(r"type_appareil_(\d+)_(\d+)")
 
         for key, value in request.POST.items():
-            match = pattern.match(key)  # ✅ Vérifier si la clé suit le bon format
-
+            match = pattern.match(key)
             if match:
                 try:
-                    index, idx = match.groups()  # ✅ Extraction des indices numériques
-
-                    # Récupération et nettoyage des valeurs
+                    index, idx = match.groups()
                     type_id = request.POST.get(f"type_appareil_{index}_{idx}", "").strip()
                     nom = request.POST.get(f"nom_{index}_{idx}", "").strip()
                     etat = request.POST.get(f"etat_{index}_{idx}", "normal").strip()
                     observation = request.POST.get(f"observation_{index}_{idx}", "").strip()
 
-                    # 🚨 Vérification des entrées vides
                     if not type_id or not nom:
-                        erreurs_detectees.append(
-                            f"⚠️ Données incomplètes pour {key} (Type: {type_id}, Nom: {nom}) - Ignoré")
-                        continue  # ✅ Ignore cette entrée sans erreur fatale
+                        erreurs_detectees.append(f"⚠️ Données incomplètes pour '{key}' - Ignoré.")
+                        continue
 
-                    print(
-                        f"🔄 Traitement : Type: {type_id}, Nom: {nom}, État: {etat}, Observation: {observation}")  # ✅ Debugging
-
-                    # Récupérer l'objet `AppareilType`
                     type_obj = get_object_or_404(AppareilType, pk=int(type_id))
 
-                    # ✅ Vérifier si un appareil avec ce nom et cette hospitalisation existe déjà
-                    if Appareil.objects.filter(hospitalisation=hospitalisation, nom=nom).exists():
-                        erreurs_detectees.append(
-                            f"⚠️ L'appareil '{nom}' existe déjà pour cette hospitalisation - Ignoré.")
-                        continue  # ✅ Ignore cette entrée sans erreur fatale
+                    # Vérifier si l’appareil existe déjà pour cette hospitalisation
+                    appareil_existant = Appareil.objects.filter(hospitalisation=hospitalisation, nom=nom).first()
 
-                    # ✅ Création d'un nouvel appareil
-                    Appareil.objects.create(
+                    if appareil_existant:
+                        # Vérifier si les données ont changé
+                        if appareil_existant.etat != etat or appareil_existant.observation != observation:
+                            # Mise à jour de l'appareil existant
+                            appareil_existant.etat = etat
+                            appareil_existant.observation = observation
+                            appareil_existant.save()
+                            appareils_mis_a_jour += 1  # Compter les mises à jour
+                        else:
+                            erreurs_detectees.append(f"⚠️ L'appareil '{nom}' existe déjà sans changement.")
+                        continue
+
+                    # ✅ Création d'un nouvel appareil si inexistant
+                    appareils_a_creer.append(Appareil(
                         type_appareil=type_obj,
                         hospitalisation=hospitalisation,
                         nom=nom,
                         etat=etat,
-                        observation=observation
-                    )
-
-                    appareils_ajoutes += 1  # ✅ Incrémenter seulement si l'ajout a réussi
+                        observation=observation,
+                        created_by=request.user.employee
+                    ))
 
                 except ValueError as e:
-                    erreurs_detectees.append(f"❌ Erreur ValueError sur {key} - {str(e)}")
+                    erreurs_detectees.append(f"❌ Erreur ValueError : {str(e)}")
                 except Exception as e:
-                    erreurs_detectees.append(f"❌ Erreur générale sur {key} - {str(e)}")
+                    erreurs_detectees.append(f"❌ Erreur inattendue : {str(e)}")
 
-        print(f"✅ Appareils ajoutés : {appareils_ajoutes}")
+        # Insérer tous les nouveaux appareils en une seule requête (optimisation)
+        if appareils_a_creer:
+            Appareil.objects.bulk_create(appareils_a_creer)
+            messages.success(request, f"✅ {len(appareils_a_creer)} nouvel(s) appareil(s) ajouté(s) avec succès.")
+
+        # Afficher un message si des appareils ont été mis à jour
+        if appareils_mis_a_jour > 0:
+            messages.info(request, f"ℹ️ {appareils_mis_a_jour} appareil(s) mis à jour avec succès.")
+
+        # Gérer les erreurs
         if erreurs_detectees:
-            print(f"⚠️ Erreurs détectées : {erreurs_detectees}")
-
-        if appareils_ajoutes > 0:
-            messages.success(request, f"✅ {appareils_ajoutes} nouvel(s) examen(s) des appareils ajouté(s) avec succès.")
-        else:
-            messages.error(request, "⚠️ Aucun appareil enregistré. Vérifiez les données du formulaire.")
+            for err in erreurs_detectees:
+                messages.error(request, err)
 
         return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
     messages.error(request, "❌ Erreur lors de l'ajout de l'examen.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
+def delete_resume(request, resume_id):
+    resume = get_object_or_404(ResumeSyndromique, id=resume_id)
+
+    if request.method == "POST":
+        resume.delete()
+        messages.success(request,
+                         f"Le résumé syndromique du {resume.created_at.strftime('%d/%m/%Y')} a été supprimé avec succès.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
 
 
 @login_required
@@ -1576,7 +1600,7 @@ def add_resume_syndromique(request, hospitalisation_id):
         else:
             messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
     else:
-        form = HistoriqueMaladieForm()
+        form = ResumeSyndromiqueForm()
     messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
@@ -1663,10 +1687,14 @@ def add_bilan_paraclinique(request, hospitalisation_id):
 
 @login_required
 def add_imagerie(request, hospitalisation_id):
+    """Ajoute une nouvelle imagerie médicale à une hospitalisation donnée."""
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
     patient = hospitalisation.patient
 
     if request.method == "POST":
+        print("📥 Données reçues :", request.POST)
+        print("📂 Fichiers reçus :", request.FILES)
+
         form = ImagerieMedicaleForm(request.POST, request.FILES)
         if form.is_valid():
             imagerie = form.save(commit=False)
@@ -1674,12 +1702,28 @@ def add_imagerie(request, hospitalisation_id):
             imagerie.hospitalisation = hospitalisation
             imagerie.medecin_prescripteur = request.user
             imagerie.save()
-            messages.success(request, "Imagerie enregistrée avec succès.")
-            return redirect("hospitalisationdetails", pk=hospitalisation_id)
-    else:
-        form = ImagerieMedicaleForm()
 
-    return render(request, "pages/imagerie/add_imagerie.html", {"form": form, "hospitalisation": hospitalisation})
+            # print(f"✅ Imagerie enregistrée : {imagerie}")
+            # if imagerie.image_file:
+            #     print(f"📂 Fichier sauvegardé : {imagerie.image_file.url}")
+            #
+            # return JsonResponse({
+            #     "success": True,
+            #     "message": "Imagerie enregistrée avec succès.",
+            #     "data": {
+            #         "type_imagerie": imagerie.type_imagerie.nom,
+            #         "prescription": imagerie.prescription,
+            #         "image_url": imagerie.image_file.url if imagerie.image_file else None,
+            #         "created_at": imagerie.created_at.strftime("%d %B %Y %H:%M")
+            #     }
+            # })
+
+        print("❌ Erreurs du formulaire:", form.errors)
+        messages.success(request, "Fichier enregistre avec succes.")
+        return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+    messages.error(request, "Erreur lors de l'ajout du Problemes. Veuillez corriger les erreurs ci-dessous.")
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
 
 def generate_ordonnance_pdf(request, patient_id, hospitalisation_id):
@@ -1770,6 +1814,103 @@ def stop_traitement(request, prescription_id):
     return redirect("/")  # Rediriger en cas d'accès direct à cette vue
 
 
+def delete_probleme(request, probleme_id):
+    probleme = get_object_or_404(ProblemePose, id=probleme_id)
+
+    if request.method == "POST":
+        probleme.delete()
+        messages.success(request,
+                         f"Le problème posé du {probleme.created_at.strftime('%d/%m/%Y')} a été supprimé avec succès.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
+
+
+def delete_bilan(request, bilan_id):
+    bilan = get_object_or_404(BilanParaclinique, id=bilan_id)
+
+    if request.method == "POST":
+        bilan.delete()
+        messages.success(request,
+                         f"Le bilan paraclinique du {bilan.created_at.strftime('%d/%m/%Y')} a été supprimé avec succès.")
+
+    return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
+
+
+@transaction.atomic
+def transferer_patient(request, hospitalisation_id):
+    """
+    Transfère un patient d'un lit à un autre en tenant compte des unités d'hospitalisation.
+    """
+    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    patient = hospitalisation.patient
+
+    if request.method == "POST":
+        new_lit_id = request.POST.get("new_lit_id")
+
+        if not new_lit_id:
+            messages.error(request, "Veuillez sélectionner un lit.")
+            return redirect("hospitalisationdetails", pk=hospitalisation_id)
+
+        new_lit = get_object_or_404(LitHospitalisation, id=new_lit_id)
+
+        # Vérifier si le lit est déjà occupé
+        if new_lit.occuper or new_lit.is_out_of_service or new_lit.is_cleaning:
+            messages.error(request, "Ce lit est déjà occupé ou indisponible.")
+            return redirect("hospitalisationdetails", pk=hospitalisation_id)
+
+        # Vérifier si le patient est déjà assigné à un lit
+        if hospitalisation.bed:
+            old_lit = hospitalisation.bed
+            old_lit.occupant = None
+            old_lit.occuper = False
+            old_lit.save()
+
+        # Assigner le patient au nouveau lit
+        new_lit.occupant = patient
+        new_lit.occuper = True
+        new_lit.save()
+
+        # Mettre à jour l'hospitalisation
+        hospitalisation.bed = new_lit
+        hospitalisation.updated_at = timezone.now()
+        hospitalisation.save()
+
+        messages.success(request, f"Le patient {patient.nom} a été transféré dans le lit {new_lit.nom}.")
+        return redirect("hospitalisationdetails", pk=hospitalisation_id)
+
+    # Récupérer les unités et lits disponibles
+    unites = UniteHospitalisation.objects.prefetch_related("chambres__boxes__lits").all()
+    lits_disponibles = LitHospitalisation.objects.filter(occuper=False, is_out_of_service=False, is_cleaning=False)
+
+    context = {
+        "hospitalisation": hospitalisation,
+        "unites": unites,
+        "lits_disponibles": lits_disponibles,
+    }
+
+
+@login_required()
+def telecharger_fichier(request, fichier_id, type_fichier):
+    """
+    Permet de télécharger un fichier (image, DICOM, rapport).
+    """
+    imagerie = get_object_or_404(ImagerieMedicale, id=fichier_id)
+
+    fichier = None
+    if type_fichier == "image" and imagerie.image_file:
+        fichier = imagerie.image_file
+    elif type_fichier == "dicom" and imagerie.dicom_file:
+        fichier = imagerie.dicom_file
+    elif type_fichier == "rapport" and imagerie.rapport_file:
+        fichier = imagerie.rapport_file
+
+    if fichier:
+        response = FileResponse(fichier.open("rb"), as_attachment=True)
+        return response
+    else:
+        return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails', {"message": "Fichier non trouvé."}))
+
+
 class HospitalisationDetailView(LoginRequiredMixin, DetailView):
     model = Hospitalization
     template_name = "pages/hospitalisation/hospitalisation_details.html"
@@ -1779,142 +1920,67 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         hospitalization = self.get_object()
 
-        # Initialiser labcompliq par défaut
-        labcompliq = {"indicators": []}
+        # 📌 1. Compter les examens par type
+        examens_par_type = (
+            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            .values("examen__type_examen__nom")
+            .annotate(total=Count("id"))
+            .order_by("-total")
+        )
+        labels_examens = [item["examen__type_examen__nom"] for item in examens_par_type]
+        data_examens = [item["total"] for item in examens_par_type]
 
-        complications = hospitalization.indicateurs_compliques.first()  # supposons une seule entrée
+        # 📌 2. Statut des examens
+        status_data = (
+            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            .values("status")
+            .annotate(count=Count("id"))
+        )
+        labels_status = [item["status"] for item in status_data]
+        data_status = [item["count"] for item in status_data]
 
-        # Si les complications existent, structure les données et les seuils
-        if complications:
-            indicators = {
-                "Sodium": {"value": complications.sodium, "range": ComplicationsIndicators.SODIUM_NORMAL_RANGE},
-                "Potassium": {"value": complications.potassium,
-                              "range": ComplicationsIndicators.POTASSIUM_NORMAL_RANGE},
-                "Chlorure": {"value": complications.chlorure, "range": ComplicationsIndicators.CHLORURE_NORMAL_RANGE},
-                "Calcium": {"value": complications.calcium, "range": ComplicationsIndicators.CALCIUM_NORMAL_RANGE},
-                "Magnésium": {"value": complications.magnesium,
-                              "range": ComplicationsIndicators.MAGNESIUM_NORMAL_RANGE},
-                "Phosphate": {"value": complications.phosphate,
-                              "range": ComplicationsIndicators.PHOSPHATE_NORMAL_RANGE},
-                "Créatinine": {"value": complications.creatinine,
-                               "range": ComplicationsIndicators.CREATININE_NORMAL_RANGE_MALE},
-                "BUN": {"value": complications.bun, "range": ComplicationsIndicators.BUN_NORMAL_RANGE},
-                "ALT": {"value": complications.alt, "range": ComplicationsIndicators.ALT_NORMAL_RANGE},
-                "AST": {"value": complications.ast, "range": ComplicationsIndicators.AST_NORMAL_RANGE},
-                "Bilirubine Totale": {"value": complications.bilirubine_totale,
-                                      "range": ComplicationsIndicators.BILIRUBINE_TOTAL_NORMAL_RANGE},
-                "Albumine": {"value": complications.albumine, "range": ComplicationsIndicators.ALBUMINE_NORMAL_RANGE},
-                "ALP": {"value": complications.alp, "range": ComplicationsIndicators.ALP_NORMAL_RANGE}
-            }
+        # 📌 3. Evolution des examens (par jour) ✅ Correction pour PostgreSQL
+        examens_par_jour = (
+            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(total=Count("id"))
+            .order_by("day")
+        )
+        labels_jours = [item["day"].strftime("%Y-%m-%d") for item in examens_par_jour]
+        data_jours = [item["total"] for item in examens_par_jour]
 
-            # Données finales pour le graphique, regroupées par segments
-            labcompliq = {
-                "indicators": []
-            }
-            for key, value in indicators.items():
-                min_normal = Decimal(value["range"][0])
-                max_normal = Decimal(value["range"][1])
-                actual = value["value"]
+        # 📌 4. Résultats des examens par type
+        resultats_par_examen = defaultdict(lambda: defaultdict(int))
+        examens = BilanParaclinique.objects.filter(hospitalisation=hospitalization)
 
-                if actual is None:
-                    normal_part = max_normal - min_normal
-                    additional_part = Decimal(0)
-                    actual_within_range = Decimal(0)
-                else:
-                    actual = Decimal(actual)
-                    if min_normal <= actual <= max_normal:
-                        normal_part = actual - min_normal
-                        actual_within_range = max_normal - actual
-                        additional_part = Decimal(0)
-                    elif actual < min_normal:
-                        normal_part = Decimal(0)
-                        additional_part = min_normal - actual
-                        actual_within_range = max_normal - min_normal
-                    else:
-                        normal_part = max_normal - min_normal
-                        additional_part = actual - max_normal
-                        actual_within_range = Decimal(0)
+        for bilan in examens:
+            if bilan.examen:
+                resultats_par_examen[bilan.examen.nom][bilan.status] += 1
 
-                labcompliq["indicators"].append({
-                    "name": key,
-                    "normal_part": float(normal_part),
-                    "within_range": float(actual_within_range),
-                    "additional_part": float(additional_part),
-                    "actual": float(actual)
+        context["examens_par_type_json"] = json.dumps({"labels": labels_examens, "data": data_examens})
+        context["status_examens_json"] = json.dumps({"labels": labels_status, "data": data_status})
+        context["examens_par_jour_json"] = json.dumps({"labels": labels_jours, "data": data_jours})
+        context["resultats_par_examen_json"] = json.dumps(dict(resultats_par_examen))
+
+        # 📌 1. Regrouper les résultats par type d'examen
+        evolution_par_bilan = defaultdict(lambda: defaultdict(list))
+
+        examens = BilanParaclinique.objects.filter(hospitalisation=hospitalization).order_by("result_date")
+
+        for bilan in examens:
+            if bilan.examen and bilan.result:
+                type_bilan = bilan.examen.type_examen.nom  # Type de bilan (ex: Hémogramme, Ionogramme)
+                nom_examen = bilan.examen.nom  # Nom de l'examen (ex: Créatinine, VGM)
+                valeur = bilan.result
+                date = bilan.result_date.strftime("%d-%m-%Y") if bilan.result_date else "Inconnue"
+
+                evolution_par_bilan[type_bilan][nom_examen].append({
+                    "date": date,
+                    "valeur": valeur
                 })
 
-        complications_indicators = hospitalization.indicateurs_autres.all().order_by('created_at')
-
-        # Structure des données pour le graphique
-        complicbarre = {
-            "dates": [indicator.created_at.strftime('%Y-%m-%d') for indicator in complications_indicators],
-            "pain_level": [indicator.pain_level for indicator in complications_indicators],
-            "mental_state": [indicator.mental_state for indicator in complications_indicators],
-            "electrolytes_balance": [indicator.electrolytes_balance for indicator in complications_indicators],
-            "renal_function": [indicator.renal_function for indicator in complications_indicators],
-            "hepatic_function": [indicator.hepatic_function for indicator in complications_indicators]
-        }
-
-        # Récupération des indicateurs de complications
-
-        complications_indicators = hospitalization.indicateurs_autres.all()
-
-        # Compter les occurrences des valeurs pour chaque catégorie
-        mental_state_counts = dict(Counter([indicator.mental_state for indicator in complications_indicators]))
-        electrolytes_balance_counts = dict(
-            Counter([indicator.electrolytes_balance for indicator in complications_indicators]))
-        renal_function_counts = dict(Counter([indicator.renal_function for indicator in complications_indicators]))
-        hepatic_function_counts = dict(Counter([indicator.hepatic_function for indicator in complications_indicators]))
-
-        # Structurer les données pour les graphiques en camembert
-        complic = {
-            "mental_state": mental_state_counts,
-            "electrolytes_balance": electrolytes_balance_counts,
-            "renal_function": renal_function_counts,
-            "hepatic_function": hepatic_function_counts
-        }
-
-        # Récupération des indicateurs fonctionnels associés à l'hospitalisation
-
-        functional_indicators = hospitalization.indicateurs_fonctionnels.all().order_by('date')
-
-        # Structure des données pour le graphique
-        donnees = {
-            "dates": [indicator.date.strftime('%Y-%m-%d') for indicator in functional_indicators],
-            "mobilite": [indicator.mobilite for indicator in functional_indicators],
-            "conscience": [indicator.conscience for indicator in functional_indicators],
-            "debit_urinaire": [indicator.debit_urinaire for indicator in functional_indicators],
-        }
-
-        # Récupération des indicateurs biologiques associés à l'hospitalisation
-        hospitalization = self.get_object()
-        indicators = hospitalization.indicateurs_biologiques.all().order_by('date')
-
-        # Structure des données pour le graphique
-        data = {
-            "dates": [indicator.date.strftime('%Y-%m-%d') for indicator in indicators],
-            "globules_blancs": [indicator.globules_blancs for indicator in indicators],
-            "hemoglobine": [indicator.hemoglobine for indicator in indicators],
-            "plaquettes": [indicator.plaquettes for indicator in indicators],
-            "crp": [indicator.crp for indicator in indicators],
-            "glucose_sanguin": [indicator.glucose_sanguin for indicator in indicators],
-        }
-
-        # Conversion en JSON pour le template
-
-        # Récupérer l'enregistrement des indicateurs pour cette hospitalisation
-        indicators = hospitalization.indicateurs_autres.last()
-        # Préparer les données pour chaque indicateur de sortie
-        if indicators:
-            context['discharge_criteria'] = {
-                'stable_vitals': 1 if indicators.stable_vitals else 0,
-                'pain_controlled': 1 if indicators.pain_controlled else 0,
-                'functional_ability': 1 if indicators.functional_ability else 0,
-                'mental_stability': 1 if indicators.mental_stability else 0,
-                'follow_up_plan': 1 if bool(indicators.follow_up_plan) else 0,  # Vérifie si le plan de suivi existe
-            }
-        else:
-            context['discharge_criteria'] = {}
+        context["evolution_bilans_json"] = json.dumps(evolution_par_bilan)
 
         # Add forms to context
         context['constante_form'] = ConstanteForm()
@@ -1975,6 +2041,12 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         context['resumesyndromiqueform'] = ResumeSyndromiqueForm()
 
+        # Serializer les types d'imagerie en JSON pour Alpine.js
+        types_imagerie = TypeImagerie.objects.all().values("id", "nom")
+        context["types_imagerie_json"] = json.dumps(list(types_imagerie))
+
+        context['imagerieForm'] = ImagerieMedicaleForm()
+
         context['diagnosticsform'] = DiagnosticForm()
         context['observationform'] = ObservationForm()
         context['avismedicalform'] = AvisMedicalForm()
@@ -2013,6 +2085,79 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['antecedents_par_type'] = dict(antecedents_par_type)
         context['antecedentscount'] = AntecedentsMedicaux.objects.filter(hospitalisation=self.object).count()
 
+        # Récupérer tous les appareils liés à cette hospitalisation
+        appareils = Appareil.objects.filter(hospitalisation=hospitalization).select_related('type_appareil',
+                                                                                            'created_by')
+
+        # Grouper les appareils par type
+        appareils_by_categories = defaultdict(list)
+        for appareil in appareils:
+            categorie = appareil.type_appareil.nom if appareil.type_appareil else "Autres"
+            appareils_by_categories[categorie].append(appareil)
+        context["appareils_by_categories"] = dict(appareils_by_categories)
+        context["appareils_count"] = appareils.count()
+
+        # Récupérer tous les résumés liés à cette hospitalisation
+        resumes = ResumeSyndromique.objects.filter(hospitalisation=hospitalization)
+
+        # Grouper les résumés par hospitalisation
+        resumes_by_hospitalisation = defaultdict(list)
+        for resume in resumes:
+            hosp_name = f"Hospitalisation du {resume.created_at.strftime('%d/%m/%Y')}"
+            resumes_by_hospitalisation[hosp_name].append(resume)
+
+        context["resumes_by_hospitalisation"] = dict(resumes_by_hospitalisation)  # ✅ Correction ici
+        context["resumes_count"] = resumes.count()  # ✅ Correction ici
+
+        # Récupérer tous les bilans liés à cette hospitalisation
+        bilans = BilanParaclinique.objects.filter(hospitalisation=hospitalization).select_related('examen', 'doctor',
+                                                                                                  'examen__type_examen')
+
+        # Regrouper les bilans par type de bilan
+        bilans_by_type = defaultdict(list)
+        for bilan in bilans:
+            type_bilan = bilan.examen.type_examen.nom if bilan.examen and bilan.examen.type_examen else "Autres"
+            bilans_by_type[type_bilan].append(bilan)
+
+        context["bilans_by_type"] = dict(bilans_by_type)
+        context["bilans_count"] = bilans.count()
+
+        # Récupérer tous les problèmes liés à cette hospitalisation
+        problemes = ProblemePose.objects.filter(hospitalisation=hospitalization).select_related('patient', 'created_by')
+
+        # Grouper les problèmes par hospitalisation
+        problemes_by_hospitalisation = defaultdict(list)
+        for probleme in problemes:
+            hosp_name = f"Hospitalisation du {probleme.created_at.strftime('%d/%m/%Y')}"
+            problemes_by_hospitalisation[hosp_name].append(probleme)
+
+        context["problemes_by_hospitalisation"] = dict(problemes_by_hospitalisation)  # ✅ Correction ici
+        context["problemes_count"] = problemes.count()  # ✅ Correction ici
+
+        # Récupérer les unités et lits disponibles
+        unites = UniteHospitalisation.objects.prefetch_related("chambres__boxes__lits").all()
+        lits_disponibles = LitHospitalisation.objects.filter(occuper=False, is_out_of_service=False, is_cleaning=False)
+
+        context["hospitalisation"] = hospitalization
+        context["unites"] = unites
+        context["lits_disponibles"] = lits_disponibles
+
+        # Récupérer les examens d'imagerie liés à l'hospitalisation
+        imageries = ImagerieMedicale.objects.filter(hospitalisation=hospitalization).select_related(
+            "type_imagerie", "medecin_prescripteur", "radiologue"
+        ).order_by("-date_examen")
+
+        # Organiser les imageries par type
+        imageries_by_type = {}
+        for imagerie in imageries:
+            type_nom = imagerie.type_imagerie.nom if imagerie.type_imagerie else "Autres"
+            if type_nom not in imageries_by_type:
+                imageries_by_type[type_nom] = []
+            imageries_by_type[type_nom].append(imagerie)
+
+        context["imageries_by_type"] = imageries_by_type
+        context["imageries_count"] = imageries.count()
+
         context['diagnostics'] = Diagnostic.objects.filter(hospitalisation=self.object).order_by('-date_diagnostic')
         context['diagnosticscount'] = Diagnostic.objects.filter(hospitalisation=self.object).count()
 
@@ -2029,11 +2174,6 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         context['constantes'] = Constante.objects.filter(hospitalisation=self.object)
         # Retrieve related 'Constante' data for the current hospitalization
-        context['chart_data'] = json.dumps(data, cls=DjangoJSONEncoder)
-        context['functional_chart_data'] = json.dumps(donnees, cls=DjangoJSONEncoder)
-        context['complications_chart_data'] = json.dumps(complicbarre, cls=DjangoJSONEncoder)
-        context['pie_chart_data'] = json.dumps(complic)
-        context['lab_ink'] = json.dumps(labcompliq, cls=DjangoJSONEncoder)
         context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
         context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient).order_by('-created_at')
         context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization).order_by(

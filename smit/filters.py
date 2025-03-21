@@ -3,6 +3,7 @@ from django.forms import Select, TextInput
 
 from core.models import situation_matrimoniales_choices, Sexe_choices, Goupe_sanguin_choices, Patient, pays_choices, \
     professions_choices
+from smit.models import BilanParaclinique
 
 
 class PatientFilter(django_filters.FilterSet):
@@ -65,3 +66,30 @@ class PatientFilter(django_filters.FilterSet):
         model = Patient
         fields = ['code_patient', 'nom', 'prenoms', 'contact', 'nationalite', 'profession', 'situation_matrimoniale',
                   'genre', 'groupe_sanguin']
+
+
+class ExamenDoneFilter(django_filters.FilterSet):
+    type_examen = django_filters.CharFilter(field_name='examen__type_examen__nom', lookup_expr='icontains', label="Type de bilan")
+    doctor = django_filters.CharFilter(field_name='doctor__username', lookup_expr='icontains', label="Médecin")
+    patient = django_filters.CharFilter(method='filter_patient', label="Patient")
+
+    class Meta:
+        model = BilanParaclinique
+        fields = []
+
+    def filter_patient(self, queryset, name, value):
+        return queryset.filter(
+            patient__nom__icontains=value
+        ) | queryset.filter(
+            patient__prenoms__icontains=value
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # ✅ Ajout de la classe Bootstrap "form-control"
+        for field in self.form.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-control',
+                'placeholder': field.label
+            })
+

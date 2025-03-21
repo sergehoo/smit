@@ -10,7 +10,8 @@ from hospitalisation.views import HospitalisationListView, HospitalisationUniteL
     add_hospi_suivie_comment, add_observations_suivi, generate_ordonnance_pdf, add_antecedents_hospi, \
     ajouter_mode_de_vie, add_examen_apareil, HospitalisedPatientListView, add_problemes_pose, add_resume_syndromique, \
     add_bilan_paraclinique, add_imagerie, update_execution_status, export_hospitalized_patients, \
-    HospitalisationDeleteView, stop_traitement
+    HospitalisationDeleteView, stop_traitement, delete_appareil, delete_resume, delete_probleme, delete_bilan, \
+    transferer_patient, telecharger_fichier
 from smit.views import add_cas_contact
 from smitci import settings
 
@@ -40,6 +41,16 @@ urlpatterns = [
                        export_indicateur_subjectif_pdf, name='export_indicateur_subjectif_pdf'),
                   path('hospitalisation/<int:hospitalisation_id>/discharge/', update_hospitalisation_discharge,
                        name='update_hospitalisation_discharge'),
+
+                  path('hospitalisation/<int:hospitalisation_id>/transferer/', transferer_patient,
+                       name='transferer_patient'),
+                  path('imagerie/<int:fichier_id>/download/<str:type_fichier>/', telecharger_fichier,
+                       name='telecharger_fichier'),
+
+                  path('delete_appareil/<int:appareil_id>/', delete_appareil, name='delete_appareil'),
+                  path('delete_resume/<int:resume_id>/', delete_resume, name='delete_resume'),
+                  path('delete_probleme/<int:probleme_id>/', delete_probleme, name='delete_probleme'),
+                  path('delete_bilan/<int:bilan_id>/', delete_bilan, name='delete_bilan'),
 
                   path('hospitalisation_reserved/<int:lit_id>', hospitalisation_lit_reserved,
                        name='hospitalisation_lit_reserved'),
@@ -78,6 +89,7 @@ urlpatterns = [
                   path('add_resume_syndromique/<int:hospitalisation_id>', add_resume_syndromique, name='add_resume_syndromique'),
 
                   path("hospitalisation/<int:hospitalisation_id>/add_bilan/", add_bilan_paraclinique,  name="add_bilan_paraclinique"),
+
                   path("add_imagerie/<int:hospitalisation_id>", add_imagerie,  name="add_imagerie"),
 
                   path('patient/<int:patient_id>/add-cas-contact/', add_cas_contact, name='add_cas_contact'),
