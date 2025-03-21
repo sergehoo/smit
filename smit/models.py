@@ -1,34 +1,23 @@
 import datetime
-import io
 import random
 import unicodedata
 import uuid
-
-import cv2
 import torch
-import torchvision
 import torchvision.models as torch_models
-from django.urls import reverse
-from torchvision.transforms import functional as F
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import Max
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.timezone import now
-from django_countries.fields import CountryField
 from schedule.models import Calendar, Event
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 from tinymce.models import HTMLField
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
 from torchvision.transforms import transforms
-from ultralytics import YOLO
+
 
 from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices, Maladie
 from pharmacy.models import Medicament, Molecule, RendezVous
