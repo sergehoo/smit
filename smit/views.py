@@ -31,6 +31,8 @@ from reportlab.platypus.tables import TableStyle, Table
 from six import BytesIO
 
 from core.models import communes_et_quartiers_choices, Location
+from core.utils.notifications import get_employees_to_notify
+from core.utils.sms import send_sms
 from pharmacy.models import RendezVous
 from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
@@ -575,6 +577,8 @@ def hospitalisation_send_create(request, consultations_id, patient_id):
             hospi.activite = activite
 
             hospi.save()
+            message = f"🛏 Le Patient : {patient.nom} {patient.prenoms}.est admis en Hospitalisation le {hospi.admission_date},  Lit : {hospi.bed.nom} ({hospi.bed.box.chambre.unite.nom})."
+            send_sms(get_employees_to_notify(), message)
             messages.success(request, 'Patient transféré en hospitalisation avec succès!')
             return redirect('hospitalisation')
         else:

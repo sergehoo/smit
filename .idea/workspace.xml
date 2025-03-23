@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/utils/notifications.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/utils/sms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/django_errors.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +25,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Dockerfile" />
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -198,7 +207,7 @@
       <workItem from="1740825963518" duration="11973000" />
       <workItem from="1741098953261" duration="584000" />
       <workItem from="1741342373996" duration="595000" />
-      <workItem from="1741723556039" duration="79919000" />
+      <workItem from="1741723556039" duration="94152000" />
     </task>
     <servers />
   </component>
@@ -221,12 +230,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>796</line>
+          <line>800</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1352</line>
+          <line>1356</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -256,27 +265,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2307</line>
+          <line>2364</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1417</line>
+          <line>1469</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/models.py</url>
-          <line>61</line>
+          <line>50</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>874</line>
+          <line>878</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/models.py</url>
-          <line>1004</line>
+          <line>993</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -286,27 +295,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>797</line>
+          <line>817</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/forms.py</url>
-          <line>1333</line>
+          <line>1336</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1169</line>
+          <line>1173</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>154</line>
+          <line>156</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>150</line>
+          <line>153</line>
           <option name="timeStamp" value="35" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -316,7 +325,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/forms.py</url>
-          <line>793</line>
+          <line>796</line>
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -326,28 +335,33 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2057</line>
+          <line>2114</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/forms.py</url>
-          <line>1197</line>
+          <line>1200</line>
           <option name="timeStamp" value="42" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>217</line>
+          <line>220</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>766</line>
+          <line>786</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1728</line>
+          <line>1780</line>
           <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/smit/views.py</url>
+          <line>1418</line>
+          <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="django-line">
           <url>file://$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html</url>

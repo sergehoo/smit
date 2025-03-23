@@ -1206,32 +1206,9 @@
                                                 Patient: {{ hospitalisationdetail.patient }}</h5>
                                         </div>
                                         <div class="modal-body">
-                                            <form method="POST"
-                                                  action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
+                                            <form method="POST" action="{% url 'update_hospitalisation_discharge' hospitalisation_id=hospitalisationdetail.id %}">
                                                 {% csrf_token %}
-                                                <div class="form-group">
-                                                    <label for="discharge_date">Date et heure de sortie</label>
-                                                    <input type="datetime-local" class="form-control"
-                                                           id="discharge_date"
-                                                           name="discharge_date" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label for="status">Mode de sortie</label>
-                                                    <select class="form-control" id="status" name="status" required>
-                                                        <option value="Sortie">Sortie</option>
-                                                        <option value="Gueris-EXEA">Gueris-EXEA</option>
-                                                        <option value="Transféré-TRANSF">Transféré-TRANSF</option>
-                                                        <option value="SCAM">SCAM</option>
-                                                        <option value="EVADE">EVADE</option>
-                                                        <option value="DCD">DCD</option>
-                                                        <!-- Add other status options if needed -->
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="discharge_reason">Commentaires</label>
-                                                    <textarea class="form-control" id="discharge_reason" name="discharge_reason" rows="4" required></textarea>
-                                                </div>
+                                        {{ Hospi_discharge_form  }}
                                                 <button type="submit" class="btn btn-primary">Sortir</button>
 
                                             </form>
@@ -1578,7 +1555,7 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form method="post" action="{% url 'add_examen_apareil' hospitalisation_id=hospitalisationdetail.id %}">
+                                                            <form method="post"  id="examenAppareil" action="{% url 'add_examen_apareil' hospitalisation_id=hospitalisationdetail.id %}">
                                                                 {% csrf_token %}
 
                                                                 <div x-data="appareilForm(JSON.parse('{{ types_appareils_json|safe|escapejs }}'))">
@@ -1688,7 +1665,7 @@
                                                                     };
                                                                 }
 
-                                                                document.querySelector("form").addEventListener("submit", function (event) {
+                                                                document.querySelector("#examenAppareil")?.addEventListener("submit", function (event) {
                                                                     let isValid = true;
 
                                                                     // Vérification des inputs, selects et textareas

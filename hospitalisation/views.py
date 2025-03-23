@@ -34,13 +34,16 @@ from simple_history.utils import update_change_reason
 from xhtml2pdf import pisa
 
 from core.models import Patient, Maladie, Employee
+from core.utils.notifications import get_employees_to_notify
+from core.utils.sms import send_sms, optimize_sms_text
 from pharmacy.models import Medicament, FORME_MEDICAMENT_CHOICES
 from smit.forms import HospitalizationSendForm, ConstanteForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
     HospitalizationIndicatorsForm, HospitalizationreservedForm, EffetIndesirableForm, HistoriqueMaladieForm, \
     DiagnosticForm, AvisMedicalForm, ObservationForm, CommentaireInfirmierForm, PatientSearchForm, \
     HospitalizationUrgenceForm, AntecedentsHospiForm, ModeDeVieForm, AppareilForm, \
-    ResumeSyndromiqueForm, ProblemePoseForm, BilanParacliniqueMultiForm, ImagerieMedicaleForm
+    ResumeSyndromiqueForm, ProblemePoseForm, BilanParacliniqueMultiForm, ImagerieMedicaleForm, \
+    HospitalizationDischargeForm
 from smit.models import Hospitalization, UniteHospitalisation, Consultation, Constante, Prescription, SigneFonctionnel, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, LitHospitalisation, \
     ComplicationsIndicators, PrescriptionExecution, Observation, HistoriqueMaladie, Diagnostic, AvisMedical, \
@@ -722,6 +725,23 @@ class HospitalizationUrgenceCreateView(CreateView):
     template_name = "pages/hospitalization/hospitalization_urgence_create.html"
     success_url = reverse_lazy('hospitalisation')  # Redirige après la création
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        # Envoi du SMS après création
+        hospitalization = self.object
+        patient = hospitalization.patient
+        chambre = hospitalization.bed.box.chambre if hospitalization.bed else "N/A"
+        lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
+        formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
+
+        message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms}a été hospitalisé en urgence. Lit: {lit}, Chambre: {chambre}, {formatted_date}."
+        safe_message = optimize_sms_text(message)
+        send_sms(get_employees_to_notify(), safe_message)
+
+        messages.success(self.request, f"Hospitalisation d'urgence créée pour {patient.nom}. SMS envoyé.")
+        return response
+
 
 # Constante PDF Export View
 @login_required
@@ -801,25 +821,57 @@ def export_indicateur_subjectif_pdf(request, hospitalisation_id):
     return pdf
 
 
+
 @login_required
 def update_hospitalisation_discharge(request, hospitalisation_id):
     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
 
     if request.method == "POST":
-        discharge_date = request.POST.get('discharge_date')
-        discharge_reason = request.POST.get('discharge_reason')
-        status = request.POST.get('status')
+        form = HospitalizationDischargeForm(request.POST, instance=hospitalization)
+        if form.is_valid():
+            hospitalization = form.save()  # form.save() met déjà à jour l'objet
 
-        # Update hospitalisation details
-        hospitalization.discharge_date = discharge_date
-        hospitalization.discharge_reason = discharge_reason
-        hospitalization.status = status
-        hospitalization.save()
+            # Envoi du SMS
+            message = (
+                f"🏠 Sortie : {hospitalization.patient.nom} "
+                f"le {hospitalization.discharge_date.strftime('%d/%m/%Y à %Hh%M')}, "
+                f"motif : {hospitalization.status},{hospitalization.discharge_reason}."
 
-        messages.success(request, f"Hospitalisation details for {hospitalization.patient.nom} updated successfully!")
+            )
+            safe_message = optimize_sms_text(message)
+            send_sms(get_employees_to_notify(), safe_message)
+
+            messages.success(request, f"{hospitalization.patient.nom} a bien été sorti et notifié.")
+        else:
+            messages.error(request, "Veuillez vérifier les champs du formulaire.")
+
         return redirect('hospitalisationdetails', pk=hospitalization.id)
 
     return redirect('hospitalisationdetails', pk=hospitalization.id)
+# def update_hospitalisation_discharge(request, hospitalisation_id):
+#     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
+#
+#     if request.method == "POST":
+#         # discharge_date = request.POST.get('discharge_date')
+#         discharge_date_str = request.POST.get('discharge_date')
+#         discharge_date = datetime.strptime(discharge_date_str, '%Y-%m-%dT%H:%M')
+#         discharge_reason = request.POST.get('discharge_reason')
+#         status = request.POST.get('status')
+#
+#         # Update hospitalisation details
+#         hospitalization.discharge_date = discharge_date
+#         hospitalization.discharge_reason = discharge_reason
+#         hospitalization.status = status
+#         hospitalization.save()
+#
+#         message = f"🏠 Sortie : {hospitalization.patient.nom} le {hospitalization.discharge_date.strftime('%d/%m/%Y')}, pour motif : {hospitalization.discharge_reason} ."
+#         safe_message = optimize_sms_text(message)
+#         send_sms(get_employees_to_notify(), safe_message)
+#
+#         messages.success(request, f"Hospitalisation details for {hospitalization.patient.nom} updated successfully!")
+#         return redirect('hospitalisationdetails', pk=hospitalization.id)
+#
+#     return redirect('hospitalisationdetails', pk=hospitalization.id)
 
 
 # def nurse_dashboard(request):
@@ -1874,6 +1926,10 @@ def transferer_patient(request, hospitalisation_id):
         hospitalisation.bed = new_lit
         hospitalisation.updated_at = timezone.now()
         hospitalisation.save()
+        formatted_date = hospitalisation.updated_at.strftime("%d/%m/%Y %H:%M")
+        message = f"🔁 le patient : {patient.nom} → a été tranféré à l'unité ({new_lit.box.chambre.unite.nom}),lit : {new_lit.nom} , le {formatted_date}"
+        safe_message = optimize_sms_text(message)
+        send_sms(get_employees_to_notify(), safe_message)
 
         messages.success(request, f"Le patient {patient.nom} a été transféré dans le lit {new_lit.nom}.")
         return redirect("hospitalisationdetails", pk=hospitalisation_id)
@@ -1984,6 +2040,7 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
 
         # Add forms to context
         context['constante_form'] = ConstanteForm()
+        context['Hospi_discharge_form'] = HospitalizationDischargeForm()
         # Charger tous les types d'antécédents sous forme de liste de dictionnaires
         types_antecedents = list(TypeAntecedent.objects.values("id", "nom"))
         context['types_antecedents_json'] = json.dumps(types_antecedents, cls=DjangoJSONEncoder)

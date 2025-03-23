@@ -297,16 +297,19 @@ class PatientUpdateForm(forms.ModelForm):
     genre = forms.ChoiceField(required=True, choices=Sexe_choices, widget=forms.Select(attrs={'class': 'form-control'}))
 
     nationalite = forms.ChoiceField(required=True, choices=nationalite_choices,
-                                    widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-                                   'data-search': 'on', }))
+                                    widget=forms.Select(attrs={
+                                        'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                        'data-search': 'on', }))
 
     ethnie = forms.ChoiceField(required=False, choices=ethnic_groups,
-                               widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                               widget=forms.Select(attrs={
+                                   'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                                    'data-search': 'on', }))
 
     profession = forms.ChoiceField(required=False, choices=professions_choices,
-                                   widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-                                   'data-search': 'on', }))
+                                   widget=forms.Select(attrs={
+                                       'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
+                                       'data-search': 'on', }))
 
     nbr_enfants = forms.IntegerField(required=False,
                                      widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}))
@@ -1560,6 +1563,27 @@ class UrgencePatientForm(forms.ModelForm):
             raise ValidationError("La date de naissance doit être inférieure à 120 ans.")
 
         return date_naissance
+
+
+class HospitalizationDischargeForm(forms.ModelForm):
+    discharge_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(
+            attrs={
+                'type': 'datetime-local',
+                'class': 'form-control'
+            }
+        ),
+        required=True,
+        label="Date et heure de sortie"
+    )
+
+    class Meta:
+        model = Hospitalization
+        fields = ['discharge_date', 'status', 'discharge_reason']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'discharge_reason': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+        }
 
 
 class HospitalizationUrgenceForm(forms.ModelForm):

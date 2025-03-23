@@ -863,6 +863,7 @@ class Employee(models.Model):
     is_deleted = models.SmallIntegerField(null=True, blank=True, default=0)
     slug = models.SlugField(null=True, blank=True, help_text="slug field", verbose_name="slug ", unique=True,
                             editable=False)
+    notify_by_sms = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=now, )
     history = HistoricalRecords()
 
