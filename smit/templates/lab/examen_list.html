@@ -22,9 +22,20 @@
                 <div class="nk-block">
     <div class="card card-bordered card-stretch">
         <div class="card-inner-group">
+        <form method="get" action="{% url 'examen_list' %}" class="mb-4">
+    <div class="row p-2">
+        <div class="col-md-3">{{ filter.form.type_examen.label_tag }} {{ filter.form.type_examen }}</div>
+        <div class="col-md-3">{{ filter.form.doctor.label_tag }} {{ filter.form.doctor }}</div>
+        <div class="col-md-3">{{ filter.form.patient.label_tag }} {{ filter.form.patient }}</div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            <a href="{% url 'examen_list' %}" class="btn btn-danger ml-3 w-100">Reset</a>
+        </div>
+    </div>
+</form>
             <div class="accordion" id="examensAccordion">
                 {% for type_bilan, examens in examens_by_type.items %}
-                    <div class="accordion-item">
+                    <div class="accordion-item pl-3 pr-3">
                         <h2 class="accordion-header" id="heading{{ forloop.counter }}">
                             <button class="accordion-button collapsed btn btn-outline-secondary uniform-btn w-100"
                                     type="button" data-bs-toggle="collapse"
@@ -123,68 +134,72 @@
             </div>
         </div>
     </div>
-<script>
-   document.addEventListener("DOMContentLoaded", function () {
-    console.log("✅ DOM entièrement chargé !");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("✅ DOM entièrement chargé !");
 
-    document.querySelectorAll(".save-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const examenId = this.getAttribute("data-id");
+            document.querySelectorAll(".save-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const examenId = this.getAttribute("data-id");
 
-            if (!examenId) {
-                alert("⚠️ ID d'examen manquant !");
-                return;
-            }
+                    if (!examenId) {
+                        alert("⚠️ ID d'examen manquant !");
+                        return;
+                    }
 
-            // ✅ Construire dynamiquement l'URL
-            const updateUrl = "{% url 'update_examen_result' 0 %}".replace("0", examenId);
+                    // ✅ Construire dynamiquement l'URL
+                    const updateUrl = "{% url 'update_examen_result' 0 %}".replace("0", examenId);
 
-            // ✅ Sélection des champs liés à l'examen
-            const resultInput = document.querySelector(`.result-input[data-id="${examenId}"]`);
-            const resultDateInput = document.querySelector(`.result-date[data-id="${examenId}"]`);
-            const commentInput = document.querySelector(`.result-comment[data-id="${examenId}"]`);
-            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+                    // ✅ Sélection des champs liés à l'examen
+                    const resultInput = document.querySelector(`.result-input[data-id="${examenId}"]`);
+                    const resultDateInput = document.querySelector(`.result-date[data-id="${examenId}"]`);
+                    const commentInput = document.querySelector(`.result-comment[data-id="${examenId}"]`);
+                    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-            // Vérification des champs
-            if (!resultInput || !resultDateInput || !commentInput) {
-                alert("⚠️ Un ou plusieurs champs sont introuvables.");
-                return;
-            }
+                    // Vérification des champs
+                    if (!resultInput || !resultDateInput || !commentInput) {
+                        alert("⚠️ Un ou plusieurs champs sont introuvables.");
+                        return;
+                    }
 
-            // ✅ Création des données à envoyer
-            const formData = new FormData();
-            formData.append("csrfmiddlewaretoken", csrfToken);
-            formData.append("result", resultInput.value);
-            formData.append("result_date", resultDateInput.value);
-            formData.append("comment", commentInput.value);
+                    // ✅ Création des données à envoyer
+                    const formData = new FormData();
+                    formData.append("csrfmiddlewaretoken", csrfToken);
+                    formData.append("result", resultInput.value);
+                    formData.append("result_date", resultDateInput.value);
+                    formData.append("comment", commentInput.value);
 
-            // ✅ Envoi de la requête
-            fetch(updateUrl, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    alert("✅ Résultat enregistré avec succès !");
-                    location.reload();
-                } else {
-                    alert("❌ Erreur : " + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                console.error("❌ Erreur de requête :", error);
-                alert("Erreur lors de l'envoi des données.");
+                    // ✅ Envoi de la requête
+                    fetch(updateUrl, {
+                        method: "POST",
+                        body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                alert("✅ Résultat enregistré avec succès !");
+                                location.reload();
+                            } else {
+                                alert("❌ Erreur : " + JSON.stringify(data.errors));
+                            }
+                        })
+                        .catch(error => {
+                            console.error("❌ Erreur de requête :", error);
+                            alert("Erreur lors de l'envoi des données.");
+                        });
+                });
             });
         });
-    });
-});
-</script>
+    </script>
 
-
+    <script>
+        $(document).ready(function () {
+            $('.patientlist').select2();
+        });
+    </script>
 {% endblock %}

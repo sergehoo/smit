@@ -35,7 +35,7 @@ from xhtml2pdf import pisa
 
 from core.models import Patient, Maladie, Employee
 from core.utils.notifications import get_employees_to_notify
-from core.utils.sms import send_sms, optimize_sms_text
+from core.utils.sms import send_sms, optimize_sms_text, send_whatsapp
 from pharmacy.models import Medicament, FORME_MEDICAMENT_CHOICES
 from smit.forms import HospitalizationSendForm, ConstanteForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
@@ -168,10 +168,10 @@ class HospitalisationListView(LoginRequiredMixin, ListView):
         # Définition des tranches d'âge
         age_ranges = {
             "0-18": (today - datetime.timedelta(days=18 * 365), today),
-            "18-30": (today - datetime.timedelta(days=30 * 365), today - datetime.timedelta(days=18 * 365)),
-            "30-45": (today - datetime.timedelta(days=45 * 365), today - datetime.timedelta(days=30 * 365)),
-            "45-60": (today - datetime.timedelta(days=60 * 365), today - datetime.timedelta(days=45 * 365)),
-            "60-plus": (None, today - datetime.timedelta(days=60 * 365)),
+            "19-30": (today - datetime.timedelta(days=30 * 365), today - datetime.timedelta(days=18 * 365)),
+            "31-45": (today - datetime.timedelta(days=45 * 365), today - datetime.timedelta(days=30 * 365)),
+            "46-60": (today - datetime.timedelta(days=60 * 365), today - datetime.timedelta(days=45 * 365)),
+            "61-plus": (None, today - datetime.timedelta(days=60 * 365)),
         }
 
         # Compter les patients hospitalisés dans chaque tranche d'âge
@@ -226,10 +226,10 @@ def export_hospitalized_patients(request, age_group):
 
     age_ranges = {
         "0-18": (0, 18),
-        "18-30": (18, 30),
-        "30-45": (30, 45),
-        "45-60": (45, 60),
-        "60-plus": (60, 150),  # Supposons un âge maximum de 150 ans
+        "19-30": (19, 30),
+        "31-45": (31, 45),
+        "46-60": (46, 60),
+        "61-plus": (61, 150),  # Supposons un âge maximum de 150 ans
     }
 
     if age_group not in age_ranges:
@@ -332,10 +332,10 @@ class HospitalisedPatientListView(LoginRequiredMixin, ListView):
         # Dictionnaire pour stocker le nombre de patients par tranche d'âge
         age_counts = {
             "0-18": 0,
-            "18-30": 0,
-            "30-45": 0,
-            "45-60": 0,
-            "60+": 0
+            "19-30": 0,
+            "31-45": 0,
+            "46-60": 0,
+            "61+": 0
         }
 
         # Calculer l'âge des patients hospitalisés
@@ -344,13 +344,13 @@ class HospitalisedPatientListView(LoginRequiredMixin, ListView):
             if age <= 18:
                 age_counts["0-18"] += 1
             elif 18 < age <= 30:
-                age_counts["18-30"] += 1
+                age_counts["19-30"] += 1
             elif 30 < age <= 45:
-                age_counts["30-45"] += 1
+                age_counts["31-45"] += 1
             elif 45 < age <= 60:
-                age_counts["45-60"] += 1
+                age_counts["46-60"] += 1
             else:
-                age_counts["60+"] += 1
+                age_counts["61+"] += 1
 
         context['age_counts'] = age_counts  # Ajout des données au contexte
 
@@ -735,7 +735,7 @@ class HospitalizationUrgenceCreateView(CreateView):
         lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
         formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
 
-        message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms}a été hospitalisé en urgence. Lit: {lit}, Chambre: {chambre}, {formatted_date}."
+        message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été hospitalisé en urgence: {lit}, {chambre},le {formatted_date}."
         safe_message = optimize_sms_text(message)
         send_sms(get_employees_to_notify(), safe_message)
 
@@ -1927,9 +1927,10 @@ def transferer_patient(request, hospitalisation_id):
         hospitalisation.updated_at = timezone.now()
         hospitalisation.save()
         formatted_date = hospitalisation.updated_at.strftime("%d/%m/%Y %H:%M")
-        message = f"🔁 le patient : {patient.nom} → a été tranféré à l'unité ({new_lit.box.chambre.unite.nom}),lit : {new_lit.nom} , le {formatted_date}"
+        message = f"🔁 le patient : {patient.nom} → a été tranféré à l'unité ({new_lit.box.chambre.unite.nom}), {new_lit.nom} , le {formatted_date}"
         safe_message = optimize_sms_text(message)
         send_sms(get_employees_to_notify(), safe_message)
+
 
         messages.success(request, f"Le patient {patient.nom} a été transféré dans le lit {new_lit.nom}.")
         return redirect("hospitalisationdetails", pk=hospitalisation_id)

@@ -16,7 +16,7 @@ from django_tables2 import SingleTableMixin, RequestConfig, LazyPaginator, Singl
 
 from core.ressources import BilanParacliniqueResource
 from core.tables import BilanParacliniqueTable
-from smit.filters import ExamenDoneFilter
+from smit.filters import ExamenDoneFilter, ExamenFilter
 from smit.forms import EchantillonForm, BilanParacliniqueResultForm
 from smit.models import Examen, Analyse, Consultation, Echantillon, BilanParaclinique
 
@@ -125,30 +125,29 @@ def update_examen_result(request, examen_id):
 
 class ExamenListView(ListView):
     model = BilanParaclinique
-    template_name = 'lab/examen_list.html'  # Nom du template à créer
+    template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
+
+    def get_queryset(self):
+        self.filterset = ExamenFilter(self.request.GET, queryset=BilanParaclinique.objects.select_related(
+            'examen__type_examen', 'patient', 'doctor'
+        ).filter(result__isnull=True).order_by("created_at"))
+        return self.filterset.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # 📌 Récupérer les examens et les organiser par type de bilan
         examens_par_type = defaultdict(list)
-        examens = BilanParaclinique.objects.select_related('examen__type_examen', 'patient', 'doctor').filter(
-            result__isnull=True  # ✅ Seuls les examens sans résultats
-        ).order_by("created_at")
-
-        for examen in examens:
-
+        for examen in self.object_list:
             type_bilan = examen.examen.type_examen.nom if examen.examen.type_examen else "Autres"
             examens_par_type[type_bilan].append({
                 "examen": examen,
-                "form": BilanParacliniqueResultForm(instance=examen)  # ✅ Associer un formulaire
+                "form": BilanParacliniqueResultForm(instance=examen)
             })
 
-        # 📌 Passer les données à la vue
         context["examens_by_type"] = dict(examens_par_type)
         context["examens_by_type_json"] = json.dumps({k: len(v) for k, v in examens_par_type.items()})
-
+        context["filter"] = self.filterset  # ✅ Ajout du filtre au contexte
         return context
 
 
@@ -221,30 +220,21 @@ def examens_by_type_paginated(request, type_slug):
     return HttpResponse(status=400)
 
 
-class ExamenDoneListView(SingleTableView, FilterView):
+class ExamenDoneListView(FilterView, ListView):
     model = BilanParaclinique
-    table_class = BilanParacliniqueTable
     template_name = 'lab/examen_done_list.html'
+    context_object_name = 'examens'
     paginate_by = 10
-    paginator_class = LazyPaginator
     filterset_class = ExamenDoneFilter
-    SingleTableView.table_pagination = False
 
     def get_queryset(self):
         return BilanParaclinique.objects.filter(
             result__isnull=False
         ).select_related('patient', 'doctor', 'examen', 'examen__type_examen')
 
-    def get_table(self, **kwargs):
-        table = super().get_table(**kwargs)
-        RequestConfig(self.request, paginate={"per_page": self.paginate_by}).configure(table)
-        # 🛠️ Force le path correct
-        table.paginate_url = self.request.resolver_match and self.request.resolver_match.view_name
-        return table
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Compter les examens groupés par type
         bilan_counts = (
             BilanParaclinique.objects
             .filter(result__isnull=False)
@@ -252,7 +242,6 @@ class ExamenDoneListView(SingleTableView, FilterView):
             .annotate(count=Count('id'))
             .order_by('examen__type_examen__nom')
         )
-
         context["type_bilans_counts"] = bilan_counts
         return context
 

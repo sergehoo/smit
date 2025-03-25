@@ -719,8 +719,8 @@ class Constante(models.Model):
 
 
 class Prescription(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE,db_index=True)
+    doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions',db_index=True)
     hospitalisation = models.ForeignKey('Hospitalization', on_delete=models.CASCADE, related_name="hospiprescriptions",
                                         null=True, blank=True)
     medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
@@ -1526,8 +1526,8 @@ class TypeBilanParaclinique(models.Model):
 
 class ExamenStandard(models.Model):
     type_examen = models.ForeignKey(TypeBilanParaclinique, on_delete=models.CASCADE, null=True, blank=True,
-                                    verbose_name="Type d'examen")
-    nom = models.CharField(max_length=250, unique=True, verbose_name="Nom de l'examen")
+                                    verbose_name="Type d'examen", db_index=True)
+    nom = models.CharField(max_length=250, unique=True, verbose_name="Nom de l'examen",db_index=True)
 
     def __str__(self):
         return self.nom
@@ -1541,11 +1541,11 @@ class BilanParaclinique(models.Model):
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="bilans",
-                                verbose_name="bilanparacliniquepatient", null=True, blank=True, )
+                                verbose_name="bilanparacliniquepatient", null=True, blank=True,db_index=True )
     hospitalisation = models.ForeignKey(Hospitalization, on_delete=models.CASCADE, related_name="bilans",
-                                        verbose_name="hospitalisation_bilan_paraclinique", null=True, blank=True, )
+                                        verbose_name="hospitalisation_bilan_paraclinique", null=True, blank=True,db_index=True )
     examen = models.ForeignKey(ExamenStandard, on_delete=models.CASCADE, null=True, blank=True,
-                               verbose_name="Examen demandé")
+                               verbose_name="Examen demandé",db_index=True)
 
     description = models.TextField(null=True, blank=True, verbose_name="Description de l'examen")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
@@ -1555,11 +1555,11 @@ class BilanParaclinique(models.Model):
     unit = models.CharField(max_length=50, null=True, blank=True, verbose_name="Unité de mesure")
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
                                related_name="bilans_medecin",
-                               verbose_name="Médecin prescripteur")
+                               verbose_name="Médecin prescripteur",db_index=True)
     comment = models.TextField(null=True, blank=True, verbose_name="Commentaire du médecin")
     status = models.CharField(max_length=20, choices=STATUT_CHOICES, default='pending',
                               verbose_name="Statut de l'examen")
-    report_file = models.FileField(upload_to="bilans/", null=True, blank=True, verbose_name="Fichier du rapport")
+    report_file = models.FileField(upload_to="bilans/", null=True, blank=True, verbose_name="Fichier du rapport",db_index=True)
 
     def __str__(self):
         return f"{self.patient.nom} - {self.examen.nom if self.examen else 'Examen non spécifié'} -- {self.examen.type_examen.nom} ({self.get_status_display()})"
@@ -2256,14 +2256,14 @@ class BoxHospitalisation(models.Model):
 
 
 class LitHospitalisation(models.Model):
-    box = models.ForeignKey(BoxHospitalisation, on_delete=models.CASCADE, related_name='lits')
-    nom = models.CharField(max_length=100, default='lit')
-    occuper = models.BooleanField(default=False)
-    occupant = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, blank=True)
-    reserved = models.BooleanField(default=False)
-    reserved_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
-    reserved_until = models.DateTimeField(null=True, blank=True)
-    is_out_of_service = models.BooleanField(default=False)
+    box = models.ForeignKey(BoxHospitalisation, on_delete=models.CASCADE, related_name='lits',db_index=True)
+    nom = models.CharField(max_length=100, default='lit',db_index=True)
+    occuper = models.BooleanField(default=False,db_index=True)
+    occupant = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
+    reserved = models.BooleanField(default=False,db_index=True)
+    reserved_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
+    reserved_until = models.DateTimeField(null=True, blank=True,db_index=True)
+    is_out_of_service = models.BooleanField(default=False,db_index=True)
     is_cleaning = models.BooleanField(default=False)
     status_changed_at = models.DateTimeField(null=True, blank=True)
 

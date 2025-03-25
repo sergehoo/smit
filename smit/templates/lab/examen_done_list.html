@@ -1,8 +1,6 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 {% load humanize %}
-{% load django_tables2 %}
-{% load custom_filter %}
 {% block content %}
 
                 <div class="nk-content nk-content-fluid">
@@ -35,7 +33,7 @@
 <div class="row mb-4">
     {% for bilan in type_bilans_counts %}
         <div class="col-md-3">
-            <div class="card text-white bg-info shadow-sm mb-2">
+            <div class="card text-white bg-indigo shadow-sm mb-2">
                 <div class="card-body py-2 px-3">
                     <strong>{{ bilan.examen__type_examen__nom|default:"Autres" }}</strong>
                     <span class="badge bg-light text-dark float-end">{{ bilan.count }}</span>
@@ -68,8 +66,87 @@
     </a>
 </div>
         <div class="card-inner-group">
-{% render_table table %}
 
+<!-- Tableau dynamique -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Code</th>
+                    <th>Patient</th>
+                    <th>Examen</th>
+                    <th>Type Examen</th>
+                    <th>Médecin</th>
+                    <th>Date</th>
+                    <th>Résultat</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in examens %}
+                    <tr>
+                        <td>{{ exam.id }}</td>
+                        <td>{{ exam.patient.nom|upper }} {{ exam.patient.prenoms|upper }}</td>
+                        <td>{{ exam.examen }}</td>
+                        <td>{{ exam.examen.type_examen }}</td>
+                        <td>{{ exam.doctor }}</td>
+                        <td>{{ exam.created_at|date:"d M Y" }}</td>
+                        <td><span class="badge bg-info">{{ exam.get_status_display }}</span></td>
+                        <td>
+                            <a href="#" class="btn btn-xs btn-outline-info">
+                                <i class="ni ni-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Aucun examen trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination manuelle -->
+   <div class="card-inner">
+    <ul class="pagination justify-content-center justify-content-md-start">
+        {% with request.path as current_path %}
+
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    Prev
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Prev</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ current_path }}?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+
+        {% endwith %}
+    </ul>
+</div>
 
         </div> <!-- .card-inner-group -->
     </div> <!-- .card -->

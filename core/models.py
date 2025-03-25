@@ -847,8 +847,8 @@ class ServiceSubActivity(models.Model):
 
 class Employee(models.Model):
     from pharmacy.models import Pharmacy
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee", )
-    qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee",db_index=True )
+    qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100,db_index=True)
     gender = models.CharField(choices=Sexe_choices, max_length=100, null=True, blank=True, )
     situation_matrimoniale = models.CharField(choices=situation_matrimoniales_choices, max_length=100, null=True,
                                               blank=True, )
@@ -857,7 +857,7 @@ class Employee(models.Model):
     email = models.CharField(null=True, blank=True, default='email@sah.com', max_length=70)
     birthdate = models.DateField(null=True, blank=True)
     departement = models.ForeignKey('Service', on_delete=models.CASCADE, verbose_name="service", blank=True, null=True)
-    pharmacie = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name="Pharmacie", blank=True, null=True)
+    pharmacie = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name="Pharmacie", blank=True, null=True,db_index=True)
     photo = models.ImageField(null=True, blank=True, default='urap/users/5.png', upload_to='urap/users')
     sortie = models.SmallIntegerField(null=True, blank=True, default=0)
     is_deleted = models.SmallIntegerField(null=True, blank=True, default=0)
@@ -880,25 +880,25 @@ class Employee(models.Model):
 
 
 class PolesRegionaux(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100,db_index=True)
 
     def __str__(self):
         return self.name if self.name else "Unnamed Pole"
 
 
 class HealthRegion(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
-    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True,db_index=True)
+    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
 
     def __str__(self):
         return self.name if self.name else "Unnamed Region"
 
 
 class DistrictSanitaire(models.Model):
-    nom = models.CharField(max_length=100, null=True, blank=True, )
-    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
-    geom = models.PointField(null=True, blank=True, )
-    geojson = models.JSONField(null=True, blank=True, )
+    nom = models.CharField(max_length=100, null=True, blank=True,db_index=True )
+    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True,db_index=True )
+    geom = models.PointField(null=True, blank=True,db_index=True )
+    geojson = models.JSONField(null=True, blank=True,db_index=True )
     previous_rank = models.IntegerField(null=True, blank=True)
 
     def clean(self):
@@ -917,8 +917,8 @@ class DistrictSanitaire(models.Model):
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True, unique=True)
-    type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True, unique=True,db_index=True)
+    type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True,db_index=True)
     population = models.CharField(max_length=100, null=True, blank=True)
     source = models.CharField(max_length=255, null=True, blank=True)
     district = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, null=True, blank=True, )
@@ -928,17 +928,17 @@ class Location(models.Model):
 
 
 class Patient(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    code_patient = models.CharField(max_length=100, unique=True)
-    code_vih = models.CharField(max_length=100, blank=True, unique=True)
-    nom = models.CharField(max_length=225)
-    prenoms = models.CharField(max_length=225)
-    contact = models.CharField(max_length=225)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
+    code_patient = models.CharField(max_length=100, unique=True,db_index=True)
+    code_vih = models.CharField(max_length=100, blank=True, unique=True,db_index=True)
+    nom = models.CharField(max_length=225,db_index=True)
+    prenoms = models.CharField(max_length=225,db_index=True)
+    contact = models.CharField(max_length=225,db_index=True)
     adresse_mail = models.CharField(max_length=50, blank=True, unique=True)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
     lieu_naissance = models.CharField(max_length=200, )
-    date_naissance = models.DateField(null=True, blank=True)
-    genre = models.CharField(max_length=10, choices=Sexe_choices)
+    date_naissance = models.DateField(null=True, blank=True,db_index=True)
+    genre = models.CharField(max_length=10, choices=Sexe_choices,db_index=True)
     nationalite = models.CharField(max_length=200)
     ethnie = models.CharField(null=True, blank=True, max_length=100)
     profession = models.CharField(max_length=100, null=True, blank=True)
@@ -950,12 +950,12 @@ class Patient(models.Model):
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True)
     qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
-    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
+    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     urgence = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    details = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True,db_index=True)
+    updated_at = models.DateTimeField(auto_now=True,db_index=True)
+    details = models.JSONField(null=True, blank=True,db_index=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -1251,9 +1251,9 @@ class Maladie(models.Model):
         ('modere', 'Modéré'),
         ('grave', 'Grave'),
     ]
-    code_cim = models.CharField(max_length=50, unique=True, blank=True, null=True)  # Code CIM-10
-    urlcim = models.CharField(max_length=100, unique=True, blank=True, null=True)  # Code CIM-10
-    nom = models.CharField(max_length=255)  # Nom de la maladie
+    code_cim = models.CharField(max_length=50, unique=True, blank=True, null=True,db_index=True)  # Code CIM-10
+    urlcim = models.CharField(max_length=100, unique=True, blank=True, null=True,db_index=True)  # Code CIM-10
+    nom = models.CharField(max_length=255,db_index=True)  # Nom de la maladie
     categorie = models.CharField(
         max_length=50,
         choices=CATEGORY_CHOICES,
@@ -1296,18 +1296,18 @@ class Maladie(models.Model):
 
 
 class VisitCounter(models.Model):
-    ip_address = models.GenericIPAddressField()
+    ip_address = models.GenericIPAddressField(db_index=True)
     user_agent = models.TextField(blank=True, null=True)
-    timestamp = models.DateTimeField(default=now)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(default=now, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
 
     # Localisation
-    country = models.CharField(max_length=100, blank=True, null=True)
-    city = models.CharField(max_length=100, blank=True, null=True)
-    region = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    city = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    region = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     postal_code = models.CharField(max_length=20, blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True, db_index=True)
+    longitude = models.FloatField(blank=True, null=True, db_index=True)
     isp = models.CharField(max_length=255, blank=True, null=True)
 
     # Type d'appareil

@@ -2,7 +2,19 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+    <style>
+    @media screen and (max-width: 768px) {
+    .section-unites {
+        margin-bottom: 0.5rem;
+        {#padding-bottom: 1rem;#}
+        border-bottom: 1px solid #e5e5e5;
+    }
 
+    .section-tableau {
+        margin-top: 1rem;
+    }
+}
+    </style>
                 <div class="nk-content nk-content-fluid">
 
                 <!--- Tableau de validation des hospi--->
@@ -313,16 +325,18 @@ document.addEventListener('DOMContentLoaded', function() {
 {#                                        <span class="btn btn-outline-light ml-2">{{ unite.nom }}<span class="badge badge-lighter ml-1">{{ unite.nb_patients_hospitalises }}</span></span>#}
 {#                                    {% endfor %}#}
 {#                                    </ul>#}
-<div class="d-flex flex-wrap gap-3 mb-5 mt-1 ">
+{#                                    <div class="row">#}
+<div class="d-flex flex-wrap m-3 ">
     {% for unite in unites_hospitalisation %}
-        <span class="btn btn-outline-light text-nowrap ml-2 mb-2">{{ unite.nom }}
+        <span class="btn btn-outline-light text-nowrap m-1 mb-2">{{ unite.nom }}
             <span class="badge badge-light ml-2">{{ unite.nb_patients_hospitalises }}</span>
         </span>
     {% endfor %}
 </div>
+{#                                    </div>#}
 
 
-                                        <div class="card-inner p-0">
+                                        <div class="card-inner p-lg-2">
                                             <div class="nk-tb-list nk-tb-ulist is-compact">
                                                 <div class="nk-tb-item nk-tb-head">
 

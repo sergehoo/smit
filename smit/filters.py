@@ -1,9 +1,10 @@
 import django_filters
+from django import forms
 from django.forms import Select, TextInput
 
 from core.models import situation_matrimoniales_choices, Sexe_choices, Goupe_sanguin_choices, Patient, pays_choices, \
-    professions_choices
-from smit.models import BilanParaclinique
+    professions_choices, Employee
+from smit.models import BilanParaclinique, TypeBilanParaclinique
 
 
 class PatientFilter(django_filters.FilterSet):
@@ -68,10 +69,66 @@ class PatientFilter(django_filters.FilterSet):
                   'genre', 'groupe_sanguin']
 
 
+class ExamenFilter(django_filters.FilterSet):
+    type_examen = django_filters.ModelChoiceFilter(
+        field_name='examen__type_examen',
+        queryset=TypeBilanParaclinique.objects.all(),
+        label="Type de bilan",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
+
+    doctor = django_filters.ModelChoiceFilter(
+        field_name='doctor',
+        queryset=Employee.objects.all(),
+        label="Médecin",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
+
+    patient = django_filters.ModelChoiceFilter(
+        field_name='patient',
+        queryset=Patient.objects.all(),
+        label="Patient",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
+
+    class Meta:
+        model = BilanParaclinique
+        fields = ['type_examen', 'doctor', 'patient']
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     for field in self.form.fields.values():
+    #         field.widget.attrs.update({'class': 'form-control'})
+
+
 class ExamenDoneFilter(django_filters.FilterSet):
-    type_examen = django_filters.CharFilter(field_name='examen__type_examen__nom', lookup_expr='icontains', label="Type de bilan")
-    doctor = django_filters.CharFilter(field_name='doctor__username', lookup_expr='icontains', label="Médecin")
-    patient = django_filters.CharFilter(method='filter_patient', label="Patient")
+    # type_examen = django_filters.CharFilter(field_name='examen__type_examen__nom', lookup_expr='icontains', label="Type de bilan")
+    type_examen = django_filters.ModelChoiceFilter(
+        field_name='examen__type_examen',
+        queryset=TypeBilanParaclinique.objects.all(),
+        label="Type de bilan",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
+
+    doctor = django_filters.ModelChoiceFilter(
+        field_name='doctor',
+        queryset=Employee.objects.all(),
+        label="Médecin",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
+
+    patient = django_filters.ModelChoiceFilter(
+        field_name='patient',
+        queryset=Patient.objects.all(),
+        label="Patient",
+        empty_label="Tous",
+        widget=forms.Select(attrs={'class': 'form-select form-control Select2', 'data-search': 'on'})
+    )
 
     class Meta:
         model = BilanParaclinique
@@ -84,12 +141,11 @@ class ExamenDoneFilter(django_filters.FilterSet):
             patient__prenoms__icontains=value
         )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # ✅ Ajout de la classe Bootstrap "form-control"
-        for field in self.form.fields.values():
-            field.widget.attrs.update({
-                'class': 'form-control',
-                'placeholder': field.label
-            })
-
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # ✅ Ajout de la classe Bootstrap "form-control"
+    #     for field in self.form.fields.values():
+    #         field.widget.attrs.update({
+    #             'class': 'form-control',
+    #             'placeholder': field.label
+    #         })

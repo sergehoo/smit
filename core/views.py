@@ -194,7 +194,7 @@ def get_orange_access_token():
     response = requests.post(ORANGE_API_TOKEN_URL, headers=headers, data=data)
     if response.status_code == 200:
         access_token = response.json().get("access_token")
-        print(f"Access Token obtenu : {access_token}")
+        # print(f"Access Token obtenu : {access_token}")
         return access_token
     else:
         raise Exception(f"Erreur lors de la récupération du token : {response.text}")
@@ -297,11 +297,11 @@ def check_sms_balance():
     if response.status_code == 200:
         # Afficher la réponse avec formatage JSON
         formatted_response = json.dumps(response.json(), indent=4, ensure_ascii=False)
-        print("Détails du contrat :\n", formatted_response)
+        # print("Détails du contrat :\n", formatted_response)
         return response.json()
     else:
         # Afficher les erreurs avec retour à la ligne
-        print(f"Erreur lors de la vérification des crédits :\n{response.text}")
+        # print(f"Erreur lors de la vérification des crédits :\n{response.text}")
         return None
 
 

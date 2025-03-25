@@ -113,21 +113,21 @@
     {% endfor %}
 </div>
 <div class="col-1" style="height: 10px"></div>
-<div class="d-flex flex-wrap gap-3 mb-5 mt-5">
+<div class="d-flex flex-wrap gap-3 mb-5 mt-5 pl-2">
     <a href="{% url 'export_hospitalized_patients' '0-18' %}" class="btn btn-outline-primary mb-2">
         Patient de 0-18 ans | <strong class="text-danger">{{ age_counts|get_item:"0-18" }}</strong>
     </a>
-    <a href="{% url 'export_hospitalized_patients' '18-30' %}" class="btn btn-outline-primary ml-2 mb-2">
-        Patient de 18-30 ans | <strong class="text-danger">{{ age_counts|get_item:"18-30" }}</strong>
+    <a href="{% url 'export_hospitalized_patients' '19-30' %}" class="btn btn-outline-primary ml-2 mb-2">
+        Patient de 19-30 ans | <strong class="text-danger">{{ age_counts|get_item:"19-30" }}</strong>
     </a>
-    <a href="{% url 'export_hospitalized_patients' '30-45' %}" class="btn btn-outline-primary ml-2 mb-2">
-        Patient de 30-45 ans | <strong class="text-danger">{{ age_counts|get_item:"30-45" }}</strong>
+    <a href="{% url 'export_hospitalized_patients' '31-45' %}" class="btn btn-outline-primary ml-2 mb-2">
+        Patient de 31-45 ans | <strong class="text-danger">{{ age_counts|get_item:"31-45" }}</strong>
     </a>
-    <a href="{% url 'export_hospitalized_patients' '45-60' %}" class="btn btn-outline-primary ml-2 mb-2">
-        Patient de 45-60 ans | <strong class="text-danger">{{ age_counts|get_item:"45-60" }}</strong>
+    <a href="{% url 'export_hospitalized_patients' '46-60' %}" class="btn btn-outline-primary ml-2 mb-2">
+        Patient de 46-60 ans | <strong class="text-danger">{{ age_counts|get_item:"46-60" }}</strong>
     </a>
-    <a href="{% url 'export_hospitalized_patients' '60-plus' %}" class="btn btn-outline-primary ml-2 mb-2">
-        Patient de 60+ ans | <strong class="text-danger">{{ age_counts|get_item:"60-plus" }}</strong>
+    <a href="{% url 'export_hospitalized_patients' '61-plus' %}" class="btn btn-outline-primary ml-2 mb-2">
+        Patient de 61+ ans | <strong class="text-danger">{{ age_counts|get_item:"61-plus" }}</strong>
     </a>
 </div>
                                     <div class="col-1" style="height: 2px"></div>

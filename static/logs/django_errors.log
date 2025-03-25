@@ -14925,3 +14925,817 @@ Traceback (most recent call last):
     if emp.phone_number
 AttributeError: 'Employee' object has no attribute 'phone_number'
 [35;1mHTTP POST /hospitalisation/hospitalisation/17/transferer/ 500 [0.15, 127.0.0.1:61319][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 144, in render
+    raise ValueError(f"Expected table or queryset, not {type(table).__name__}")
+ValueError: Expected table or queryset, not str
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.23, 127.0.0.1:56076][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 204, in render_table
+    template = parser.compile_filter(bits.pop(0)) if bits else None
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 703, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '=request' from 'request=request'
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.38, 127.0.0.1:56303][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 204, in render_table
+    template = parser.compile_filter(bits.pop(0)) if bits else None
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 703, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '=request' from 'request=request'
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.11, 127.0.0.1:56325][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 204, in render_table
+    template = parser.compile_filter(bits.pop(0)) if bits else None
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 703, in __init__
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: Could not parse the remainder: '=request' from 'request=request'
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.08, 127.0.0.1:56325][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 155, in render
+    template = select_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 47, in select_template
+    raise TemplateDoesNotExist(", ".join(template_name_list), chain=chain)
+django.template.exceptions.TemplateDoesNotExist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.48, 127.0.0.1:56333][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 155, in render
+    template = select_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 47, in select_template
+    raise TemplateDoesNotExist(", ".join(template_name_list), chain=chain)
+django.template.exceptions.TemplateDoesNotExist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.41, 127.0.0.1:56446][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 152, in render
+    template = get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 852, in do_for
+    sequence = parser.compile_filter(bits[in_index + 1])
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'table_page_range'
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.68, 127.0.0.1:56464][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 1026, in find_library
+    return parser.libraries[name]
+KeyError: 'table_tags'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 152, in render
+    template = get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 1088, in load
+    lib = find_library(parser, name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 1028, in find_library
+    raise TemplateSyntaxError(
+django.template.exceptions.TemplateSyntaxError: 'table_tags' is not a registered tag library. Must be one of:
+account
+admin_list
+admin_modify
+admin_urls
+allauth
+cache
+countries
+custom_filter
+custom_filters
+debugger_tags
+django_tables2
+getattributes
+group_permissions
+guardian_tags
+highlighting
+humanize
+humanizelib
+i18n
+import_export_tags
+indent_text
+l10n
+log
+scheduletags
+simple_history_admin_list
+simple_history_compat
+static
+syntax_color
+tz
+unicorn
+user_agents
+widont
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.31, 127.0.0.1:56507][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+KeyError: 'laboratoire'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 166, in render
+    return template.render(context={"table": table}, request=request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 238, in render
+    nodelist.append(node.render_annotated(context))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'laboratoire' is not a registered namespace
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.64, 127.0.0.1:56613][0m
+Internal Server Error: /laboratoire/examens_effectues/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+KeyError: 'laboratoire'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_tables2/templatetags/django_tables2.py", line 166, in render
+    return template.render(context={"table": table}, request=request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 238, in render
+    nodelist.append(node.render_annotated(context))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'laboratoire' is not a registered namespace
+[35;1mHTTP GET /laboratoire/examens_effectues/ 500 [0.26, 127.0.0.1:56613][0m
+Internal Server Error: /laboratoire/examens/resultats
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/views.py", line 73, in get
+    filterset_class = self.get_filterset_class()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/views.py", line 28, in get_filterset_class
+    return filterset_factory(model=self.model, fields=self.filterset_fields)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/filterset.py", line 502, in filterset_factory
+    return type(filterset)(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/filterset.py", line 78, in __new__
+    new_class.base_filters = new_class.get_filters()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/filterset.py", line 356, in get_filters
+    filter_instance = cls.filter_for_field(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/filterset.py", line 404, in filter_for_field
+    cls.handle_unrecognized_field(field_name, (
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django_filters/filterset.py", line 381, in handle_unrecognized_field
+    raise AssertionError(message)
+AssertionError: BilanParacliniqueFilterSet resolved field 'report_file' with 'exact' lookup to an unrecognized field type FileField. Try adding an override to 'Meta.filter_overrides'. See: https://django-filter.readthedocs.io/en/main/ref/filterset.html#customise-filter-generation-with-filter-overrides
+[35;1mHTTP GET /laboratoire/examens/resultats 500 [0.61, 127.0.0.1:57947][0m

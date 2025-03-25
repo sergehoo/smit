@@ -5,8 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/hospitalisation/templatetags/table_tags.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/lab/custom_table.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/tables.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/utils/sms.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/utils/sms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/templatetags/custom_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/templatetags/custom_filters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/laboratory/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/laboratory/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/filters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/lab/examen_done_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/lab/examen_done_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/lab/examen_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/lab/examen_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/hospitalised_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/hospitalised_patient.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/suivie_soins.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/hospitalisation/suivie_soins.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/static/logs/django_errors.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -199,7 +217,8 @@
       <workItem from="1740825963518" duration="11973000" />
       <workItem from="1741098953261" duration="584000" />
       <workItem from="1741342373996" duration="595000" />
-      <workItem from="1741723556039" duration="95386000" />
+      <workItem from="1741723556039" duration="96022000" />
+      <workItem from="1742749453531" duration="17444000" />
     </task>
     <servers />
   </component>
@@ -257,7 +276,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2364</line>
+          <line>2365</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -327,7 +346,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2114</line>
+          <line>2115</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -355,9 +374,19 @@
           <line>1418</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
+          <line>367</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
+          <line>332</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="django-line">
           <url>file://$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html</url>
-          <line>301</line>
+          <line>313</line>
           <option name="timeStamp" value="30" />
         </line-breakpoint>
       </breakpoints>

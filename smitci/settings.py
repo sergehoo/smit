@@ -110,7 +110,7 @@ INSTALLED_APPS = [
     'guardian',
     'phonenumber_field',
     'django_user_agents',
-    'django_tables2',
+    'django_tables2'
 
     # 'django_select2',
 
@@ -209,7 +209,7 @@ PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
 
 # Durée de vie de la session en secondes (par exemple, 30 minutes)
-SESSION_COOKIE_AGE = 30 * 60  # 30 minutes
+SESSION_COOKIE_AGE = 60 * 60  # 60 minutes
 
 # SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 # Configurer pour que la session expire uniquement après inactivité
@@ -343,10 +343,10 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 
-TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.environ.get('messaging_service_sid')  # Numéro Twilio
-TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = config('messaging_service_sid')  # Numéro Twilio
+TWILIO_MESSAGING_SERVICE_SID = config('TWILIO_MESSAGING_SERVICE_SID')
 # CACHES = {
 #     "default": {
 #         "BACKEND": "django.core.cache.backends.redis.RedisCache",
