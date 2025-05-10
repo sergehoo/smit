@@ -5,25 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/smit/templates/employees/admin_password_reset.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/employees/change_password.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smitci/settings/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smitci/settings/dev.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smitci/settings/prod.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/password-validation.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/management/commands/import_patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/import_patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dbbackup/default-192.168.1.9-2025-01-19-224653.psql" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/employees/employee_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/employees/employee_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/donnessmitpatients.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/static/donnessmitpatients.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/logs/django_errors.log" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -226,7 +208,7 @@
       <workItem from="1744875881869" duration="577000" />
       <workItem from="1745010091639" duration="4085000" />
       <workItem from="1746124972101" duration="598000" />
-      <workItem from="1746448709547" duration="18777000" />
+      <workItem from="1746448709547" duration="20188000" />
     </task>
     <servers />
   </component>
