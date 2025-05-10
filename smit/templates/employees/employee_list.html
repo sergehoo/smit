@@ -289,7 +289,13 @@
                                             <a href="{% url 'send_sms_view' employee_id=employee.id %}"
                                                class="btn btn-sm btn-outline-secondary ml-2">
                                                 <i class="ni ni-send"></i> SMS
-                                            </a></td>
+                                            </a>
+  <a href="{% url 'admin_password_reset' employee.pk %}" class="btn btn-sm btn-info ml-2">
+        <i class="ni ni-lock"></i> Modifier MDP
+    </a>
+                                            <!-- Autres boutons... -->
+
+                                        </td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

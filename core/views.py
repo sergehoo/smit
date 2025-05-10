@@ -4,27 +4,36 @@ import json
 from datetime import timedelta
 
 import requests
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import Group, User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.timezone import now
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, FormView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, FormView, View
 from matplotlib import pyplot as plt
 
 from core.models import Employee, VisitCounter
-from smit.forms import RoleForm, AssignRoleForm, EmployeeCreateForm
+from smit.forms import RoleForm, AssignRoleForm, EmployeeCreateForm, AdminPasswordChangeForm
 from twilio.rest import Client
 import random
 import string
 from django.contrib.auth.models import User
 
+
+import logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 def custom_403_view(request, exception=None):
@@ -307,6 +316,81 @@ def check_sms_balance():
 
 # Exécutez la fonction
 # check_sms_balance()
+
+class AdminPasswordResetView(LoginRequiredMixin, FormView):
+    template_name = 'employees/admin_password_reset.html'
+    form_class = AdminPasswordChangeForm
+    success_url = reverse_lazy('employee_list')
+    permission_required = 'auth.change_user'  # Ajout d'une permission
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.employee = get_object_or_404(Employee, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'employee': self.employee,
+            'title': f"Réinitialisation mot de passe - {self.employee.user.get_full_name()}",
+            'active_tab': 'security',
+        })
+        return context
+
+    def form_valid(self, form):
+        user = self.employee.user
+        new_password = form.cleaned_data['new_password1']
+
+        # Mise à jour du mot de passe
+        user.set_password(new_password)
+        user.save()
+
+        # Journalisation
+        self._log_password_change(user)
+
+        # Notification
+        self._send_password_change_notification(user)
+
+        messages.success(
+            self.request,
+            f"Mot de passe de {user.get_full_name()} mis à jour avec succès",
+            extra_tags='alert-success'
+        )
+
+        return super().form_valid(form)
+
+    def _log_password_change(self, user):
+        LogEntry.objects.log_action(
+            user_id=self.request.user.pk,
+            content_type_id=ContentType.objects.get_for_model(user).pk,
+            object_id=user.pk,
+            object_repr=str(user),
+            action_flag=CHANGE,
+            change_message="Mot de passe réinitialisé par admin"
+        )
+
+    def _send_password_change_notification(self, user):
+        if not hasattr(user, 'email') or not user.email:
+            logger.warning(f"Pas d'email défini pour l'utilisateur {user.username}")
+            return
+
+        try:
+            site_name = getattr(settings, 'SITE_NAME', None)
+            if not site_name:
+                current_site = Site.objects.get_current()
+                site_name = current_site.name
+
+            subject = f"{site_name} - Réinitialisation de votre mot de passe"
+            message = f"""..."""
+
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com'),
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception as e:
+            logger.error(f"Erreur lors de l'envoi de la notification: {str(e)}")
 
 
 class EmployeeCreateView(LoginRequiredMixin, CreateView):

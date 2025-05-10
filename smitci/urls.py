@@ -21,7 +21,7 @@ from django.shortcuts import redirect
 from django.urls import path, include
 
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
-    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view, employee_profile
+    EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view, employee_profile, AdminPasswordResetView
 from hospitalisation.views import HospitalizationUrgenceCreateView, SuivieSoinsListView, SuivieSoinsDetailView, \
     search_medications, add_prescription
 from smit import views
@@ -61,7 +61,6 @@ urlpatterns = [
                   path("roles/create/", RoleCreateView.as_view(), name="role_create"),
                   path("roles/delete/<int:pk>", RoleDeleteView.as_view(), name="role_delete"),
 
-
                   path("profile/", employee_profile, name="employee_profile"),
 
                   path("employees/", EmployeeListView.as_view(), name="employee_list"),
@@ -69,6 +68,9 @@ urlpatterns = [
                   path("employees/<int:pk>/update/", EmployeeUpdateView.as_view(), name="employee_update"),
                   path("employees/<int:pk>/delete/", EmployeeDeleteView.as_view(), name="employee_delete"),
                   path('employee/role/assignment', AssignRoleView.as_view(), name='employee_role_assign'),
+
+
+                  path('employees/<int:pk>/reset-password/', AdminPasswordResetView.as_view(), name='admin_password_reset'),
 
                   path('', HomePageView.as_view(), name='home'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),

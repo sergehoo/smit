@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
     'django.contrib.gis',
-    "decouple",
+
     "django.contrib.sites",
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -190,16 +190,7 @@ WSGI_APPLICATION = 'smitci.wsgi.application'
 #     }
 # }
 #prod
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',  # Correct engine for GIS support
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT'),
-    }
-}
+
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
 
@@ -208,8 +199,7 @@ DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
 
-# Durée de vie de la session en secondes (par exemple, 30 minutes)
-SESSION_COOKIE_AGE = 60 * 60  # 60 minutes
+
 
 # SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 # Configurer pour que la session expire uniquement après inactivité
@@ -219,9 +209,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 ACCOUNT_ADAPTER = 'core.account_adapter.NoNewUsersAccountAdapter'
 LOGOUT_REDIRECT_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
-# ACCOUNT_FORMS = {
-#     'login': 'smit.forms.CustomLoginForm',
-# }
+
 
 ACCOUNT_LOGIN_METHODS = {'username'}
 # ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Vérification d'e-mail obligatoire
@@ -241,10 +229,7 @@ ACCOUNT_RESET_PASSWORD_REDIRECT_URL = "/accounts/password/reset/done/"
 #
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_HTTPONLY = True  # Empêche l’accès aux cookies via JavaScript
-# SECURE_BROWSER_XSS_FILTER = True  # Protection contre XSS
-# SECURE_CONTENT_TYPE_NOSNIFF = True  # Protection contre MIME sniffing
-# SECURE_SSL_REDIRECT = True  # Redirige tout en HTTPS
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -347,16 +332,3 @@ TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.environ.get('messaging_service_sid')  # Numéro Twilio
 TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",
-#     },
-#     "select2": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/2",
-#     }
-# }
-
-# Tell select2 which cache configuration to use:
-# SELECT2_CACHE_BACKEND = "select2"

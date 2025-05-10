@@ -6,6 +6,7 @@ import phonenumbers
 from allauth.account.forms import LoginForm
 from django import forms
 from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django_countries.fields import CountryField
@@ -1053,6 +1054,26 @@ class PrescriptionExecutionForm(forms.ModelForm):
 #             'mental_stability': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
 #             'follow_up_plan': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
 #         }
+
+class AdminPasswordChangeForm(forms.Form):
+    new_password1 = forms.CharField(
+        label="Nouveau mot de passe",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        strip=False,
+    )
+    new_password2 = forms.CharField(
+        label="Confirmation du mot de passe",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        strip=False,
+    )
+
+    def clean_new_password2(self):
+        p1 = self.cleaned_data.get("new_password1")
+        p2 = self.cleaned_data.get("new_password2")
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("❌ Les mots de passe ne correspondent pas.")
+        return p2
+
 
 class RoleForm(forms.ModelForm):
     permissions = forms.ModelMultipleChoiceField(queryset=Permission.objects.all(), widget=forms.CheckboxSelectMultiple,
