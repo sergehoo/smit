@@ -38,7 +38,13 @@ class Command(BaseCommand):
             nom = row.get('nom', 'Inconnu')
             prenom = row.get('prenom', 'Inconnu')
             contact = format_phone_number(row.get('contact', '00000000'))
-            date_naissance = pd.to_datetime(row.get('date_naissance'), errors='coerce')
+            naissance_raw = row.get('date_naissance', None)
+            date_naissance = None
+            if pd.notnull(naissance_raw):
+                try:
+                    date_naissance = pd.to_datetime(naissance_raw).date()
+                except Exception:
+                    self.stdout.write(self.style.WARNING(f"⚠️ Date invalide pour {nom} {prenom}, ignorée."))
             sexe = row.get('sexe', 'Non précisé')
             nationalite = row.get('nationalite', 'Non précisé')
             profession = row.get('profession', 'Inconnue')
