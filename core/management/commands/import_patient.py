@@ -69,9 +69,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"❌ Erreur lors de la création du patient {nom} {prenom} : {e}"))
                 continue
 
-            medecin_nom = row.get('medecin', '').strip()
-            if not medecin_nom or pd.isna(medecin_nom):
-                medecin_nom = "Médecin Inconnu"
+            medecin_raw = row.get('medecin', '')
+            medecin_nom = str(medecin_raw).strip() if pd.notnull(medecin_raw) else 'Médecin inconnu'
 
             username = medecin_nom.lower().replace(" ", ".")
 
