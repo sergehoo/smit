@@ -2,39 +2,1155 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+<style>
+    :root {
+        --primary-color: #4a6cf7;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Global Styles */
+    .profile-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    .qr-code-container {
+        transition: all 0.3s ease;
+        border: 2px solid var(--primary-color);
+        border-radius: 10px;
+        padding: 5px;
+        background: white;
+    }
+    
+    .qr-code-container:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(74, 108, 247, 0.3);
+    }
+    
+    .patient-title {
+        position: relative;
+        padding-left: 15px;
+    }
+    
+    .patient-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary-color);
+        border-radius: 2px;
+    }
+    
+    .profile-ud-item {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .profile-ud-item:hover {
+        background-color: rgba(74, 108, 247, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .profile-ud-label {
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+    
+    .profile-ud-value {
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+    
+    /* Badge Styles */
+    .badge {
+        transition: all 0.3s ease;
+    }
+    
+    .badge-success {
+        background-color: var(--success-color);
+    }
+    
+    .badge-danger {
+        background-color: var(--danger-color);
+    }
+    
+    /* Tab Styles */
+    .nav-tabs {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--secondary-color);
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: var(--primary-color);
+        background: rgba(74, 108, 247, 0.05);
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background: transparent;
+    }
+    
+    .nav-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary-color);
+    }
+    
+    .tab-content {
+        padding: 20px 0;
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    /* Accordion Styles */
+    .accordion-item {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .accordion-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .accordion-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .accordion-head:hover {
+        background: rgba(74, 108, 247, 0.2);
+    }
+    
+    .accordion-body {
+        padding: 20px;
+        background: white;
+    }
+    
+    /* Table Styles */
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table thead th {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(74, 108, 247, 0.05);
+    }
+    
+    /* Button Styles */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(74, 108, 247, 0.3);
+    }
+    
+    .btn-primary:hover {
+        background-color: #3a5bd9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(74, 108, 247, 0.4);
+    }
+    
+    .btn-outline-secondary {
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .patient-title::before {
+            display: none;
+        }
+    }
+</style>
+
 <div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- Patient Header Section -->
+            <div class="nk-block-head nk-block-head-sm mb-4">
+                <div class="nk-block-between g-3 align-items-center profile-header p-4">
+                    <div class="d-flex align-items-center">
+                        {% if patientsdetail.qr_code %}
+                            <div class="qr-code-container mr-4 animate__animated animate__fadeInLeft">
+                                <img src="{{ patientsdetail.qr_code.url }}" width="110" alt="QR Code" class="img-fluid">
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning mr-4">Aucun QR code disponible</div>
+                        {% endif %}
+                        
+                        <div>
+                            <h3 class="nk-block-title page-title patient-title animate__animated animate__fadeIn">
+                                Patient / <strong class="text-primary">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</strong>
+                            </h3>
+                            <div class="nk-block-des text-soft ml-0 ml-sm-5 animate__animated animate__fadeIn animate__delay-1s">
+                                <ul class="list-inline">
+                                    <li class="list-inline-item mr-3"><i class="fas fa-id-badge text-primary mr-1"></i> UUID: <span class="text-dark font-weight-bold">{{ patientsdetail.code_patient }}</span></li>
+                                    <li class="list-inline-item mr-3"><i class="fas fa-virus text-danger mr-1"></i> CODE VIH: <span class="text-dark font-weight-bold">{% if patientsdetail.code_vih %}{{ patientsdetail.code_vih }}{% else %}NEANT{% endif %}</span></li>
+                                    <li class="list-inline-item"><i class="fas fa-calendar-check text-success mr-1"></i> Dernière Visite: <span class="text-dark font-weight-bold">15 Feb, 2019 01:02 PM</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="nk-block-head-content animate__animated animate__fadeInRight">
+                        <button class="btn btn-outline-light bg-white d-none d-sm-inline-flex mr-3 print-btn">
+                            <em class="icon ni ni-printer-fill mr-1"></em><span>Imprimer</span>
+                        </button>
+                        <a href="/" class="btn btn-outline-light bg-white d-none d-sm-inline-flex back-btn">
+                            <em class="icon ni ni-arrow-left mr-1"></em><span>Retour</span>
+                        </a>
+                        <a href="#" class="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none">
+                            <em class="icon ni ni-arrow-left"></em>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between g-3">
+            <!-- Main Content Tabs -->
+            <div class="nk-block">
+                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card animate__animated animate__fadeIn">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#tabPersonal">
+                            <em class="icon ni ni-user"></em><span>Informations Personnelles</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabConsultations">
+                            <em class="icon ni ni-repeat"></em><span>Consultations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabHospitalizations">
+                            <em class="icon ni ni-home"></em><span>Hospitalisations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabAppointments">
+                            <em class="icon ni ni-calendar"></em><span>Rendez-vous</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tabSuivis">
+                            <em class="icon ni ni-user-check"></em><span>Suivis</span>
+                        </a>
+                    </li>
+                </ul>
 
-
-                                    <div class="nk-block-head-content">
-                                        {% if patientsdetail.qr_code %}
-                                            <div class="nk-block float-left">
-                                                <img src="{{ patientsdetail.qr_code.url }}" width="110" alt="QR Code">
+                <div class="tab-content">
+                    <!-- Personal Info Tab -->
+                    <div class="tab-pane fade show active" id="tabPersonal">
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-lg-6">
+                                <div class="card card-bordered mb-4 animate__animated animate__fadeInLeft">
+                                    <div class="card-inner">
+                                        <div class="card-head">
+                                            <h5 class="card-title text-primary"><i class="fas fa-id-card mr-2"></i>Informations de Base</h5>
+                                        </div>
+                                        <div class="profile-ud-list">
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-venus-mars mr-2"></i>Sexe</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.genre }}</span>
+                                                </div>
                                             </div>
-                                        {% else %}
-                                            <p>Aucun QR code disponible pour ce patient.</p>
-                                        {% endif %}
-                                        <h3 class="nk-block-title page-title">Patient / <strong class="text-primary small">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</strong></h3>
-                                        <div class="nk-block-des text-soft ml-5">
-                                            <ul class="list-inline">
-                                                <li>UUID: <span class="text-base">{{ patientsdetail.code_patient }}</span></li>
-                                                <li>CODE VIH: <span class="text-base">{% if patientsdetail.code_vih %} {{ patientsdetail.code_vih }}{% else %} NEANT {% endif %}</span></li>
-                                                 <li>Derniere Visite: <span class="text-base">15 Feb, 2019 01:02 PM</span></li>
-                                            </ul>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-signature mr-2"></i>Nom & Prénom</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-birthday-cake mr-2"></i>Date de naissance</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.date_naissance }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-map-marker-alt mr-2"></i>Lieu de naissance</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.lieu_naissance }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-user-clock mr-2"></i>Âge</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.calculate_age }} ans</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-key mr-2"></i>Code Patient</span>
+                                                    <span class="profile-ud-value text-primary"><i class="fa-solid fa-lock"></i> {{ patientsdetail.code_patient }}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="nk-block-head-content">
-                                        <a href="/" class="btn btn-outline-light bg-secondary-dim d-none d-sm-inline-flex mr-5"><em class="icon ni ni-printer-fill"></em><span>Imprimer</span></a>
-                                        <a href="/" class="btn btn-outline-light bg-white d-none d-sm-inline-flex"><em class="icon ni ni-arrow-left"></em><span>Back</span></a>
-                                        <a href="#" class="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"><em class="icon ni ni-arrow-left"></em></a>
+                                </div>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="col-lg-6">
+                                <div class="card card-bordered mb-4 animate__animated animate__fadeInRight">
+                                    <div class="card-inner">
+                                        <div class="card-head">
+                                            <h5 class="card-title text-primary"><i class="fas fa-address-book mr-2"></i>Coordonnées</h5>
+                                        </div>
+                                        <div class="profile-ud-list">
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-phone mr-2"></i>Contact</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.contact }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-envelope mr-2"></i>Email</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.adresse_mail }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-tint mr-2 text-danger"></i>Groupe Sanguin</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.groupe_sanguin }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-flag mr-2"></i>Nationalité</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.nationalite }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-briefcase mr-2"></i>Profession</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.profession }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="profile-ud-item">
+                                                <div class="profile-ud wider">
+                                                    <span class="profile-ud-label"><i class="fas fa-building mr-2"></i>Employeur</span>
+                                                    <span class="profile-ud-value">{{ patientsdetail.employeur }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div><!-- .nk-block-head -->
-                            <div class="nk-block">
+                            </div>
+                            
+                            <!-- Additional Information -->
+                            <div class="col-12">
+                                <div class="card card-bordered animate__animated animate__fadeInUp">
+                                    <div class="card-inner">
+                                        <div class="card-head">
+                                            <h5 class="card-title text-primary"><i class="fas fa-info-circle mr-2"></i>Informations Supplémentaires</h5>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-child mr-2"></i>Nombre d'enfants</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.nbr_enfants }} <i class="fa-solid fa-children text-black-50"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-heart mr-2 text-danger"></i>Situation Matrimoniale</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.situation_matrimoniale }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-graduation-cap mr-2"></i>Niveau d'Étude</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.niveau_etude }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-globe-africa mr-2"></i>Ethnie</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.ethnie }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-map-marked-alt mr-2"></i>Localité</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.localite.nom }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="profile-ud-item">
+                                                    <div class="profile-ud wider">
+                                                        <span class="profile-ud-label"><i class="fas fa-user-shield mr-2"></i>Statut</span>
+                                                        <span class="profile-ud-value">{{ patientsdetail.status }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Case Contacts Section -->
+                        <div class="nk-divider divider md my-4"></div>
+                        <div class="nk-block animate__animated animate__fadeIn">
+                            <div class="nk-block-head nk-block-head-sm nk-block-between">
+                                <h5 class="title"><i class="fas fa-users mr-2"></i>Cas Contacts</h5>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalDefault">
+                                    <i class="fas fa-plus mr-1"></i> Ajouter contact
+                                </button>
+                            </div>
+                            
+                            <div class="bq-note">
+                                <div class="bq-note-item">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="thead-primary">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Nom</th>
+                                                    <th>Prénom</th>
+                                                    <th>Téléphone</th>
+                                                    <th>Relation</th>
+                                                    <th>Fréquence de Contact</th>
+                                                    <th>Dernier contact</th>
+                                                    <th>SMS Sensibilisation</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for contact in case_contacts %}
+                                                <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>{{ contact.contact_person.split|first }}</td>
+                                                    <td>{{ contact.contact_person.split|last }}</td>
+                                                    <td><a href="tel:{{ contact.phone_number }}">{{ contact.phone_number }}</a></td>
+                                                    <td>{{ contact.get_relationship_display }}</td>
+                                                    <td>{{ contact.get_contact_frequency_display }}</td>
+                                                    <td>{{ contact.date_contact|date:"d/m/Y" }}</td>
+                                                    <td>
+                                                        {% if contact.smsdepistage %}
+                                                            <span class="badge badge-success">Envoyé</span>
+                                                        {% else %}
+                                                            <span class="badge badge-danger">Non envoyé</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-outline-secondary btn-sm notify-btn">
+                                                            <i class="fas fa-bell mr-1"></i> Notifier
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="9" class="text-center py-4">
+                                                        <i class="fas fa-users-slash fa-2x text-muted mb-2"></i>
+                                                        <p>Aucun cas contact enregistré.</p>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consultations Tab -->
+                    <div class="tab-pane fade" id="tabConsultations">
+                        <div id="accordion" class="accordion">
+                            {% for consultation in consultations %}
+                                <div class="accordion-item animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                    <a href="#"
+                                       class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"
+                                       data-toggle="collapse"
+                                       data-target="#accordion-item-{{ consultation.id }}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="mr-3">
+                                                <i class="fas fa-calendar-check fa-lg text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="title mb-0">
+                                                    Consultation du {{ consultation.consultation_date|date:"d/m/Y" }}
+                                                </h6>
+                                                <small class="text-muted">{{ consultation.reason|truncatewords:25 }}</small>
+                                            </div>
+                                        </div>
+                                        <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+                                    </a>
+                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
+                                         id="accordion-item-{{ consultation.id }}"
+                                         data-parent="#accordion">
+                                        <div class="accordion-inner">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h5 class="text-primary mb-4"><i class="fas fa-info-circle mr-2"></i>Détails de la Consultation</h5>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="far fa-calendar-alt mr-2"></i>Date & Heure</h6>
+                                                        <p>{{ consultation.consultation_date|date:"d/m/Y H:i" }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-comment-medical mr-2"></i>Raison</h6>
+                                                        <p>{{ consultation.reason|default:"Non spécifiée" }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-heartbeat mr-2"></i>Constantes</h6>
+                                                        {% if consultation.constante %}
+                                                            <div class="constantes-grid">
+                                                                {% for key, value in consultation.constante.items %}
+                                                                    <div class="constante-item">
+                                                                        <span class="constante-label">{{ key }}:</span>
+                                                                        <span class="constante-value">{{ value }}</span>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% else %}
+                                                            <p>Aucune constante enregistrée.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-flask mr-2"></i>Examens</h6>
+                                                        <p>{{ consultation.examens|default:"Aucun examen associé." }}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    <h5 class="text-primary mb-4"><i class="fas fa-diagnoses mr-2"></i>Diagnostic & Traitement</h5>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-stethoscope mr-2"></i>Symptômes</h6>
+                                                        {% if consultation.symptomes.all %}
+                                                            <div class="symptoms-tags">
+                                                                {% for symptome in consultation.symptomes.all %}
+                                                                    <span class="badge badge-info mr-1 mb-1">{{ symptome.nom }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% else %}
+                                                            <p>Aucun symptôme enregistré.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-history mr-2"></i>Antécédents Médicaux</h6>
+                                                        {% if consultation.antecedentsMedicaux.all %}
+                                                            <ul class="list-group list-group-flush">
+                                                                {% for antecedent in consultation.antecedentsMedicaux.all %}
+                                                                    <li class="list-group-item">{{ antecedent.nom }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% else %}
+                                                            <p>Aucun antécédent médical.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-allergies mr-2"></i>Allergies</h6>
+                                                        {% if consultation.allergies.all %}
+                                                            <ul class="list-group list-group-flush">
+                                                                {% for allergie in consultation.allergies.all %}
+                                                                    <li class="list-group-item text-danger">{{ allergie.titre }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% else %}
+                                                            <p>Aucune allergie enregistrée.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-file-medical mr-2"></i>Diagnostic</h6>
+                                                        <div class="diagnosis-content">
+                                                            {{ consultation.diagnosis|safe|default:"Aucun diagnostic enregistré." }}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item">
+                                                        <h6 class="text-secondary"><i class="fas fa-comments mr-2"></i>Commentaires</h6>
+                                                        <div class="comments-content">
+                                                            {{ consultation.commentaires|safe|default:"Aucun commentaire." }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mt-4">
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <h6 class="text-secondary"><i class="fas fa-user-md mr-2"></i>Médecin</h6>
+                                                        <p>{{ consultation.doctor.username|default:"Non attribué" }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <h6 class="text-secondary"><i class="fas fa-info-circle mr-2"></i>Statut</h6>
+                                                        <p>{{ consultation.get_status_display|default:"Non défini" }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="detail-item">
+                                                        <h6 class="text-secondary"><i class="fas fa-clinic-medical mr-2"></i>Service de Suivi</h6>
+                                                        <p>{{ consultation.suivi.nom|default:"Aucun service de suivi" }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="alert alert-info animate__animated animate__fadeIn">
+                                    <i class="fas fa-info-circle mr-2"></i> Aucune consultation disponible pour ce patient.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Hospitalizations Tab -->
+                    <div class="tab-pane fade" id="tabHospitalizations">
+                        <div id="accordion-hospitalization" class="accordion">
+                            {% for hospitalization in hospitalizations %}
+                                <div class="accordion-item animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                    <a href="#" class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}" 
+                                       data-toggle="collapse" 
+                                       data-target="#accordion-item-hosp-{{ hospitalization.id }}">
+                                        <div class="d-flex align-items-center">
+                                            <div class="mr-3">
+                                                <i class="fas fa-procedures fa-lg text-danger"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="title mb-0">
+                                                    Hospitalisation du {{ hospitalization.admission_date|date:"d/m/Y" }}
+                                                </h6>
+                                                <small class="text-muted">
+                                                    Chambre: {{ hospitalization.bed }}-{{ hospitalization.bed.box }}
+                                                    {% if hospitalization.discharge_date %}
+                                                        <span class="badge badge-outline-primary ml-2">
+                                                            Sortie le: {{ hospitalization.discharge_date|date:"d/m/Y" }}
+                                                        </span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+                                    </a>
+                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
+                                         id="accordion-item-hosp-{{ hospitalization.id }}"
+                                         data-parent="#accordion-hospitalization">
+                                        <div class="accordion-inner">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h5 class="text-danger mb-4"><i class="fas fa-info-circle mr-2"></i>Détails de l'Hospitalisation</h5>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-bed mr-2"></i>Chambre</h6>
+                                                        <p>{{ hospitalization.bed }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-user-md mr-2"></i>Médecin Responsable</h6>
+                                                        <p>{{ hospitalization.doctor.username|default:"Non attribué" }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-comment-medical mr-2"></i>Motif d'Admission</h6>
+                                                        <p>{{ hospitalization.reason_for_admission }}</p>
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-info-circle mr-2"></i>Statut</h6>
+                                                        <p>{{ hospitalization.get_status_display|default:"Non défini" }}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    <h5 class="text-danger mb-4"><i class="fas fa-chart-line mr-2"></i>Indicateurs</h5>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-dna mr-2"></i>Biologiques</h6>
+                                                        {% if hospitalization.indicateurs_biologiques.all %}
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Date</th>
+                                                                            <th>GB</th>
+                                                                            <th>CRP</th>
+                                                                            <th>Hémoglobine</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for indicator in hospitalization.indicateurs_biologiques.all %}
+                                                                            <tr>
+                                                                                <td>{{ indicator.date|date:"d/m/Y" }}</td>
+                                                                                <td>{{ indicator.globules_blancs }}</td>
+                                                                                <td>{{ indicator.crp }}</td>
+                                                                                <td>{{ indicator.hemoglobine }}</td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        {% else %}
+                                                            <p>Aucun indicateur biologique enregistré.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    <div class="detail-item mb-3">
+                                                        <h6 class="text-secondary"><i class="fas fa-brain mr-2"></i>Fonctionnels</h6>
+                                                        {% if hospitalization.indicateurs_fonctionnels.all %}
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Date</th>
+                                                                            <th>Mobilité</th>
+                                                                            <th>Conscience</th>
+                                                                            <th>Douleur</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for indicator in hospitalization.indicateurs_fonctionnels.all %}
+                                                                            <tr>
+                                                                                <td>{{ indicator.date|date:"d/m/Y" }}</td>
+                                                                                <td>{{ indicator.mobilite }}</td>
+                                                                                <td>{{ indicator.conscience }}</td>
+                                                                                <td>{{ indicator.douleur }}</td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        {% else %}
+                                                            <p>Aucun indicateur fonctionnel enregistré.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mt-4">
+                                                <div class="col-12">
+                                                    <h5 class="text-danger mb-4"><i class="fas fa-pills mr-2"></i>Médicaments Prescrits</h5>
+                                                    
+                                                    {% if hospitalization.hospiprescriptions.all %}
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Médicament</th>
+                                                                        <th>Quantité</th>
+                                                                        <th>Posologie</th>
+                                                                        <th>Date Début</th>
+                                                                        <th>Date Fin</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for prescription in hospitalization.hospiprescriptions.all %}
+                                                                        <tr>
+                                                                            <td>{{ prescription.medication.nom }}</td>
+                                                                            <td>{{ prescription.quantity }}</td>
+                                                                            <td>{{ prescription.posology }}</td>
+                                                                            <td>{{ prescription.start_date|date:"d/m/Y" }}</td>
+                                                                            <td>{{ prescription.end_date|date:"d/m/Y" }}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="alert alert-info">
+                                                            <i class="fas fa-info-circle mr-2"></i> Aucune prescription pour cette hospitalisation.
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="alert alert-info animate__animated animate__fadeIn">
+                                    <i class="fas fa-info-circle mr-2"></i> Aucune hospitalisation disponible pour ce patient.
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Appointments Tab -->
+                    <div class="tab-pane fade" id="tabAppointments">
+                        <div class="card animate__animated animate__fadeIn">
+                            <div class="card-inner">
+                                <h5 class="card-title text-primary mb-4"><i class="fas fa-calendar-alt mr-2"></i>Rendez-vous</h5>
+                                
+                                {% if appointments %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="thead-primary">
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Heure</th>
+                                                    <th>Raison</th>
+                                                    <th>Statut</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for appointment in appointments %}
+                                                    <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                        <td>{{ appointment.date|date:"d/m/Y" }}</td>
+                                                        <td>{{ appointment.time|time:"H:i" }}</td>
+                                                        <td>{{ appointment.reason }}</td>
+                                                        <td>
+                                                            <span class="badge 
+                                                                {% if appointment.status == 'confirmed' %}badge-success
+                                                                {% elif appointment.status == 'pending' %}badge-warning
+                                                                {% elif appointment.status == 'cancelled' %}badge-danger
+                                                                {% else %}badge-secondary{% endif %}">
+                                                                {{ appointment.get_status_display }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-primary mr-1">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-sm btn-outline-secondary">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info animate__animated animate__fadeIn">
+                                        <i class="fas fa-info-circle mr-2"></i> Aucun rendez-vous disponible.
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="text-right mt-3">
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus mr-1"></i> Nouveau Rendez-vous
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow-ups Tab -->
+                    <div class="tab-pane fade" id="tabSuivis">
+                        <div class="card animate__animated animate__fadeIn">
+                            <div class="card-inner">
+                                <h5 class="card-title text-primary mb-4"><i class="fas fa-user-check mr-2"></i>Suivis</h5>
+                                
+                                {% if suivis %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="thead-primary">
+                                                <tr>
+                                                    <th>Activité</th>
+                                                    <th>Service</th>
+                                                    <th>Date Début</th>
+                                                    <th>Date Fin</th>
+                                                    <th>Statut</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for suivi in suivis %}
+                                                    <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                        <td>{{ suivi.activite.nom }}</td>
+                                                        <td>{{ suivi.services.nom }}</td>
+                                                        <td>{{ suivi.date_debut|date:"d/m/Y" }}</td>
+                                                        <td>{{ suivi.date_fin|date:"d/m/Y" }}</td>
+                                                        <td>
+                                                            <span class="badge 
+                                                                {% if suivi.status == 'completed' %}badge-success
+                                                                {% elif suivi.status == 'in_progress' %}badge-primary
+                                                                {% elif suivi.status == 'pending' %}badge-warning
+                                                                {% else %}badge-secondary{% endif %}">
+                                                                {{ suivi.get_status_display }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info animate__animated animate__fadeIn">
+                                        <i class="fas fa-info-circle mr-2"></i> Aucun suivi disponible.
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" tabindex="-1" id="modalDefault">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">
+                    <i class="fas fa-user-plus mr-2"></i>Ajouter un Cas Contact
+                </h5>
+            </div>
+            <div class="modal-body">
+                <form id="casContactForm" method="post" action="{% url 'add_cas_contact' patient_id=patientsdetail.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_contact_person">Personne Contact</label>
+                        {{ cascontactsForm.contact_person }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone_number">Téléphone</label>
+                        {{ cascontactsForm.phone_number }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_relationship">Relation</label>
+                        {{ cascontactsForm.relationship }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_contact_frequency">Fréquence de Contact</label>
+                        {{ cascontactsForm.contact_frequency }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_date_contact">Date du Dernier Contact</label>
+                        {{ cascontactsForm.date_contact }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_smsdepistage">SMS de Sensibilisation</label>
+                        {{ cascontactsForm.smsdepistage }}
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Print button functionality
+        $('.print-btn').click(function() {
+            window.print();
+        });
+        
+        // Back button animation
+        $('.back-btn').hover(
+            function() {
+                $(this).find('em').addClass('animate__animated animate__shakeX');
+            },
+            function() {
+                $(this).find('em').removeClass('animate__animated animate__shakeX');
+            }
+        );
+        
+        // Notify button animation
+        $('.notify-btn').hover(
+            function() {
+                $(this).find('i').addClass('animate__animated animate__swing');
+            },
+            function() {
+                $(this).find('i').removeClass('animate__animated animate__swing');
+            }
+        );
+        
+        // Form submission with animation
+        $('#casContactForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            
+            // Add loading animation
+            submitBtn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Enregistrement...');
+            submitBtn.prop('disabled', true);
+            
+            // Submit form via AJAX
+            $.ajax({
+                type: form.attr('method'),
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Show success animation
+                        submitBtn.html('<i class="fas fa-check mr-1"></i> Enregistré!');
+                        submitBtn.removeClass('btn-primary').addClass('btn-success');
+                        
+                        // Close modal and refresh page after delay
+                        setTimeout(function() {
+                            $('#modalDefault').modal('hide');
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        // Show error message
+                        submitBtn.html('<i class="fas fa-save mr-1"></i> Enregistrer');
+                        submitBtn.prop('disabled', false);
+                        alert('Erreur: ' + response.message);
+                    }
+                },
+                error: function() {
+                    submitBtn.html('<i class="fas fa-save mr-1"></i> Enregistrer');
+                    submitBtn.prop('disabled', false);
+                    alert('Une erreur est survenue lors de l\'enregistrement.');
+                }
+            });
+        });
+        
+        // Reset form when modal is closed
+        $('#modalDefault').on('hidden.bs.modal', function () {
+            $('#casContactForm')[0].reset();
+            $('#casContactForm button[type="submit"]')
+                .html('<i class="fas fa-save mr-1"></i> Enregistrer')
+                .prop('disabled', false)
+                .removeClass('btn-success')
+                .addClass('btn-primary');
+        });
+        
+        // Tab change animation
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            const target = $(e.target).attr("href");
+            $(target).addClass('animate__animated animate__fadeIn');
+        });
+    });
+</script>
+{% endblock %}
+{#{% extends 'layout/base.html' %}#}
+{#{% load static %}#}
+{#{% load humanize %}#}
+{#{% block content %}#}
+{#<div class="nk-content nk-content-fluid">#}
+{##}
+{#                    <div class="container-xl wide-lg">#}
+{#                        <div class="nk-content-body">#}
+{#                            <div class="nk-block-head nk-block-head-sm">#}
+{#                                <div class="nk-block-between g-3">#}
+{##}
+{##}
+{#                                    <div class="nk-block-head-content">#}
+{#                                        {% if patientsdetail.qr_code %}#}
+{#                                            <div class="nk-block float-left">#}
+{#                                                <img src="{{ patientsdetail.qr_code.url }}" width="110" alt="QR Code">#}
+{#                                            </div>#}
+{#                                        {% else %}#}
+{#                                            <p>Aucun QR code disponible pour ce patient.</p>#}
+{#                                        {% endif %}#}
+{#                                        <h3 class="nk-block-title page-title">Patient / <strong class="text-primary small">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</strong></h3>#}
+{#                                        <div class="nk-block-des text-soft ml-5">#}
+{#                                            <ul class="list-inline">#}
+{#                                                <li>UUID: <span class="text-base">{{ patientsdetail.code_patient }}</span></li>#}
+{#                                                <li>CODE VIH: <span class="text-base">{% if patientsdetail.code_vih %} {{ patientsdetail.code_vih }}{% else %} NEANT {% endif %}</span></li>#}
+{#                                                 <li>Derniere Visite: <span class="text-base">15 Feb, 2019 01:02 PM</span></li>#}
+{#                                            </ul>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="nk-block-head-content">#}
+{#                                        <a href="/" class="btn btn-outline-light bg-secondary-dim d-none d-sm-inline-flex mr-5"><em class="icon ni ni-printer-fill"></em><span>Imprimer</span></a>#}
+{#                                        <a href="/" class="btn btn-outline-light bg-white d-none d-sm-inline-flex"><em class="icon ni ni-arrow-left"></em><span>Back</span></a>#}
+{#                                        <a href="#" class="btn btn-icon btn-outline-light bg-white d-inline-flex d-sm-none"><em class="icon ni ni-arrow-left"></em></a>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div><!-- .nk-block-head -->#}
+{#                            <div class="nk-block">#}
 {#                                      debut du nav#}
 {#                                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">#}
 {#                                    <li class="nav-item">#}
@@ -53,490 +1169,490 @@
 {#                                                class="icon ni ni-user-list-fill"></em></a>#}
 {#                                    </li>#}
 {# </ul>#}
-
-
-                                <!-- .nav-tabs -->
-                                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="tab" href="#tabPersonal">
-                                            <em class="icon ni ni-user"></em><span>Personal Infos</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link " data-toggle="tab" href="#tabConsultations">
-                                            <em class="icon ni ni-repeat"></em><span>Consultations</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#tabHospitalizations">
-                                            <em class="icon ni ni-home"></em><span>Hospitalisations</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#tabAppointments">
-                                            <em class="icon ni ni-calendar"></em><span>Rendez-vous</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="tab" href="#tabSuivis">
-                                            <em class="icon ni ni-user-check"></em><span>Suivis</span>
-                                        </a>
-                                    </li>
-                                </ul>
-
-                                <div class="tab-content">
-                                    <!-- Tab Peronal Info -->
-                                    <div class="tab-pane fade show active" id="tabPersonal">
-
-                                      <div class="nk-block">
-    <div class="nk-block-head">
-        <h5 class="title">Personal Information</h5>
-        <p>Informations relatives au patient.</p>
-    </div>
-    <!-- .nk-block-head -->
-    <div class="profile-ud-list">
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Sexe</span>
-                <span class="profile-ud-value">{{ patientsdetail.genre }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Nom & Prénom</span>
-                <span class="profile-ud-value">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Date de naissance</span>
-                <span class="profile-ud-value">{{ patientsdetail.date_naissance }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Lieu de naissance</span>
-                <span class="profile-ud-value">{{ patientsdetail.lieu_naissance }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Âge</span>
-                <span class="profile-ud-value">{{ patientsdetail.calculate_age }} ans</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Code Patient</span>
-                <span class="profile-ud-value text-primary"><i class="fa-solid fa-lock"></i> {{ patientsdetail.code_patient }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Contact</span>
-                <span class="profile-ud-value">{{ patientsdetail.contact }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Email</span>
-                <span class="profile-ud-value">{{ patientsdetail.adresse_mail }}</span>
-            </div>
-        </div>
-    </div>
-    <!-- .profile-ud-list -->
-</div>
-<!-- .nk-block -->
-<div class="nk-block">
-    <div class="nk-block-head nk-block-head-line">
-        <h6 class="title overline-title text-base">Informations Supplémentaires</h6>
-    </div>
-    <!-- .nk-block-head -->
-    <div class="profile-ud-list">
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Groupe Sanguin</span>
-                <span class="profile-ud-value"><i class="fa-solid fa-droplet text-danger"></i> {{ patientsdetail.groupe_sanguin }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Nationalité</span>
-                <span class="profile-ud-value">{{ patientsdetail.nationalite }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Profession</span>
-                <span class="profile-ud-value">{{ patientsdetail.profession }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Employeur</span>
-                <span class="profile-ud-value">{{ patientsdetail.employeur }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Nombre d'enfants</span>
-                <span class="profile-ud-value">{{ patientsdetail.nbr_enfants }} <i class="fa-solid fa-children text-black-50"></i></span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Situation Matrimoniale</span>
-                <span class="profile-ud-value">{{ patientsdetail.situation_matrimoniale }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Niveau d'Étude</span>
-                <span class="profile-ud-value">{{ patientsdetail.niveau_etude }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Ethnie</span>
-                <span class="profile-ud-value">{{ patientsdetail.ethnie }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Localité</span>
-                <span class="profile-ud-value">{{ patientsdetail.localite.nom }}</span>
-            </div>
-        </div>
-        <div class="profile-ud-item">
-            <div class="profile-ud wider">
-                <span class="profile-ud-label">Statut</span>
-                <span class="profile-ud-value">{{ patientsdetail.status }}</span>
-            </div>
-        </div>
-    </div>
-    <!-- .profile-ud-list -->
-</div>
-<!-- .nk-block -->
-
-                                        <!-- .nk-block -->
-                                        <div class="nk-divider divider md"></div>
-                                        <div class="nk-block">
-                                            <div class="nk-block-head nk-block-head-sm nk-block-between">
-                                                <h5 class="title">Cas Contacts</h5>
-                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalDefault">Ajouter contact</button>
-
-                                                <div class="modal fade" tabindex="-1" id="modalDefault">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                    <h5>Ajouter un Cas Contact pour {{ patient.nom }} {{ patient.prenoms }}</h5>
-            </div>
-            <div class="modal-body">
-            <form id="casContactForm" method="post" action="{% url 'add_cas_contact' patient_id=patientsdetail.id %}">
-                {% csrf_token %}
-                {{ cascontactsForm.as_p }}
-                <button type="submit" class="btn btn-primary">Enregistrer</button>
-            </form>
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Modal Footer Text</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                            </div><!-- .nk-block-head -->
-                                            <div class="bq-note">
-                                                <div class="bq-note-item">
-                                                    <table class="table">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Nom</th>
-      <th>Prénom</th>
-      <th>Téléphone</th>
-      <th>Relation</th>
-      <th>Fréquence de Contact</th>
-      <th>Dernier contact</th>
-      <th>SMS Sensibilisation</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for contact in case_contacts %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ contact.contact_person.split|first }}</td>
-      <td>{{ contact.contact_person.split|last }}</td>
-      <td>{{ contact.phone_number }}</td>
-      <td>{{ contact.get_relationship_display }}</td>
-      <td>{{ contact.get_contact_frequency_display }}</td>
-      <td>{{ contact.date_contact|date:"d/m/Y" }}</td>
-      <td>{% if contact.smsdepistage %}
-          <span class="badge badge-success xs">Envoyer</span>
-          {% else %}
-         <span class="badge badge-danger xs">non envoyer</span>
-          {% endif %}
-      </td>
-      <td><button class="btn btn-outline-secondary btn-xs">
-          Notifier
-      </button></td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="7" class="text-center">Aucun cas contact enregistré.</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-                                                            </div>
-
-                                            </div><!-- .bq-note -->
-                                        </div><!-- .nk-block -->
-                                    </div>
-
-                                    <!-- Tab Consultations -->
-                                    <div class="tab-pane fade" id="tabConsultations">
-
-                                        <div id="accordion" class="accordion">
-                                            {% for consultation in consultations %}
-                                                <div class="accordion-item">
-                                                    <a href="#"
-                                                       class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"
-                                                       data-toggle="collapse"
-                                                       data-target="#accordion-item-{{ consultation.id }}">
-                                                        <h6 data-toggle="tooltip" data-placement="left"
-                                                            title="{{ consultation.consultation_date|naturaltime }}"
-                                                            class="title">
-                                                            Consultation du {{ consultation.consultation_date }}
-                                                            | {{ consultation.reason|truncatewords:25 }}
-                                                        </h6>
-                                                        <span class="accordion-icon"></span>
-                                                    </a>
-                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
-                                                         id="accordion-item-{{ consultation.id }}"
-                                                         data-parent="#accordion">
-                                                        <div class="accordion-inner">
-                                                            <h5>Détails de la Consultation {{ consultation.num }}</h5>
-
-                                                            <p><strong>Date
-                                                                :</strong> {{ consultation.consultation_date|date:"d/m/Y H:i" }}
-                                                            </p>
-                                                            <p><strong>Raison
-                                                                :</strong> {{ consultation.reason|default:"Non spécifiée" }}
-                                                            </p>
-
-                                                            <p><strong>Constante :</strong>
-                                                                {% if consultation.constante %}
-                                                                    {{ consultation.constante }}
-                                                                {% else %}
-                                                                    Aucune constante enregistrée.
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Examens :</strong>
-                                                                {% if consultation.examens %}
-                                                                    {{ consultation.examens }}
-                                                                {% else %}
-                                                                    Aucun examen associé.
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Symptômes :</strong></p>
-                                                            <ul>
-                                                                {% for symptome in consultation.symptomes.all %}
-                                                                    <li>{{ symptome.nom }}</li>
-                                                                {% empty %}
-                                                                    <li>Aucun symptôme enregistré.</li>
-                                                                {% endfor %}
-                                                            </ul>
-
-                                                            <p><strong>Antécédents Médicaux :</strong></p>
-                                                            <ul>
-                                                                {% for antecedent in consultation.antecedentsMedicaux.all %}
-                                                                    <li>{{ antecedent.nom }}</li>
-                                                                {% empty %}
-                                                                    <li>Aucun antécédent médical.</li>
-                                                                {% endfor %}
-                                                            </ul>
-
-                                                            <p><strong>Allergies :</strong></p>
-                                                            <ul>
-                                                                {% for allergie in consultation.allergies.all %}
-                                                                    <li>{{ allergie.titre }}</li>
-                                                                {% empty %}
-                                                                    <li>Aucune allergie enregistrée.</li>
-                                                                {% endfor %}
-                                                            </ul>
-
-                                                            <p><strong>Diagnostic :</strong></p>
-                                                            <div>
-                                                                {{ consultation.diagnosis|safe }}
-                                                            </div>
-
-                                                            <p><strong>Commentaires :</strong></p>
-                                                            <div>
-                                                                {{ consultation.commentaires|safe }}
-                                                            </div>
-
-                                                            <p><strong>Médecin :</strong>
-                                                                {% if consultation.doctor %}
-                                                                    {{ consultation.doctor.username }}
-                                                                {% else %}
-                                                                    Non attribué.
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Status
-                                                                :</strong> {{ consultation.get_status_display|default:"Non défini" }}
-                                                            </p>
-
-                                                            <p><strong>Service de Suivi :</strong>
-                                                                {% if consultation.suivi %}
-                                                                    {{ consultation.suivi.nom }}
-                                                                {% else %}
-                                                                    Aucun service de suivi.
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Créé par :</strong>
-                                                                {% if consultation.created_by %}
-                                                                    {{ consultation.created_by.username }}
-                                                                {% else %}
-                                                                    Créateur inconnu.
-                                                                {% endif %}
-                                                            </p>
-
-                                                            <p><strong>Créé le
-                                                                :</strong> {{ consultation.created_at|date:"d/m/Y H:i" }}
-                                                            </p>
-                                                            <p><strong>Mis à jour le
-                                                                :</strong> {{ consultation.updated_at|date:"d/m/Y H:i" }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% empty %}
-                                                <p>Aucune consultation disponible pour ce patient.</p>
-                                            {% endfor %}
-                                        </div>
-
-
-                                    </div>
-
-                                    <!-- Tab Hospitalisations -->
-                                    <div class="tab-pane fade" id="tabHospitalizations">
-                                        <div id="accordion-hospitalization" class="accordion">
-                                            {% for hospitalization in hospitalizations %}
-                                                <div class="accordion-item">
-                                                    <a href="#" class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse" data-target="#accordion-item-hosp-{{ hospitalization.id }}">
-                                                        <h6 class="title">
-                                                            Hospitalisation
-                                                            du {{ hospitalization.admission_date|date:"d/m/Y" }}
-                                                            | Chambre
-                                                            : {{ hospitalization.bed }}-{{ hospitalization.bed.box }}
-                                                            | {% if hospitalization.discharge_date %}
-                                                            <span class="badge badge-outline-primary"> Sortie le :
-                                                            {{ hospitalization.discharge_date|date:"d/m/Y" }} | Motif :
-                                                            {{ hospitalization.discharge_reason }} {% endif %}</span>
-                                                        </h6>
-                                                        <span class="accordion-icon"></span>
-                                                    </a>
-                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"
-                                                         id="accordion-item-hosp-{{ hospitalization.id }}"
-                                                         data-parent="#accordion-hospitalization">
-                                                        <div class="accordion-inner">
-                                                            <!-- Détails de l'Hospitalisation -->
-                                    <h6>Détails de l'Hospitalisation</h6>
-                                    <p><strong>Chambre :</strong> {{ hospitalization.bed }}</p>
-                                    <p><strong>Médecin Responsable :</strong> {{ hospitalization.doctor.username|default:"Non attribué" }}</p>
-                                    <p><strong>Motif d'Admission :</strong> {{ hospitalization.reason_for_admission }}</p>
-                                    <p><strong>Statut :</strong> {{ hospitalization.get_status_display|default:"Non défini" }}</p>
-
-                                    <!-- Indicateurs -->
-                                    <h6 class="mt-4">Indicateurs</h6>
-                                    <p><strong>Biologiques :</strong></p>
-                                    <ul>
-                                        {% for indicator in hospitalization.indicateurs_biologiques.all %}
-                                            <li>Globules Blancs : {{ indicator.globules_blancs }} | CRP : {{ indicator.crp }}</li>
-                                        {% empty %}
-                                            <li>Aucun indicateur biologique enregistré.</li>
-                                        {% endfor %}
-                                    </ul>
-
-                                    <p><strong>Fonctionnels :</strong></p>
-                                    <ul>
-                                        {% for indicator in hospitalization.indicateurs_fonctionnels.all %}
-                                            <li>Mobilité : {{ indicator.mobilite }} | Conscience : {{ indicator.conscience }}</li>
-                                        {% empty %}
-                                            <li>Aucun indicateur fonctionnel enregistré.</li>
-                                        {% endfor %}
-                                    </ul>
-
-                                    <p><strong>Subjectifs :</strong></p>
-                                    <ul>
-                                        {% for indicator in hospitalization.indicateurs_subjectifs.all %}
-                                            <li>Bien-Être : {{ indicator.bien_etre }}</li>
-                                        {% empty %}
-                                            <li>Aucun indicateur subjectif enregistré.</li>
-                                        {% endfor %}
-                                    </ul>
-
-                                    <!-- Médicaments Prescrits -->
-                                    <h6 class="mt-4">Médicaments Prescrits</h6>
-                                    <ul>
-                                        {% for prescription in hospitalization.hospiprescriptions.all %}
-                                            <li>
-                                                <strong>{{ prescription.medication.nom }}</strong> - {{ prescription.quantity }} unité(s)
-                                                ({{ prescription.posology }})
-                                            </li>
-                                        {% empty %}
-                                            <li>Aucune prescription pour cette hospitalisation.</li>
-                                        {% endfor %}
-                                    </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% empty %}
-                                                <p>Aucune hospitalisation disponible pour ce patient.</p>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <!-- Tab Rendez-vous -->
-                                    <div class="tab-pane fade" id="tabAppointments">
-                                        <h5>Rendez-vous</h5>
-                                        <ul>
-                                            {% for appointment in appointments %}
-                                                <li>
-                                                    {{ appointment.date }} à {{ appointment.time }} -
-                                                    {{ appointment.reason }} ({{ appointment.status }})
-                                                </li>
-                                            {% empty %}
-                                                <p>Aucun rendez-vous disponible.</p>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-
-                                    <!-- Tab Suivis -->
-                                    <div class="tab-pane fade" id="tabSuivis">
-                                        <h5>Suivis</h5>
-                                        <ul>
-                                            {% for suivi in suivis %}
-                                                <li>
-                                                    Activité : {{ suivi.activite.nom }} -
-                                                    Service : {{ suivi.services.nom }}
-                                                </li>
-                                            {% empty %}
-                                                <p>Aucun suivi disponible.</p>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-
-
-
+{##}
+{##}
+{#                                <!-- .nav-tabs -->#}
+{#                                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link active" data-toggle="tab" href="#tabPersonal">#}
+{#                                            <em class="icon ni ni-user"></em><span>Personal Infos</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link " data-toggle="tab" href="#tabConsultations">#}
+{#                                            <em class="icon ni ni-repeat"></em><span>Consultations</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link" data-toggle="tab" href="#tabHospitalizations">#}
+{#                                            <em class="icon ni ni-home"></em><span>Hospitalisations</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link" data-toggle="tab" href="#tabAppointments">#}
+{#                                            <em class="icon ni ni-calendar"></em><span>Rendez-vous</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nav-item">#}
+{#                                        <a class="nav-link" data-toggle="tab" href="#tabSuivis">#}
+{#                                            <em class="icon ni ni-user-check"></em><span>Suivis</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{##}
+{#                                <div class="tab-content">#}
+{#                                    <!-- Tab Peronal Info -->#}
+{#                                    <div class="tab-pane fade show active" id="tabPersonal">#}
+{##}
+{#                                      <div class="nk-block">#}
+{#    <div class="nk-block-head">#}
+{#        <h5 class="title">Personal Information</h5>#}
+{#        <p>Informations relatives au patient.</p>#}
+{#    </div>#}
+{#    <!-- .nk-block-head -->#}
+{#    <div class="profile-ud-list">#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Sexe</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.genre }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Nom & Prénom</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.nom }} {{ patientsdetail.prenoms }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Date de naissance</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.date_naissance }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Lieu de naissance</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.lieu_naissance }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Âge</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.calculate_age }} ans</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Code Patient</span>#}
+{#                <span class="profile-ud-value text-primary"><i class="fa-solid fa-lock"></i> {{ patientsdetail.code_patient }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Contact</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.contact }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Email</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.adresse_mail }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    <!-- .profile-ud-list -->#}
+{#</div>#}
+{#<!-- .nk-block -->#}
+{#<div class="nk-block">#}
+{#    <div class="nk-block-head nk-block-head-line">#}
+{#        <h6 class="title overline-title text-base">Informations Supplémentaires</h6>#}
+{#    </div>#}
+{#    <!-- .nk-block-head -->#}
+{#    <div class="profile-ud-list">#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Groupe Sanguin</span>#}
+{#                <span class="profile-ud-value"><i class="fa-solid fa-droplet text-danger"></i> {{ patientsdetail.groupe_sanguin }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Nationalité</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.nationalite }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Profession</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.profession }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Employeur</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.employeur }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Nombre d'enfants</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.nbr_enfants }} <i class="fa-solid fa-children text-black-50"></i></span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Situation Matrimoniale</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.situation_matrimoniale }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Niveau d'Étude</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.niveau_etude }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Ethnie</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.ethnie }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Localité</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.localite.nom }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="profile-ud-item">#}
+{#            <div class="profile-ud wider">#}
+{#                <span class="profile-ud-label">Statut</span>#}
+{#                <span class="profile-ud-value">{{ patientsdetail.status }}</span>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    <!-- .profile-ud-list -->#}
+{#</div>#}
+{#<!-- .nk-block -->#}
+{##}
+{#                                        <!-- .nk-block -->#}
+{#                                        <div class="nk-divider divider md"></div>#}
+{#                                        <div class="nk-block">#}
+{#                                            <div class="nk-block-head nk-block-head-sm nk-block-between">#}
+{#                                                <h5 class="title">Cas Contacts</h5>#}
+{#                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalDefault">Ajouter contact</button>#}
+{##}
+{#                                                <div class="modal fade" tabindex="-1" id="modalDefault">#}
+{#    <div class="modal-dialog" role="document">#}
+{#        <div class="modal-content">#}
+{#            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                <em class="icon ni ni-cross"></em>#}
+{#            </a>#}
+{#            <div class="modal-header">#}
+{#                    <h5>Ajouter un Cas Contact pour {{ patient.nom }} {{ patient.prenoms }}</h5>#}
+{#            </div>#}
+{#            <div class="modal-body">#}
+{#            <form id="casContactForm" method="post" action="{% url 'add_cas_contact' patient_id=patientsdetail.id %}">#}
+{#                {% csrf_token %}#}
+{#                {{ cascontactsForm.as_p }}#}
+{#                <button type="submit" class="btn btn-primary">Enregistrer</button>#}
+{#            </form>#}
+{#            </div>#}
+{#            <div class="modal-footer bg-light">#}
+{#                <span class="sub-text">Modal Footer Text</span>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#                                            </div><!-- .nk-block-head -->#}
+{#                                            <div class="bq-note">#}
+{#                                                <div class="bq-note-item">#}
+{#                                                    <table class="table">#}
+{#  <thead>#}
+{#    <tr>#}
+{#      <th>#</th>#}
+{#      <th>Nom</th>#}
+{#      <th>Prénom</th>#}
+{#      <th>Téléphone</th>#}
+{#      <th>Relation</th>#}
+{#      <th>Fréquence de Contact</th>#}
+{#      <th>Dernier contact</th>#}
+{#      <th>SMS Sensibilisation</th>#}
+{#      <th>Action</th>#}
+{#    </tr>#}
+{#  </thead>#}
+{#  <tbody>#}
+{#    {% for contact in case_contacts %}#}
+{#    <tr>#}
+{#      <th scope="row">{{ forloop.counter }}</th>#}
+{#      <td>{{ contact.contact_person.split|first }}</td>#}
+{#      <td>{{ contact.contact_person.split|last }}</td>#}
+{#      <td>{{ contact.phone_number }}</td>#}
+{#      <td>{{ contact.get_relationship_display }}</td>#}
+{#      <td>{{ contact.get_contact_frequency_display }}</td>#}
+{#      <td>{{ contact.date_contact|date:"d/m/Y" }}</td>#}
+{#      <td>{% if contact.smsdepistage %}#}
+{#          <span class="badge badge-success xs">Envoyer</span>#}
+{#          {% else %}#}
+{#         <span class="badge badge-danger xs">non envoyer</span>#}
+{#          {% endif %}#}
+{#      </td>#}
+{#      <td><button class="btn btn-outline-secondary btn-xs">#}
+{#          Notifier#}
+{#      </button></td>#}
+{#    </tr>#}
+{#    {% empty %}#}
+{#    <tr>#}
+{#      <td colspan="7" class="text-center">Aucun cas contact enregistré.</td>#}
+{#    </tr>#}
+{#    {% endfor %}#}
+{#  </tbody>#}
+{#</table>#}
+{#                                                            </div>#}
+{##}
+{#                                            </div><!-- .bq-note -->#}
+{#                                        </div><!-- .nk-block -->#}
+{#                                    </div>#}
+{##}
+{#                                    <!-- Tab Consultations -->#}
+{#                                    <div class="tab-pane fade" id="tabConsultations">#}
+{##}
+{#                                        <div id="accordion" class="accordion">#}
+{#                                            {% for consultation in consultations %}#}
+{#                                                <div class="accordion-item">#}
+{#                                                    <a href="#"#}
+{#                                                       class="accordion-head bg-azure-dim {% if not forloop.first %}collapsed{% endif %}"#}
+{#                                                       data-toggle="collapse"#}
+{#                                                       data-target="#accordion-item-{{ consultation.id }}">#}
+{#                                                        <h6 data-toggle="tooltip" data-placement="left"#}
+{#                                                            title="{{ consultation.consultation_date|naturaltime }}"#}
+{#                                                            class="title">#}
+{#                                                            Consultation du {{ consultation.consultation_date }}#}
+{#                                                            | {{ consultation.reason|truncatewords:25 }}#}
+{#                                                        </h6>#}
+{#                                                        <span class="accordion-icon"></span>#}
+{#                                                    </a>#}
+{#                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"#}
+{#                                                         id="accordion-item-{{ consultation.id }}"#}
+{#                                                         data-parent="#accordion">#}
+{#                                                        <div class="accordion-inner">#}
+{#                                                            <h5>Détails de la Consultation {{ consultation.num }}</h5>#}
+{##}
+{#                                                            <p><strong>Date#}
+{#                                                                :</strong> {{ consultation.consultation_date|date:"d/m/Y H:i" }}#}
+{#                                                            </p>#}
+{#                                                            <p><strong>Raison#}
+{#                                                                :</strong> {{ consultation.reason|default:"Non spécifiée" }}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Constante :</strong>#}
+{#                                                                {% if consultation.constante %}#}
+{#                                                                    {{ consultation.constante }}#}
+{#                                                                {% else %}#}
+{#                                                                    Aucune constante enregistrée.#}
+{#                                                                {% endif %}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Examens :</strong>#}
+{#                                                                {% if consultation.examens %}#}
+{#                                                                    {{ consultation.examens }}#}
+{#                                                                {% else %}#}
+{#                                                                    Aucun examen associé.#}
+{#                                                                {% endif %}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Symptômes :</strong></p>#}
+{#                                                            <ul>#}
+{#                                                                {% for symptome in consultation.symptomes.all %}#}
+{#                                                                    <li>{{ symptome.nom }}</li>#}
+{#                                                                {% empty %}#}
+{#                                                                    <li>Aucun symptôme enregistré.</li>#}
+{#                                                                {% endfor %}#}
+{#                                                            </ul>#}
+{##}
+{#                                                            <p><strong>Antécédents Médicaux :</strong></p>#}
+{#                                                            <ul>#}
+{#                                                                {% for antecedent in consultation.antecedentsMedicaux.all %}#}
+{#                                                                    <li>{{ antecedent.nom }}</li>#}
+{#                                                                {% empty %}#}
+{#                                                                    <li>Aucun antécédent médical.</li>#}
+{#                                                                {% endfor %}#}
+{#                                                            </ul>#}
+{##}
+{#                                                            <p><strong>Allergies :</strong></p>#}
+{#                                                            <ul>#}
+{#                                                                {% for allergie in consultation.allergies.all %}#}
+{#                                                                    <li>{{ allergie.titre }}</li>#}
+{#                                                                {% empty %}#}
+{#                                                                    <li>Aucune allergie enregistrée.</li>#}
+{#                                                                {% endfor %}#}
+{#                                                            </ul>#}
+{##}
+{#                                                            <p><strong>Diagnostic :</strong></p>#}
+{#                                                            <div>#}
+{#                                                                {{ consultation.diagnosis|safe }}#}
+{#                                                            </div>#}
+{##}
+{#                                                            <p><strong>Commentaires :</strong></p>#}
+{#                                                            <div>#}
+{#                                                                {{ consultation.commentaires|safe }}#}
+{#                                                            </div>#}
+{##}
+{#                                                            <p><strong>Médecin :</strong>#}
+{#                                                                {% if consultation.doctor %}#}
+{#                                                                    {{ consultation.doctor.username }}#}
+{#                                                                {% else %}#}
+{#                                                                    Non attribué.#}
+{#                                                                {% endif %}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Status#}
+{#                                                                :</strong> {{ consultation.get_status_display|default:"Non défini" }}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Service de Suivi :</strong>#}
+{#                                                                {% if consultation.suivi %}#}
+{#                                                                    {{ consultation.suivi.nom }}#}
+{#                                                                {% else %}#}
+{#                                                                    Aucun service de suivi.#}
+{#                                                                {% endif %}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Créé par :</strong>#}
+{#                                                                {% if consultation.created_by %}#}
+{#                                                                    {{ consultation.created_by.username }}#}
+{#                                                                {% else %}#}
+{#                                                                    Créateur inconnu.#}
+{#                                                                {% endif %}#}
+{#                                                            </p>#}
+{##}
+{#                                                            <p><strong>Créé le#}
+{#                                                                :</strong> {{ consultation.created_at|date:"d/m/Y H:i" }}#}
+{#                                                            </p>#}
+{#                                                            <p><strong>Mis à jour le#}
+{#                                                                :</strong> {{ consultation.updated_at|date:"d/m/Y H:i" }}#}
+{#                                                            </p>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            {% empty %}#}
+{#                                                <p>Aucune consultation disponible pour ce patient.</p>#}
+{#                                            {% endfor %}#}
+{#                                        </div>#}
+{##}
+{##}
+{#                                    </div>#}
+{##}
+{#                                    <!-- Tab Hospitalisations -->#}
+{#                                    <div class="tab-pane fade" id="tabHospitalizations">#}
+{#                                        <div id="accordion-hospitalization" class="accordion">#}
+{#                                            {% for hospitalization in hospitalizations %}#}
+{#                                                <div class="accordion-item">#}
+{#                                                    <a href="#" class="bg-danger-dim accordion-head {% if not forloop.first %}collapsed{% endif %}" data-toggle="collapse" data-target="#accordion-item-hosp-{{ hospitalization.id }}">#}
+{#                                                        <h6 class="title">#}
+{#                                                            Hospitalisation#}
+{#                                                            du {{ hospitalization.admission_date|date:"d/m/Y" }}#}
+{#                                                            | Chambre#}
+{#                                                            : {{ hospitalization.bed }}-{{ hospitalization.bed.box }}#}
+{#                                                            | {% if hospitalization.discharge_date %}#}
+{#                                                            <span class="badge badge-outline-primary"> Sortie le :#}
+{#                                                            {{ hospitalization.discharge_date|date:"d/m/Y" }} | Motif :#}
+{#                                                            {{ hospitalization.discharge_reason }} {% endif %}</span>#}
+{#                                                        </h6>#}
+{#                                                        <span class="accordion-icon"></span>#}
+{#                                                    </a>#}
+{#                                                    <div class="accordion-body collapse {% if forloop.first %}show{% endif %}"#}
+{#                                                         id="accordion-item-hosp-{{ hospitalization.id }}"#}
+{#                                                         data-parent="#accordion-hospitalization">#}
+{#                                                        <div class="accordion-inner">#}
+{#                                                            <!-- Détails de l'Hospitalisation -->#}
+{#                                    <h6>Détails de l'Hospitalisation</h6>#}
+{#                                    <p><strong>Chambre :</strong> {{ hospitalization.bed }}</p>#}
+{#                                    <p><strong>Médecin Responsable :</strong> {{ hospitalization.doctor.username|default:"Non attribué" }}</p>#}
+{#                                    <p><strong>Motif d'Admission :</strong> {{ hospitalization.reason_for_admission }}</p>#}
+{#                                    <p><strong>Statut :</strong> {{ hospitalization.get_status_display|default:"Non défini" }}</p>#}
+{##}
+{#                                    <!-- Indicateurs -->#}
+{#                                    <h6 class="mt-4">Indicateurs</h6>#}
+{#                                    <p><strong>Biologiques :</strong></p>#}
+{#                                    <ul>#}
+{#                                        {% for indicator in hospitalization.indicateurs_biologiques.all %}#}
+{#                                            <li>Globules Blancs : {{ indicator.globules_blancs }} | CRP : {{ indicator.crp }}</li>#}
+{#                                        {% empty %}#}
+{#                                            <li>Aucun indicateur biologique enregistré.</li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{##}
+{#                                    <p><strong>Fonctionnels :</strong></p>#}
+{#                                    <ul>#}
+{#                                        {% for indicator in hospitalization.indicateurs_fonctionnels.all %}#}
+{#                                            <li>Mobilité : {{ indicator.mobilite }} | Conscience : {{ indicator.conscience }}</li>#}
+{#                                        {% empty %}#}
+{#                                            <li>Aucun indicateur fonctionnel enregistré.</li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{##}
+{#                                    <p><strong>Subjectifs :</strong></p>#}
+{#                                    <ul>#}
+{#                                        {% for indicator in hospitalization.indicateurs_subjectifs.all %}#}
+{#                                            <li>Bien-Être : {{ indicator.bien_etre }}</li>#}
+{#                                        {% empty %}#}
+{#                                            <li>Aucun indicateur subjectif enregistré.</li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{##}
+{#                                    <!-- Médicaments Prescrits -->#}
+{#                                    <h6 class="mt-4">Médicaments Prescrits</h6>#}
+{#                                    <ul>#}
+{#                                        {% for prescription in hospitalization.hospiprescriptions.all %}#}
+{#                                            <li>#}
+{#                                                <strong>{{ prescription.medication.nom }}</strong> - {{ prescription.quantity }} unité(s)#}
+{#                                                ({{ prescription.posology }})#}
+{#                                            </li>#}
+{#                                        {% empty %}#}
+{#                                            <li>Aucune prescription pour cette hospitalisation.</li>#}
+{#                                        {% endfor %}#}
+{#                                    </ul>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            {% empty %}#}
+{#                                                <p>Aucune hospitalisation disponible pour ce patient.</p>#}
+{#                                            {% endfor %}#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <!-- Tab Rendez-vous -->#}
+{#                                    <div class="tab-pane fade" id="tabAppointments">#}
+{#                                        <h5>Rendez-vous</h5>#}
+{#                                        <ul>#}
+{#                                            {% for appointment in appointments %}#}
+{#                                                <li>#}
+{#                                                    {{ appointment.date }} à {{ appointment.time }} -#}
+{#                                                    {{ appointment.reason }} ({{ appointment.status }})#}
+{#                                                </li>#}
+{#                                            {% empty %}#}
+{#                                                <p>Aucun rendez-vous disponible.</p>#}
+{#                                            {% endfor %}#}
+{#                                        </ul>#}
+{#                                    </div>#}
+{##}
+{#                                    <!-- Tab Suivis -->#}
+{#                                    <div class="tab-pane fade" id="tabSuivis">#}
+{#                                        <h5>Suivis</h5>#}
+{#                                        <ul>#}
+{#                                            {% for suivi in suivis %}#}
+{#                                                <li>#}
+{#                                                    Activité : {{ suivi.activite.nom }} -#}
+{#                                                    Service : {{ suivi.services.nom }}#}
+{#                                                </li>#}
+{#                                            {% empty %}#}
+{#                                                <p>Aucun suivi disponible.</p>#}
+{#                                            {% endfor %}#}
+{#                                        </ul>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{##}
+{##}
 {#   {% for service, consultations in services_with_consultations %}#}
 {#    <div class="tab-pane" id="tabItem{{ service.id }}">#}
 {#        {% if consultations %}#}
@@ -582,8 +1698,8 @@
 {#        {% endif %}#}
 {#    </div>#}
 {#{% endfor %}#}
-
-
+{##}
+{##}
 {#                                    {% for service, consultations in services_with_consultations %}#}
 {#                                        <div class="tab-pane" id="tabItem{{ service.id }}">#}
 {#                                            <h4>{{ service.nom }}</h4>#}
@@ -618,36 +1734,36 @@
 {#                                            {% endif %}#}
 {#                                        </div>#}
 {#                                    {% endfor %}#}
-                                
-                                </div>
-                            </div>
-                            <!-- .card-aside-wrap -->
-                        </div><!-- .card -->
-                            </div><!-- .nk-block -->
-                       
-    <script>
-        document.getElementById('casContactForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-
-            fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        location.reload();  // Recharge la page ou redirige si nécessaire
-                    } else if (data.errors) {
-                        let errorMessages = Object.values(data.errors).map(err => err.join(' ')).join('\n');
-                        alert("Erreur :\n" + errorMessages);
-                    }
-                })
-                .catch(error => console.error('Erreur:', error));
-        });
-    </script>
-{% endblock %}
+{##}
+{#                                </div>#}
+{#                            </div>#}
+{#                            <!-- .card-aside-wrap -->#}
+{#                        </div><!-- .card -->#}
+{#                            </div><!-- .nk-block -->#}
+{##}
+{#    <script>#}
+{#        document.getElementById('casContactForm').addEventListener('submit', function (e) {#}
+{#            e.preventDefault();#}
+{#            const formData = new FormData(this);#}
+{##}
+{#            fetch(this.action, {#}
+{#                method: 'POST',#}
+{#                body: formData,#}
+{#                headers: {#}
+{#                    'X-Requested-With': 'XMLHttpRequest'#}
+{#                }#}
+{#            })#}
+{#                .then(response => response.json())#}
+{#                .then(data => {#}
+{#                    if (data.success) {#}
+{#                        alert(data.message);#}
+{#                        location.reload();  // Recharge la page ou redirige si nécessaire#}
+{#                    } else if (data.errors) {#}
+{#                        let errorMessages = Object.values(data.errors).map(err => err.join(' ')).join('\n');#}
+{#                        alert("Erreur :\n" + errorMessages);#}
+{#                    }#}
+{#                })#}
+{#                .catch(error => console.error('Erreur:', error));#}
+{#        });#}
+{#    </script>#}
+{#{% endblock %}#}

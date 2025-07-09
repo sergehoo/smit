@@ -1,672 +1,473 @@
 {% extends 'layout/base.html' %}
 {% load static %}
-{% block content %}
+{% load custom_filters %}
 
+{% block content %}
+    
     {% if subservice.service == service %}
 
         <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title text-primary">{{ service  }} {{ subservice.nom }}</h3>
-                                        <div class="nk-block-des text-soft">
-                                            <p>Bienvenue sur le tableau de bord.VIH</p>
-                                        </div>
-                                    </div><!-- .nk-block-head-content -->
-                                    <div class="nk-block-head-content">
-                                        <div class="toggle-wrap nk-block-tools-toggle">
-                                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
-                                            <div class="toggle-expand-content" data-content="pageMenu">
-                                                <ul class="nk-block-tools g-3">
-                                                    <li>
-                                                        <div class="drodown">
-                                                            <a href="#" class="dropdown-toggle btn btn-white btn-dim btn-outline-light" data-toggle="dropdown"><em class="d-none d-sm-inline icon ni ni-calender-date"></em><span><span class="d-none d-md-inline">Last</span> 30 Days</span><em class="dd-indc icon ni ni-chevron-right"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-                                                                    <li><a href="#"><span>Last 30 Days</span></a></li>
-                                                                    <li><a href="#"><span>Last 6 Months</span></a></li>
-                                                                    <li><a href="#"><span>Last 1 Years</span></a></li>
-                                                                </ul>
-                                                            </div>
+            <div class="container-xl wide-lg">
+                <div class="nk-content-body">
+                    <div class="nk-block-head nk-block-head-sm">
+                        <div class="nk-block-between">
+                            <div class="nk-block-head-content">
+                                <h3 class="nk-block-title page-title text-primary">{{ service }} {{ subservice.nom }}</h3>
+                                <div class="nk-block-des text-soft">
+                                    <p>Tableau de bord VIH - Données en temps réel</p>
+                                </div>
+                            </div>
+                            <div class="nk-block-head-content">
+                                <div class="toggle-wrap nk-block-tools-toggle">
+                                    <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em class="icon ni ni-more-v"></em></a>
+                                    <div class="toggle-expand-content" data-content="pageMenu">
+                                        <ul class="nk-block-tools g-3">
+                                            <li>
+                                                <div class="drodown">
+                                                    <a href="#" class="dropdown-toggle btn btn-white btn-dim btn-outline-light" data-toggle="dropdown"><em class="d-none d-sm-inline icon ni ni-calender-date"></em><span>Période</span><em class="dd-indc icon ni ni-chevron-right"></em></a>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <ul class="link-list-opt no-bdr">
+                                                            <li><a href="#"><span>7 derniers jours</span></a></li>
+                                                            <li><a href="#"><span>30 derniers jours</span></a></li>
+                                                            <li><a href="#"><span>6 derniers mois</span></a></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li class="nk-block-tools-opt"><a href="#" class="btn btn-primary"><em class="icon ni ni-download"></em><span>Exporter</span></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nk-block">
+                        <div class="row g-gs">
+                            <!-- Première colonne - Statistiques principales -->
+                            <div class="col-xxl-7">
+                                <div class="row g-gs">
+                                    <!-- Carte principale - Dépistage VIH -->
+                                    <div class="col-lg-7 col-xxl-12">
+                                        <div class="card card-bordered">
+                                            <div class="card-inner">
+                                                <div class="card-title-group align-start mb-2">
+                                                    <div class="card-title">
+                                                        <h6 class="title">Statistiques de dépistage VIH</h6>
+                                                        <p>Données cumulées sur les 12 derniers mois</p>
+                                                    </div>
+                                                    <div class="card-tools">
+                                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Données issues des tests rapides et confirmatoires"></em>
+                                                    </div>
+                                                </div>
+                                                <div class="align-end gy-3 gx-5 flex-wrap flex-md-nowrap flex-lg-wrap flex-xxl-nowrap">
+                                                    <div class="nk-sale-data-group flex-md-nowrap g-4">
+                                                        <div class="nk-sale-data">
+                                                            <span class="amount">{{ total_tests }} <span class="change {% if test_change >= 0 %}up text-success{% else %}down text-danger{% endif %}">
+                                                                <em class="icon ni ni-arrow-long-{% if test_change >= 0 %}up{% else %}down{% endif %}"></em>{{ test_change }}%</span></span>
+                                                            <span class="sub-title">Tests réalisés</span>
                                                         </div>
-                                                    </li>
-                                                    <li class="nk-block-tools-opt"><a href="#" class="btn btn-primary"><em class="icon ni ni-reports"></em><span>Reports</span></a></li>
-                                                </ul>
+                                                        <div class="nk-sale-data">
+                                                            <span class="amount">{{ total_positifs }} <span class="change {% if positif_change >= 0 %}up text-success{% else %}down text-danger{% endif %}">
+                                                                <em class="icon ni ni-arrow-long-{% if positif_change >= 0 %}up{% else %}down{% endif %}"></em>{{ positif_change }}%</span></span>
+                                                            <span class="sub-title">Cas positifs</span>
+                                                        </div>
+                                                        <div class="nk-sale-data">
+                                                            <span class="amount">{{ taux_positivite|floatformat:1 }}%</span>
+                                                            <span class="sub-title">Taux de positivité</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-sales-ck sales-revenue">
+                                                        <canvas class="sales-bar-chart" id="testsChart"></canvas>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div><!-- .nk-block-head-content -->
-                                </div><!-- .nk-block-between -->
-                            </div><!-- .nk-block-head -->
-                            <div class="nk-block">
-                                <div class="row g-gs">
-                                    <div class="col-xxl-7">
+                                    </div>
+
+                                    <!-- Cartes secondaires - Dépistage par sexe -->
+                                    <div class="col-lg-5 col-xxl-12">
                                         <div class="row g-gs">
-                                            <div class="col-lg-7 col-xxl-12">
+                                            <div class="col-sm-6 col-lg-12 col-xxl-6">
                                                 <div class="card card-bordered">
                                                     <div class="card-inner">
                                                         <div class="card-title-group align-start mb-2">
                                                             <div class="card-title">
-                                                                <h6 class="title">Taux de dépistage</h6>
-                                                                <p>Estimé pour les 12 derniers mois.</p>
+                                                                <h6 class="title">Dépistage hommes</h6>
                                                             </div>
                                                             <div class="card-tools">
-                                                                <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Revenue from subscription"></em>
+                                                                <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Patients masculins testés"></em>
                                                             </div>
                                                         </div>
-                                                        <div class="align-end gy-3 gx-5 flex-wrap flex-md-nowrap flex-lg-wrap flex-xxl-nowrap">
-                                                            <div class="nk-sale-data-group flex-md-nowrap g-4">
-                                                                <div class="nk-sale-data">
-                                                                    <span class="amount">14,299.59 <span class="change down text-danger"><em class="icon ni ni-arrow-long-down"></em>16.93%</span></span>
-                                                                    <span class="sub-title">Dépisté</span>
-                                                                </div>
-                                                                <div class="nk-sale-data">
-                                                                    <span class="amount">7,299.59 <span class="change up text-success"><em class="icon ni ni-arrow-long-up"></em>4.26%</span></span>
-                                                                    <span class="sub-title"> Positif</span>
-                                                                </div>
+                                                        <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                                            <div class="nk-sale-data">
+                                                                <span class="amount">{{ hommes_tests }}</span>
+                                                                <span class="sub-title">{{ hommes_positifs }} positifs ({{ hommes_taux|floatformat:1 }}%)</span>
                                                             </div>
-                                                            <div class="nk-sales-ck sales-revenue">
-                                                                <canvas class="sales-bar-chart" id="salesRevenue"></canvas>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .col -->
-                                            <div class="col-lg-5 col-xxl-12">
-                                                <div class="row g-gs">
-                                                    <div class="col-sm-6 col-lg-12 col-xxl-6">
-                                                        <div class="card card-bordered">
-                                                            <div class="card-inner">
-                                                                <div class="card-title-group align-start mb-2">
-                                                                    <div class="card-title">
-                                                                        <h6 class="title">Taux de dépistage des hommes</h6>
-                                                                    </div>
-                                                                    <div class="card-tools">
-                                                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Total active subscription"></em>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
-                                                                    <div class="nk-sale-data">
-                                                                        <span class="amount">9.69K</span>
-                                                                        <span class="sub-title"><span class="change down text-danger"><em class="icon ni ni-arrow-long-down"></em>1.93%</span>since last month</span>
-                                                                    </div>
-                                                                    <div class="nk-sales-ck">
-                                                                        <canvas class="sales-bar-chart" id="activeSubscription"></canvas>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div><!-- .card -->
-                                                    </div><!-- .col -->
-                                                    <div class="col-sm-6 col-lg-12 col-xxl-6">
-                                                        <div class="card card-bordered">
-                                                            <div class="card-inner">
-                                                                <div class="card-title-group align-start mb-2">
-                                                                    <div class="card-title">
-                                                                        <h6 class="title">Taux de dépistage des femmes</h6>
-                                                                    </div>
-                                                                    <div class="card-tools">
-                                                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Daily Avg. subscription"></em>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
-                                                                    <div class="nk-sale-data">
-                                                                        <span class="amount">346.2</span>
-                                                                        <span class="sub-title"><span class="change up text-success"><em class="icon ni ni-arrow-long-up"></em>2.45%</span>since last week</span>
-                                                                    </div>
-                                                                    <div class="nk-sales-ck">
-                                                                        <canvas class="sales-bar-chart" id="totalSubscription"></canvas>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div><!-- .card -->
-                                                    </div><!-- .col -->
-                                                </div><!-- .row -->
-                                            </div><!-- .col -->
-                                        </div><!-- .row -->
-                                    </div><!-- .col -->
-                                    <div class="col-xxl-5">
-                                        <div class="card card-bordered h-100">
-                                            <div class="card-inner">
-                                                <div class="card-title-group align-start gx-3 mb-3">
-                                                    <div class="card-title">
-                                                        <h6 class="title">Patients Infectés</h6>
-                                                        <p>liste des patients </p>
-                                                    </div>
-                                                    <div class="card-tools">
-                                                        <div class="dropdown">
-                                                            <a href="#" class="btn btn-primary btn-dim d-none d-sm-inline-flex" data-toggle="dropdown"><em class="icon ni ni-download-cloud"></em><span><span class="d-none d-md-inline">Download</a>
-                                                            <a href="#" class="btn btn-icon btn-primary btn-dim d-sm-none" data-toggle="dropdown"><em class="icon ni ni-download-cloud"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-                                                                    <li><a href="#"><span>Download Mini Version</span></a></li>
-                                                                    <li><a href="#"><span>Download Full Version</span></a></li>
-                                                                    <li class="divider"></li>
-                                                                    <li><a href="#"><em class="icon ni ni-opt-alt"></em><span>More Options</span></a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-sale-data-group align-center justify-between gy-3 gx-5">
-                                                    <div class="nk-sale-data">
-                                                        <span class="amount">82,944.60</span>
-                                                    </div>
-                                                    <div class="nk-sale-data">
-                                                        <span class="amount sm">1,937 <small>Subscribers</small></span>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-sales-ck large pt-4">
-                                                    <canvas class="sales-overview-chart" id="salesOverview"></canvas>
-                                                </div>
-                                            </div>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
-                                    <div class="col-xxl-8">
-                                        <div class="card card-bordered card-full">
-                                            <div class="card-inner">
-                                                <div class="card-title-group">
-                                                    <div class="card-title">
-                                                        <h6 class="title"><span class="mr-2">Derniers Dépistages </span> <a href="#" class="link d-none d-sm-inline">Voir +</a></h6>
-                                                    </div>
-                                                    <div class="card-tools">
-                                                        <ul class="card-tools-nav">
-                                                            <li><a href="#"><span>Paid</span></a></li>
-                                                            <li><a href="#"><span>Pending</span></a></li>
-                                                            <li class="active"><a href="#"><span>All</span></a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-inner p-0 border-top">
-                                                <div class="nk-tb-list nk-tb-orders">
-                                                    <div class="nk-tb-item nk-tb-head">
-                                                        <div class="nk-tb-col"><span>Order No.</span></div>
-                                                        <div class="nk-tb-col tb-col-sm"><span>Customer</span></div>
-                                                        <div class="nk-tb-col tb-col-md"><span>Date</span></div>
-                                                        <div class="nk-tb-col tb-col-lg"><span>Ref</span></div>
-                                                        <div class="nk-tb-col"><span>Amount</span></div>
-                                                        <div class="nk-tb-col"><span class="d-none d-sm-inline">Status</span></div>
-                                                        <div class="nk-tb-col"><span>&nbsp;</span></div>
-                                                    </div>
-                                                    <div class="nk-tb-item">
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-lead"><a href="#">#95954</a></span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-sm">
-                                                            <div class="user-card">
-                                                                <div class="user-avatar user-avatar-sm bg-purple">
-                                                                    <span>AB</span>
-                                                                </div>
-                                                                <div class="user-name">
-                                                                    <span class="tb-lead">Abu Bin Ishtiyak</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-md">
-                                                            <span class="tb-sub">02/11/2020</span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-lg">
-                                                            <span class="tb-sub text-primary">SUB-2309232</span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-sub tb-amount">4,596.75 <span>USD</span></span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="badge badge-dot badge-dot-xs badge-success">Paid</span>
-                                                        </div>
-                                                        <div class="nk-tb-col nk-tb-col-action">
-                                                            <div class="dropdown">
-                                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                    <ul class="link-list-plain">
-                                                                        <li><a href="#">View</a></li>
-                                                                        <li><a href="#">Invoice</a></li>
-                                                                        <li><a href="#">Print</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-item">
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-lead"><a href="#">#95850</a></span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-sm">
-                                                            <div class="user-card">
-                                                                <div class="user-avatar user-avatar-sm bg-azure">
-                                                                    <span>DE</span>
-                                                                </div>
-                                                                <div class="user-name">
-                                                                    <span class="tb-lead">Desiree Edwards</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-md">
-                                                            <span class="tb-sub">02/02/2020</span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-lg">
-                                                            <span class="tb-sub text-primary">SUB-2309154</span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-sub tb-amount">596.75 <span>USD</span></span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="badge badge-dot badge-dot-xs badge-danger">Canceled</span>
-                                                        </div>
-                                                        <div class="nk-tb-col nk-tb-col-action">
-                                                            <div class="dropdown">
-                                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                    <ul class="link-list-plain">
-                                                                        <li><a href="#">View</a></li>
-                                                                        <li><a href="#">Remove</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-item">
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-lead"><a href="#">#95812</a></span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-sm">
-                                                            <div class="user-card">
-                                                                <div class="user-avatar user-avatar-sm bg-warning">
-                                                                    <img src="./images/avatar/b-sm.jpg" alt="">
-                                                                </div>
-                                                                <div class="user-name">
-                                                                    <span class="tb-lead">Blanca Schultz</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-md">
-                                                            <span class="tb-sub">02/01/2020</span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-lg">
-                                                            <span class="tb-sub text-primary">SUB-2309143</span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-sub tb-amount">199.99 <span>USD</span></span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="badge badge-dot badge-dot-xs badge-success">Paid</span>
-                                                        </div>
-                                                        <div class="nk-tb-col nk-tb-col-action">
-                                                            <div class="dropdown">
-                                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                    <ul class="link-list-plain">
-                                                                        <li><a href="#">View</a></li>
-                                                                        <li><a href="#">Invoice</a></li>
-                                                                        <li><a href="#">Print</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-item">
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-lead"><a href="#">#95256</a></span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-sm">
-                                                            <div class="user-card">
-                                                                <div class="user-avatar user-avatar-sm bg-purple">
-                                                                    <span>NL</span>
-                                                                </div>
-                                                                <div class="user-name">
-                                                                    <span class="tb-lead">Naomi Lawrence</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-md">
-                                                            <span class="tb-sub">01/29/2020</span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-lg">
-                                                            <span class="tb-sub text-primary">SUB-2305684</span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-sub tb-amount">1099.99 <span>USD</span></span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="badge badge-dot badge-dot-xs badge-success">Paid</span>
-                                                        </div>
-                                                        <div class="nk-tb-col nk-tb-col-action">
-                                                            <div class="dropdown">
-                                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                    <ul class="link-list-plain">
-                                                                        <li><a href="#">View</a></li>
-                                                                        <li><a href="#">Invoice</a></li>
-                                                                        <li><a href="#">Print</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-item">
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-lead"><a href="#">#95135</a></span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-sm">
-                                                            <div class="user-card">
-                                                                <div class="user-avatar user-avatar-sm bg-success">
-                                                                    <span>CH</span>
-                                                                </div>
-                                                                <div class="user-name">
-                                                                    <span class="tb-lead">Cassandra Hogan</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-md">
-                                                            <span class="tb-sub">01/29/2020</span>
-                                                        </div>
-                                                        <div class="nk-tb-col tb-col-lg">
-                                                            <span class="tb-sub text-primary">SUB-2305564</span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="tb-sub tb-amount">1099.99 <span>USD</span></span>
-                                                        </div>
-                                                        <div class="nk-tb-col">
-                                                            <span class="badge badge-dot badge-dot-xs badge-warning">Due</span>
-                                                        </div>
-                                                        <div class="nk-tb-col nk-tb-col-action">
-                                                            <div class="dropdown">
-                                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                                    <ul class="link-list-plain">
-                                                                        <li><a href="#">View</a></li>
-                                                                        <li><a href="#">Invoice</a></li>
-                                                                        <li><a href="#">Notify</a></li>
-                                                                    </ul>
-                                                                </div>
+                                                            <div class="nk-sales-ck">
+                                                                <canvas class="sales-bar-chart" id="hommesChart"></canvas>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="card-inner-sm border-top text-center d-sm-none">
-                                                <a href="#" class="btn btn-link btn-block">See History</a>
-                                            </div>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
-                                    <div class="col-md-6 col-xxl-4">
-                                        <div class="card card-bordered card-full">
-                                            <div class="card-inner border-bottom">
-                                                <div class="card-title-group">
-                                                    <div class="card-title">
-                                                        <h6 class="title">Recentes consultations</h6>
-                                                    </div>
-                                                    <div class="card-tools">
-                                                        <ul class="card-tools-nav">
-                                                            <li><a href="#"><span>Cancel</span></a></li>
-                                                            <li class="active"><a href="#"><span>Voir+</span></a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <ul class="nk-activity">
-                                                <li class="nk-activity-item">
-                                                    <div class="nk-activity-media user-avatar bg-success"><img src="./images/avatar/c-sm.jpg" alt=""></div>
-                                                    <div class="nk-activity-data">
-                                                        <div class="label">Keith Jensen requested to Widthdrawl.</div>
-                                                        <span class="time">2 hours ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-activity-item">
-                                                    <div class="nk-activity-media user-avatar bg-warning">HS</div>
-                                                    <div class="nk-activity-data">
-                                                        <div class="label">Harry Simpson placed a Order.</div>
-                                                        <span class="time">2 hours ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-activity-item">
-                                                    <div class="nk-activity-media user-avatar bg-azure">SM</div>
-                                                    <div class="nk-activity-data">
-                                                        <div class="label">Stephanie Marshall got a huge bonus.</div>
-                                                        <span class="time">2 hours ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-activity-item">
-                                                    <div class="nk-activity-media user-avatar bg-purple"><img src="./images/avatar/d-sm.jpg" alt=""></div>
-                                                    <div class="nk-activity-data">
-                                                        <div class="label">Nicholas Carr deposited funds.</div>
-                                                        <span class="time">2 hours ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-activity-item">
-                                                    <div class="nk-activity-media user-avatar bg-pink">TM</div>
-                                                    <div class="nk-activity-data">
-                                                        <div class="label">Timothy Moreno placed a Order.</div>
-                                                        <span class="time">2 hours ago</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
-                                    <div class="col-lg-6 col-xxl-4">
-                                        <div class="card card-bordered h-100">
-                                            <div class="card-inner border-bottom">
-                                                <div class="card-title-group">
-                                                    <div class="card-title">
-                                                        <h6 class="title">Prochains rendez vous</h6>
-                                                    </div>
-                                                    <div class="card-tools">
-                                                        <a href="#" class="link">Voir+</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-inner">
-                                                <div class="timeline">
-                                                    <h6 class="timeline-head">November, 2019</h6>
-                                                    <ul class="timeline-list">
-                                                        <li class="timeline-item">
-                                                            <div class="timeline-status bg-primary is-outline"></div>
-                                                            <div class="timeline-date">13 Nov <em class="icon ni ni-alarm-alt"></em></div>
-                                                            <div class="timeline-data">
-                                                                <h6 class="timeline-title">Submited KYC Application</h6>
-                                                                <div class="timeline-des">
-                                                                    <p>Re-submitted KYC form.</p>
-                                                                    <span class="time">09:30am</span>
-                                                                </div>
+                                            <div class="col-sm-6 col-lg-12 col-xxl-6">
+                                                <div class="card card-bordered">
+                                                    <div class="card-inner">
+                                                        <div class="card-title-group align-start mb-2">
+                                                            <div class="card-title">
+                                                                <h6 class="title">Dépistage femmes</h6>
                                                             </div>
-                                                        </li>
-                                                        <li class="timeline-item">
-                                                            <div class="timeline-status bg-primary"></div>
-                                                            <div class="timeline-date">13 Nov <em class="icon ni ni-alarm-alt"></em></div>
-                                                            <div class="timeline-data">
-                                                                <h6 class="timeline-title">Submited KYC Application</h6>
-                                                                <div class="timeline-des">
-                                                                    <p>Ishtiyak submitted KYC form.</p>
-                                                                    <span class="time">09:30am</span>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="timeline-item">
-                                                            <div class="timeline-status bg-pink"></div>
-                                                            <div class="timeline-date">13 Nov <em class="icon ni ni-alarm-alt"></em></div>
-                                                            <div class="timeline-data">
-                                                                <h6 class="timeline-title">Submited KYC Application</h6>
-                                                                <div class="timeline-des">
-                                                                    <p>Re-submitted KYC form.</p>
-                                                                    <span class="time">09:30am</span>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
-                                    <div class="col-md-6 col-xxl-4">
-                                        <div class="card card-bordered card-full">
-                                            <div class="card-inner-group">
-                                                <div class="card-inner">
-                                                    <div class="card-title-group">
-                                                        <div class="card-title">
-                                                            <h6 class="title">Patients en hospitalisation</h6>
-                                                        </div>
-                                                        <div class="card-tools">
-                                                            <a href="html/user-list-regular.html" class="link">Voir+</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="card-inner card-inner-md">
-                                                    <div class="user-card">
-                                                        <div class="user-avatar bg-primary-dim">
-                                                            <span>AB</span>
-                                                        </div>
-                                                        <div class="user-info">
-                                                            <span class="lead-text">Abu Bin Ishtiyak</span>
-                                                            <span class="sub-text">info@softnio.com</span>
-                                                        </div>
-                                                        <div class="user-action">
-                                                            <div class="drodown">
-                                                                <a href="#" class="dropdown-toggle btn btn-icon btn-trigger mr-n1" data-toggle="dropdown" aria-expanded="false"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right">
-                                                                    <ul class="link-list-opt no-bdr">
-                                                                        <li><a href="#"><em class="icon ni ni-setting"></em><span>Action Settings</span></a></li>
-                                                                        <li><a href="#"><em class="icon ni ni-notify"></em><span>Push Notification</span></a></li>
-                                                                    </ul>
-                                                                </div>
+                                                            <div class="card-tools">
+                                                                <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Patients féminins testés"></em>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                <div class="card-inner card-inner-md">
-                                                    <div class="user-card">
-                                                        <div class="user-avatar bg-pink-dim">
-                                                            <span>SW</span>
-                                                        </div>
-                                                        <div class="user-info">
-                                                            <span class="lead-text">Sharon Walker</span>
-                                                            <span class="sub-text">sharon-90@example.com</span>
-                                                        </div>
-                                                        <div class="user-action">
-                                                            <div class="drodown">
-                                                                <a href="#" class="dropdown-toggle btn btn-icon btn-trigger mr-n1" data-toggle="dropdown" aria-expanded="false"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right">
-                                                                    <ul class="link-list-opt no-bdr">
-                                                                        <li><a href="#"><em class="icon ni ni-setting"></em><span>Action Settings</span></a></li>
-                                                                        <li><a href="#"><em class="icon ni ni-notify"></em><span>Push Notification</span></a></li>
-                                                                    </ul>
-                                                                </div>
+                                                        <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                                            <div class="nk-sale-data">
+                                                                <span class="amount">{{ femmes_tests }}</span>
+                                                                <span class="sub-title">{{ femmes_positifs }} positifs ({{ femmes_taux|floatformat:1 }}%)</span>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="card-inner card-inner-md">
-                                                    <div class="user-card">
-                                                        <div class="user-avatar bg-warning-dim">
-                                                            <span>GO</span>
-                                                        </div>
-                                                        <div class="user-info">
-                                                            <span class="lead-text">Gloria Oliver</span>
-                                                            <span class="sub-text">gloria_72@example.com</span>
-                                                        </div>
-                                                        <div class="user-action">
-                                                            <div class="drodown">
-                                                                <a href="#" class="dropdown-toggle btn btn-icon btn-trigger mr-n1" data-toggle="dropdown" aria-expanded="false"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right">
-                                                                    <ul class="link-list-opt no-bdr">
-                                                                        <li><a href="#"><em class="icon ni ni-setting"></em><span>Action Settings</span></a></li>
-                                                                        <li><a href="#"><em class="icon ni ni-notify"></em><span>Push Notification</span></a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="card-inner card-inner-md">
-                                                    <div class="user-card">
-                                                        <div class="user-avatar bg-success-dim">
-                                                            <span>PS</span>
-                                                        </div>
-                                                        <div class="user-info">
-                                                            <span class="lead-text">Phillip Sullivan</span>
-                                                            <span class="sub-text">phillip-85@example.com</span>
-                                                        </div>
-                                                        <div class="user-action">
-                                                            <div class="drodown">
-                                                                <a href="#" class="dropdown-toggle btn btn-icon btn-trigger mr-n1" data-toggle="dropdown" aria-expanded="false"><em class="icon ni ni-more-h"></em></a>
-                                                                <div class="dropdown-menu dropdown-menu-right">
-                                                                    <ul class="link-list-opt no-bdr">
-                                                                        <li><a href="#"><em class="icon ni ni-setting"></em><span>Action Settings</span></a></li>
-                                                                        <li><a href="#"><em class="icon ni ni-notify"></em><span>Push Notification</span></a></li>
-                                                                    </ul>
-                                                                </div>
+                                                            <div class="nk-sales-ck">
+                                                                <canvas class="sales-bar-chart" id="femmesChart"></canvas>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
-                                    <div class="col-lg-6 col-xxl-4">
-                                        <div class="card card-bordered h-100">
-                                            <div class="card-inner border-bottom">
-                                                <div class="card-title-group">
-                                                    <div class="card-title">
-                                                        <h6 class="title">Patient Guérris</h6>
-                                                    </div>
-                                                    <div class="card-tools">
-                                                        <a href="#" class="link">Voir+</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <ul class="nk-support">
-                                                <li class="nk-support-item">
-                                                    <div class="user-avatar">
-                                                        <img src="./images/avatar/a-sm.jpg" alt="">
-                                                    </div>
-                                                    <div class="nk-support-content">
-                                                        <div class="title">
-                                                            <span>Vincent Lopez</span><span class="badge badge-dot badge-dot-xs badge-warning ml-1">Pending</span>
-                                                        </div>
-                                                        <p>Thanks for contact us with your...</p>
-                                                        <span class="time">6 min ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-support-item">
-                                                    <div class="user-avatar bg-purple">
-                                                        <span>DM</span>
-                                                    </div>
-                                                    <div class="nk-support-content">
-                                                        <div class="title">
-                                                            <span>Daniel Moore</span><span class="badge badge-dot badge-dot-xs badge-info ml-1">Open</span>
-                                                        </div>
-                                                        <p>We have fixed your issues, please...</p>
-                                                        <span class="time">2 Hours ago</span>
-                                                    </div>
-                                                </li>
-                                                <li class="nk-support-item">
-                                                    <div class="user-avatar">
-                                                        <img src="./images/avatar/b-sm.jpg" alt="">
-                                                    </div>
-                                                    <div class="nk-support-content">
-                                                        <div class="title">
-                                                            <span>Larry Henry</span><span class="badge badge-dot badge-dot-xs badge-success ml-1">Solved</span>
-                                                        </div>
-                                                        <p>Thank you to let me know...</p>
-                                                        <span class="time">3 Hours ago</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div><!-- .card -->
-                                    </div><!-- .col -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                </div><!-- .row -->
-                            </div><!-- .nk-block -->
+                            <!-- Deuxième colonne - Patients sous ARV -->
+                            <div class="col-xxl-5">
+                                <div class="card card-bordered h-100">
+                                    <div class="card-inner">
+                                        <div class="card-title-group align-start gx-3 mb-3">
+                                            <div class="card-title">
+                                                <h6 class="title">Patients sous traitement ARV</h6>
+                                                <p>Statut des patients en traitement antirétroviral</p>
+                                            </div>
+                                            <div class="card-tools">
+                                                <div class="dropdown">
+                                                    <a href="#" class="btn btn-primary btn-dim d-none d-sm-inline-flex" data-toggle="dropdown">
+                                                        <em class="icon ni ni-download-cloud"></em>
+                                                        <span>Exporter</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="nk-sale-data-group align-center justify-between gy-3 gx-5">
+                                            <div class="nk-sale-data">
+                                                <span class="amount">{{ total_arv }}</span>
+                                                <span class="sub-title">Patients sous ARV</span>
+                                            </div>
+                                            <div class="nk-sale-data">
+                                                <span class="amount sm">{{ arv_adherence_bonne }} <small>Bonne observance</small></span>
+                                            </div>
+                                            <div class="nk-sale-data">
+                                                <span class="amount sm">{{ arv_adherence_moyenne }} <small>Observance moyenne</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="nk-sales-ck large pt-4">
+                                            <canvas class="sales-overview-chart" id="arvAdherenceChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Troisième colonne - Derniers dépistages -->
+                            <div class="col-xxl-8">
+                                <div class="card card-bordered card-full">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><span class="mr-2">Derniers dépistages VIH</span></h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <ul class="card-tools-nav">
+                                                    <li class="active"><a href="#"><span>Tous</span></a></li>
+                                                    <li><a href="#"><span>Positifs</span></a></li>
+                                                    <li><a href="#"><span>Négatifs</span></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-inner p-0 border-top">
+                                        <div class="nk-tb-list nk-tb-orders">
+                                            <div class="nk-tb-item nk-tb-head">
+                                                <div class="nk-tb-col"><span>ID</span></div>
+                                                <div class="nk-tb-col tb-col-sm"><span>Patient</span></div>
+                                                <div class="nk-tb-col tb-col-md"><span>Date</span></div>
+                                                <div class="nk-tb-col tb-col-lg"><span>Type test</span></div>
+                                                <div class="nk-tb-col"><span>Résultat</span></div>
+                                                <div class="nk-tb-col"><span class="d-none d-sm-inline">Statut</span></div>
+                                            </div>
+                                            {% for test in derniers_tests %}
+                                            <div class="nk-tb-item">
+                                                <div class="nk-tb-col">
+                                                    <span class="tb-lead"><a href="#">#{{ test.id }}</a></span>
+                                                </div>
+                                                <div class="nk-tb-col tb-col-sm">
+                                                    <div class="user-card">
+                                                        <div class="user-avatar user-avatar-sm bg-{% if test.patient.genre == 'Femme' %}pink{% else %}azure{% endif %}">
+                                                            <span>{{ test.patient.nom|first }}{{ test.patient.prenoms|first }}</span>
+                                                        </div>
+                                                        <div class="user-name">
+                                                            <span class="tb-lead">{{ test.patient.nom }} {{ test.patient.prenoms }}</span>
+                                                            <span class="tb-sub">{{ test.patient.genre }}, {{ test.patient.age }} ans</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-tb-col tb-col-md">
+                                                    <span class="tb-sub">{{ test.date_test|date:"d/m/Y H:i" }}</span>
+                                                </div>
+                                                <div class="nk-tb-col tb-col-lg">
+                                                    <span class="tb-sub text-primary">{{ test.test_type }}</span>
+                                                </div>
+                                                <div class="nk-tb-col">
+                                                    <span class="badge badge-dot badge-dot-xs badge-{% if test.resultat == 'POSITIF' %}danger{% else %}success{% endif %}">{{ test.resultat }}</span>
+                                                </div>
+                                                <div class="nk-tb-col">
+                                                    <span class="badge badge-{% if test.resultat == 'POSITIF' %}outline-danger{% else %}outline-success{% endif %}">
+                                                        {% if test.resultat == 'POSITIF' %}
+                                                            Prise en charge
+                                                        {% else %}
+                                                            Non éligible
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="card-inner-sm border-top text-center">
+                                        <a href="" class="btn btn-link btn-block">Voir tous les tests</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quatrième colonne - Consultations récentes -->
+                            <div class="col-md-6 col-xxl-4">
+                                <div class="card card-bordered card-full">
+                                    <div class="card-inner border-bottom">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title">Consultations récentes VIH</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <ul class="card-tools-nav">
+                                                    <li><a href=""><span>Voir+</span></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ul class="nk-activity">
+                                        {% for consultation in consultations_recentes %}
+                                        <li class="nk-activity-item">
+                                            <div class="nk-activity-media user-avatar bg-{% cycle 'success' 'warning' 'azure' 'purple' 'pink' %}">
+                                                <span>{{ consultation.doctor.nom|first }}{{ consultation.doctor.prenom|first }}</span>
+                                            </div>
+                                            <div class="nk-activity-data">
+                                                <div class="label">
+                                                    <a href="#">{{ consultation.patient.nom }} {{ consultation.patient.prenoms }}</a>
+                                                    <span class="text-soft"> - {{ consultation.diagnosis|default:"Pas de diagnostic"|truncatechars:30 }}</span>
+                                                </div>
+                                                <span class="time">{{ consultation.consultation_date|timesince }} ago</span>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Cinquième colonne - Prochains RDV -->
+                            <div class="col-lg-6 col-xxl-4">
+                                <div class="card card-bordered h-100">
+                                    <div class="card-inner border-bottom">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title">Prochains rendez-vous</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <a href="" class="link">Voir+</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-inner">
+                                        <div class="timeline">
+                                            <h6 class="timeline-head">{{ mois_actuel }}, {{ annee_actuelle }}</h6>
+                                            <ul class="timeline-list">
+                                                {% for rdv in prochains_rdv %}
+                                                <li class="timeline-item">
+                                                    <div class="timeline-status bg-primary is-outline"></div>
+                                                    <div class="timeline-date">{{ rdv.date|date:"d M" }} <em class="icon ni ni-alarm-alt"></em></div>
+                                                    <div class="timeline-data">
+                                                        <h6 class="timeline-title">{{ rdv.patient.nom }} {{ rdv.patient.prenoms }}</h6>
+                                                        <div class="timeline-des">
+                                                            <p>{{ rdv.reason|truncatechars:40 }}</p>
+                                                            <span class="time">{{ rdv.time|time:"H:i" }}</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sixième colonne - Patients hospitalisés -->
+                            <div class="col-md-6 col-xxl-4">
+                                <div class="card card-bordered card-full">
+                                    <div class="card-inner-group">
+                                        <div class="card-inner">
+                                            <div class="card-title-group">
+                                                <div class="card-title">
+                                                    <h6 class="title">Patients VIH hospitalisés</h6>
+                                                </div>
+                                                <div class="card-tools">
+                                                    <a href="" class="link">Voir+</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% for hospi in hospitalisations_vih %}
+                                        <div class="card-inner card-inner-md">
+                                            <div class="user-card">
+                                                <div class="user-avatar bg-{% cycle 'primary-dim' 'pink-dim' 'warning-dim' 'success-dim' %}">
+                                                    <span>{{ hospi.patient.nom|first }}{{ hospi.patient.prenoms|first }}</span>
+                                                </div>
+                                                <div class="user-info">
+                                                    <span class="lead-text">{{ hospi.patient.nom }} {{ hospi.patient.prenoms }}</span>
+                                                    <span class="sub-text">Chambre {{ hospi.room }}, Lit {{ hospi.bed }}</span>
+                                                    <span class="sub-text">Depuis {{ hospi.admission_date|timesince }}</span>
+                                                </div>
+                                                <div class="user-action">
+                                                    <div class="drodown">
+                                                        <a href="#" class="dropdown-toggle btn btn-icon btn-trigger mr-n1" data-toggle="dropdown">
+                                                            <em class="icon ni ni-more-h"></em>
+                                                        </a>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <ul class="link-list-opt no-bdr">
+                                                                <li><a href="{% url 'dossier_patient' hospi.patient.id %}"><em class="icon ni ni-eye"></em><span>Dossier</span></a></li>
+                                                                <li><a href="{% url 'fiche_hospitalisation' hospi.id %}"><em class="icon ni ni-file-text"></em><span>Fiche hospi.</span></a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Septième colonne - Patients guéris -->
+                            <div class="col-lg-6 col-xxl-4">
+                                <div class="card card-bordered h-100">
+                                    <div class="card-inner border-bottom">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title">Suivi des patients</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <a href="" class="link">Voir+</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <ul class="nk-support">
+                                        {% for suivi in suivis_recents %}
+                                        <li class="nk-support-item">
+                                            <div class="user-avatar bg-{% cycle 'purple' 'success' 'warning' %}">
+                                                <span>{{ suivi.patient.nom|first }}{{ suivi.patient.prenoms|first }}</span>
+                                            </div>
+                                            <div class="nk-support-content">
+                                                <div class="title">
+                                                    <span>{{ suivi.patient.nom }} {{ suivi.patient.prenoms }}</span>
+                                                    <span class="badge badge-dot badge-dot-xs badge-{% if suivi.statut_patient == 'actif' %}success{% elif suivi.statut_patient == 'perdu_de_vue' %}warning{% else %}danger{% endif %}">
+                                                        {{ suivi.get_statut_patient_display }}
+                                                    </span>
+                                                </div>
+                                                <p>CD4: {{ suivi.cd4|default:"N/A" }} - CV: {{ suivi.charge_virale|default:"N/A" }}</p>
+                                                <span class="time">{{ suivi.date_suivi|timesince }} ago</span>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-       {% elif service.nom == 'TUBERCULOSE' %}
+            </div>
+        </div>
 
+    {% elif service.nom == 'TUBERCULOSE' %}
         {% include 'pages/services/vih.html' %}
-
-       {% else %}
-
+    {% else %}
+        <!-- Autres services -->
     {% endif %}
 
+{% endblock %}
 
+{% block scripts %}
+<script>
+// Script pour initialiser les graphiques avec Chart.js
+document.addEventListener("DOMContentLoaded", function() {
+    // Graphique des tests mensuels
+    const testsCtx = document.getElementById('testsChart').getContext('2d');
+    const testsChart = new Chart(testsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ mois_labels|safe }},
+            datasets: [
+                {
+                    label: 'Tests réalisés',
+                    data: {{ tests_data }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Tests positifs',
+                    data: {{ positifs_data }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Graphique d'adhérence aux ARV
+    const arvCtx = document.getElementById('arvAdherenceChart').getContext('2d');
+    const arvChart = new Chart(arvCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Bonne observance', 'Observance moyenne', 'Faible observance'],
+            datasets: [{
+                data: [{{ arv_adherence_bonne }}, {{ arv_adherence_moyenne }}, {{ arv_adherence_faible }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 99, 132, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%'
+        }
+    });
+});
+</script>
 {% endblock %}

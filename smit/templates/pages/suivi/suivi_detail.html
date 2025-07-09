@@ -2,287 +2,1599 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-    <div class="nk-content-body">
-        <!-- Header Section -->
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between g-3">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Suivi /
-                        <strong class="text-primary small">{{ suividetail.patient.nom }} {{ suividetail.patient.prenoms }}</strong>
-                    </h3>
-                    <div class="nk-block-des text-soft">
-                        <ul class="list-inline">
-                            <li>Code Patient : <span class="text-base">{{ suividetail.patient.code_patient }}</span></li>
-                            <li>Date de Suivi : <span class="text-base">{{ suividetail.date_suivi|date:"d M, Y" }}</span></li>
-                            <li>Mode de suivi : <span class="text-base">{{ suividetail.get_mode_display }}</span></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="nk-block-head-content">
-                    <a href="{% url 'suivi_list' %}" class="btn btn-outline-light bg-white d-none d-sm-inline-flex">
-                        <em class="icon ni ni-arrow-left"></em><span>Retour</span>
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Content Section -->
-        <div class="nk-block">
-            <div class="row gy-5">
-                <!-- Informations Générales -->
-                <div class="col-lg-5">
-                    <div class="card card-bordered">
-                        <div class="card-header">
-                            <h5 class="title">Informations Générales</h5>
-                        </div>
-                        <div class="card-body">
-                            <ul class="data-list is-compact">
-                                <li class="data-item">
-                                    <div class="data-col">
-                                        <div class="data-label">Statut du Patient</div>
-                                        <div class="data-value">{{ suividetail.get_statut_patient_display }}</div>
-                                    </div>
-                                </li>
-                                <li class="data-item">
-                                    <div class="data-col">
-                                        <div class="data-label">Poids</div>
-                                        <div class="data-value">{{ suividetail.poids }} kg</div>
-                                    </div>
-                                </li>
-                                <li class="data-item">
-                                    <div class="data-col">
-                                        <div class="data-label">Taux de CD4</div>
-                                        <div class="data-value">{{ suividetail.cd4 }} cellules/mm³</div>
-                                    </div>
-                                </li>
-                                <li class="data-item">
-                                    <div class="data-col">
-                                        <div class="data-label">Charge Virale</div>
-                                        <div class="data-value">{{ suividetail.charge_virale }} copies/mL</div>
-                                    </div>
-                                </li>
-                                <li class="data-item">
-                                    <div class="data-col">
-                                        <div class="data-label">Observations</div>
-                                        <div class="data-value">{{ suividetail.observations }}</div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+<style>
+    :root {
+        --primary-color: #4a6cf7;
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --purple-color: #6f42c1;
+        --pink-color: #e83e8c;
+    }
 
-                <!-- Protocole et Traitement ARV -->
-               <div class="col-lg-7">
-    <div class="card card-bordered">
-        <div class="card-header">
-            <h5 class="title">Traitements</h5>
-        </div>
-        <div class="card-body">
-            <h6 class="text-muted">Traitements ARV</h6>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Type</th>
-                        <th>Dosage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for traitement in suividetail.suivitreatarv.all %}
-                    <tr>
-                        <td>{{ traitement.nom }}</td>
-                        <td>{{ traitement.get_type_traitement_display }}</td>
-                        <td>{{ traitement.dosage }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-    </div>
-</div>
+    @keyframes slideInRight {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
 
-             <!-- Protocoles -->
-                <div class="col-lg-12">
-                    <div class="card card-bordered">
-                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h5 class="title">Protocoles</h5>
-                            <a href="" class="btn btn-outline-primary">Nouveau protocole</a>
-                        </div>
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
 
-                        {% for type, protocols in grouped_protocols.items %}
-                            <div class="card-body">
-                                <h6 class="text-success">{{ type.nom|upper }} |
-                                    <span class="text-muted">{{ type.parent.nom|upper }}</span>
-                                </h6>
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th>Nom</th>
-                                        <th>Durée</th>
-                                        <th>Date Début</th>
-                                        <th>Date Fin</th>
-                                        <th>Molécules</th>
-                                        <th>Médicament</th>
-                                        <th>Maladies</th>
-                                        <th>Examens</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for proto in protocols %}
-                                        <tr>
-                                            <td>{{ proto.protocole.nom }}</td>
-                                            <td>{{ proto.protocole.duree }}</td>
-                                            <td>{{ proto.protocole.date_debut|date:"d M, Y" }}</td>
-                                            <td>{{ proto.protocole.date_fin|date:"d M, Y" }}</td>
-                                            <td>
-                                                {% for molecule in proto.protocole.molecules.all %}
-                                                    <span class="badge badge-outline-dark mr-2">{{ molecule.nom }}</span>
-                                                {% endfor %}
-                                            </td>
-                                            <td>
-                                                {% for medicament in proto.protocole.medicament.all %}
-                                                    <span class="badge badge-outline-info">{{ medicament.nom }}</span>
-                                                {% endfor %}
-                                            </td>
-                                            <td>{{ proto.protocole.maladies }}</td>
-                                            <td>
-                                                {% for exam in proto.protocole.protocoleexam.all %}
-                                                    {{ exam.request_number }}
-                                                {% endfor %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+    /* Header Styles */
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
 
-                <!-- Rendez-vous -->
-               <div class="col-lg-12">
-    <div class="card card-bordered">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h5 class="title">Rendez-vous</h5>
-            <a href="#" data-toggle="modal"
-               data-target="#rdvsuivi" class="btn btn-outline-primary">Nouveau rendez-vous</a>
+    .breadcrumb-item.active {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
 
-            <div class="modal fade" tabindex="-1" id="rdvsuivi">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                            <em class="icon ni ni-cross"></em>
-                        </a>
-                        <div class="modal-header">
-                            <h5 class="modal-title">Modal Title</h5>
-                        </div>
-                        <div class="modal-body">
-                           <form action="{% url 'suivis-rdv-create' suivi_id=suividetail.id %}">
-                               {% csrf_token %}
-                               {{ suivirdvform.as_p }}
+    .patient-header {
+        background: linear-gradient(135deg, rgba(74, 108, 247, 0.1) 0%, rgba(255,255,255,1) 100%);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        animation: fadeIn 0.6s ease-out;
+    }
 
-                           </form>
-                        </div>
-                        <div class="modal-footer bg-light">
-                            <button class="btn btn-primary">Creer </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        border-radius: 50px;
+    }
 
-        </div>
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Heure</th>
-                        <th>Raison</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for rdv in suividetail.suivierdv.all %}
-                    <tr>
-                        <td>{{ rdv.date|date:"d M, Y" }}</td>
-                        <td>{{ rdv.time|time:"H:i" }}</td>
-                        <td>{{ rdv.reason }}</td>
-                        <td>
-                            <span class="badge badge-sm badge-outline-{{ rdv.status|lower }}">
-                                {{ rdv.get_status_display }}
+    /* Tab Styles */
+    .nav-tabs {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--secondary-color);
+        font-weight: 600;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--primary-color);
+        background: rgba(74, 108, 247, 0.05);
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background: transparent;
+    }
+
+    .nav-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--primary-color);
+    }
+
+    /* Card Styles */
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        position: relative;
+        padding-left: 15px;
+    }
+
+    .card-title::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 5px;
+        height: 60%;
+        width: 3px;
+        background: var(--primary-color);
+        border-radius: 3px;
+    }
+
+    /* Data Item Styles */
+    .data-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        background: rgba(248, 249, 250, 0.5);
+        transition: all 0.3s ease;
+    }
+
+    .data-item:hover {
+        background: rgba(74, 108, 247, 0.1);
+        transform: translateX(5px);
+    }
+
+    .data-icon {
+        font-size: 1.5rem;
+        margin-left: auto;
+    }
+
+    /* Badge Styles */
+    .badge-dim {
+        opacity: 0.8;
+    }
+
+    /* Table Styles */
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(74, 108, 247, 0.05);
+    }
+
+    /* Accordion Styles */
+    .accordion-item {
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .accordion-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .accordion-header .accordion-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(74, 108, 247, 0.1);
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .accordion-header .accordion-toggle:hover {
+        background: rgba(74, 108, 247, 0.2);
+    }
+
+    .accordion-body {
+        padding: 20px;
+        background: white;
+    }
+
+    /* Progress Bar */
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .progress-bar {
+        background-color: var(--primary-color);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .data-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .data-icon {
+            margin: 10px auto 0;
+        }
+    }
+</style>
+
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- Header Section améliorée avec animation -->
+            <div class="patient-header animate__animated animate__fadeIn mt-5">
+                <div class="nk-block-between g-3">
+                    <div class="nk-block-head-content">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb breadcrumb-arrow">
+                                <li class="breadcrumb-item"><a href="{% url 'suivi_list' %}">Suivis</a></li>
+                                <li class="breadcrumb-item active">Détails</li>
+                            </ol>
+                        </nav>
+                        <h2 class="nk-block-title page-title mt-2">
+                            <span class="text-primary">{{ suividetail.patient.nom_complet }}</span>
+                            <span class="status-badge badge-dim bg-outline-{% if suividetail.statut_patient == 'actif' %}success{% elif suividetail.statut_patient == 'perdu_de_vue' %}warning{% elif suividetail.statut_patient == 'transferé' %}info{% else %}secondary{% endif %} ml-2">
+                                {{ suividetail.get_statut_patient_display }}
                             </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                        </h2>
+                        <div class="nk-block-des mt-3">
+                            <div class="row g-3">
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center">
+                                        <em class="icon ni ni-id text-primary mr-2"></em>
+                                        <div>
+                                            <span class="text-soft">Code:</span>
+                                            <span class="text-base font-weight-bold">{{ suividetail.patient.code_patient }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center">
+                                        <em class="icon ni ni-calendar text-primary mr-2"></em>
+                                        <div>
+                                            <span class="text-soft">Date:</span>
+                                            <span class="text-base font-weight-bold">{{ suividetail.date_suivi|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center">
+                                        <em class="icon ni ni-user text-primary mr-2"></em>
+                                        <div>
+                                            <span class="text-soft">Mode:</span>
+                                            <span class="text-base font-weight-bold">{{ suividetail.get_mode_display }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center">
+                                        <em class="icon ni ni-check-circle text-primary mr-2"></em>
+                                        <div>
+                                            <span class="text-soft">Adhérence:</span>
+                                            <span class="text-base font-weight-bold">{{ suividetail.get_adherence_traitement_display }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content animate__animated animate__fadeInRight">
+                        <div class="btn-group">
+                            <a href="{% url 'suivi_list' %}" class="btn btn-outline-light bg-white back-btn">
+                                <em class="icon ni ni-arrow-left"></em><span>Retour</span>
+                            </a>
+                            <div class="dropdown ml-2">
+                                <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="actionsDropdown">
+                                    Actions
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionsDropdown">
+                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#rdvsuivi">
+                                        <em class="icon ni ni-calendar"></em> Nouveau RDV
+                                    </a>
+                                    <a class="dropdown-item" href="#">
+                                        <em class="icon ni ni-edit"></em> Modifier
+                                    </a>
+                                    <a class="dropdown-item" href="#">
+                                        <em class="icon ni ni-file-text"></em> Imprimer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Vaccinations -->
-                <div class="col-lg-12">
-    <div class="card card-bordered">
-        <div class="card-header">
-            <h5 class="title">Vaccinations</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Vaccin</th>
-                        <th>Date</th>
-                        <th>Centre</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for vaccination in suividetail.patient.vaccinations.all %}
-                    <tr>
-                        <td>{{ vaccination.type_vaccin }}</td>
-                        <td>{{ vaccination.date_administration|date:"d M, Y" }}</td>
-                        <td>{{ vaccination.centre_vaccination }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+            <!-- Navigation par onglets avec animation -->
+            <div class="nk-block">
+                <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card animate__animated animate__fadeIn">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-toggle="tab" href="#tab-infos">
+                            <em class="icon ni ni-info"></em> Informations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tab-traitements">
+                            <em class="icon ni ni-medical"></em> Traitements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tab-protocoles">
+                            <em class="icon ni ni-clipboard"></em> Protocoles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tab-rdv">
+                            <em class="icon ni ni-calendar"></em> Rendez-vous
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#tab-comorbidites">
+                            <em class="icon ni ni-heart-fill"></em> Comorbidités
+                        </a>
+                    </li>
+                </ul>
 
-                <!-- Comorbidités -->
-                <!-- Comorbidités -->
-<div class="col-lg-12">
-    <div class="card card-bordered">
-        <div class="card-header">
-            <h5 class="title">Comorbidités</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Impact</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for comorbidite in suividetail.suivicomorbide.all %}
-                    <tr>
-                        <td>{{ comorbidite.type_comorbidite }}</td>
-                        <td>{{ comorbidite.impact_sur_vih }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                <div class="tab-content mt-4">
+                    <!-- Onglet Informations -->
+                    <div class="tab-pane fade show active" id="tab-infos">
+                        <div class="row gy-4">
+                            <!-- Carte Santé -->
+                            <div class="col-lg-6 animate__animated animate__fadeInLeft">
+                                <div class="card card-bordered h-100">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><i class="fas fa-heartbeat text-danger mr-2"></i>État de santé</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <em class="card-hint icon ni ni-help" data-toggle="tooltip" data-placement="left" title="Dernières mesures"></em>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3 mt-3">
+                                            <div class="col-6">
+                                                <div class="data-item">
+                                                    <div class="data-info">
+                                                        <span class="data-label">Poids</span>
+                                                        <span class="data-value">
+                                                            {% if suividetail.poids %}
+                                                                {{ suividetail.poids }} kg
+                                                            {% else %}
+                                                                <span class="text-soft">Non renseigné</span>
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                    <div class="data-icon text-primary">
+                                                        <em class="icon ni ni-scale"></em>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="data-item">
+                                                    <div class="data-info">
+                                                        <span class="data-label">CD4</span>
+                                                        <span class="data-value">
+                                                            {% if suividetail.cd4 %}
+                                                                {{ suividetail.cd4 }} cellules/mm³
+                                                            {% else %}
+                                                                <span class="text-soft">Non renseigné</span>
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                    <div class="data-icon text-info">
+                                                        <em class="icon ni ni-activity"></em>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="data-item">
+                                                    <div class="data-info">
+                                                        <span class="data-label">Charge virale</span>
+                                                        <span class="data-value">
+                                                            {% if suividetail.charge_virale %}
+                                                                {{ suividetail.charge_virale }} copies/mL
+                                                            {% else %}
+                                                                <span class="text-soft">Non renseigné</span>
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                    <div class="data-icon text-danger">
+                                                        <em class="icon ni ni-virus"></em>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="data-item">
+                                                    <div class="data-info">
+                                                        <span class="data-label">Adhérence</span>
+                                                        <span class="data-value">
+                                                            <span class="badge badge-pill badge-{% if suividetail.adherence_traitement == 'bonne' %}success{% elif suividetail.adherence_traitement == 'moyenne' %}warning{% else %}danger{% endif %}">
+                                                                {{ suividetail.get_adherence_traitement_display }}
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="data-icon text-success">
+                                                        <em class="icon ni ni-check-circle"></em>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Carte Observations -->
+                            <div class="col-lg-6 animate__animated animate__fadeInRight">
+                                <div class="card card-bordered h-100">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><i class="fas fa-clipboard-list text-primary mr-2"></i>Observations</h6>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            {% if suividetail.observations %}
+                                                <div class="border rounded p-3 bg-light animate__animated animate__fadeIn">
+                                                    {{ suividetail.observations|linebreaks }}
+                                                </div>
+                                            {% else %}
+                                                <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                                    <em class="icon ni ni-info fs-24px"></em>
+                                                    <p class="mt-2">Aucune observation enregistrée</p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Carte Examens Paracliniques -->
+                            <div class="col-12 animate__animated animate__fadeInUp">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><i class="fas fa-flask text-purple mr-2"></i>Examens paracliniques</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <a href="#" class="link">Voir tous</a>
+                                            </div>
+                                        </div>
+                                        {% if suividetail.examens %}
+                                        <div class="mt-3 animate__animated animate__fadeIn">
+                                            <div class="row gy-3">
+                                                <div class="col-md-6">
+                                                    <div class="border rounded p-3 bg-white shadow-sm">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span class="font-weight-bold">{{ suividetail.examens.get_exam_type_display }}</span>
+                                                            <span class="badge badge-dim bg-{% if suividetail.examens.status == 'Completed' %}success{% elif suividetail.examens.status == 'Pending' %}warning{% else %}secondary{% endif %}">
+                                                                {{ suividetail.examens.get_status_display }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between">
+                                                            <small class="text-soft">Date:</small>
+                                                            <small>{{ suividetail.examens.prescribed_at|date:"d M Y" }}</small>
+                                                        </div>
+                                                        {% if suividetail.examens.result_text %}
+                                                        <div class="mt-2">
+                                                            <p class="small">{{ suividetail.examens.result_text|truncatewords:20 }}</p>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                            <em class="icon ni ni-file-text fs-24px"></em>
+                                            <p class="mt-2">Aucun examen associé à ce suivi</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Traitements -->
+                    <div class="tab-pane fade" id="tab-traitements">
+                        <div class="card card-bordered animate__animated animate__fadeIn">
+                            <div class="card-inner">
+                                <div class="card-title-group">
+                                    <div class="card-title">
+                                        <h6 class="title"><i class="fas fa-pills text-success mr-2"></i>Traitements ARV</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <a href="#" class="btn btn-sm btn-outline-primary">Ajouter un traitement</a>
+                                    </div>
+                                </div>
+
+                                {% if suividetail.suivitreatarv.all %}
+                                <div class="table-responsive animate__animated animate__fadeIn">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="thead-primary">
+                                            <tr>
+                                                <th>Nom</th>
+                                                <th>Type</th>
+                                                <th>Dosage</th>
+                                                <th>Forme</th>
+                                                <th>Durée</th>
+                                                <th>Efficacité</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for traitement in suividetail.suivitreatarv.all %}
+                                            <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="user-avatar bg-dim-primary mr-2">
+                                                            <span>ARV</span>
+                                                        </div>
+                                                        <span>{{ traitement.nom }}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-dim bg-outline-{% if traitement.type_traitement == 'première_ligne' %}primary{% elif traitement.type_traitement == 'deuxième_ligne' %}warning{% else %}danger{% endif %}">
+                                                        {{ traitement.get_type_traitement_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ traitement.dosage }}</td>
+                                                <td>{{ traitement.get_forme_pharmaceutique_display }}</td>
+                                                <td>{{ traitement.duree_traitement }} mois</td>
+                                                <td>
+                                                    <div class="progress progress-sm">
+                                                        <div class="progress-bar" style="width: {{ traitement.efficacite|default:0 }}%"></div>
+                                                    </div>
+                                                    <span class="small">{{ traitement.efficacite|default:"0" }}%</span>
+                                                </td>
+                                                <td class="text-right">
+                                                    <button class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" title="Voir détails">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                    <em class="icon ni ni-medical fs-24px"></em>
+                                    <p class="mt-2">Aucun traitement ARV enregistré pour ce suivi</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Protocoles -->
+                    <div class="tab-pane fade" id="tab-protocoles">
+                        <div class="card card-bordered animate__animated animate__fadeIn">
+                            <div class="card-inner">
+                                <div class="card-title-group">
+                                    <div class="card-title">
+                                        <h6 class="title"><i class="fas fa-clipboard-check text-info mr-2"></i>Protocoles de traitement</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <a href="#" class="btn btn-sm btn-outline-primary">Ajouter un protocole</a>
+                                    </div>
+                                </div>
+
+                                {% if grouped_protocols %}
+                                <div class="accordion accordion-block animate__animated animate__fadeIn" id="protocol-accordion">
+                                    {% for type, protocols in grouped_protocols.items %}
+                                    <div class="accordion-item">
+                                        <div class="accordion-header">
+                                            <a href="#" class="accordion-toggle" data-toggle="collapse" data-target="#protocol-{{ forloop.counter }}">
+                                                <span class="text-success font-weight-bold">{{ type.nom|upper }}</span>
+                                                <span class="small text-soft ml-2">{{ type.parent.nom|upper }}</span>
+                                                <span class="badge badge-pill badge-light ml-2">{{ protocols|length }}</span>
+                                            </a>
+                                        </div>
+                                        <div id="protocol-{{ forloop.counter }}" class="accordion-body collapse show" data-parent="#protocol-accordion">
+                                            <div class="accordion-inner">
+                                                <div class="table-responsive">
+                                                    <table class="table table-striped table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nom</th>
+                                                                <th>Période</th>
+                                                                <th>Molécules</th>
+                                                                <th>Médicaments</th>
+                                                                <th>Statut</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for proto in protocols %}
+                                                            <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                                <td>{{ proto.protocole.nom }}</td>
+                                                                <td>
+                                                                    <div class="d-flex flex-column">
+                                                                        <small>Début: {{ proto.protocole.date_debut|date:"d M Y" }}</small>
+                                                                        <small>Fin: {{ proto.protocole.date_fin|date:"d M Y" }}</small>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    {% for molecule in proto.protocole.molecules.all %}
+                                                                    <span class="badge badge-dim badge-outline-dark mb-1">{{ molecule.nom }}</span>
+                                                                    {% endfor %}
+                                                                </td>
+                                                                <td>
+                                                                    {% for medicament in proto.protocole.medicament.all %}
+                                                                    <span class="badge badge-dim badge-outline-info mb-1">{{ medicament.nom }}</span>
+                                                                    {% endfor %}
+                                                                </td>
+                                                                <td>
+                                                                    {% if proto.protocole.date_fin > now %}
+                                                                    <span class="badge badge-dim badge-success">Actif</span>
+                                                                    {% else %}
+                                                                    <span class="badge badge-dim badge-secondary">Terminé</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                    <em class="icon ni ni-clipboard fs-24px"></em>
+                                    <p class="mt-2">Aucun protocole associé à ce suivi</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Rendez-vous -->
+                    <div class="tab-pane fade" id="tab-rdv">
+                        <div class="card card-bordered animate__animated animate__fadeIn">
+                            <div class="card-inner">
+                                <div class="card-title-group">
+                                    <div class="card-title">
+                                        <h6 class="title"><i class="fas fa-calendar-alt text-warning mr-2"></i>Rendez-vous</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <a href="#" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#rdvsuivi">
+                                            Planifier un RDV
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {% if suividetail.suivierdv.all %}
+                                <div class="nk-tb-list is-compact animate__animated animate__fadeIn">
+                                    <div class="nk-tb-item nk-tb-head">
+                                        <div class="nk-tb-col"><span>Date</span></div>
+                                        <div class="nk-tb-col"><span>Heure</span></div>
+                                        <div class="nk-tb-col"><span>Type</span></div>
+                                        <div class="nk-tb-col"><span>Statut</span></div>
+                                        <div class="nk-tb-col text-right"><span>Actions</span></div>
+                                    </div>
+
+                                    {% for rdv in suividetail.suivierdv.all %}
+                                    <div class="nk-tb-item animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                        <div class="nk-tb-col">
+                                            <span>{{ rdv.date|date:"d M Y" }}</span>
+                                        </div>
+                                        <div class="nk-tb-col">
+                                            <span>{{ rdv.time|time:"H:i" }}</span>
+                                        </div>
+                                        <div class="nk-tb-col">
+                                            <span>{{ rdv.reason|truncatechars:30 }}</span>
+                                        </div>
+                                        <div class="nk-tb-col">
+                                            <span class="badge badge-pill badge-{% if rdv.status == 'Completed' %}success{% elif rdv.status == 'Scheduled' %}info{% else %}secondary{% endif %}">
+                                                {{ rdv.get_status_display }}
+                                            </span>
+                                        </div>
+                                        <div class="nk-tb-col text-right">
+                                            <div class="dropdown">
+                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="dropdown">
+                                                    <em class="icon ni ni-more-h"></em>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <ul class="link-list-opt no-bdr">
+                                                        <li><a href="#"><em class="icon ni ni-eye"></em><span>Voir détails</span></a></li>
+                                                        <li><a href="#"><em class="icon ni ni-edit"></em><span>Modifier</span></a></li>
+                                                        <li><a href="#"><em class="icon ni ni-trash"></em><span>Annuler</span></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                    <em class="icon ni ni-calendar fs-24px"></em>
+                                    <p class="mt-2">Aucun rendez-vous planifié</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Comorbidités -->
+                    <div class="tab-pane fade" id="tab-comorbidites">
+                        <div class="row gy-4 animate__animated animate__fadeIn">
+                            <div class="col-lg-6">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><i class="fas fa-heartbeat text-danger mr-2"></i>Comorbidités</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <a href="#" class="btn btn-sm btn-outline-primary">Ajouter</a>
+                                            </div>
+                                        </div>
+
+                                        {% if suividetail.suivicomorbide.all %}
+                                        <div class="table-responsive animate__animated animate__fadeIn">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Impact</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for comorbidite in suividetail.suivicomorbide.all %}
+                                                    <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                        <td>{{ comorbidite.type_comorbidite }}</td>
+                                                        <td>
+                                                            <span class="badge badge-dim bg-{% if comorbidite.impact_sur_vih == 'Faible' %}success{% elif comorbidite.impact_sur_vih == 'Modéré' %}warning{% else %}danger{% endif %}">
+                                                                {{ comorbidite.impact_sur_vih }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" title="Modifier">
+                                                                <em class="icon ni ni-edit"></em>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                            <em class="icon ni ni-heart-fill fs-24px"></em>
+                                            <p class="mt-2">Aucune comorbidité enregistrée</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <div class="card-title-group">
+                                            <div class="card-title">
+                                                <h6 class="title"><i class="fas fa-syringe text-success mr-2"></i>Vaccinations</h6>
+                                            </div>
+                                            <div class="card-tools">
+                                                <a href="#" class="btn btn-sm btn-outline-primary">Ajouter</a>
+                                            </div>
+                                        </div>
+
+                                        {% if suividetail.patient.vaccinations.all %}
+                                        <div class="table-responsive animate__animated animate__fadeIn">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Vaccin</th>
+                                                        <th>Date</th>
+                                                        <th>Centre</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for vaccination in suividetail.patient.vaccinations.all %}
+                                                    <tr class="animate__animated animate__fadeIn" style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'0.1s,0.2s' }}">
+                                                        <td>{{ vaccination.type_vaccin }}</td>
+                                                        <td>{{ vaccination.date_administration|date:"d M Y" }}</td>
+                                                        <td>{{ vaccination.centre_vaccination|default:"-" }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="text-center py-4 text-soft animate__animated animate__fadeIn">
+                                            <em class="icon ni ni-shield-cross fs-24px"></em>
+                                            <p class="mt-2">Aucune vaccination enregistrée</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-                </div>
+
+<!-- Modal pour nouveau RDV -->
+<div class="modal fade" tabindex="-1" id="rdvsuivi">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Nouveau rendez-vous pour {{ suividetail.patient.nom_complet }}</h5>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'suivis-rdv-create' suivi_id=suividetail.id %}" method="post" class="form-validate">
+                    {% csrf_token %}
+                    <div class="row gy-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ suivirdvform.date.id_for_label }}">Date</label>
+                                <div class="form-control-wrap">
+                                    {{ suivirdvform.date }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ suivirdvform.time.id_for_label }}">Heure</label>
+                                <div class="form-control-wrap">
+                                    {{ suivirdvform.time }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ suivirdvform.service.id_for_label }}">Service</label>
+                                <div class="form-control-wrap">
+                                    {{ suivirdvform.service }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ suivirdvform.doctor.id_for_label }}">Médecin</label>
+                                <div class="form-control-wrap">
+                                    {{ suivirdvform.doctor }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label" for="{{ suivirdvform.reason.id_for_label }}">Motif</label>
+                                <div class="form-control-wrap">
+                                    {{ suivirdvform.reason }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Planifier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Back button animation
+        $('.back-btn').hover(
+            function() {
+                $(this).find('em').addClass('animate__animated animate__shakeX');
+            },
+            function() {
+                $(this).find('em').removeClass('animate__animated animate__shakeX');
+            }
+        );
+
+        // Actions dropdown animation
+        $('#actionsDropdown').on('click', function() {
+            $('.dropdown-menu').addClass('animate__animated animate__fadeIn');
+        });
+
+        // Tab change animation
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            const target = $(e.target).attr("href");
+            $(target).addClass('animate__animated animate__fadeIn');
+        });
+
+        // Modal show animation
+        $('#rdvsuivi').on('show.bs.modal', function () {
+            $(this).find('.modal-content').addClass('animate__animated animate__zoomIn');
+        });
+
+        // Modal hide animation
+        $('#rdvsuivi').on('hidden.bs.modal', function () {
+            $(this).find('.modal-content').removeClass('animate__animated animate__zoomIn');
+        });
+
+        // Form submission with animation
+        $('.form-validate').on('submit', function(e) {
+            const submitBtn = $(this).find('button[type="submit"]');
+
+            // Add loading animation
+            submitBtn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Enregistrement...');
+            submitBtn.prop('disabled', true);
+        });
+    });
+</script>
+
 {% endblock %}
+{#{% extends 'layout/base.html' %}#}
+{#{% load static %}#}
+{#{% load humanize %}#}
+{#{% block content %}#}
+{#<div class="nk-content nk-content-fluid">#}
+{#    <div class="container-xl wide-lg">#}
+{#        <div class="nk-content-body">#}
+{#            <!-- Header Section améliorée -->#}
+{#            <div class="nk-block-head nk-block-head-sm mb-4">#}
+{#                <div class="nk-block-between g-3">#}
+{#                    <div class="nk-block-head-content">#}
+{#                        <nav>#}
+{#                            <ol class="breadcrumb breadcrumb-arrow">#}
+{#                                <li class="breadcrumb-item"><a href="{% url 'suivi_list' %}">Suivis</a></li>#}
+{#                                <li class="breadcrumb-item active">Détails</li>#}
+{#                            </ol>#}
+{#                        </nav>#}
+{#                        <h2 class="nk-block-title page-title">#}
+{#                            <span class="text-primary">{{ suividetail.patient.nom_complet }}</span>#}
+{#                            <span class="badge badge-dim bg-outline-{% if suividetail.statut_patient == 'actif' %}success{% elif suividetail.statut_patient == 'perdu_de_vue' %}warning{% elif suividetail.statut_patient == 'transferé' %}info{% else %}secondary{% endif %} ml-2">#}
+{#                                {{ suividetail.get_statut_patient_display }}#}
+{#                            </span>#}
+{#                        </h2>#}
+{#                        <div class="nk-block-des">#}
+{#                            <div class="row g-2">#}
+{#                                <div class="col-auto">#}
+{#                                    <span class="text-soft">Code:</span>#}
+{#                                    <span class="text-base font-weight-bold">{{ suividetail.patient.code_patient }}</span>#}
+{#                                </div>#}
+{#                                <div class="col-auto">#}
+{#                                    <span class="text-soft">Date:</span>#}
+{#                                    <span class="text-base font-weight-bold">{{ suividetail.date_suivi|date:"d M Y" }}</span>#}
+{#                                </div>#}
+{#                                <div class="col-auto">#}
+{#                                    <span class="text-soft">Mode:</span>#}
+{#                                    <span class="text-base font-weight-bold">{{ suividetail.get_mode_display }}</span>#}
+{#                                </div>#}
+{#                                <div class="col-auto">#}
+{#                                    <span class="text-soft">Adhérence:</span>#}
+{#                                    <span class="text-base font-weight-bold">{{ suividetail.get_adherence_traitement_display }}</span>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="nk-block-head-content">#}
+{#                        <div class="btn-group">#}
+{#                            <a href="{% url 'suivi_list' %}" class="btn btn-outline-light bg-white">#}
+{#                                <em class="icon ni ni-arrow-left"></em><span>Retour</span>#}
+{#                            </a>#}
+{#                            <div class="dropdown ml-2">#}
+{#                                <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">#}
+{#                                    Actions#}
+{#                                </button>#}
+{#                                <div class="dropdown-menu dropdown-menu-right">#}
+{#                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#rdvsuivi">#}
+{#                                        <em class="icon ni ni-calendar"></em> Nouveau RDV#}
+{#                                    </a>#}
+{#                                    <a class="dropdown-item" href="#">#}
+{#                                        <em class="icon ni ni-edit"></em> Modifier#}
+{#                                    </a>#}
+{#                                    <a class="dropdown-item" href="#">#}
+{#                                        <em class="icon ni ni-file-text"></em> Imprimer#}
+{#                                    </a>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Navigation par onglets -->#}
+{#            <div class="nk-block">#}
+{#                <ul class="nav nav-tabs">#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link active" data-toggle="tab" href="#tab-infos">#}
+{#                            <em class="icon ni ni-info"></em> Informations#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" data-toggle="tab" href="#tab-traitements">#}
+{#                            <em class="icon ni ni-medical"></em> Traitements#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" data-toggle="tab" href="#tab-protocoles">#}
+{#                            <em class="icon ni ni-clipboard"></em> Protocoles#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" data-toggle="tab" href="#tab-rdv">#}
+{#                            <em class="icon ni ni-calendar"></em> Rendez-vous#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" data-toggle="tab" href="#tab-comorbidites">#}
+{#                            <em class="icon ni ni-heart-fill"></em> Comorbidités#}
+{#                        </a>#}
+{#                    </li>#}
+{#                </ul>#}
+{##}
+{#                <div class="tab-content mt-4">#}
+{#                    <!-- Onglet Informations -->#}
+{#                    <div class="tab-pane active" id="tab-infos">#}
+{#                        <div class="row gy-4">#}
+{#                            <!-- Carte Santé -->#}
+{#                            <div class="col-lg-6">#}
+{#                                <div class="card card-bordered h-100">#}
+{#                                    <div class="card-inner">#}
+{#                                        <div class="card-title-group">#}
+{#                                            <div class="card-title">#}
+{#                                                <h6 class="title">État de santé</h6>#}
+{#                                            </div>#}
+{#                                            <div class="card-tools">#}
+{#                                                <em class="card-hint icon ni ni-help" data-toggle="tooltip" data-placement="left" title="Dernières mesures"></em>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        <div class="row g-3">#}
+{#                                            <div class="col-6">#}
+{#                                                <div class="data-item">#}
+{#                                                    <div class="data-info">#}
+{#                                                        <span class="data-label">Poids</span>#}
+{#                                                        <span class="data-value">#}
+{#                                                            {% if suividetail.poids %}#}
+{#                                                                {{ suividetail.poids }} kg#}
+{#                                                            {% else %}#}
+{#                                                                <span class="text-soft">Non renseigné</span>#}
+{#                                                            {% endif %}#}
+{#                                                        </span>#}
+{#                                                    </div>#}
+{#                                                    <div class="data-icon text-primary">#}
+{#                                                        <em class="icon ni ni-scale"></em>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                            <div class="col-6">#}
+{#                                                <div class="data-item">#}
+{#                                                    <div class="data-info">#}
+{#                                                        <span class="data-label">CD4</span>#}
+{#                                                        <span class="data-value">#}
+{#                                                            {% if suividetail.cd4 %}#}
+{#                                                                {{ suividetail.cd4 }} cellules/mm³#}
+{#                                                            {% else %}#}
+{#                                                                <span class="text-soft">Non renseigné</span>#}
+{#                                                            {% endif %}#}
+{#                                                        </span>#}
+{#                                                    </div>#}
+{#                                                    <div class="data-icon text-info">#}
+{#                                                        <em class="icon ni ni-activity"></em>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                            <div class="col-6">#}
+{#                                                <div class="data-item">#}
+{#                                                    <div class="data-info">#}
+{#                                                        <span class="data-label">Charge virale</span>#}
+{#                                                        <span class="data-value">#}
+{#                                                            {% if suividetail.charge_virale %}#}
+{#                                                                {{ suividetail.charge_virale }} copies/mL#}
+{#                                                            {% else %}#}
+{#                                                                <span class="text-soft">Non renseigné</span>#}
+{#                                                            {% endif %}#}
+{#                                                        </span>#}
+{#                                                    </div>#}
+{#                                                    <div class="data-icon text-danger">#}
+{#                                                        <em class="icon ni ni-virus"></em>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                            <div class="col-6">#}
+{#                                                <div class="data-item">#}
+{#                                                    <div class="data-info">#}
+{#                                                        <span class="data-label">Adhérence</span>#}
+{#                                                        <span class="data-value">#}
+{#                                                            <span class="badge badge-pill badge-{% if suividetail.adherence_traitement == 'bonne' %}success{% elif suividetail.adherence_traitement == 'moyenne' %}warning{% else %}danger{% endif %}">#}
+{#                                                                {{ suividetail.get_adherence_traitement_display }}#}
+{#                                                            </span>#}
+{#                                                        </span>#}
+{#                                                    </div>#}
+{#                                                    <div class="data-icon text-success">#}
+{#                                                        <em class="icon ni ni-check-circle"></em>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                            <!-- Carte Observations -->#}
+{#                            <div class="col-lg-6">#}
+{#                                <div class="card card-bordered h-100">#}
+{#                                    <div class="card-inner">#}
+{#                                        <div class="card-title-group">#}
+{#                                            <div class="card-title">#}
+{#                                                <h6 class="title">Observations</h6>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        <div class="mt-3">#}
+{#                                            {% if suividetail.observations %}#}
+{#                                                <div class="border rounded p-3 bg-light">#}
+{#                                                    {{ suividetail.observations|linebreaks }}#}
+{#                                                </div>#}
+{#                                            {% else %}#}
+{#                                                <div class="text-center py-4 text-soft">#}
+{#                                                    <em class="icon ni ni-info fs-24px"></em>#}
+{#                                                    <p class="mt-2">Aucune observation enregistrée</p>#}
+{#                                                </div>#}
+{#                                            {% endif %}#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                            <!-- Carte Examens Paracliniques -->#}
+{#                            <div class="col-12">#}
+{#                                <div class="card card-bordered">#}
+{#                                    <div class="card-inner">#}
+{#                                        <div class="card-title-group">#}
+{#                                            <div class="card-title">#}
+{#                                                <h6 class="title">Examens paracliniques</h6>#}
+{#                                            </div>#}
+{#                                            <div class="card-tools">#}
+{#                                                <a href="#" class="link">Voir tous</a>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        {% if suividetail.examens %}#}
+{#                                        <div class="mt-3">#}
+{#                                            <div class="row gy-3">#}
+{#                                                <div class="col-md-6">#}
+{#                                                    <div class="border rounded p-3">#}
+{#                                                        <div class="d-flex justify-content-between mb-2">#}
+{#                                                            <span class="font-weight-bold">{{ suividetail.examens.get_exam_type_display }}</span>#}
+{#                                                            <span class="badge badge-dim bg-{% if suividetail.examens.status == 'Completed' %}success{% elif suividetail.examens.status == 'Pending' %}warning{% else %}secondary{% endif %}">#}
+{#                                                                {{ suividetail.examens.get_status_display }}#}
+{#                                                            </span>#}
+{#                                                        </div>#}
+{#                                                        <div class="d-flex justify-content-between">#}
+{#                                                            <small class="text-soft">Date:</small>#}
+{#                                                            <small>{{ suividetail.examens.prescribed_at|date:"d M Y" }}</small>#}
+{#                                                        </div>#}
+{#                                                        {% if suividetail.examens.result_text %}#}
+{#                                                        <div class="mt-2">#}
+{#                                                            <p class="small">{{ suividetail.examens.result_text|truncatewords:20 }}</p>#}
+{#                                                        </div>#}
+{#                                                        {% endif %}#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        {% else %}#}
+{#                                        <div class="text-center py-4 text-soft">#}
+{#                                            <em class="icon ni ni-file-text fs-24px"></em>#}
+{#                                            <p class="mt-2">Aucun examen associé à ce suivi</p>#}
+{#                                        </div>#}
+{#                                        {% endif %}#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                    <!-- Onglet Traitements -->#}
+{#                    <div class="tab-pane" id="tab-traitements">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Traitements ARV</h6>#}
+{#                                    </div>#}
+{#                                    <div class="card-tools">#}
+{#                                        <a href="#" class="btn btn-sm btn-outline-primary">Ajouter un traitement</a>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                {% if suividetail.suivitreatarv.all %}#}
+{#                                <div class="table-responsive">#}
+{#                                    <table class="table table-striped table-hover">#}
+{#                                        <thead>#}
+{#                                            <tr>#}
+{#                                                <th>Nom</th>#}
+{#                                                <th>Type</th>#}
+{#                                                <th>Dosage</th>#}
+{#                                                <th>Forme</th>#}
+{#                                                <th>Durée</th>#}
+{#                                                <th>Efficacité</th>#}
+{#                                                <th></th>#}
+{#                                            </tr>#}
+{#                                        </thead>#}
+{#                                        <tbody>#}
+{#                                            {% for traitement in suividetail.suivitreatarv.all %}#}
+{#                                            <tr>#}
+{#                                                <td>#}
+{#                                                    <div class="d-flex align-items-center">#}
+{#                                                        <div class="user-avatar bg-dim-primary mr-2">#}
+{#                                                            <span>ARV</span>#}
+{#                                                        </div>#}
+{#                                                        <span>{{ traitement.nom }}</span>#}
+{#                                                    </div>#}
+{#                                                </td>#}
+{#                                                <td>#}
+{#                                                    <span class="badge badge-dim bg-outline-{% if traitement.type_traitement == 'première_ligne' %}primary{% elif traitement.type_traitement == 'deuxième_ligne' %}warning{% else %}danger{% endif %}">#}
+{#                                                        {{ traitement.get_type_traitement_display }}#}
+{#                                                    </span>#}
+{#                                                </td>#}
+{#                                                <td>{{ traitement.dosage }}</td>#}
+{#                                                <td>{{ traitement.get_forme_pharmaceutique_display }}</td>#}
+{#                                                <td>{{ traitement.duree_traitement }} mois</td>#}
+{#                                                <td>#}
+{#                                                    <div class="progress progress-sm">#}
+{#                                                        <div class="progress-bar" style="width: {{ traitement.efficacite|default:0 }}%"></div>#}
+{#                                                    </div>#}
+{#                                                    <span class="small">{{ traitement.efficacite|default:"0" }}%</span>#}
+{#                                                </td>#}
+{#                                                <td class="text-right">#}
+{#                                                    <button class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" title="Voir détails">#}
+{#                                                        <em class="icon ni ni-eye"></em>#}
+{#                                                    </button>#}
+{#                                                </td>#}
+{#                                            </tr>#}
+{#                                            {% endfor %}#}
+{#                                        </tbody>#}
+{#                                    </table>#}
+{#                                </div>#}
+{#                                {% else %}#}
+{#                                <div class="text-center py-4 text-soft">#}
+{#                                    <em class="icon ni ni-medical fs-24px"></em>#}
+{#                                    <p class="mt-2">Aucun traitement ARV enregistré pour ce suivi</p>#}
+{#                                </div>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                    <!-- Onglet Protocoles -->#}
+{#                    <div class="tab-pane" id="tab-protocoles">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Protocoles de traitement</h6>#}
+{#                                    </div>#}
+{#                                    <div class="card-tools">#}
+{#                                        <a href="#" class="btn btn-sm btn-outline-primary">Ajouter un protocole</a>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                {% if grouped_protocols %}#}
+{#                                <div class="accordion accordion-block" id="protocol-accordion">#}
+{#                                    {% for type, protocols in grouped_protocols.items %}#}
+{#                                    <div class="accordion-item">#}
+{#                                        <div class="accordion-header">#}
+{#                                            <a href="#" class="accordion-toggle" data-toggle="collapse" data-target="#protocol-{{ forloop.counter }}">#}
+{#                                                <span class="text-success font-weight-bold">{{ type.nom|upper }}</span>#}
+{#                                                <span class="small text-soft ml-2">{{ type.parent.nom|upper }}</span>#}
+{#                                                <span class="badge badge-pill badge-light ml-2">{{ protocols|length }}</span>#}
+{#                                            </a>#}
+{#                                        </div>#}
+{#                                        <div id="protocol-{{ forloop.counter }}" class="accordion-body collapse show" data-parent="#protocol-accordion">#}
+{#                                            <div class="accordion-inner">#}
+{#                                                <div class="table-responsive">#}
+{#                                                    <table class="table table-striped table-hover">#}
+{#                                                        <thead>#}
+{#                                                            <tr>#}
+{#                                                                <th>Nom</th>#}
+{#                                                                <th>Période</th>#}
+{#                                                                <th>Molécules</th>#}
+{#                                                                <th>Médicaments</th>#}
+{#                                                                <th>Statut</th>#}
+{#                                                            </tr>#}
+{#                                                        </thead>#}
+{#                                                        <tbody>#}
+{#                                                            {% for proto in protocols %}#}
+{#                                                            <tr>#}
+{#                                                                <td>{{ proto.protocole.nom }}</td>#}
+{#                                                                <td>#}
+{#                                                                    <div class="d-flex flex-column">#}
+{#                                                                        <small>Début: {{ proto.protocole.date_debut|date:"d M Y" }}</small>#}
+{#                                                                        <small>Fin: {{ proto.protocole.date_fin|date:"d M Y" }}</small>#}
+{#                                                                    </div>#}
+{#                                                                </td>#}
+{#                                                                <td>#}
+{#                                                                    {% for molecule in proto.protocole.molecules.all %}#}
+{#                                                                    <span class="badge badge-dim badge-outline-dark mb-1">{{ molecule.nom }}</span>#}
+{#                                                                    {% endfor %}#}
+{#                                                                </td>#}
+{#                                                                <td>#}
+{#                                                                    {% for medicament in proto.protocole.medicament.all %}#}
+{#                                                                    <span class="badge badge-dim badge-outline-info mb-1">{{ medicament.nom }}</span>#}
+{#                                                                    {% endfor %}#}
+{#                                                                </td>#}
+{#                                                                <td>#}
+{#                                                                    {% if proto.protocole.date_fin > now %}#}
+{#                                                                    <span class="badge badge-dim badge-success">Actif</span>#}
+{#                                                                    {% else %}#}
+{#                                                                    <span class="badge badge-dim badge-secondary">Terminé</span>#}
+{#                                                                    {% endif %}#}
+{#                                                                </td>#}
+{#                                                            </tr>#}
+{#                                                            {% endfor %}#}
+{#                                                        </tbody>#}
+{#                                                    </table>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    {% endfor %}#}
+{#                                </div>#}
+{#                                {% else %}#}
+{#                                <div class="text-center py-4 text-soft">#}
+{#                                    <em class="icon ni ni-clipboard fs-24px"></em>#}
+{#                                    <p class="mt-2">Aucun protocole associé à ce suivi</p>#}
+{#                                </div>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                    <!-- Onglet Rendez-vous -->#}
+{#                    <div class="tab-pane" id="tab-rdv">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Rendez-vous</h6>#}
+{#                                    </div>#}
+{#                                    <div class="card-tools">#}
+{#                                        <a href="#" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#rdvsuivi">#}
+{#                                            Planifier un RDV#}
+{#                                        </a>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                {% if suividetail.suivierdv.all %}#}
+{#                                <div class="nk-tb-list is-compact">#}
+{#                                    <div class="nk-tb-item nk-tb-head">#}
+{#                                        <div class="nk-tb-col"><span>Date</span></div>#}
+{#                                        <div class="nk-tb-col"><span>Heure</span></div>#}
+{#                                        <div class="nk-tb-col"><span>Type</span></div>#}
+{#                                        <div class="nk-tb-col"><span>Statut</span></div>#}
+{#                                        <div class="nk-tb-col text-right"><span>Actions</span></div>#}
+{#                                    </div>#}
+{##}
+{#                                    {% for rdv in suividetail.suivierdv.all %}#}
+{#                                    <div class="nk-tb-item">#}
+{#                                        <div class="nk-tb-col">#}
+{#                                            <span>{{ rdv.date|date:"d M Y" }}</span>#}
+{#                                        </div>#}
+{#                                        <div class="nk-tb-col">#}
+{#                                            <span>{{ rdv.time|time:"H:i" }}</span>#}
+{#                                        </div>#}
+{#                                        <div class="nk-tb-col">#}
+{#                                            <span>{{ rdv.reason|truncatechars:30 }}</span>#}
+{#                                        </div>#}
+{#                                        <div class="nk-tb-col">#}
+{#                                            <span class="badge badge-pill badge-{% if rdv.status == 'Completed' %}success{% elif rdv.status == 'Scheduled' %}info{% else %}secondary{% endif %}">#}
+{#                                                {{ rdv.get_status_display }}#}
+{#                                            </span>#}
+{#                                        </div>#}
+{#                                        <div class="nk-tb-col text-right">#}
+{#                                            <div class="dropdown">#}
+{#                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="dropdown">#}
+{#                                                    <em class="icon ni ni-more-h"></em>#}
+{#                                                </a>#}
+{#                                                <div class="dropdown-menu dropdown-menu-right">#}
+{#                                                    <ul class="link-list-opt no-bdr">#}
+{#                                                        <li><a href="#"><em class="icon ni ni-eye"></em><span>Voir détails</span></a></li>#}
+{#                                                        <li><a href="#"><em class="icon ni ni-edit"></em><span>Modifier</span></a></li>#}
+{#                                                        <li><a href="#"><em class="icon ni ni-trash"></em><span>Annuler</span></a></li>#}
+{#                                                    </ul>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    {% endfor %}#}
+{#                                </div>#}
+{#                                {% else %}#}
+{#                                <div class="text-center py-4 text-soft">#}
+{#                                    <em class="icon ni ni-calendar fs-24px"></em>#}
+{#                                    <p class="mt-2">Aucun rendez-vous planifié</p>#}
+{#                                </div>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{##}
+{#                    <!-- Onglet Comorbidités -->#}
+{#                    <div class="tab-pane" id="tab-comorbidites">#}
+{#                        <div class="row gy-4">#}
+{#                            <div class="col-lg-6">#}
+{#                                <div class="card card-bordered">#}
+{#                                    <div class="card-inner">#}
+{#                                        <div class="card-title-group">#}
+{#                                            <div class="card-title">#}
+{#                                                <h6 class="title">Comorbidités</h6>#}
+{#                                            </div>#}
+{#                                            <div class="card-tools">#}
+{#                                                <a href="#" class="btn btn-sm btn-outline-primary">Ajouter</a>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{##}
+{#                                        {% if suividetail.suivicomorbide.all %}#}
+{#                                        <div class="table-responsive">#}
+{#                                            <table class="table table-striped table-hover">#}
+{#                                                <thead>#}
+{#                                                    <tr>#}
+{#                                                        <th>Type</th>#}
+{#                                                        <th>Impact</th>#}
+{#                                                        <th>Actions</th>#}
+{#                                                    </tr>#}
+{#                                                </thead>#}
+{#                                                <tbody>#}
+{#                                                    {% for comorbidite in suividetail.suivicomorbide.all %}#}
+{#                                                    <tr>#}
+{#                                                        <td>{{ comorbidite.type_comorbidite }}</td>#}
+{#                                                        <td>#}
+{#                                                            <span class="badge badge-dim bg-{% if comorbidite.impact_sur_vih == 'Faible' %}success{% elif comorbidite.impact_sur_vih == 'Modéré' %}warning{% else %}danger{% endif %}">#}
+{#                                                                {{ comorbidite.impact_sur_vih }}#}
+{#                                                            </span>#}
+{#                                                        </td>#}
+{#                                                        <td>#}
+{#                                                            <button class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" title="Modifier">#}
+{#                                                                <em class="icon ni ni-edit"></em>#}
+{#                                                            </button>#}
+{#                                                        </td>#}
+{#                                                    </tr>#}
+{#                                                    {% endfor %}#}
+{#                                                </tbody>#}
+{#                                            </table>#}
+{#                                        </div>#}
+{#                                        {% else %}#}
+{#                                        <div class="text-center py-4 text-soft">#}
+{#                                            <em class="icon ni ni-heart-fill fs-24px"></em>#}
+{#                                            <p class="mt-2">Aucune comorbidité enregistrée</p>#}
+{#                                        </div>#}
+{#                                        {% endif %}#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{##}
+{#                            <div class="col-lg-6">#}
+{#                                <div class="card card-bordered">#}
+{#                                    <div class="card-inner">#}
+{#                                        <div class="card-title-group">#}
+{#                                            <div class="card-title">#}
+{#                                                <h6 class="title">Vaccinations</h6>#}
+{#                                            </div>#}
+{#                                            <div class="card-tools">#}
+{#                                                <a href="#" class="btn btn-sm btn-outline-primary">Ajouter</a>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{##}
+{#                                        {% if suividetail.patient.vaccinations.all %}#}
+{#                                        <div class="table-responsive">#}
+{#                                            <table class="table table-striped table-hover">#}
+{#                                                <thead>#}
+{#                                                    <tr>#}
+{#                                                        <th>Vaccin</th>#}
+{#                                                        <th>Date</th>#}
+{#                                                        <th>Centre</th>#}
+{#                                                    </tr>#}
+{#                                                </thead>#}
+{#                                                <tbody>#}
+{#                                                    {% for vaccination in suividetail.patient.vaccinations.all %}#}
+{#                                                    <tr>#}
+{#                                                        <td>{{ vaccination.type_vaccin }}</td>#}
+{#                                                        <td>{{ vaccination.date_administration|date:"d M Y" }}</td>#}
+{#                                                        <td>{{ vaccination.centre_vaccination|default:"-" }}</td>#}
+{#                                                    </tr>#}
+{#                                                    {% endfor %}#}
+{#                                                </tbody>#}
+{#                                            </table>#}
+{#                                        </div>#}
+{#                                        {% else %}#}
+{#                                        <div class="text-center py-4 text-soft">#}
+{#                                            <em class="icon ni ni-shield-cross fs-24px"></em>#}
+{#                                            <p class="mt-2">Aucune vaccination enregistrée</p>#}
+{#                                        </div>#}
+{#                                        {% endif %}#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{##}
+{#<!-- Modal pour nouveau RDV -->#}
+{#<div class="modal fade" tabindex="-1" id="rdvsuivi">#}
+{#    <div class="modal-dialog modal-lg" role="document">#}
+{#        <div class="modal-content">#}
+{#            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                <em class="icon ni ni-cross"></em>#}
+{#            </a>#}
+{#            <div class="modal-header">#}
+{#                <h5 class="modal-title">Nouveau rendez-vous pour {{ suividetail.patient.nom_complet }}</h5>#}
+{#            </div>#}
+{#            <div class="modal-body">#}
+{#                <form action="{% url 'suivis-rdv-create' suivi_id=suividetail.id %}" method="post" class="form-validate">#}
+{#                    {% csrf_token %}#}
+{#                    <div class="row gy-4">#}
+{#                        <div class="col-md-6">#}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label" for="{{ suivirdvform.date.id_for_label }}">Date</label>#}
+{#                                <div class="form-control-wrap">#}
+{#                                    {{ suivirdvform.date }}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-md-6">#}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label" for="{{ suivirdvform.time.id_for_label }}">Heure</label>#}
+{#                                <div class="form-control-wrap">#}
+{#                                    {{ suivirdvform.time }}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-md-6">#}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label" for="{{ suivirdvform.service.id_for_label }}">Service</label>#}
+{#                                <div class="form-control-wrap">#}
+{#                                    {{ suivirdvform.service }}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-md-6">#}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label" for="{{ suivirdvform.doctor.id_for_label }}">Médecin</label>#}
+{#                                <div class="form-control-wrap">#}
+{#                                    {{ suivirdvform.doctor }}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-12">#}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label" for="{{ suivirdvform.reason.id_for_label }}">Motif</label>#}
+{#                                <div class="form-control-wrap">#}
+{#                                    {{ suivirdvform.reason }}#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="modal-footer bg-light">#}
+{#                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>#}
+{#                        <button type="submit" class="btn btn-primary">Planifier</button>#}
+{#                    </div>#}
+{#                </form>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{% endblock %}#}

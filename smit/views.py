@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from collections import defaultdict
 from datetime import date, timedelta
@@ -41,7 +42,7 @@ from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, Consu
     HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm, \
     PatientUpdateForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
-    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole
+    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV
 
 
 # Create your views here.
@@ -50,6 +51,7 @@ def hospitalization_chart_data(request):
     view = HomePageView()
     stats = view.get_hospitalization_statistics()
     return JsonResponse(stats, safe=False)
+
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
@@ -1144,30 +1146,159 @@ class PatientRecuListView(LoginRequiredMixin, ListView):
         return context
 
 
+# class ServiceContentDetailView(LoginRequiredMixin, DetailView):
+#     model = ServiceSubActivity
+#     # template_name = "pages/services/servicecontent_detail.html"
+#     context_object_name = "subservice"
+#
+#     def get_template_names(self):
+#         # Déterminer le template en fonction du service ou de la sous-activité
+#         service = self.object.service
+#         if service.nom == 'VIH/SIDA':
+#             # if self.object.nom == 'overview':
+#             #     return ["pages/services/soverview.html"]
+#             # elif self.object.nom == 'consultation':
+#             return ["pages/services/servicecontent_detail.html"]
+#         elif service.nom == 'TUBERCULOSE':
+#             # if self.object.nom == 'overview':
+#             #     return ["pages/services/soverview.html"]
+#             # elif self.object.nom == 'consultation':
+#             return ["pages/services/consultation.html"]
+#         else:
+#             return ["pages/services/servicecontent_default.html"]
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['service'] = self.object.service  # Ajoutez le service parent au contexte
+#         return context
 class ServiceContentDetailView(LoginRequiredMixin, DetailView):
     model = ServiceSubActivity
-    # template_name = "pages/services/servicecontent_detail.html"
     context_object_name = "subservice"
 
     def get_template_names(self):
-        # Déterminer le template en fonction du service ou de la sous-activité
         service = self.object.service
-        if service.nom == 'VIH/SIDA':
-            # if self.object.nom == 'overview':
-            #     return ["pages/services/soverview.html"]
-            # elif self.object.nom == 'consultation':
+        if service.nom == 'VIH-SIDA' and self.object.nom == 'Overview':
+            print("SERVICE = ", service.nom)
+            print("SUBSERVICE = ", self.object.nom)
+            return ["pages/services/VIH-SIDA/vih_sida_overview.html"]
+        elif service.nom == 'VIH-SIDA':
             return ["pages/services/servicecontent_detail.html"]
         elif service.nom == 'TUBERCULOSE':
-            # if self.object.nom == 'overview':
-            #     return ["pages/services/soverview.html"]
-            # elif self.object.nom == 'consultation':
             return ["pages/services/consultation.html"]
         else:
             return ["pages/services/servicecontent_default.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['service'] = self.object.service  # Ajoutez le service parent au contexte
+        service = self.object.service
+        context['service'] = service
+
+        if service.nom == 'VIH-SIDA':
+            now = timezone.now()
+            date_debut = now - timedelta(days=365)
+            tests = TestRapideVIH.objects.filter(date_test__gte=date_debut)
+            total_tests = tests.count()
+            total_positifs = tests.filter(resultat='POSITIF').count()
+            taux_positivite = round((total_positifs / total_tests * 100), 2) if total_tests > 0 else 0
+
+            mois_labels, tests_data, positifs_data = [], [], []
+
+            # Données actuelles et précédentes pour calcul des variations
+            current_month = now.month
+            last_month = (now - timedelta(days=30)).month
+
+            test_this_month = 0
+            test_last_month = 0
+            positif_this_month = 0
+            positif_last_month = 0
+
+            for i in range(12):
+                mois = now - timedelta(days=30 * (11 - i))
+                mois_labels.append(mois.strftime("%b %Y"))
+                mois_debut = mois.replace(day=1, hour=0, minute=0, second=0)
+                mois_fin = (mois_debut + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+
+                tests_mois = TestRapideVIH.objects.filter(date_test__range=(mois_debut, mois_fin))
+                tests_count = tests_mois.count()
+                positifs_count = tests_mois.filter(resultat='POSITIF').count()
+
+                tests_data.append(tests_count)
+                positifs_data.append(positifs_count)
+
+                if mois.month == current_month:
+                    test_this_month = tests_count
+                    positif_this_month = positifs_count
+                elif mois.month == last_month:
+                    test_last_month = tests_count
+                    positif_last_month = positifs_count
+
+            # Calcul des variations (%)
+            def variation(new, old):
+                if old == 0:
+                    return 0
+                return round(((new - old) / old) * 100, 2)
+
+            test_change = variation(test_this_month, test_last_month)
+            positif_change = variation(positif_this_month, positif_last_month)
+
+            hommes_tests = tests.filter(patient__genre='Homme').count()
+            hommes_positifs = tests.filter(patient__genre='Homme', resultat='POSITIF').count()
+            hommes_taux = round((hommes_positifs / hommes_tests * 100), 2) if hommes_tests > 0 else 0
+
+            femmes_tests = tests.filter(patient__genre='Femme').count()
+            femmes_positifs = tests.filter(patient__genre='Femme', resultat='POSITIF').count()
+            femmes_taux = round((femmes_positifs / femmes_tests * 100), 2) if femmes_tests > 0 else 0
+
+            traitements = TraitementARV.objects.filter(
+                type_traitement__in=['première_ligne', 'deuxième_ligne', 'troisième_ligne'])
+            total_arv = traitements.count()
+
+            suivi_arv = Suivi.objects.filter(services__nom='VIH-SIDA')
+            arv_adherence_bonne = suivi_arv.filter(adherence_traitement='bonne').count()
+            arv_adherence_moyenne = suivi_arv.filter(adherence_traitement='moyenne').count()
+            arv_adherence_faible = suivi_arv.filter(adherence_traitement='faible').count()
+
+            context.update({
+                'total_tests': total_tests,
+                'total_positifs': total_positifs,
+                'taux_positivite': taux_positivite,
+                'test_change': abs(test_change),
+                'positif_change': abs(positif_change),
+                'test_change_sign': '↑' if test_change > 0 else '↓' if test_change < 0 else '=',
+                'positif_change_sign': '↑' if positif_change > 0 else '↓' if positif_change < 0 else '=',
+                'mois_labels': mois_labels,
+                'tests_data': tests_data,
+                'positifs_data': positifs_data,
+                'hommes_tests': hommes_tests,
+                'hommes_positifs': hommes_positifs,
+                'hommes_taux': hommes_taux,
+                'femmes_tests': femmes_tests,
+                'femmes_positifs': femmes_positifs,
+                'femmes_taux': femmes_taux,
+                'total_arv': total_arv,
+                'arv_adherence_bonne': arv_adherence_bonne,
+                'arv_adherence_moyenne': arv_adherence_moyenne,
+                'arv_adherence_faible': arv_adherence_faible,
+                'derniers_tests': TestRapideVIH.objects.order_by('-date_test')[:5],
+                'consultations_recentes': Consultation.objects.filter(
+                    services__nom='VIH-SIDA'
+                ).order_by('-consultation_date')[:5],
+                'prochains_rdv': Appointment.objects.filter(
+                    service__nom='VIH-SIDA',
+                    date__gte=now.date(),
+                    status='Scheduled'
+                ).order_by('date', 'time')[:5],
+                'hospitalisations_vih': Hospitalization.objects.filter(
+                    activite__service__nom='VIH-SIDA',
+                    discharge_date__isnull=True
+                ).order_by('-admission_date')[:3],
+                'suivis_recents': Suivi.objects.filter(
+                    services__nom='VIH-SIDA'
+                ).order_by('-date_suivi')[:3],
+                'mois_actuel': now.strftime("%B"),
+                'annee_actuelle': now.year,
+            })
+
         return context
 
 
@@ -1535,6 +1666,95 @@ class SuiviListView(LoginRequiredMixin, ListView):
     model = Suivi
     template_name = "pages/suivi/suivi_list.html"
     context_object_name = "suivis"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Périodes de comparaison
+        aujourdhui = timezone.now().date()
+        mois_dernier = aujourdhui - timedelta(days=30)
+        semaine_derniere = aujourdhui - timedelta(days=7)
+
+        # Patients actifs
+        patients_actifs = Suivi.objects.filter(statut_patient='actif').count()
+        patients_actifs_mois_dernier = Suivi.objects.filter(
+            statut_patient='actif',
+            date_suivi__month=mois_dernier.month,
+            date_suivi__year=mois_dernier.year
+        ).count()
+
+        # Patients perdus de vue
+        patients_perdus_vue = Suivi.objects.filter(statut_patient='perdu_de_vue').count()
+        patients_perdus_mois_dernier = Suivi.objects.filter(
+            statut_patient='perdu_de_vue',
+            date_suivi__month=mois_dernier.month,
+            date_suivi__year=mois_dernier.year
+        ).count()
+
+        # Taux d'adhérence
+        suivi_adherence = Suivi.objects.exclude(adherence_traitement='')
+        taux_adherence = suivi_adherence.filter(
+            adherence_traitement='bonne').count() / suivi_adherence.count() * 100 if suivi_adherence.count() > 0 else 0
+        taux_adherence_mois_dernier = Suivi.objects.filter(
+            date_suivi__month=mois_dernier.month,
+            date_suivi__year=mois_dernier.year,
+            adherence_traitement='bonne'
+        ).count() / Suivi.objects.filter(
+            date_suivi__month=mois_dernier.month,
+            date_suivi__year=mois_dernier.year
+        ).exclude(adherence_traitement='').count() * 100 if Suivi.objects.filter(
+            date_suivi__month=mois_dernier.month,
+            date_suivi__year=mois_dernier.year
+        ).exclude(adherence_traitement='').count() > 0 else 0
+
+        # Nouveaux patients (7 derniers jours)
+        nouveaux_7j = Patient.objects.filter(
+            created_at__gte=semaine_derniere
+        ).count()
+        nouveaux_7j_precedent = Patient.objects.filter(
+            created_at__gte=semaine_derniere - timedelta(days=7),
+            created_at__lt=semaine_derniere
+        ).count()
+
+        # Calcul des évolutions
+        evolution_actifs = ((
+                                    patients_actifs - patients_actifs_mois_dernier) / patients_actifs_mois_dernier * 100) if patients_actifs_mois_dernier > 0 else 0
+        evolution_perdus = ((
+                                    patients_perdus_vue - patients_perdus_mois_dernier) / patients_perdus_mois_dernier * 100) if patients_perdus_mois_dernier > 0 else 0
+        evolution_adherence = ((
+                                       taux_adherence - taux_adherence_mois_dernier) / taux_adherence_mois_dernier * 100) if taux_adherence_mois_dernier > 0 else 0
+        evolution_nouveaux = ((
+                                      nouveaux_7j - nouveaux_7j_precedent) / nouveaux_7j_precedent * 100) if nouveaux_7j_precedent > 0 else 0
+
+        # Tendance sur 7 jours (simplifié - en production, utilisez des données réelles)
+        jours_tendance = [(aujourdhui - timedelta(days=i)).strftime('%a %d/%m') for i in reversed(range(7))]
+
+        tendance_actifs = [patients_actifs - i for i in range(7)]
+        tendance_perdus = [patients_perdus_vue - i for i in range(7)]
+        tendance_adherence = [int(taux_adherence) - i for i in range(7)]
+        tendance_nouveaux = [nouveaux_7j - i for i in range(7)]
+
+        context['stats'] = {
+            'patients_actifs': patients_actifs,
+            'evolution_actifs': evolution_actifs,
+            # 'tendance_actifs': tendance_actifs[::-1],
+            'tendance_actifs': json.dumps(tendance_actifs[::-1]),
+
+            'patients_perdus_vue': patients_perdus_vue,
+            'evolution_perdus': evolution_perdus,
+            'tendance_perdus': tendance_perdus[::-1],
+
+            'taux_adherence': round(taux_adherence, 1),
+            'evolution_adherence': round(evolution_adherence, 1),
+            'tendance_adherence': tendance_adherence[::-1],
+
+            'nouveaux_7j': nouveaux_7j,
+            'evolution_nouveaux': round(evolution_nouveaux, 1),
+            'tendance_nouveaux': tendance_nouveaux[::-1],
+            'jours_tendance': jours_tendance,
+        }
+
+        return context
 
 
 def create_rdv(request, suivi_id):

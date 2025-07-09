@@ -69,8 +69,8 @@ urlpatterns = [
                   path("employees/<int:pk>/delete/", EmployeeDeleteView.as_view(), name="employee_delete"),
                   path('employee/role/assignment', AssignRoleView.as_view(), name='employee_role_assign'),
 
-
-                  path('employees/<int:pk>/reset-password/', AdminPasswordResetView.as_view(), name='admin_password_reset'),
+                  path('employees/<int:pk>/reset-password/', AdminPasswordResetView.as_view(),
+                       name='admin_password_reset'),
 
                   path('', HomePageView.as_view(), name='home'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
@@ -170,7 +170,10 @@ urlpatterns = [
 
                   # path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
 
-                  path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
+                  # path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
+                  path('service/<str:serv>/<str:acty>/<int:pk>/', ServiceContentDetailView.as_view(),
+                       name='service_content_detail'
+                       ),
                   path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),
 
                   path('api/get-patient-name/<int:appointment_id>/', views.get_patient_name, name='get_patient_name'),

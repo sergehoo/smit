@@ -1,6 +1,5 @@
 {% load static %}
 
-
 <html lang="fr-FR" class="js">
 
 <head>
@@ -13,34 +12,247 @@
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6c757d;
+            --accent-color: #ff6b6b;
+            --transition-speed: 0.3s;
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6a11cb 100%);
+        }
+        
+        .nk-auth-body {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .brand-logo {
+            animation: bounceIn 0.8s ease-in-out;
+        }
+        
+        .form-control {
+            transition: all var(--transition-speed) ease;
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 4px 15px rgba(74, 108, 247, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a5bd9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 108, 247, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .toggle-password {
+            border-radius: 0 8px 8px 0;
+            border-left: none;
+            background-color: #f8f9fa;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .toggle-password:hover {
+            background-color: #e9ecef;
+        }
+        
+        .input-group {
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .input-group:focus-within {
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+            border-radius: 8px;
+        }
+        
+        .footer-links a {
+            color: var(--secondary-color);
+            transition: color var(--transition-speed) ease;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        .shape-1 {
+            width: 150px;
+            height: 150px;
+            background: var(--primary-color);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent-color);
+            top: 60%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+        
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            background: var(--secondary-color);
+            top: 80%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767px) {
+            .card {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .nk-auth-body {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body class="nk-body bg-white npc-general pg-auth">
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    
     <div class="nk-app-root">
         <!-- main @s -->
-        <div class="nk-main ">
+        <div class="nk-main">
             <!-- wrap @s -->
             <div class="nk-wrap nk-wrap-nosidebar">
                 <!-- content @s -->
-                <div class="nk-content ">
-                    <div class="nk-block nk-block-middle nk-auth-body  wide-xs">
+                <div class="nk-content">
+                    <div class="nk-block nk-block-middle nk-auth-body wide-xs">
                         <div class="brand-logo pb-4 text-center">
-                            <a href="{% url 'home' %}" class="logo-link">
-                                <img class="logo-light logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
-                                <img class="logo-dark logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
+                            <a href="{% url 'home' %}" class="logo-link pulse">
+                                <img class="logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
                             </a>
                         </div>
-                        <div class="card card-bordered">
+                        <div class="card card-bordered animate-slide-up delay-1">
                             <div class="card-inner card-inner-lg">
                                 {% block content %}
-
-                                 
-
+                                <!-- Your login form content here -->
                                 {% endblock %}
                             </div>
                         </div>
+                        
+                        <div class="text-center mt-4 delay-3">
+                            <p class="text-muted">© {% now "Y" %} SMIT | KENEYA. Tous droits réservés.</p>
+                            <div class="footer-links">
+                                <a href="#" class="mx-2">Conditions d'utilisation</a>
+                                <a href="#" class="mx-2">Politique de confidentialité</a>
+                                <a href="#" class="mx-2">Support</a>
+                            </div>
+                        </div>
                     </div>
-                    
                 </div>
                 <!-- wrap @e -->
             </div>
@@ -49,10 +261,145 @@
         <!-- main @e -->
     </div>
     <!-- app-root @e -->
+    
     <!-- JavaScript -->
     <script src="{% static 'assets/js/bundle.js' %}"></script>
     <script src="{% static 'assets/js/scripts.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 
+    <script>
+    $(document).ready(function () {
+        // Animation for form elements
+        gsap.from(".form-group", {
+            duration: 0.6,
+            y: 20,
+            opacity: 0,
+            stagger: 0.1,
+            ease: "back.out(1.7)",
+            delay: 0.4
+        });
+        
+        // Password toggle with better animation
+        $('input[type="password"]').each(function () {
+            if (!$(this).next('.toggle-password').length) {
+                $(this).wrap('<div class="input-group"></div>');
+                $(this).after(`
+                    <button type="button" class="btn btn-outline-secondary toggle-password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                `);
+                
+                // Add focus effect
+                $(this).on('focus', function() {
+                    $(this).parent().css('box-shadow', '0 0 0 3px rgba(74, 108, 247, 0.2)');
+                }).on('blur', function() {
+                    $(this).parent().css('box-shadow', 'none');
+                });
+            }
+        });
+
+        $(document).on('click', '.toggle-password', function () {
+            const passwordField = $(this).prev('input');
+            const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+            passwordField.attr('type', type);
+            
+            // Animate the icon change
+            const icon = $(this).find('i');
+            gsap.to(icon, {
+                duration: 0.3,
+                scale: 1.3,
+                yoyo: true,
+                repeat: 1,
+                ease: "power2.out",
+                onComplete: function() {
+                    icon.toggleClass('fa-eye fa-eye-slash');
+                }
+            });
+        });
+        
+        // Button hover effects
+        $('.btn-primary').hover(
+            function() {
+                gsap.to($(this), {
+                    duration: 0.2,
+                    y: -2,
+                    boxShadow: '0 6px 20px rgba(74, 108, 247, 0.4)',
+                    ease: "power1.out"
+                });
+            },
+            function() {
+                gsap.to($(this), {
+                    duration: 0.2,
+                    y: 0,
+                    boxShadow: '0 4px 15px rgba(74, 108, 247, 0.3)',
+                    ease: "power1.out"
+                });
+            }
+        );
+        
+        // Form submission animation
+        $('form').on('submit', function(e) {
+            if ($(this).valid()) {
+                gsap.to($(this).find('button[type="submit"]'), {
+                    duration: 0.3,
+                    scale: 0.95,
+                    ease: "power2.inOut"
+                });
+            }
+        });
+        
+        // Floating shapes animation
+        gsap.to(".shape-1", {
+            duration: 20,
+            x: "+=100",
+            y: "+=50",
+            rotation: 360,
+            repeat: -1,
+            yoyo: true,
+            ease: "none"
+        });
+        
+        gsap.to(".shape-2", {
+            duration: 25,
+            x: "-=150",
+            y: "+=30",
+            rotation: -360,
+            repeat: -1,
+            yoyo: true,
+            ease: "none"
+        });
+        
+        gsap.to(".shape-3", {
+            duration: 30,
+            x: "+=200",
+            y: "-=20",
+            rotation: 180,
+            repeat: -1,
+            yoyo: true,
+            ease: "none"
+        });
+        
+        // Show messages with animation
+        {% if messages %}
+            {% for message in messages %}
+                const alert = $(`<div class="alert alert-{{ message.tags }} animate__animated animate__fadeInDown mb-4">${'{{ message }}'}</div>`);
+                $('.card-inner').prepend(alert);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(function() {
+                    gsap.to(alert, {
+                        duration: 0.5,
+                        opacity: 0,
+                        y: -20,
+                        onComplete: function() {
+                            alert.remove();
+                        }
+                    });
+                }, 5000);
+            {% endfor %}
+        {% endif %}
+    });
+    </script>
 <script>
 $(document).ready(function () {
     // Ajouter les classes CSS existantes
@@ -127,62 +474,10 @@ $(document).ready(function () {
     });
 });
 </script>
-
-{#    <script>#}
-{#        //according to loftblog tut#}
-{#        $('input').addClass('form-control')#}
-{#        $('button').addClass('btn btn-primary')#}
-{#        $('.nav li:first').addClass('active');#}
-{##}
-{#        var showSection = function showSection(section, isAnimate) {#}
-{#          var#}
-{#          direction = section.replace(/#/, ''),#}
-{#          reqSection = $('.section').filter('[data-section="' + direction + '"]'),#}
-{#          reqSectionPos = reqSection.offset().top - 0;#}
-{##}
-{#          if (isAnimate) {#}
-{#            $('body, html').animate({#}
-{#              scrollTop: reqSectionPos },#}
-{#            800);#}
-{#          } else {#}
-{#            $('body, html').scrollTop(reqSectionPos);#}
-{#          }#}
-{##}
-{#        };#}
-{##}
-{#        var checkSection = function checkSection() {#}
-{#          $('.section').each(function () {#}
-{#            var#}
-{#            $this = $(this),#}
-{#            topEdge = $this.offset().top - 80,#}
-{#            bottomEdge = topEdge + $this.height(),#}
-{#            wScroll = $(window).scrollTop();#}
-{#            if (topEdge < wScroll && bottomEdge > wScroll) {#}
-{#              var#}
-{#              currentId = $this.data('section'),#}
-{#              reqLink = $('a').filter('[href*=\\#' + currentId + ']');#}
-{#              reqLink.closest('li').addClass('active').#}
-{#              siblings().removeClass('active');#}
-{#            }#}
-{#          });#}
-{#        };#}
-{##}
-{#        $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) {#}
-{#          e.preventDefault();#}
-{#          showSection($(this).attr('href'), true);#}
-{#        });#}
-{##}
-{#        $(window).scroll(function () {#}
-{#          checkSection();#}
-{#        });#}
-{#    </script>#}
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-info">{{ message }}</div>
-    {% endfor %}
-{% endif %}
 </body>
 </html>
+
+
 
 
 

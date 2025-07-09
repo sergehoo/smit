@@ -12,11 +12,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
-
 from django.conf import settings
 from django.contrib import staticfiles
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -328,3 +328,8 @@ TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.environ.get('messaging_service_sid')  # Numéro Twilio
 TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
 SITE_NAME = 'SMIT-CI'
+
+
+ORANGE_SMS_CLIENT_ID = config('ORANGE_SMS_CLIENT_ID')
+ORANGE_SMS_CLIENT_SECRET = config('ORANGE_SMS_CLIENT_SECRET')
+ORANGE_SMS_SENDER = config('ORANGE_SMS_SENDER')

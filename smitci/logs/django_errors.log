@@ -299,3 +299,1824 @@ Traceback (most recent call last):
     logger.error(f"Erreur lors de l'envoi de la notification: {str(e)}")
 NameError: name 'logger' is not defined
 [35;1mHTTP POST /employees/121/reset-password/ 500 [1.62, 127.0.0.1:53871][0m
+Internal Server Error: /admin/smit/suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 2065, in changelist_view
+    "selection_note": _("0 of %(cnt)s selected") % {"cnt": len(cl.result_list)},
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+[35;1mHTTP GET /admin/smit/suivi/ 500 [0.21, 127.0.0.1:59336][0m
+Internal Server Error: /admin/smit/suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 2065, in changelist_view
+    "selection_note": _("0 of %(cnt)s selected") % {"cnt": len(cl.result_list)},
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+[35;1mHTTP GET /admin/smit/suivi/ 500 [0.33, 127.0.0.1:59443][0m
+Internal Server Error: /admin/smit/suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.UndefinedColumn: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 688, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/decorators/cache.py", line 62, in _wrapper_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/sites.py", line 242, in inner
+    return view(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 46, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/utils/decorators.py", line 134, in _wrapper_view
+    response = view_func(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/admin/options.py", line 2065, in changelist_view
+    "selection_note": _("0 of %(cnt)s selected") % {"cnt": len(cl.result_list)},
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 380, in __len__
+    self._fetch_all()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1881, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 102, in execute
+    return super().execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.ProgrammingError: column smit_suivi.examens_id does not exist
+LINE 1: ...vi"."charge_virale", "smit_suivi"."observations", "smit_suiv...
+                                                             ^
+
+[35;1mHTTP GET /admin/smit/suivi/ 500 [0.08, 127.0.0.1:59458][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'dashboard' not found. 'dashboard' is not a valid view function or pattern name.
+[35;1mHTTP GET /Suivi/ 500 [10.67, 127.0.0.1:60710][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'suivi_create' not found. 'suivi_create' is not a valid view function or pattern name.
+[35;1mHTTP GET /Suivi/ 500 [6.38, 127.0.0.1:60718][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 238, in render
+    nodelist.append(node.render_annotated(context))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'add_constante' not found. 'add_constante' is not a valid view function or pattern name.
+[35;1mHTTP GET /Suivi/ 500 [7.00, 127.0.0.1:60724][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 238, in render
+    nodelist.append(node.render_annotated(context))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'stop_followup' not found. 'stop_followup' is not a valid view function or pattern name.
+[35;1mHTTP GET /Suivi/ 500 [8.07, 127.0.0.1:60728][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.38, 127.0.0.1:62025][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.95, 127.0.0.1:62064][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.72, 127.0.0.1:62068][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.33, 127.0.0.1:62071][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.22, 127.0.0.1:62071][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.28, 127.0.0.1:62075][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 953, in do_if
+    nodelist = parser.parse(("elif", "else", "endif"))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.89, 127.0.0.1:62093][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 321, in render
+    return nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'liste_tests_vih' not found. 'liste_tests_vih' is not a valid view function or pattern name.
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [3.18, 127.0.0.1:62097][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 321, in render
+    return nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'liste_consultations_vih' not found. 'liste_consultations_vih' is not a valid view function or pattern name.
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.50, 127.0.0.1:62101][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 321, in render
+    return nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'liste_rdv_vih' not found. 'liste_rdv_vih' is not a valid view function or pattern name.
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.70, 127.0.0.1:62104][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 321, in render
+    return nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'liste_hospitalisations_vih' not found. 'liste_hospitalisations_vih' is not a valid view function or pattern name.
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.48, 127.0.0.1:62107][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 175, in render
+    return self._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 157, in render
+    return compiled_parent._render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 167, in _render
+    return self.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 63, in render
+    result = block.nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 321, in render
+    return nodelist.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 966, in render_annotated
+    return self.render(context)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'liste_suivi_vih' not found. 'liste_suivi_vih' is not a valid view function or pattern name.
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1 500 [0.71, 127.0.0.1:62110][0m
+Internal Server Error: /service/VIH-SIDA/Overview/1/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/detail.py", line 109, in get
+    context = self.get_context_data(object=self.object)
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 1290, in get_context_data
+    'hospitalisations_vih': Hospitalization.objects.filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'services' into field. Choices are: activite, activite_id, admission_date, avis_medicaux, bed, bed_id, bilans, created_at, diagnostics, discharge_date, discharge_reason, doctor, doctor_id, effets_indesirables, examens_appareils, historique_maladie_hospi, hospiantecedents, hospicomment, hospiconstantes, hospimodedevie, hospiobservations, hospiprescriptions, hospitalization_exams, id, imagerieshospi, indicateurs_autres, indicateurs_biologiques, indicateurs_compliques, indicateurs_fonctionnels, indicateurs_subjectifs, patient, patient_id, probleme_maladie_hospi, reason_for_admission, resume_maladie_hospi, room, signefonctionnels, status, updated_at
+[35;1mHTTP GET /service/VIH-SIDA/Overview/1/ 500 [0.30, 127.0.0.1:62842][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/list.py", line 174, in get
+    context = self.get_context_data()
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 1710, in get_context_data
+    nouveaux_7j = Patient.objects.filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'date_creation' into field. Choices are: adresse_mail, allergies, antecedentsmedicaux, appointments, avatar, bilans, boxhospitalisation, case_contacts, cmu, code_patient, code_vih, commentpatient, comorbidites, constantes, consultation, consultations, contact, created_at, created_by, created_by_id, date_naissance, details, echantillon_for_patient, effets_indesirables, emergency, employeur, enquetevihs, ethnie, examen, genre, groupe_sanguin, historiques_maladie, hospitalized, id, imageriespatient, infections_opportunistes, lieu_naissance, lithospitalisation, localite, localite_id, maladies, modes_de_vie_patients, mouvementstock, nationalite, nbr_enfants, niveau_etude, nom, observations, paraclinical_exams, patient_maladie_probleme, patient_resume_syndromique, patientarv, patientgroupobjectpermission, patientuserobjectpermission, prenoms, prescription, profession, qr_code, rendezvous, situation_matrimoniale, status, suivimedecin, symptomes, tests_rapides_vih, updated_at, urgence, user, user_id, vaccinations, waitingroom
+[35;1mHTTP GET /Suivi/ 500 [0.69, 127.0.0.1:64913][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/list.py", line 174, in get
+    context = self.get_context_data()
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 1710, in get_context_data
+    nouveaux_7j = Patient.objects.filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'date_creation' into field. Choices are: adresse_mail, allergies, antecedentsmedicaux, appointments, avatar, bilans, boxhospitalisation, case_contacts, cmu, code_patient, code_vih, commentpatient, comorbidites, constantes, consultation, consultations, contact, created_at, created_by, created_by_id, date_naissance, details, echantillon_for_patient, effets_indesirables, emergency, employeur, enquetevihs, ethnie, examen, genre, groupe_sanguin, historiques_maladie, hospitalized, id, imageriespatient, infections_opportunistes, lieu_naissance, lithospitalisation, localite, localite_id, maladies, modes_de_vie_patients, mouvementstock, nationalite, nbr_enfants, niveau_etude, nom, observations, paraclinical_exams, patient_maladie_probleme, patient_resume_syndromique, patientarv, patientgroupobjectpermission, patientuserobjectpermission, prenoms, prescription, profession, qr_code, rendezvous, situation_matrimoniale, status, suivimedecin, symptomes, tests_rapides_vih, updated_at, urgence, user, user_id, vaccinations, waitingroom
+[35;1mHTTP GET /Suivi/ 500 [0.19, 127.0.0.1:64917][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/contrib/auth/mixins.py", line 73, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/list.py", line 174, in get
+    context = self.get_context_data()
+  File "/Users/ogahserge/Documents/smitci/smit/views.py", line 1710, in get_context_data
+    nouveaux_7j = Patient.objects.filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1436, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1454, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/query.py", line 1461, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1546, in add_q
+    clause, _ = self._add_q(q_object, self.used_aliases)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1577, in _add_q
+    child_clause, needed_inner = self.build_filter(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1427, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1237, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/db/models/sql/query.py", line 1725, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'date_creation' into field. Choices are: adresse_mail, allergies, antecedentsmedicaux, appointments, avatar, bilans, boxhospitalisation, case_contacts, cmu, code_patient, code_vih, commentpatient, comorbidites, constantes, consultation, consultations, contact, created_at, created_by, created_by_id, date_naissance, details, echantillon_for_patient, effets_indesirables, emergency, employeur, enquetevihs, ethnie, examen, genre, groupe_sanguin, historiques_maladie, hospitalized, id, imageriespatient, infections_opportunistes, lieu_naissance, lithospitalisation, localite, localite_id, maladies, modes_de_vie_patients, mouvementstock, nationalite, nbr_enfants, niveau_etude, nom, observations, paraclinical_exams, patient_maladie_probleme, patient_resume_syndromique, patientarv, patientgroupobjectpermission, patientuserobjectpermission, prenoms, prescription, profession, qr_code, rendezvous, situation_matrimoniale, status, suivimedecin, symptomes, tests_rapides_vih, updated_at, urgence, user, user_id, vaccinations, waitingroom
+[35;1mHTTP GET /Suivi/ 500 [0.23, 127.0.0.1:64917][0m
+Internal Server Error: /Suivi/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 284, in _get_response_async
+    response = await sync_to_async(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/backends/django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 513, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 484, in parse
+    raise self.error(token, e)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 482, in parse
+    filter_expression = self.compile_filter(token.contents)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 600, in compile_filter
+    return FilterExpression(token, self)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 698, in __init__
+    filter_func = parser.find_filter(filter_name)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/template/base.py", line 606, in find_filter
+    raise TemplateSyntaxError("Invalid filter: '%s'" % filter_name)
+django.template.exceptions.TemplateSyntaxError: Invalid filter: 'abs'
+[35;1mHTTP GET /Suivi/ 500 [1.13, 127.0.0.1:64952][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=o 500 [0.03, 127.0.0.1:56596][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=ok 500 [0.07, 127.0.0.1:56596][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=o 500 [0.03, 127.0.0.1:56596][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=o 500 [0.03, 127.0.0.1:56596][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=ok 500 [0.03, 127.0.0.1:56596][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=o 500 [0.03, 127.0.0.1:56605][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=v 500 [0.02, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=vi 500 [0.03, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=vil 500 [0.03, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=vill 500 [0.02, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=villa 500 [0.03, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=villa%20 500 [0.02, 127.0.0.1:56614][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=villa 500 [0.04, 127.0.0.1:56626][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=vill 500 [0.04, 127.0.0.1:56626][0m
+Internal Server Error: /pharmacy/search_rendezvous/
+[35;1mHTTP GET /pharmacy/search_rendezvous/?query=villa 500 [0.03, 127.0.0.1:56629][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 47, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 21, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.66, 127.0.0.1:55743][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 48, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 22, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.96, 127.0.0.1:57206][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 51, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 25, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [2.79, 127.0.0.1:57522][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [1.23, 127.0.0.1:58764][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.86, 127.0.0.1:59279][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [1.01, 127.0.0.1:59470][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.98, 127.0.0.1:59874][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.80, 127.0.0.1:61585][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.72, 127.0.0.1:61679][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.67, 127.0.0.1:61766][0m
+Internal Server Error: /hospitalization/create/
+Traceback (most recent call last):
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 518, in thread_handler
+    raise exc_info[1]
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 42, in inner
+    response = await get_response(request)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 253, in _get_response_async
+    response = await wrapped_callback(
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 468, in __call__
+    ret = await asyncio.shield(exec_coro)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/current_thread_executor.py", line 40, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/asgiref/sync.py", line 522, in thread_handler
+    return func(*args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 184, in post
+    return super().post(request, *args, **kwargs)
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/django/views/generic/edit.py", line 153, in post
+    return self.form_valid(form)
+  File "/Users/ogahserge/Documents/smitci/hospitalisation/views.py", line 740, in form_valid
+    send_sms(get_employees_to_notify(), safe_message)
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 52, in send_sms
+    access_token = get_orange_sms_token()
+  File "/Users/ogahserge/Documents/smitci/core/utils/sms.py", line 26, in get_orange_sms_token
+    response.raise_for_status()
+  File "/Users/ogahserge/Documents/smitci/venv/lib/python3.9/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.orange.com/oauth/v3/token
+[35;1mHTTP POST /hospitalization/create/ 500 [0.63, 127.0.0.1:61810][0m

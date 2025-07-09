@@ -2,569 +2,1854 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+{% load custom_filter %}
+    <style>
+    .nk-sales-ck {
+        position: relative;
+        padding-bottom: 20px;
+    }
 
-                <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title">Suivi VHI</h3>
-                                        <div class="nk-block-des text-soft">
-                                            <p> Liste des Patents suivis </p>
+    .sparkline-days-legend {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    .sparkline-days-legend span {
+        display: inline-block;
+        width: calc(100% / 7);
+        text-align: center;
+        color: #6c757d;
+        font-size: 0.7em;
+        letter-spacing: -0.5px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animated-card {
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    /* Couleurs dynamiques */
+    .bg-pulse-success {
+        background: linear-gradient(135deg, rgba(46,213,115,1) 0%, rgba(32,178,170,1) 100%);
+        color: white;
+    }
+
+    .bg-pulse-warning {
+        background: linear-gradient(135deg, rgba(255,165,0,1) 0%, rgba(255,193,7,1) 100%);
+        color: white;
+    }
+
+    .bg-pulse-danger {
+        background: linear-gradient(135deg, rgba(255,71,87,1) 0%, rgba(255,107,107,1) 100%);
+        color: white;
+    }
+
+    .bg-pulse-info {
+        background: linear-gradient(135deg, rgba(52,152,219,1) 0%, rgba(72,219,251,1) 100%);
+        color: white;
+    }
+
+    .progress-bar-animated {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar-animated:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.2) 75%,
+            transparent 75%,
+            transparent
+        );
+        background-size: 50px 50px;
+        animation: move 2s linear infinite;
+    }
+
+    @keyframes move {
+        0% { background-position: 0 0; }
+        100% { background-position: 50px 50px; }
+    }
+
+    .badge-dynamic {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.1); }
+        70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+        100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+    }
+
+    .user-avatar {
+        transition: all 0.3s ease;
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .status-dot {
+        animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+</style>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- Header amélioré avec filtre rapide -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between g-3">
+                    <div class="nk-block-head-content">
+                        <nav>
+                            <ol class="breadcrumb breadcrumb-arrow">
+                                <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Suivi VIH</li>
+                            </ol>
+                        </nav>
+                        <h2 class="nk-block-title page-title">Suivi des Patients VIH <span class="badge badge-pill badge-primary ml-2">{{ suivis.paginator.count }}</span></h2>
+                        <div class="nk-block-des text-soft">
+                            <p>Gestion du suivi thérapeutique des patients séropositifs</p>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <div class="toggle-wrap">
+                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="pageMenu">
+                                <em class="icon ni ni-menu-alt-r"></em>
+                            </a>
+                            <div class="toggle-content" data-content="pageMenu">
+                                <ul class="btn-toolbar gx-3">
+                                    <li>
+                                        <a href="" class="btn btn-primary btn-round">
+                                            <em class="icon ni ni-plus"></em>
+                                            <span>Nouveau Suivi</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">
+                                                <em class="icon ni ni-filter-alt"></em>
+                                                <span>Filtrer</span>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <ul class="link-list-opt no-bdr">
+                                                    <li><a href="?statut=actif"><span>Patients Actifs</span></a></li>
+                                                    <li><a href="?statut=perdu_de_vue"><span>Perdus de vue</span></a></li>
+                                                    <li><a href="?statut=transferé"><span>Transférés</span></a></li>
+                                                    <li><a href="?statut=décédé"><span>Décédés</span></a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="?adherence=bonne"><span>Bonne adhérence</span></a></li>
+                                                    <li><a href="?adherence=moyenne"><span>Adhérence moyenne</span></a></li>
+                                                    <li><a href="?adherence=faible"><span>Faible adhérence</span></a></li>
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div><!-- .nk-block-head-content -->
-                                    <div class="nk-block-head-content">
-                                       {% include 'layout/toggleoption.html' %}
-                                    </div><!-- .nk-block-head-content -->
-                                </div><!-- .nk-block-between -->
-                            </div><!-- .nk-block-head -->
-                            <div class="nk-block">
-                                <div class="card card-bordered card-stretch">
-                                    <div class="card-inner-group">
-                                        <div class="card-inner position-relative card-tools-toggle">
-                                            <div class="card-title-group">
-                                                <div class="card-tools">
-                                                    <div class="form-inline flex-nowrap gx-3">
-                                                        <div class="form-wrap w-150px">
-                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Bulk Action">
-                                                                <option value="">Bulk Action</option>
-                                                                <option value="email">Send Email</option>
-                                                                <option value="group">Change Group</option>
-                                                                <option value="suspend">Suspend User</option>
-                                                                <option value="delete">Delete User</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="btn-wrap">
-                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
-                                                            <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
-                                                        </div>
-                                                    </div><!-- .form-inline -->
-                                                </div><!-- .card-tools -->
-                                                <div class="card-tools mr-n1">
-                                                    <ul class="btn-toolbar gx-1">
-                                                        <li>
-                                                            <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
-                                                        </li><!-- li -->
-                                                        <li class="btn-toolbar-sep"></li><!-- li -->
-                                                        <li>
-                                                            <div class="toggle-wrap">
-                                                                <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
-                                                                <div class="toggle-content" data-content="cardTools">
-                                                                    <ul class="btn-toolbar gx-1">
-                                                                        <li class="toggle-close">
-                                                                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-arrow-left"></em></a>
-                                                                        </li><!-- li -->
-                                                                        <li>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
-                                                                                    <div class="dot dot-primary"></div>
-                                                                                    <em class="icon ni ni-filter-alt"></em>
-                                                                                </a>
-                                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
-                                                                                    <div class="dropdown-head">
-                                                                                        <span class="sub-title dropdown-title">Filter Users</span>
-                                                                                        <div class="dropdown">
-                                                                                            <a href="#" class="btn btn-sm btn-icon">
-                                                                                                <em class="icon ni ni-more-h"></em>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-body dropdown-body-rg">
-                                                                                        <div class="row gx-6 gy-3">
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasBalance">
-                                                                                                    <label class="custom-control-label" for="hasBalance"> Have Balance</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasKYC">
-                                                                                                    <label class="custom-control-label" for="hasKYC"> KYC Verified</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Role</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Role</option>
-                                                                                                        <option value="investor">Investor</option>
-                                                                                                        <option value="seller">Seller</option>
-                                                                                                        <option value="buyer">Buyer</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Status</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Any Status</option>
-                                                                                                        <option value="active">Active</option>
-                                                                                                        <option value="pending">Pending</option>
-                                                                                                        <option value="suspend">Suspend</option>
-                                                                                                        <option value="deleted">Deleted</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-12">
-                                                                                                <div class="form-group">
-                                                                                                    <button type="button" class="btn btn-secondary">Filter</button>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-foot between">
-                                                                                        <a class="clickable" href="#">Reset Filter</a>
-                                                                                        <a href="#">Save Filter</a>
-                                                                                    </div>
-                                                                                </div><!-- .filter-wg -->
-                                                                            </div><!-- .dropdown -->
-                                                                        </li><!-- li -->
-                                                                        <li>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
-                                                                                    <em class="icon ni ni-setting"></em>
-                                                                                </a>
-                                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                                    <ul class="link-check">
-                                                                                        <li><span>Show</span></li>
-                                                                                        <li class="active"><a href="#">10</a></li>
-                                                                                        <li><a href="#">20</a></li>
-                                                                                        <li><a href="#">50</a></li>
-                                                                                    </ul>
-                                                                                    <ul class="link-check">
-                                                                                        <li><span>Order</span></li>
-                                                                                        <li class="active"><a href="#">DESC</a></li>
-                                                                                        <li><a href="#">ASC</a></li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </div><!-- .dropdown -->
-                                                                        </li><!-- li -->
-                                                                    </ul><!-- .btn-toolbar -->
-                                                                </div><!-- .toggle-content -->
-                                                            </div><!-- .toggle-wrap -->
-                                                        </li><!-- li -->
-                                                    </ul><!-- .btn-toolbar -->
-                                                </div><!-- .card-tools -->
-                                            </div><!-- .card-title-group -->
-                                            <div class="card-search search-wrap" data-search="search">
-                                                <div class="card-body">
-                                                    <div class="search-content">
-                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by user or email">
-                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .card-search -->
-                                        </div><!-- .card-inner -->
-                                        <div class="card-inner p-0">
-                                            <div class="nk-tb-list nk-tb-ulist is-compact">
-                                                <div class="nk-tb-item nk-tb-head">
-
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Mode</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Provenance</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
-                                                    <div class="nk-tb-col"><span class="sub-text">Status</span></div>
-
-                                                    <div class="nk-tb-col nk-tb-col-tools text-right">
-                                                        Action
-                                                    </div>
-                                                </div><!-- .nk-tb-item -->
-
-                                                {% for patient in suivis %}
-                                                <div class="nk-tb-item">
-                                                 <div class="nk-tb-col tb-col-sm">
-                                                        <span><i class="fa-solid fa-calendar-check"></i> {{ patient.patient.code_patient  }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-md">
-                                                         <span>
-        <i class="fa-solid fa-user-alt"></i>
-        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
-        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
-        {% if perms.core.view_patient_name %}
-        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
-                data-patient-id="{{ patient.patient.id }}"
-                data-counter="{{ forloop.counter }}">
-            <i class="fa-solid fa-eye"></i>
-        </button>
-        {% else %}
-        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
-            <i class="fa-solid fa-cancel"></i>
-        </span>
-        {% endif %}
-    </span>
-                                                        <span class="tb-status text-gray">
-                                                              <a class="tb-status" href="" data-toggle="modal" data-target="#constanteover{{ patient.patient.id }}">
-                                                          {% with constante=patient.patient.constantes.last %}
-                                                              {% if constante %}
-                                                                  {% if constante.alerte %}
-                                                                      <span> <img src="{% static 'images/gift/alert.gif' %}" width="20"/></span>
-                                                                      <!-- Affiche les anomalies -->
-                                                                  {% else %}
-                                                                      <span><img data-toggle="tooltip" data-placement="top"
-                 title="Constantes du : {{ consultation.patient.latest_constante.created_at }} par {{ consultation.patient.latest_constante.created_by }}"
-                 src="{% static 'images/gift/livre-medical.gif' %}" width="20" /></span> <!-- Tout est normal -->
-                                                                  {% endif %}
-                                                              {% endif %}
-                                                          {% endwith %}
-                                                          </a> </span>                                                    </div>
-                                                    <div class="nk-tb-col">
-                                                        <div class="user-card">
-                                                            <div class="user-name">
-                                                                <span class="tb-lead"><i class="fa-solid fa-calendar-check"></i> {{ patient.created_at|naturalday }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-sm">
-                                                        <span><i class="fa-solid fa-calendar-check"></i> {{ patient.mode  }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span><i class="fa-solid fa-virus"></i>{{ patient.activite }}</span>
-                                                    </div>
-
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <ul class="list-status">
-                                                            <li><span><i class="fa-solid fa-phone"></i>{{ patient.patient.contact }}</span></li>
-                                                        </ul>
-                                                    </div>
-
-                                                    <div class="nk-tb-col">
-                                                      <span class="tb-status text-gray">{{ patient.statut_patient }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col nk-tb-col-tools">
-                                                        <ul class="nk-tb-actions gx-2">
-
-                                                            <li>
-                                                                <div class="drodown">
-                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                                        <ul class="link-list-opt no-bdr">
-                                                                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier </span></a></li>
-                                                                            <li><a href="{% url 'suivis-detail' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Details du suivi</span></a></li>
-                                                                            <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Arreter le suivi</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Transferer</span></a></li>
-
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                <!-- Modal Trigger Code -->
-
-
-<!-- Modal Content Code -->
-<div class="modal fade" tabindex="-1" id="constante{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Patient : <span class="text-primary">{{ patient.patient}}</span>   <span class="ml-20 text-gray">Prise de constantes</span> </h5>
-
-            </div>
-            <div class="modal-body">
-                <form method="post">
-            {% csrf_token %}
-            <div class="row m-4">
-                {% for field in constanteform %}
-                <div class="col-4 col-md-4 mb-3 ">
-
-                    <label for="{{ field.label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-
-                    {% if field.help_text %}
-                    <small class="form-text text-muted">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                {% endfor %}
-            <div class="col-md-12 float-right mb-10">
-            <button type="submit" class="btn btn-primary mb-10 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Enregistrer  </button>
-            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right"> <i class="fa-solid fa-floppy-disk"> </i> Annuler</button>
-            </div>
-            </div>
-                </form>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" tabindex="-1" id="constanteover{{ patient.patient.id }}">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
-            <div class="modal-header">
-                <h5 class="modal-title">Overview des constante du Patient : <span class="text-primary">{{ patient.patient}}</span> </h5>
-            </div>
-            <div class="modal-body">
-                <div class="nk-block card card-bordered">
-
-                     {% if patient.patient.latest_constante %}
-                     <h4>Deniere constante enregistrée le : {{ patient.patient.latest_constante.created_at }} </h4>
-                            <table class="table table-ulogs">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th class="tb-col-os"><span class="overline-title">Libélé <span class="d-sm-none">/ IP</span></span>
-                                    </th>
-                                    <th class="tb-col-ip"><span class="overline-title">Valeure</span></th>
-                                    <th class="tb-col-time"><span class="overline-title">Observation</span></th>
-
-                                </tr>
-                                </thead>
-                                <tbody>
-
-
-
-
-
-                                <tr>
-                                    <td class="tb-col-os">Tension systolique</td>
-                                    <td class="tb-col-ip">
-                                        <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
-                                    </td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                        </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Tension diastolique</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span></td>
-                                    <td class="tb-col-time">
-
-                                        {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                            {% endif %}</td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence cardiaque</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Frequence respiratoire</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span></td>
-                                    <td class="tb-col-time">
-                                         {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Temperature</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.temperature }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Saturation oxygene</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">Glycemie</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">poids</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.poids }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">taille</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.taille }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                    <tr>
-                                    <td class="tb-col-os">pouls</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.pouls }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td class="tb-col-os">IMC</td>
-                                    <td class="tb-col-ip"><span class="sub-text">{{ patient.patient.latest_constante.imc }}</span></td>
-                                    <td class="tb-col-time">
-
-                                         {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                             <span class="sub-text"><i class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                            {% else %}
-                                             <span class="sub-text font-italic"><i class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                            {% endif %}
-                                    </td>
-
-                                </tr>
-                                </tbody>
-                            </table>
-
-                    {% else %}
-                        Pas de constantes enregistrées
-                    {% endif %}
-                </div>
-
-
-            </div>
-            <div class="modal-footer bg-light">
-                <span class="sub-text">Prise de tension {{ patient.patient}} {{ patient.patient.code_patient}}</span>
-            </div>
-        </div>
-    </div>
-</div>
-                                                </div>
-                                                {% endfor %}
-
-
-                                            </div><!-- .nk-tb-list -->
-                                        </div><!-- .card-inner -->
-                                       <div class="card-inner">
-                                            <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.previous_page_number }}">Prev</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                                {% endif %}
-
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
-                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="salle_attente/?page={{ num }}">{{ num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
-
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="salle_attente/?page={{ page_obj.next_page_number }}">Next</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                                {% endif %}
-                                            </ul>
-                                        </div><!-- .card-inner -->
-                                    </div><!-- .card-inner-group -->
-                                </div><!-- .card -->
-                            </div><!-- .nk-block -->
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
- <script>
-    document.querySelectorAll('.toggle-name-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const patientId = this.dataset.patientId; // ID du patient
-            const counter = this.dataset.counter; // Numéro unique pour cet élément
-            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
-            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
-            const icon = this.querySelector('i');
 
-            if (maskedName.classList.contains('d-none')) {
-                // Revenir à l'affichage masqué
-                maskedName.classList.remove('d-none');
-                fullName.classList.add('d-none');
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            } else if (!fullName.textContent) {
-                // Charger le nom complet via AJAX
-                fetch(`/api/get-patient-all-name/${patientId}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.full_name) {
-                            fullName.textContent = data.full_name; // Ajouter le nom complet
-                            maskedName.classList.add('d-none');
-                            fullName.classList.remove('d-none');
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
-                        } else {
-                            alert('Erreur : Impossible de charger le nom.');
-                        }
-                    })
-                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
-            } else {
-                // Afficher le nom complet déjà chargé
-                maskedName.classList.add('d-none');
-                fullName.classList.remove('d-none');
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+            <!-- Statistiques rapides -->
+            <div class="nk-block">
+                <div class="row g-gs">
+                    <div class="col-sm-6 col-lg-12">
+                        <div class="card card-bordered animated-card" style="animation-delay: 0.1s;">
+                            <div class="card-inner bg-pulse-info">
+                                <div class="card-title-group align-start mb-2">
+                                    <div class="card-title">
+                                        <h6 class="title text-white">Patients Actifs</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Patients suivis actuellement"></em>
+                                    </div>
+                                </div>
+                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                    <div class="nk-sale-data">
+                                        <span class="amount text-white">{{ stats.patients_actifs }}</span>
+                                        <span class="change {% if stats.evolution_actifs >= 0 %}up text-white{% else %}down text-white{% endif %}">
+                                            <em class="icon ni ni-arrow-long-{% if stats.evolution_actifs >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_actifs|abs }}%
+                                        </span>
+                                    </div>
+                                    <div class="nk-sales-ck mb-2">
+                                        <canvas id="chartActifs" height="50"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card card-bordered animated-card" style="animation-delay: 0.2s;">
+                            <div class="card-inner bg-pulse-warning">
+                                <div class="card-title-group align-start mb-2">
+                                    <div class="card-title">
+                                        <h6 class="title text-white">Perdus de vue</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Patients perdus de vue"></em>
+                                    </div>
+                                </div>
+                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                    <div class="nk-sale-data">
+                                        <span class="amount text-white">{{ stats.patients_perdus_vue }}</span>
+                                        <span class="change {% if stats.evolution_perdus >= 0 %}up text-white{% else %}down text-white{% endif %}">
+                                            <em class="icon ni ni-arrow-long-{% if stats.evolution_perdus >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_perdus|abs }}%
+                                        </span>
+                                    </div>
+                                    <div class="nk-sales-ck">
+                                        <div class="sparkline" data-type="line" data-fill="true" data-line-color="rgba(255,255,255,0.7)"
+                                             data-line="{{ stats.tendance_perdus }}"
+                                             data-height="60">{{ stats.tendance_perdus }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card card-bordered animated-card" style="animation-delay: 0.3s;">
+                            <div class="card-inner bg-pulse-success">
+                                <div class="card-title-group align-start mb-2">
+                                    <div class="card-title">
+                                        <h6 class="title text-white">Adhérence</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Taux d'adhérence au traitement"></em>
+                                    </div>
+                                </div>
+                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                    <div class="nk-sale-data">
+                                        <span class="amount text-white">{{ stats.taux_adherence }}%</span>
+                                        <span class="change {% if stats.evolution_adherence >= 0 %}up text-white{% else %}down text-white{% endif %}">
+                                            <em class="icon ni ni-arrow-long-{% if stats.evolution_adherence >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_adherence|abs }}%
+                                        </span>
+                                    </div>
+                                    <div class="nk-sales-ck">
+                                        <div class="sparkline" data-type="line" data-fill="true" data-line-color="rgba(255,255,255,0.7)"
+                                             data-line="{{ stats.tendance_adherence }}"
+                                             data-height="60">{{ stats.tendance_adherence }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="card card-bordered animated-card" style="animation-delay: 0.4s;">
+                            <div class="card-inner bg-pulse-danger">
+                                <div class="card-title-group align-start mb-2">
+                                    <div class="card-title">
+                                        <h6 class="title text-white">Nouveaux (7j)</h6>
+                                    </div>
+                                    <div class="card-tools">
+                                        <em class="card-hint icon ni ni-help-fill" data-toggle="tooltip" data-placement="left" title="Nouveaux patients cette semaine"></em>
+                                    </div>
+                                </div>
+                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">
+                                    <div class="nk-sale-data">
+                                        <span class="amount text-white">{{ stats.nouveaux_7j }}</span>
+                                        <span class="change {% if stats.evolution_nouveaux >= 0 %}up text-white{% else %}down text-white{% endif %}">
+                                            <em class="icon ni ni-arrow-long-{% if stats.evolution_nouveaux >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_nouveaux|abs }}%
+                                        </span>
+                                    </div>
+                                    <div class="nk-sales-ck">
+                                        <div class="sparkline" data-type="line" data-fill="true" data-line-color="rgba(255,255,255,0.7)"
+                                             data-line="{{ stats.tendance_nouveaux }}"
+                                             data-height="60">{{ stats.tendance_nouveaux }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des patients -->
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner position-relative card-tools-toggle">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-wrap">
+                                            <div class="form-control-wrap">
+                                                <div class="form-icon form-icon-left">
+                                                    <em class="icon ni ni-search"></em>
+                                                </div>
+                                                <input type="text" class="form-control" id="search-patient" placeholder="Rechercher un patient...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-tools mr-n1">
+                                    <ul class="btn-toolbar gx-1">
+                                        <li>
+                                            <div class="dropdown">
+                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                                    <em class="icon ni ni-setting"></em>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                                    <ul class="link-check">
+                                                        <li><span>Colonnes à afficher</span></li>
+                                                        <li class="active"><a href="#"><span>Code Patient</span></a></li>
+                                                        <li class="active"><a href="#"><span>Nom</span></a></li>
+                                                        <li class="active"><a href="#"><span>Date</span></a></li>
+                                                        <li class="active"><a href="#"><span>Statut</span></a></li>
+                                                        <li class="active"><a href="#"><span>Actions</span></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-inner p-0">
+                            <div class="nk-tb-list nk-tb-ulist">
+                                <div class="nk-tb-item nk-tb-head bg-light">
+                                    <div class="nk-tb-col nk-tb-col-check">
+                                        <div class="custom-control custom-control-sm custom-checkbox notext">
+                                            <input type="checkbox" class="custom-control-input" id="selectAll">
+                                            <label class="custom-control-label" for="selectAll"></label>
+                                        </div>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code</span></div>
+                                    <div class="nk-tb-col"><span class="sub-text">Patient</span></div>
+                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Dernier suivi</span></div>
+                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Mode</span></div>
+                                    <div class="nk-tb-col"><span class="sub-text">Statut</span></div>
+                                    <div class="nk-tb-col"><span class="sub-text">Adhérence</span></div>
+                                    <div class="nk-tb-col nk-tb-col-tools text-right">
+                                        <span class="sub-text">Actions</span>
+                                    </div>
+                                </div>
+
+                                {% for suivi in suivis %}
+                                <div class="nk-tb-item animated-card" style="animation-delay: {{ forloop.counter|divisibleby:2|yesno:'0.1s,0.2s' }}" data-patient="{{ suivi.patient.nom_complet|lower }}" data-code="{{ suivi.patient.code_patient|lower }}">
+                                    <div class="nk-tb-col nk-tb-col-check">
+                                        <div class="custom-control custom-control-sm custom-checkbox notext">
+                                            <input type="checkbox" class="custom-control-input" id="suivi-{{ suivi.id }}">
+                                            <label class="custom-control-label" for="suivi-{{ suivi.id }}"></label>
+                                        </div>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm">
+                                        <span class="tb-patient">
+                                            <span class="title">
+                                                <span class="text-primary">{{ suivi.patient.code_patient }}</span>
+                                                {% with constante=suivi.patient.constantes.last %}
+                                                    {% if constante and constante.alerte %}
+                                                    <span class="status dot dot-lg dot-danger status-dot" data-toggle="tooltip" title="Alerte constantes"></span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="nk-tb-col">
+                                        <div class="user-card">
+                                            <div class="user-avatar bg-dim-primary d-none d-sm-flex">
+                                                <span>{{ suivi.patient.initials }}</span>
+                                            </div>
+                                            <div class="user-info">
+                                                <span class="tb-lead">
+                                                    <span class="masked-name" id="masked-name-{{ suivi.patient.id }}-{{ forloop.counter }}">************</span>
+                                                    <span class="full-name d-none" id="full-name-{{ suivi.patient.id }}-{{ forloop.counter }}"></span>
+                                                    {% if perms.core.view_patient_name %}
+                                                    <button class="btn btn-xs btn-link p-0 ml-1 toggle-name-btn"
+                                                            data-patient-id="{{ suivi.patient.id }}"
+                                                            data-counter="{{ forloop.counter }}">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </button>
+                                                    {% else %}
+                                                    <span class="btn btn-xs btn-link p-0 ml-1" data-toggle="tooltip" title="Accès non autorisé">
+                                                        <em class="icon ni ni-lock"></em>
+                                                    </span>
+                                                    {% endif %}
+                                                </span>
+                                                <span class="sub-text">{{ suivi.patient.contact }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md">
+                                        <span class="tb-sub">
+                                            <span class="date">{{ suivi.date_suivi|date:"d M Y" }}</span>
+                                            <span class="d-none d-sm-inline">à {{ suivi.created_at|time:"H:i" }}</span>
+                                        </span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md">
+                                        <span class="tb-sub">
+                                            <span class="badge badge-dim bg-outline-{% if suivi.mode == 'permanent' %}primary{% elif suivi.mode == 'occasionnel' %}warning{% else %}info{% endif %} badge-dynamic">
+                                                {{ suivi.get_mode_display }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="nk-tb-col">
+                                        <span class="tb-status text-{% if suivi.statut_patient == 'actif' %}success{% elif suivi.statut_patient == 'perdu_de_vue' %}warning{% elif suivi.statut_patient == 'transferé' %}info{% else %}secondary{% endif %}">
+                                            <span class="dot dot-{% if suivi.statut_patient == 'actif' %}success{% elif suivi.statut_patient == 'perdu_de_vue' %}warning{% elif suivi.statut_patient == 'transferé' %}info{% else %}secondary{% endif %} d-inline-block mr-1"></span>
+                                            {{ suivi.get_statut_patient_display }}
+                                        </span>
+                                    </div>
+                                    <div class="nk-tb-col">
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar bg-{% if suivi.adherence_traitement == 'bonne' %}success{% elif suivi.adherence_traitement == 'moyenne' %}warning{% else %}danger{% endif %} progress-bar-animated"
+                                                 style="width: {% if suivi.adherence_traitement == 'bonne' %}90{% elif suivi.adherence_traitement == 'moyenne' %}60{% else %}30{% endif %}%">
+                                            </div>
+                                        </div>
+                                        <span class="sub-text small">{{ suivi.get_adherence_traitement_display }}</span>
+                                    </div>
+                                    <div class="nk-tb-col nk-tb-col-tools">
+                                        <ul class="nk-tb-actions gx-1">
+                                            <li>
+                                                <div class="drodown">
+                                                    <a href="#" class="dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown">
+                                                        <em class="icon ni ni-more-h"></em>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right ">
+                                                        <ul class="link-list-opt no-bdr">
+                                                            <li>
+                                                                <a href="{% url 'detail_patient' suivi.patient.pk %}">
+                                                                    <em class="icon ni ni-eye"></em>
+                                                                    <span>Dossier Patient</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="{% url 'suivis-detail' suivi.pk %}">
+                                                                    <em class="icon ni ni-notes"></em>
+                                                                    <span>Détails Suivi</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#" data-toggle="modal" data-target="#modalConstantes-{{ suivi.patient.id }}">
+                                                                    <em class="icon ni ni-heart-fill"></em>
+                                                                    <span>Constantes</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a href="#" data-toggle="modal" data-target="#modalTransfert-{{ suivi.id }}">
+                                                                    <em class="icon ni ni-share"></em>
+                                                                    <span>Transférer</span>
+                                                                </a>
+                                                            </li>
+                                                            {% if suivi.statut_patient == 'actif' %}
+                                                            <li>
+                                                                <a href="#" data-toggle="modal" data-target="#modalArret-{{ suivi.id }}">
+                                                                    <em class="icon ni ni-pause"></em>
+                                                                    <span>Arrêter suivi</span>
+                                                                </a>
+                                                            </li>
+                                                            {% endif %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Constantes -->
+                                <div class="modal fade" tabindex="-1" id="modalConstantes-{{ suivi.patient.id }}">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Constantes médicales</h5>
+                                                <span class="sub-text">Patient: {{ suivi.patient.code_patient }}</span>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if suivi.patient.latest_constante %}
+                                                <div class="row gy-3">
+                                                    <div class="col-md-6">
+                                                        <div class="card card-bordered">
+                                                            <div class="card-inner">
+                                                                <div class="card-title">Dernières mesures</div>
+                                                                <div class="row g-3">
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Tension</span>
+                                                                                <span class="data-value">
+                                                                                    {{ suivi.patient.latest_constante.tension_systolique }}/{{ suivi.patient.latest_constante.tension_diastolique }}
+                                                                                    {% if suivi.patient.latest_constante.tension_anormale %}
+                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Température</span>
+                                                                                <span class="data-value">
+                                                                                    {{ suivi.patient.latest_constante.temperature }}°C
+                                                                                    {% if suivi.patient.latest_constante.temperature_anormale %}
+                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Pouls</span>
+                                                                                <span class="data-value">
+                                                                                    {{ suivi.patient.latest_constante.pouls }} bpm
+                                                                                    {% if suivi.patient.latest_constante.pouls_anormal %}
+                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Saturation</span>
+                                                                                <span class="data-value">
+                                                                                    {{ suivi.patient.latest_constante.saturation_oxygene }}%
+                                                                                    {% if suivi.patient.latest_constante.saturation_anormale %}
+                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="card card-bordered">
+                                                            <div class="card-inner">
+                                                                <div class="card-title">Autres mesures</div>
+                                                                <div class="row g-3">
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Poids</span>
+                                                                                <span class="data-value">{{ suivi.patient.latest_constante.poids }} kg</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Taille</span>
+                                                                                <span class="data-value">{{ suivi.patient.latest_constante.taille }} cm</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">IMC</span>
+                                                                                <span class="data-value">{{ suivi.patient.latest_constante.imc }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div class="data-item">
+                                                                            <div class="data-info">
+                                                                                <span class="data-label">Glycémie</span>
+                                                                                <span class="data-value">
+                                                                                    {{ suivi.patient.latest_constante.glycemie }} mg/dL
+                                                                                    {% if suivi.patient.latest_constante.glycemie_anormale %}
+                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>
+                                                                                    {% endif %}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="card card-bordered">
+                                                            <div class="card-inner">
+                                                                <div class="card-title">Historique</div>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-striped">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Date</th>
+                                                                                <th>Tension</th>
+                                                                                <th>Température</th>
+                                                                                <th>Pouls</th>
+                                                                                <th>Saturation</th>
+                                                                                <th>Poids</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            {% for c in suivi.patient.constantes.all|slice:":5" %}
+                                                                            <tr>
+                                                                                <td>{{ c.created_at|date:"d/m/Y H:i" }}</td>
+                                                                                <td>{{ c.tension_systolique }}/{{ c.tension_diastolique }}</td>
+                                                                                <td>{{ c.temperature }}°C</td>
+                                                                                <td>{{ c.pouls }} bpm</td>
+                                                                                <td>{{ c.saturation_oxygene }}%</td>
+                                                                                <td>{{ c.poids }} kg</td>
+                                                                            </tr>
+                                                                            {% endfor %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <div class="text-center py-4">
+                                                    <em class="icon ni ni-info text-soft fs-24px"></em>
+                                                    <p class="mt-2">Aucune constante enregistrée pour ce patient</p>
+                                                    <a href="#" class="btn btn-sm btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#modalNewConstante-{{ suivi.patient.id }}">
+                                                        Ajouter des constantes
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <span class="sub-text">Dernière mise à jour: {% if suivi.patient.latest_constante %}{{ suivi.patient.latest_constante.created_at|date:"d M Y H:i" }}{% else %}Jamais{% endif %}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Nouvelle Constante -->
+                                <div class="modal fade" tabindex="-1" id="modalNewConstante-{{ suivi.patient.id }}">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Nouvelles constantes</h5>
+                                                <span class="sub-text">Patient: {{ suivi.patient.code_patient }}</span>
+                                            </div>
+                                            <form method="post" action="">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+                                                    <div class="row gy-3">
+                                                        {% for field in constanteform %}
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                                {{ field }}
+                                                                {% if field.help_text %}
+                                                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Transfert -->
+                                <div class="modal fade" tabindex="-1" id="modalTransfert-{{ suivi.id }}">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Transférer le patient</h5>
+                                                <span class="sub-text">{{ suivi.patient.code_patient }}</span>
+                                            </div>
+                                            <form method="post" action="">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Centre de transfert</label>
+                                                        <select class="form-select" name="centre" required>
+                                                            <option value="">Sélectionner un centre</option>
+                                                            <option value="centre1">Centre Hospitalier Régional</option>
+                                                            <option value="centre2">Centre de Traitement Ambulatoire</option>
+                                                            <option value="centre3">Centre de Référence VIH</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Motif du transfert</label>
+                                                        <textarea class="form-control" name="motif" rows="3" required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-primary">Confirmer le transfert</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Arrêt Suivi -->
+                                <div class="modal fade" tabindex="-1" id="modalArret-{{ suivi.id }}">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                <em class="icon ni ni-cross"></em>
+                                            </a>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Arrêter le suivi</h5>
+                                                <span class="sub-text">{{ suivi.patient.code_patient }}</span>
+                                            </div>
+                                            <form method="post" action="">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Motif de l'arrêt</label>
+                                                        <select class="form-select" name="motif" required>
+                                                            <option value="">Sélectionner un motif</option>
+                                                            <option value="guerison">Guérison</option>
+                                                            <option value="non_adherence">Non adhérence</option>
+                                                            <option value="deces">Décès</option>
+                                                            <option value="autre">Autre</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Commentaires</label>
+                                                        <textarea class="form-control" name="commentaire" rows="3"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-danger">Confirmer l'arrêt</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="nk-block-des text-soft">
+                                    <p>Affichage de {{ suivis.start_index }} à {{ suivis.end_index }} sur {{ suivis.paginator.count }} suivis</p>
+                                </div>
+                                <ul class="pagination justify-content-center justify-content-md-start">
+                                    {% if suivis.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ suivis.previous_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">
+                                                <em class="icon ni ni-chevron-left"></em>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <em class="icon ni ni-chevron-left"></em>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in suivis.paginator.page_range %}
+                                        {% if num == suivis.number %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="#">{{ num }}</a>
+                                            </li>
+                                        {% elif num > suivis.number|add:'-3' and num < suivis.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if suivis.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ suivis.next_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">
+                                                <em class="icon ni ni-chevron-right"></em>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <em class="icon ni ni-chevron-right"></em>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('chartActifs').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ stats.jours_tendance|safe }},
+      datasets: [{
+        label: 'Patients actifs',
+        data: {{ stats.tendance_actifs|safe }},
+        fill: true,
+        borderColor: 'rgba(255,255,255,1)',
+        backgroundColor: 'rgba(255,255,255,0.3)',
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: 'rgba(255,255,255,1)',
+        pointBorderColor: 'rgba(52,152,219,1)',
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+            grid: { display: false },
+            ticks: { color: 'rgba(255,255,255,0.8)' }
+        },
+        y: {
+            beginAtZero: true,
+            ticks: {
+                precision: 0,
+                color: 'rgba(255,255,255,0.8)'
+            },
+            grid: {
+                color: 'rgba(255,255,255,0.1)'
             }
-        });
-    });
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            titleFont: { size: 14, weight: 'bold' },
+            bodyFont: { size: 12 },
+            padding: 12
+        }
+      }
+    }
+  });
 </script>
+    <script>
+        // Recherche en temps réel
+        document.getElementById('search-patient').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.nk-tb-item[data-patient], .nk-tb-item[data-code]');
+
+            rows.forEach(row => {
+                const patientName = row.getAttribute('data-patient');
+                const patientCode = row.getAttribute('data-code');
+
+                if (patientName.includes(searchTerm) || patientCode.includes(searchTerm)) {
+                    row.style.display = '';
+                    row.classList.add('highlight');
+                    setTimeout(() => row.classList.remove('highlight'), 1000);
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Affichage du nom complet avec permission
+        document.querySelectorAll('.toggle-name-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const patientId = this.dataset.patientId;
+                const counter = this.dataset.counter;
+                const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+                const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+                const icon = this.querySelector('em');
+
+                if (maskedName.classList.contains('d-none')) {
+                    // Masquer le nom
+                    maskedName.classList.remove('d-none');
+                    fullName.classList.add('d-none');
+                    icon.classList.remove('ni-eye-fill');
+                    icon.classList.add('ni-eye');
+                } else {
+                    // Afficher le nom (via AJAX si pas encore chargé)
+                    if (!fullName.textContent) {
+                        fetch(`/api/patient/${patientId}/name/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.full_name) {
+                                    fullName.textContent = data.full_name;
+                                    maskedName.classList.add('d-none');
+                                    fullName.classList.remove('d-none');
+                                    icon.classList.remove('ni-eye');
+                                    icon.classList.add('ni-eye-fill');
+
+                                    // Animation de révélation
+                                    fullName.style.opacity = 0;
+                                    fullName.style.transform = 'translateY(5px)';
+                                    fullName.style.transition = 'all 0.3s ease';
+                                    setTimeout(() => {
+                                        fullName.style.opacity = 1;
+                                        fullName.style.transform = 'translateY(0)';
+                                    }, 10);
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    } else {
+                        maskedName.classList.add('d-none');
+                        fullName.classList.remove('d-none');
+                        icon.classList.remove('ni-eye');
+                        icon.classList.add('ni-eye-fill');
+
+                        // Animation de révélation
+                        fullName.style.opacity = 0;
+                        fullName.style.transform = 'translateY(5px)';
+                        fullName.style.transition = 'all 0.3s ease';
+                        setTimeout(() => {
+                            fullName.style.opacity = 1;
+                            fullName.style.transform = 'translateY(0)';
+                        }, 10);
+                    }
+                }
+            });
+        });
+
+        // Sélection multiple
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.nk-tb-item .custom-control-input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+                if (this.checked) {
+                    checkbox.closest('.nk-tb-item').classList.add('selected');
+                } else {
+                    checkbox.closest('.nk-tb-item').classList.remove('selected');
+                }
+            });
+        });
+
+        // Animation au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.animated-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.05}s`;
+            });
+        });
+    </script>
+    <script>
+        // Recherche en temps réel
+        document.getElementById('search-patient').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.nk-tb-item[data-patient], .nk-tb-item[data-code]');
+
+            rows.forEach(row => {
+                const patientName = row.getAttribute('data-patient');
+                const patientCode = row.getAttribute('data-code');
+
+                if (patientName.includes(searchTerm) || patientCode.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Affichage du nom complet avec permission
+        document.querySelectorAll('.toggle-name-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const patientId = this.dataset.patientId;
+                const counter = this.dataset.counter;
+                const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+                const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+                const icon = this.querySelector('em');
+
+                if (maskedName.classList.contains('d-none')) {
+                    // Masquer le nom
+                    maskedName.classList.remove('d-none');
+                    fullName.classList.add('d-none');
+                    icon.classList.remove('ni-eye-fill');
+                    icon.classList.add('ni-eye');
+                } else {
+                    // Afficher le nom (via AJAX si pas encore chargé)
+                    if (!fullName.textContent) {
+                        fetch(`/api/patient/${patientId}/name/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.full_name) {
+                                    fullName.textContent = data.full_name;
+                                    maskedName.classList.add('d-none');
+                                    fullName.classList.remove('d-none');
+                                    icon.classList.remove('ni-eye');
+                                    icon.classList.add('ni-eye-fill');
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                    } else {
+                        maskedName.classList.add('d-none');
+                        fullName.classList.remove('d-none');
+                        icon.classList.remove('ni-eye');
+                        icon.classList.add('ni-eye-fill');
+                    }
+                }
+            });
+        });
+
+        // Sélection multiple
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.nk-tb-item .custom-control-input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    </script>
 {% endblock %}
+
+
+{#{% extends 'layout/base.html' %}#}
+{#{% load static %}#}
+{#{% load humanize %}#}
+{#{% block content %}#}
+{#{% load custom_filter %}#}
+{#    <style>#}
+{#    .nk-sales-ck {#}
+{#        position: relative;#}
+{#        padding-bottom: 20px; /* Espace pour la légende */#}
+{#    }#}
+{##}
+{#    .sparkline-days-legend {#}
+{#        position: absolute;#}
+{#        bottom: 0;#}
+{#        left: 0;#}
+{#        right: 0;#}
+{#        width: 100%;#}
+{#    }#}
+{##}
+{#    .sparkline-days-legend span {#}
+{#        display: inline-block;#}
+{#        width: calc(100% / 7);#}
+{#        text-align: center;#}
+{#        color: #6c757d;#}
+{#        font-size: 0.7em;#}
+{#        letter-spacing: -0.5px;#}
+{#    }#}
+{#</style>#}
+{#<div class="nk-content nk-content-fluid">#}
+{#    <div class="container-xl wide-lg">#}
+{#        <div class="nk-content-body">#}
+{#            <!-- Header amélioré avec filtre rapide -->#}
+{#            <div class="nk-block-head nk-block-head-sm">#}
+{#                <div class="nk-block-between g-3">#}
+{#                    <div class="nk-block-head-content">#}
+{#                        <nav>#}
+{#                            <ol class="breadcrumb breadcrumb-arrow">#}
+{#                                <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>#}
+{#                                <li class="breadcrumb-item active">Suivi VIH</li>#}
+{#                            </ol>#}
+{#                        </nav>#}
+{#                        <h2 class="nk-block-title page-title">Suivi des Patients VIH</h2>#}
+{#                        <div class="nk-block-des text-soft">#}
+{#                            <p>Gestion du suivi thérapeutique des patients séropositifs</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="nk-block-head-content">#}
+{#                        <div class="toggle-wrap">#}
+{#                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="pageMenu">#}
+{#                                <em class="icon ni ni-menu-alt-r"></em>#}
+{#                            </a>#}
+{#                            <div class="toggle-content" data-content="pageMenu">#}
+{#                                <ul class="btn-toolbar gx-3">#}
+{#                                    <li>#}
+{#                                        <a href="" class="btn btn-primary">#}
+{#                                            <em class="icon ni ni-plus"></em>#}
+{#                                            <span>Nouveau Suivi</span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li>#}
+{#                                        <div class="dropdown">#}
+{#                                            <a href="#" class="btn btn-outline-light dropdown-toggle" data-toggle="dropdown">#}
+{#                                                <em class="icon ni ni-filter-alt"></em>#}
+{#                                                <span>Filtrer</span>#}
+{#                                            </a>#}
+{#                                            <div class="dropdown-menu dropdown-menu-right">#}
+{#                                                <ul class="link-list-opt no-bdr">#}
+{#                                                    <li><a href="?statut=actif"><span>Patients Actifs</span></a></li>#}
+{#                                                    <li><a href="?statut=perdu_de_vue"><span>Perdus de vue</span></a></li>#}
+{#                                                    <li><a href="?statut=transferé"><span>Transférés</span></a></li>#}
+{#                                                    <li><a href="?statut=décédé"><span>Décédés</span></a></li>#}
+{#                                                    <li class="divider"></li>#}
+{#                                                    <li><a href="?adherence=bonne"><span>Bonne adhérence</span></a></li>#}
+{#                                                    <li><a href="?adherence=moyenne"><span>Adhérence moyenne</span></a></li>#}
+{#                                                    <li><a href="?adherence=faible"><span>Faible adhérence</span></a></li>#}
+{#                                                </ul>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{##}
+{#            <!-- Statistiques rapides -->#}
+{#            <div class="nk-block">#}
+{#                <div class="row g-gs">#}
+{#                    <div class="col-sm-6 col-lg-4">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group align-start mb-2">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Patients Actifs</h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">#}
+{#                                    <div class="nk-sale-data">#}
+{#                                        <span class="amount">{{ stats.patients_actifs }}</span>#}
+{#                                        <span class="change {% if stats.evolution_actifs >= 0 %}up text-success{% else %}down text-danger{% endif %}">#}
+{#                                <em class="icon ni ni-arrow-long-{% if stats.evolution_actifs >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_actifs|abs }}%#}
+{#                            </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-sales-ck mb-2">#}
+{#                                        <canvas id="chartActifs" height="30"></canvas>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-6 col-lg-3">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group align-start mb-2">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Perdus de vue</h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">#}
+{#                                    <div class="nk-sale-data">#}
+{#                                        <span class="amount">{{ stats.patients_perdus_vue }}</span>#}
+{#                                        <span class="change {% if stats.evolution_perdus >= 0 %}up text-danger{% else %}down text-success{% endif %}">#}
+{#                                <em class="icon ni ni-arrow-long-{% if stats.evolution_perdus >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_perdus|abs }}%#}
+{#                            </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-sales-ck">#}
+{#                                        <div class="sparkline" data-type="line" data-fill="true"#}
+{#                                             data-line="{{ stats.tendance_perdus }}"#}
+{#                                             data-height="60">{{ stats.tendance_perdus }}</div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-6 col-lg-3">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group align-start mb-2">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Adhérence</h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">#}
+{#                                    <div class="nk-sale-data">#}
+{#                                        <span class="amount">{{ stats.taux_adherence }}%</span>#}
+{#                                        <span class="change {% if stats.evolution_adherence >= 0 %}up text-success{% else %}down text-danger{% endif %}">#}
+{#                                <em class="icon ni ni-arrow-long-{% if stats.evolution_adherence >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_adherence|abs }}%#}
+{#                            </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-sales-ck">#}
+{#                                        <div class="sparkline" data-type="line" data-fill="true"#}
+{#                                             data-line="{{ stats.tendance_adherence }}"#}
+{#                                             data-height="60">{{ stats.tendance_adherence }}</div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="col-sm-6 col-lg-3">#}
+{#                        <div class="card card-bordered">#}
+{#                            <div class="card-inner">#}
+{#                                <div class="card-title-group align-start mb-2">#}
+{#                                    <div class="card-title">#}
+{#                                        <h6 class="title">Nouveaux (7j)</h6>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="align-end flex-sm-wrap g-4 flex-md-nowrap">#}
+{#                                    <div class="nk-sale-data">#}
+{#                                        <span class="amount">{{ stats.nouveaux_7j }}</span>#}
+{#                                        <span class="change {% if stats.evolution_nouveaux >= 0 %}up text-success{% else %}down text-danger{% endif %}">#}
+{#                                <em class="icon ni ni-arrow-long-{% if stats.evolution_nouveaux >= 0 %}up{% else %}down{% endif %}"></em>{{ stats.evolution_nouveaux|abs }}%#}
+{#                            </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-sales-ck">#}
+{#                                        <div class="sparkline" data-type="line" data-fill="true"#}
+{#                                             data-line="{{ stats.tendance_nouveaux }}"#}
+{#                                             data-height="60">{{ stats.tendance_nouveaux }}</div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#            <!-- Liste des patients -->#}
+{#            <div class="nk-block">#}
+{#                <div class="card card-bordered card-stretch">#}
+{#                    <div class="card-inner-group">#}
+{#                        <div class="card-inner position-relative card-tools-toggle">#}
+{#                            <div class="card-title-group">#}
+{#                                <div class="card-tools">#}
+{#                                    <div class="form-inline flex-nowrap gx-3">#}
+{#                                        <div class="form-wrap">#}
+{#                                            <div class="form-control-wrap">#}
+{#                                                <div class="form-icon form-icon-left">#}
+{#                                                    <em class="icon ni ni-search"></em>#}
+{#                                                </div>#}
+{#                                                <input type="text" class="form-control" id="search-patient" placeholder="Rechercher un patient...">#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                <div class="card-tools mr-n1">#}
+{#                                    <ul class="btn-toolbar gx-1">#}
+{#                                        <li>#}
+{#                                            <div class="dropdown">#}
+{#                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">#}
+{#                                                    <em class="icon ni ni-setting"></em>#}
+{#                                                </a>#}
+{#                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">#}
+{#                                                    <ul class="link-check">#}
+{#                                                        <li><span>Colonnes à afficher</span></li>#}
+{#                                                        <li class="active"><a href="#"><span>Code Patient</span></a></li>#}
+{#                                                        <li class="active"><a href="#"><span>Nom</span></a></li>#}
+{#                                                        <li class="active"><a href="#"><span>Date</span></a></li>#}
+{#                                                        <li class="active"><a href="#"><span>Statut</span></a></li>#}
+{#                                                        <li class="active"><a href="#"><span>Actions</span></a></li>#}
+{#                                                    </ul>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </li>#}
+{#                                    </ul>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{##}
+{#                        <div class="card-inner p-0">#}
+{#                            <div class="nk-tb-list nk-tb-ulist">#}
+{#                                <div class="nk-tb-item nk-tb-head">#}
+{#                                    <div class="nk-tb-col nk-tb-col-check">#}
+{#                                        <div class="custom-control custom-control-sm custom-checkbox notext">#}
+{#                                            <input type="checkbox" class="custom-control-input" id="selectAll">#}
+{#                                            <label class="custom-control-label" for="selectAll"></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code</span></div>#}
+{#                                    <div class="nk-tb-col"><span class="sub-text">Patient</span></div>#}
+{#                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Dernier suivi</span></div>#}
+{#                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Mode</span></div>#}
+{#                                    <div class="nk-tb-col"><span class="sub-text">Statut</span></div>#}
+{#                                    <div class="nk-tb-col"><span class="sub-text">Adhérence</span></div>#}
+{#                                    <div class="nk-tb-col nk-tb-col-tools text-right">#}
+{#                                        <span class="sub-text">Actions</span>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                {% for suivi in suivis %}#}
+{#                                <div class="nk-tb-item" data-patient="{{ suivi.patient.nom_complet|lower }}" data-code="{{ suivi.patient.code_patient|lower }}">#}
+{#                                    <div class="nk-tb-col nk-tb-col-check">#}
+{#                                        <div class="custom-control custom-control-sm custom-checkbox notext">#}
+{#                                            <input type="checkbox" class="custom-control-input" id="suivi-{{ suivi.id }}">#}
+{#                                            <label class="custom-control-label" for="suivi-{{ suivi.id }}"></label>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col tb-col-sm">#}
+{#                                        <span class="tb-patient">#}
+{#                                            <span class="title">#}
+{#                                                <span class="text-primary">{{ suivi.patient.code_patient }}</span>#}
+{#                                                {% with constante=suivi.patient.constantes.last %}#}
+{#                                                    {% if constante and constante.alerte %}#}
+{#                                                    <span class="status dot dot-lg dot-danger" data-toggle="tooltip" title="Alerte constantes"></span>#}
+{#                                                    {% endif %}#}
+{#                                                {% endwith %}#}
+{#                                            </span>#}
+{#                                        </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col">#}
+{#                                        <div class="user-card">#}
+{#                                            <div class="user-avatar bg-dim-primary d-none d-sm-flex">#}
+{#                                                <span>{{ suivi.patient.initials }}</span>#}
+{#                                            </div>#}
+{#                                            <div class="user-info">#}
+{#                                                <span class="tb-lead">#}
+{#                                                    <span class="masked-name" id="masked-name-{{ suivi.patient.id }}-{{ forloop.counter }}">************</span>#}
+{#                                                    <span class="full-name d-none" id="full-name-{{ suivi.patient.id }}-{{ forloop.counter }}"></span>#}
+{#                                                    {% if perms.core.view_patient_name %}#}
+{#                                                    <button class="btn btn-xs btn-link p-0 ml-1 toggle-name-btn"#}
+{#                                                            data-patient-id="{{ suivi.patient.id }}"#}
+{#                                                            data-counter="{{ forloop.counter }}">#}
+{#                                                        <em class="icon ni ni-eye"></em>#}
+{#                                                    </button>#}
+{#                                                    {% else %}#}
+{#                                                    <span class="btn btn-xs btn-link p-0 ml-1" data-toggle="tooltip" title="Accès non autorisé">#}
+{#                                                        <em class="icon ni ni-lock"></em>#}
+{#                                                    </span>#}
+{#                                                    {% endif %}#}
+{#                                                </span>#}
+{#                                                <span class="sub-text">{{ suivi.patient.contact }}</span>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col tb-col-md">#}
+{#                                        <span class="tb-sub">#}
+{#                                            <span class="date">{{ suivi.date_suivi|date:"d M Y" }}</span>#}
+{#                                            <span class="d-none d-sm-inline">à {{ suivi.created_at|time:"H:i" }}</span>#}
+{#                                        </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col tb-col-md">#}
+{#                                        <span class="tb-sub">#}
+{#                                            <span class="badge badge-dim bg-outline-{% if suivi.mode == 'permanent' %}primary{% elif suivi.mode == 'occasionnel' %}warning{% else %}info{% endif %}">#}
+{#                                                {{ suivi.get_mode_display }}#}
+{#                                            </span>#}
+{#                                        </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col">#}
+{#                                        <span class="tb-status text-{% if suivi.statut_patient == 'actif' %}success{% elif suivi.statut_patient == 'perdu_de_vue' %}warning{% elif suivi.statut_patient == 'transferé' %}info{% else %}secondary{% endif %}">#}
+{#                                            {{ suivi.get_statut_patient_display }}#}
+{#                                        </span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col">#}
+{#                                        <div class="progress progress-sm">#}
+{#                                            <div class="progress-bar bg-{% if suivi.adherence_traitement == 'bonne' %}success{% elif suivi.adherence_traitement == 'moyenne' %}warning{% else %}danger{% endif %}"#}
+{#                                                 style="width: {% if suivi.adherence_traitement == 'bonne' %}90{% elif suivi.adherence_traitement == 'moyenne' %}60{% else %}30{% endif %}%">#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                        <span class="sub-text small">{{ suivi.get_adherence_traitement_display }}</span>#}
+{#                                    </div>#}
+{#                                    <div class="nk-tb-col nk-tb-col-tools">#}
+{#                                        <ul class="nk-tb-actions gx-1">#}
+{#                                            <li>#}
+{#                                                <div class="drodown">#}
+{#                                                    <a href="#" class="dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown">#}
+{#                                                        <em class="icon ni ni-more-h"></em>#}
+{#                                                    </a>#}
+{#                                                    <div class="dropdown-menu dropdown-menu-right">#}
+{#                                                        <ul class="link-list-opt no-bdr">#}
+{#                                                            <li>#}
+{#                                                                <a href="{% url 'detail_patient' suivi.patient.pk %}">#}
+{#                                                                    <em class="icon ni ni-eye"></em>#}
+{#                                                                    <span>Dossier Patient</span>#}
+{#                                                                </a>#}
+{#                                                            </li>#}
+{#                                                            <li>#}
+{#                                                                <a href="{% url 'suivis-detail' suivi.pk %}">#}
+{#                                                                    <em class="icon ni ni-notes"></em>#}
+{#                                                                    <span>Détails Suivi</span>#}
+{#                                                                </a>#}
+{#                                                            </li>#}
+{#                                                            <li>#}
+{#                                                                <a href="#" data-toggle="modal" data-target="#modalConstantes-{{ suivi.patient.id }}">#}
+{#                                                                    <em class="icon ni ni-heart-fill"></em>#}
+{#                                                                    <span>Constantes</span>#}
+{#                                                                </a>#}
+{#                                                            </li>#}
+{#                                                            <li class="divider"></li>#}
+{#                                                            <li>#}
+{#                                                                <a href="#" data-toggle="modal" data-target="#modalTransfert-{{ suivi.id }}">#}
+{#                                                                    <em class="icon ni ni-share"></em>#}
+{#                                                                    <span>Transférer</span>#}
+{#                                                                </a>#}
+{#                                                            </li>#}
+{#                                                            {% if suivi.statut_patient == 'actif' %}#}
+{#                                                            <li>#}
+{#                                                                <a href="#" data-toggle="modal" data-target="#modalArret-{{ suivi.id }}">#}
+{#                                                                    <em class="icon ni ni-pause"></em>#}
+{#                                                                    <span>Arrêter suivi</span>#}
+{#                                                                </a>#}
+{#                                                            </li>#}
+{#                                                            {% endif %}#}
+{#                                                        </ul>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </li>#}
+{#                                        </ul>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                <!-- Modal Constantes -->#}
+{#                                <div class="modal fade" tabindex="-1" id="modalConstantes-{{ suivi.patient.id }}">#}
+{#                                    <div class="modal-dialog modal-lg" role="document">#}
+{#                                        <div class="modal-content">#}
+{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                                <em class="icon ni ni-cross"></em>#}
+{#                                            </a>#}
+{#                                            <div class="modal-header">#}
+{#                                                <h5 class="modal-title">Constantes médicales</h5>#}
+{#                                                <span class="sub-text">Patient: {{ suivi.patient.code_patient }}</span>#}
+{#                                            </div>#}
+{#                                            <div class="modal-body">#}
+{#                                                {% if suivi.patient.latest_constante %}#}
+{#                                                <div class="row gy-3">#}
+{#                                                    <div class="col-md-6">#}
+{#                                                        <div class="card card-bordered">#}
+{#                                                            <div class="card-inner">#}
+{#                                                                <div class="card-title">Dernières mesures</div>#}
+{#                                                                <div class="row g-3">#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Tension</span>#}
+{#                                                                                <span class="data-value">#}
+{#                                                                                    {{ suivi.patient.latest_constante.tension_systolique }}/{{ suivi.patient.latest_constante.tension_diastolique }}#}
+{#                                                                                    {% if suivi.patient.latest_constante.tension_anormale %}#}
+{#                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>#}
+{#                                                                                    {% endif %}#}
+{#                                                                                </span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Température</span>#}
+{#                                                                                <span class="data-value">#}
+{#                                                                                    {{ suivi.patient.latest_constante.temperature }}°C#}
+{#                                                                                    {% if suivi.patient.latest_constante.temperature_anormale %}#}
+{#                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>#}
+{#                                                                                    {% endif %}#}
+{#                                                                                </span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Pouls</span>#}
+{#                                                                                <span class="data-value">#}
+{#                                                                                    {{ suivi.patient.latest_constante.pouls }} bpm#}
+{#                                                                                    {% if suivi.patient.latest_constante.pouls_anormal %}#}
+{#                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>#}
+{#                                                                                    {% endif %}#}
+{#                                                                                </span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Saturation</span>#}
+{#                                                                                <span class="data-value">#}
+{#                                                                                    {{ suivi.patient.latest_constante.saturation_oxygene }}%#}
+{#                                                                                    {% if suivi.patient.latest_constante.saturation_anormale %}#}
+{#                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>#}
+{#                                                                                    {% endif %}#}
+{#                                                                                </span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                    <div class="col-md-6">#}
+{#                                                        <div class="card card-bordered">#}
+{#                                                            <div class="card-inner">#}
+{#                                                                <div class="card-title">Autres mesures</div>#}
+{#                                                                <div class="row g-3">#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Poids</span>#}
+{#                                                                                <span class="data-value">{{ suivi.patient.latest_constante.poids }} kg</span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Taille</span>#}
+{#                                                                                <span class="data-value">{{ suivi.patient.latest_constante.taille }} cm</span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">IMC</span>#}
+{#                                                                                <span class="data-value">{{ suivi.patient.latest_constante.imc }}</span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                    <div class="col-6">#}
+{#                                                                        <div class="data-item">#}
+{#                                                                            <div class="data-info">#}
+{#                                                                                <span class="data-label">Glycémie</span>#}
+{#                                                                                <span class="data-value">#}
+{#                                                                                    {{ suivi.patient.latest_constante.glycemie }} mg/dL#}
+{#                                                                                    {% if suivi.patient.latest_constante.glycemie_anormale %}#}
+{#                                                                                    <span class="icon ni ni-alert-fill text-danger"></span>#}
+{#                                                                                    {% endif %}#}
+{#                                                                                </span>#}
+{#                                                                            </div>#}
+{#                                                                        </div>#}
+{#                                                                    </div>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                    <div class="col-12">#}
+{#                                                        <div class="card card-bordered">#}
+{#                                                            <div class="card-inner">#}
+{#                                                                <div class="card-title">Historique</div>#}
+{#                                                                <div class="table-responsive">#}
+{#                                                                    <table class="table table-striped">#}
+{#                                                                        <thead>#}
+{#                                                                            <tr>#}
+{#                                                                                <th>Date</th>#}
+{#                                                                                <th>Tension</th>#}
+{#                                                                                <th>Température</th>#}
+{#                                                                                <th>Pouls</th>#}
+{#                                                                                <th>Saturation</th>#}
+{#                                                                                <th>Poids</th>#}
+{#                                                                            </tr>#}
+{#                                                                        </thead>#}
+{#                                                                        <tbody>#}
+{#                                                                            {% for c in suivi.patient.constantes.all|slice:":5" %}#}
+{#                                                                            <tr>#}
+{#                                                                                <td>{{ c.created_at|date:"d/m/Y H:i" }}</td>#}
+{#                                                                                <td>{{ c.tension_systolique }}/{{ c.tension_diastolique }}</td>#}
+{#                                                                                <td>{{ c.temperature }}°C</td>#}
+{#                                                                                <td>{{ c.pouls }} bpm</td>#}
+{#                                                                                <td>{{ c.saturation_oxygene }}%</td>#}
+{#                                                                                <td>{{ c.poids }} kg</td>#}
+{#                                                                            </tr>#}
+{#                                                                            {% endfor %}#}
+{#                                                                        </tbody>#}
+{#                                                                    </table>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                                {% else %}#}
+{#                                                <div class="text-center py-4">#}
+{#                                                    <em class="icon ni ni-info text-soft fs-24px"></em>#}
+{#                                                    <p class="mt-2">Aucune constante enregistrée pour ce patient</p>#}
+{#                                                    <a href="#" class="btn btn-sm btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#modalNewConstante-{{ suivi.patient.id }}">#}
+{#                                                        Ajouter des constantes#}
+{#                                                    </a>#}
+{#                                                </div>#}
+{#                                                {% endif %}#}
+{#                                            </div>#}
+{#                                            <div class="modal-footer bg-light">#}
+{#                                                <span class="sub-text">Dernière mise à jour: {% if suivi.patient.latest_constante %}{{ suivi.patient.latest_constante.created_at|date:"d M Y H:i" }}{% else %}Jamais{% endif %}</span>#}
+{#                                            </div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                <!-- Modal Nouvelle Constante -->#}
+{#                                <div class="modal fade" tabindex="-1" id="modalNewConstante-{{ suivi.patient.id }}">#}
+{#                                    <div class="modal-dialog" role="document">#}
+{#                                        <div class="modal-content">#}
+{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                                <em class="icon ni ni-cross"></em>#}
+{#                                            </a>#}
+{#                                            <div class="modal-header">#}
+{#                                                <h5 class="modal-title">Nouvelles constantes</h5>#}
+{#                                                <span class="sub-text">Patient: {{ suivi.patient.code_patient }}</span>#}
+{#                                            </div>#}
+{#                                            <form method="post" action="">#}
+{#                                                {% csrf_token %}#}
+{#                                                <div class="modal-body">#}
+{#                                                    <div class="row gy-3">#}
+{#                                                        {% for field in constanteform %}#}
+{#                                                        <div class="col-md-6">#}
+{#                                                            <div class="form-group">#}
+{#                                                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>#}
+{#                                                                {{ field }}#}
+{#                                                                {% if field.help_text %}#}
+{#                                                                <small class="form-text text-muted">{{ field.help_text }}</small>#}
+{#                                                                {% endif %}#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                        {% endfor %}#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                                <div class="modal-footer bg-light">#}
+{#                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>#}
+{#                                                    <button type="submit" class="btn btn-primary">Enregistrer</button>#}
+{#                                                </div>#}
+{#                                            </form>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                <!-- Modal Transfert -->#}
+{#                                <div class="modal fade" tabindex="-1" id="modalTransfert-{{ suivi.id }}">#}
+{#                                    <div class="modal-dialog" role="document">#}
+{#                                        <div class="modal-content">#}
+{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                                <em class="icon ni ni-cross"></em>#}
+{#                                            </a>#}
+{#                                            <div class="modal-header">#}
+{#                                                <h5 class="modal-title">Transférer le patient</h5>#}
+{#                                                <span class="sub-text">{{ suivi.patient.code_patient }}</span>#}
+{#                                            </div>#}
+{#                                            <form method="post" action="">#}
+{#                                                {% csrf_token %}#}
+{#                                                <div class="modal-body">#}
+{#                                                    <div class="form-group">#}
+{#                                                        <label class="form-label">Centre de transfert</label>#}
+{#                                                        <select class="form-select" name="centre" required>#}
+{#                                                            <option value="">Sélectionner un centre</option>#}
+{#                                                            <option value="centre1">Centre Hospitalier Régional</option>#}
+{#                                                            <option value="centre2">Centre de Traitement Ambulatoire</option>#}
+{#                                                            <option value="centre3">Centre de Référence VIH</option>#}
+{#                                                        </select>#}
+{#                                                    </div>#}
+{#                                                    <div class="form-group">#}
+{#                                                        <label class="form-label">Motif du transfert</label>#}
+{#                                                        <textarea class="form-control" name="motif" rows="3" required></textarea>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                                <div class="modal-footer bg-light">#}
+{#                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>#}
+{#                                                    <button type="submit" class="btn btn-primary">Confirmer le transfert</button>#}
+{#                                                </div>#}
+{#                                            </form>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{##}
+{#                                <!-- Modal Arrêt Suivi -->#}
+{#                                <div class="modal fade" tabindex="-1" id="modalArret-{{ suivi.id }}">#}
+{#                                    <div class="modal-dialog" role="document">#}
+{#                                        <div class="modal-content">#}
+{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+{#                                                <em class="icon ni ni-cross"></em>#}
+{#                                            </a>#}
+{#                                            <div class="modal-header">#}
+{#                                                <h5 class="modal-title">Arrêter le suivi</h5>#}
+{#                                                <span class="sub-text">{{ suivi.patient.code_patient }}</span>#}
+{#                                            </div>#}
+{#                                            <form method="post" action="">#}
+{#                                                {% csrf_token %}#}
+{#                                                <div class="modal-body">#}
+{#                                                    <div class="form-group">#}
+{#                                                        <label class="form-label">Motif de l'arrêt</label>#}
+{#                                                        <select class="form-select" name="motif" required>#}
+{#                                                            <option value="">Sélectionner un motif</option>#}
+{#                                                            <option value="guerison">Guérison</option>#}
+{#                                                            <option value="non_adherence">Non adhérence</option>#}
+{#                                                            <option value="deces">Décès</option>#}
+{#                                                            <option value="autre">Autre</option>#}
+{#                                                        </select>#}
+{#                                                    </div>#}
+{#                                                    <div class="form-group">#}
+{#                                                        <label class="form-label">Commentaires</label>#}
+{#                                                        <textarea class="form-control" name="commentaire" rows="3"></textarea>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                                <div class="modal-footer bg-light">#}
+{#                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>#}
+{#                                                    <button type="submit" class="btn btn-danger">Confirmer l'arrêt</button>#}
+{#                                                </div>#}
+{#                                            </form>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                {% endfor %}#}
+{#                            </div>#}
+{#                        </div>#}
+{##}
+{#                        <!-- Pagination -->#}
+{#                        <div class="card-inner">#}
+{#                            <div class="d-flex justify-content-between align-items-center">#}
+{#                                <div class="nk-block-des text-soft">#}
+{#                                    <p>Affichage de {{ suivis.start_index }} à {{ suivis.end_index }} sur {{ suivis.paginator.count }} suivis</p>#}
+{#                                </div>#}
+{#                                <ul class="pagination justify-content-center justify-content-md-start">#}
+{#                                    {% if suivis.has_previous %}#}
+{#                                        <li class="page-item">#}
+{#                                            <a class="page-link" href="?page={{ suivis.previous_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">#}
+{#                                                <em class="icon ni ni-chevron-left"></em>#}
+{#                                            </a>#}
+{#                                        </li>#}
+{#                                    {% else %}#}
+{#                                        <li class="page-item disabled">#}
+{#                                            <a class="page-link" href="#">#}
+{#                                                <em class="icon ni ni-chevron-left"></em>#}
+{#                                            </a>#}
+{#                                        </li>#}
+{#                                    {% endif %}#}
+{##}
+{#                                    {% for num in suivis.paginator.page_range %}#}
+{#                                        {% if num == suivis.number %}#}
+{#                                            <li class="page-item active">#}
+{#                                                <a class="page-link" href="#">{{ num }}</a>#}
+{#                                            </li>#}
+{#                                        {% elif num > suivis.number|add:'-3' and num < suivis.number|add:'3' %}#}
+{#                                            <li class="page-item">#}
+{#                                                <a class="page-link" href="?page={{ num }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">{{ num }}</a>#}
+{#                                            </li>#}
+{#                                        {% endif %}#}
+{#                                    {% endfor %}#}
+{##}
+{#                                    {% if suivis.has_next %}#}
+{#                                        <li class="page-item">#}
+{#                                            <a class="page-link" href="?page={{ suivis.next_page_number }}{% if request.GET.statut %}&statut={{ request.GET.statut }}{% endif %}">#}
+{#                                                <em class="icon ni ni-chevron-right"></em>#}
+{#                                            </a>#}
+{#                                        </li>#}
+{#                                    {% else %}#}
+{#                                        <li class="page-item disabled">#}
+{#                                            <a class="page-link" href="#">#}
+{#                                                <em class="icon ni ni-chevron-right"></em>#}
+{#                                            </a>#}
+{#                                        </li>#}
+{#                                    {% endif %}#}
+{#                                </ul>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>#}
+{#<script>#}
+{#  const ctx = document.getElementById('chartActifs').getContext('2d');#}
+{#  const chart = new Chart(ctx, {#}
+{#    type: 'line',#}
+{#    data: {#}
+{#      labels: {{ stats.jours_tendance|safe }},#}
+{#      datasets: [{#}
+{#        label: 'Patients actifs',#}
+{#        data: {{ stats.tendance_actifs|safe }},#}
+{#        fill: true,#}
+{#        borderColor: 'rgba(52, 152, 219, 1)',#}
+{#        backgroundColor: 'rgba(52, 152, 219, 0.2)',#}
+{#        tension: 0.3,#}
+{#        pointRadius: 3,#}
+{#        pointBackgroundColor: 'rgba(52, 152, 219, 1)'#}
+{#      }]#}
+{#    },#}
+{#    options: {#}
+{#      responsive: true,#}
+{#      scales: {#}
+{#        x: { grid: { display: false } },#}
+{#        y: { beginAtZero: true, ticks: { precision: 0 } }#}
+{#      },#}
+{#      plugins: {#}
+{#        legend: { display: false },#}
+{#        tooltip: { mode: 'index', intersect: false }#}
+{#      }#}
+{#    }#}
+{#  });#}
+{#</script>#}
+{#    <script>#}
+{#        // Recherche en temps réel#}
+{#        document.getElementById('search-patient').addEventListener('input', function () {#}
+{#            const searchTerm = this.value.toLowerCase();#}
+{#            const rows = document.querySelectorAll('.nk-tb-item[data-patient], .nk-tb-item[data-code]');#}
+{##}
+{#            rows.forEach(row => {#}
+{#                const patientName = row.getAttribute('data-patient');#}
+{#                const patientCode = row.getAttribute('data-code');#}
+{##}
+{#                if (patientName.includes(searchTerm) || patientCode.includes(searchTerm)) {#}
+{#                    row.style.display = '';#}
+{#                } else {#}
+{#                    row.style.display = 'none';#}
+{#                }#}
+{#            });#}
+{#        });#}
+{##}
+{#        // Affichage du nom complet avec permission#}
+{#        document.querySelectorAll('.toggle-name-btn').forEach(button => {#}
+{#            button.addEventListener('click', function (e) {#}
+{#                e.preventDefault();#}
+{#                const patientId = this.dataset.patientId;#}
+{#                const counter = this.dataset.counter;#}
+{#                const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);#}
+{#                const fullName = document.getElementById(`full-name-${patientId}-${counter}`);#}
+{#                const icon = this.querySelector('em');#}
+{##}
+{#                if (maskedName.classList.contains('d-none')) {#}
+{#                    // Masquer le nom#}
+{#                    maskedName.classList.remove('d-none');#}
+{#                    fullName.classList.add('d-none');#}
+{#                    icon.classList.remove('ni-eye-fill');#}
+{#                    icon.classList.add('ni-eye');#}
+{#                } else {#}
+{#                    // Afficher le nom (via AJAX si pas encore chargé)#}
+{#                    if (!fullName.textContent) {#}
+{#                        fetch(`/api/patient/${patientId}/name/`)#}
+{#                            .then(response => response.json())#}
+{#                            .then(data => {#}
+{#                                if (data.full_name) {#}
+{#                                    fullName.textContent = data.full_name;#}
+{#                                    maskedName.classList.add('d-none');#}
+{#                                    fullName.classList.remove('d-none');#}
+{#                                    icon.classList.remove('ni-eye');#}
+{#                                    icon.classList.add('ni-eye-fill');#}
+{#                                }#}
+{#                            })#}
+{#                            .catch(error => console.error('Error:', error));#}
+{#                    } else {#}
+{#                        maskedName.classList.add('d-none');#}
+{#                        fullName.classList.remove('d-none');#}
+{#                        icon.classList.remove('ni-eye');#}
+{#                        icon.classList.add('ni-eye-fill');#}
+{#                    }#}
+{#                }#}
+{#            });#}
+{#        });#}
+{##}
+{#        // Sélection multiple#}
+{#        document.getElementById('selectAll').addEventListener('change', function () {#}
+{#            const checkboxes = document.querySelectorAll('.nk-tb-item .custom-control-input');#}
+{#            checkboxes.forEach(checkbox => {#}
+{#                checkbox.checked = this.checked;#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+{##}
+{#{% endblock %}#}

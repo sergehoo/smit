@@ -521,7 +521,7 @@ class HospitalizationreservedForm(forms.ModelForm):
 
 
 class HospitalizationSendForm(forms.ModelForm):
-    bed = forms.ModelChoiceField(queryset=LitHospitalisation.objects.filter(occuper=False), widget=forms.Select(
+    bed = forms.ModelChoiceField(queryset=LitHospitalisation.objects.filter(occuper=False), required=True, widget=forms.Select(
         attrs={'class': 'form-control bedid form-control-xl select2 form-select ', 'data-search': 'on', 'id': 'bedid'}))
 
     class Meta:
@@ -1622,13 +1622,15 @@ class HospitalizationUrgenceForm(forms.ModelForm):
             'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
             # 'activite': forms.Select(attrs={'class': 'form-control'}),
             # 'doctor': forms.Select(attrs={'class': 'form-control'}),
-            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'} ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Filtrer les patients urgents uniquement
         self.fields['patient'].queryset = Patient.objects.filter(urgence=True)
+        # Rendre le champ bed obligatoire
+        self.fields['bed'].required = True
 
 
 class CasContactForm(forms.ModelForm):

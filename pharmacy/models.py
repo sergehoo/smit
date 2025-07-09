@@ -15,6 +15,8 @@ from django.utils.timezone import now
 from schedule.models import Calendar, Event
 from django.core.files.storage import default_storage
 
+
+
 FORME_MEDICAMENT_CHOICES = [
     ('comprime', 'comprime'),
     ('sirop', 'sirop'),
@@ -58,7 +60,7 @@ UNITE_DOSAGE_CHOICES = [
 
 
 class CathegorieMolecule(models.Model):
-    nom = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    nom = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -93,82 +95,108 @@ class Pharmacy(models.Model):
 
 class Medicament(models.Model):
     codebarre = models.CharField(max_length=150, unique=True, default=generate_unique_code_barre,
-                                 help_text="Code unique pour le médicament", validators=[
-            RegexValidator(regex=r'^\d{12}$',
-                           message="Le code-barre doit être composé de 12 chiffres.")])  # Pour l'identification par code-barre
-    nom = models.CharField(max_length=255, null=True, blank=True, unique=True)
+                                 validators=[RegexValidator(regex=r'^\d{12}$',
+                                                            message="Le code-barre doit être composé de 12 chiffres.")])
+    nom = models.CharField(max_length=255, unique=True)
     dosage = models.IntegerField(null=True, blank=True)
-    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,
-                                  help_text="Ex: 500mg, 20mg/ml")
+    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True)
     dosage_form = models.CharField(max_length=50, choices=FORME_MEDICAMENT_CHOICES, null=True, blank=True)
-    description = models.TextField(null=True, blank=True, )
-    stock = models.PositiveIntegerField(null=True, blank=True, default=0)
-    date_expiration = models.DateField(null=True, blank=True, )
+    description = models.TextField(null=True, blank=True)
+    stock = models.PositiveIntegerField(default=0)
+    date_expiration = models.DateField(null=True, blank=True)
     categorie = models.ForeignKey(CathegorieMolecule, on_delete=models.SET_NULL, null=True, blank=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.SET_NULL, null=True, blank=True)
     molecules = models.ManyToManyField(Molecule)
     miniature = models.ImageField(upload_to="pharmacy/miniature", null=True, blank=True)
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
+    pharmacie = models.ForeignKey('pharmacy.Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Enregistrez d'abord l'image originale
-
+        super().save(*args, **kwargs)
         if self.miniature:
             miniature_path = self.miniature.path
             with Image.open(miniature_path) as img:
-                # Convertir en RGB si nécessaire (utile pour les formats non RGB comme PNG)
                 if img.mode != "RGB":
                     img = img.convert("RGB")
-
-                # Étape 1 : Redimensionner pour couvrir le cadre tout en conservant les proportions
                 img_ratio = img.width / img.height
                 target_ratio = 200 / 100
-
                 if img_ratio > target_ratio:
-                    # Image trop large, réduire la largeur
                     new_height = 100
                     new_width = int(new_height * img_ratio)
                 else:
-                    # Image trop haute, réduire la hauteur
                     new_width = 200
                     new_height = int(new_width / img_ratio)
-
                 img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-
-                # Étape 2 : Rogner pour obtenir exactement 150x100
                 left = (new_width - 200) / 2
                 top = (new_height - 100) / 2
                 right = left + 200
                 bottom = top + 100
-
                 img = img.crop((left, top, right, bottom))
-
-                # Étape 3 : Enregistrer avec une qualité élevée
                 img.save(miniature_path, format="JPEG", quality=100)
 
     def __str__(self):
-        return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
+        return f"{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}"
 
 
 class Medocsprescrits(models.Model):
+
     nom = models.CharField(max_length=355, null=True, blank=True, unique=True)
     dosage = models.IntegerField(null=True, blank=True)
-    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,help_text="Ex: 500mg, 20mg/ml")
+    unitdosage = models.CharField(max_length=50, choices=UNITE_DOSAGE_CHOICES, null=True, blank=True,
+                                  help_text="Ex: 500mg, 20mg/ml")
     dosage_form = models.CharField(max_length=50, choices=FORME_MEDICAMENT_CHOICES, null=True, blank=True)
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f'{self.nom} {self.dosage_form} {self.dosage} {self.unitdosage}'
 
 
 class MouvementStock(models.Model):
-    medicament = models.ForeignKey('Medicament', on_delete=models.CASCADE)
-    patient = models.ForeignKey('core.Patient', on_delete=models.SET_NULL, null=True, blank=True)
+
+    ENTREE = 'Entrée'
+    SORTIE = 'Sortie'
+    TYPES = [(ENTREE, 'Entrée'), (SORTIE, 'Sortie')]
+
+    medicament = models.ForeignKey('Medicament', on_delete=models.CASCADE, related_name='mouvements')
+    patient = models.ForeignKey('core.Patient', on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='mouvements_stock')
     quantite = models.PositiveIntegerField()
-    type_mouvement = models.CharField(max_length=50, choices=[('Entrée', 'Entrée'), ('Sortie', 'Sortie')])
+    type_mouvement = models.CharField(max_length=10, choices=TYPES)
     date_mouvement = models.DateTimeField(auto_now_add=True)
 
+    # Champs obligatoires uniquement pour les entrées
+    fournisseur = models.ForeignKey('Fournisseur', on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name='mouvements_stock')
+    commande = models.ForeignKey('Commande', on_delete=models.SET_NULL, null=True, blank=True, related_name='mouvements_stock')
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True,related_name='employee_stock')
+    pharmacie = models.ForeignKey('pharmacy.Pharmacy', on_delete=models.SET_NULL, null=True, blank=True,related_name='pharmacie_stock')
+
     def clean(self):
-        if self.type_mouvement == 'Sortie' and self.quantite > self.medicament.stock:
-            raise ValidationError('La quantité retirée dépasse le stock disponible.')
+        from django.core.exceptions import ValidationError
+
+        # Vérification stock si sortie
+        if self.type_mouvement == self.SORTIE:
+            if self.quantite > self.medicament.stock:
+                raise ValidationError("La quantité retirée dépasse le stock disponible.")
+            if self.fournisseur or self.commande:
+                raise ValidationError("Fournisseur et commande ne doivent pas être renseignés pour une sortie.")
+
+        # Vérification logique pour entrée
+        if self.type_mouvement == self.ENTREE:
+            if not self.fournisseur:
+                raise ValidationError("Le fournisseur est requis pour une entrée.")
+            if not self.commande:
+                raise ValidationError("La commande est requise pour une entrée.")
+
+    def __str__(self):
+        return f"{self.type_mouvement} - {self.medicament.nom} ({self.quantite})"
+
+    class Meta:
+        ordering = ['-date_mouvement']
+        indexes = [
+            models.Index(fields=['type_mouvement']),
+            models.Index(fields=['date_mouvement']),
+        ]
 
 
 @receiver(post_save, sender=MouvementStock)
@@ -197,13 +225,20 @@ def update_stock_on_delete(sender, instance, **kwargs):
 
 
 class StockAlert(models.Model):
-    medication = models.ForeignKey(Medicament, on_delete=models.CASCADE)
+    medication = models.ForeignKey('Medicament', on_delete=models.CASCADE, related_name='alertes')
     niveau_critique = models.PositiveIntegerField()
     quantite_actuelle = models.PositiveIntegerField()
     alerte = models.BooleanField(default=False)
+    pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"Alert for {self.medication.nom}: {self.quantite_actuelle} remaining"
+        return f"Alerte: {self.medication.nom} ({self.quantite_actuelle})"
+
+    class Meta:
+        ordering = ['medication']
+        constraints = [
+            models.CheckConstraint(check=models.Q(niveau_critique__gt=0), name='niveau_critique_positive')
+        ]
 
 
 @receiver(post_save, sender=Medicament)
@@ -223,69 +258,43 @@ def create_or_update_stock_alert(sender, instance, **kwargs):
 
 
 class ArticleCommande(models.Model):
+
     medicament = models.ForeignKey(Medicament, on_delete=models.CASCADE)
     quantite_commandee = models.PositiveIntegerField()
     date_commande = models.DateField(auto_now_add=True)
     fournisseur = models.ForeignKey('Fournisseur', on_delete=models.CASCADE)
     statut = models.CharField(max_length=50, choices=[
-        ('Commandé', 'Commandé'),
+        ('Commande', 'Commandé'),
         ('Reçu', 'Reçu'),
         ('En attente', 'En attente')
     ])
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True,related_name='employee_article')
+    pharmacie = models.ForeignKey('pharmacy.Pharmacy', on_delete=models.SET_NULL, null=True, blank=True,related_name='pharmacie_article')
 
 
 class Commande(models.Model):
-    # numero = models.PositiveIntegerField()
-    numero = models.PositiveIntegerField(unique=True, blank=True, null=True)
-    articles = models.ManyToManyField('ArticleCommande', related_name='commandes')
-    date_commande = models.DateField()
-    created_at = models.DateField(auto_now=True)
-    statut = models.CharField(max_length=50, choices=[
+    STATUT_CHOICES = [
         ('Commandé', 'Commandé'),
         ('Reçu', 'Reçu'),
         ('En attente', 'En attente')
-    ])
+    ]
+
+    numero = models.PositiveIntegerField(unique=True, blank=True, null=True)
+    articles = models.ManyToManyField(ArticleCommande, related_name='commandes')
+    date_commande = models.DateField()
+    created_at = models.DateField(auto_now=True)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='Commandé')
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
+    pharmacie = models.ForeignKey('pharmacy.Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.numero:
-            # Générer un numéro basé sur l'année et un compteur unique
-            last_commande = Commande.objects.filter(date_commande__year=now().year).order_by('numero').last()
-            if last_commande:
-                self.numero = last_commande.numero + 1
-            else:
-                self.numero = int(f"{now().year}0001")  # Commencer avec l'année et un compteur
+            last = Commande.objects.filter(date_commande__year=now().year).order_by('-numero').first()
+            self.numero = last.numero + 1 if last else int(f"{now().year}0001")
         super().save(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        from smit.forms import ArticleCommandeFormSet
-        context = super().get_context_data(**kwargs)
-        if self.request.POST:
-            context['articles_formset'] = ArticleCommandeFormSet(self.request.POST)
-        else:
-            context['articles_formset'] = ArticleCommandeFormSet(queryset=ArticleCommande.objects.none())
-        context['title'] = "Créer une nouvelle commande"
-        return context
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        articles_formset = context['articles_formset']
-        if form.is_valid() and articles_formset.is_valid():
-            self.object = form.save()
-            articles = articles_formset.save(commit=False)
-            for article in articles:
-                article.save()
-                self.object.articles.add(article)
-            return redirect(self.success_url)
-        else:
-            return self.form_invalid(form)
-
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(fields=[ 'numero'], name='unique_commande_medicament')
-    #     ]
-
     def __str__(self):
-        return f"{self.articles} de {self.date_commande}"
+        return f"Commande #{self.numero} - {self.date_commande}"
 
     def get_status_badge(self):
         status_badges = {
@@ -297,6 +306,12 @@ class Commande(models.Model):
 
     def get_absolute_url(self):
         return reverse('commande_detail', kwargs={'pk': self.pk})
+
+    class Meta:
+        ordering = ['-date_commande']
+        constraints = [
+            models.UniqueConstraint(fields=['numero'], name='unique_commande_numero')
+        ]
 
 
 class RendezVous(models.Model):
@@ -410,6 +425,8 @@ class Fournisseur(models.Model):
     adresse = models.TextField()
     contact = models.CharField(max_length=255)
     email = models.EmailField()
+    employee = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
+    pharmacie = models.ForeignKey('pharmacy.Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.nom}"
