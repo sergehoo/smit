@@ -23,7 +23,8 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, HospitalizationIndicators, PrescriptionExecution, \
     Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
     UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon, ModeDeVie, Appareil, \
-    ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale, BilanParaclinique
+    ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale, BilanParaclinique, SuiviProtocole, Protocole, \
+    TraitementARV
 from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
@@ -521,8 +522,10 @@ class HospitalizationreservedForm(forms.ModelForm):
 
 
 class HospitalizationSendForm(forms.ModelForm):
-    bed = forms.ModelChoiceField(queryset=LitHospitalisation.objects.filter(occuper=False), required=True, widget=forms.Select(
-        attrs={'class': 'form-control bedid form-control-xl select2 form-select ', 'data-search': 'on', 'id': 'bedid'}))
+    bed = forms.ModelChoiceField(queryset=LitHospitalisation.objects.filter(occuper=False), required=True,
+                                 widget=forms.Select(
+                                     attrs={'class': 'form-control bedid form-control-xl select2 form-select ',
+                                            'data-search': 'on', 'id': 'bedid'}))
 
     class Meta:
         model = Hospitalization
@@ -1622,7 +1625,7 @@ class HospitalizationUrgenceForm(forms.ModelForm):
             'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
             # 'activite': forms.Select(attrs={'class': 'form-control'}),
             # 'doctor': forms.Select(attrs={'class': 'form-control'}),
-            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'} ),
+            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -1801,3 +1804,57 @@ class BilanParacliniqueResultForm(forms.ModelForm):
             "result_date": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
             "comment": forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Commentaire"}),
         }
+
+
+class TraitementARVForm(forms.ModelForm):
+    class Meta:
+        model = TraitementARV
+        fields = ['nom', 'description', 'dosage', 'forme_pharmaceutique',
+                  'type_traitement', 'duree_traitement', 'posologie_details',
+                  'effet_secondaire_courant', 'interaction_medicamenteuse', 'efficacite']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'posologie_details': forms.Textarea(attrs={'rows': 3}),
+            'effet_secondaire_courant': forms.Textarea(attrs={'rows': 3}),
+            'interaction_medicamenteuse': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class ProtocoleForm(forms.ModelForm):
+    class Meta:
+        model = Protocole
+        fields = ['nom', 'description', 'type_protocole', 'duree', 'date_debut',
+                  'molecules', 'medicament', 'maladies', 'examens']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'molecules': forms.SelectMultiple(attrs={'class': 'select2'}),
+            'medicament': forms.SelectMultiple(attrs={'class': 'select2'}),
+            'examens': forms.SelectMultiple(attrs={'class': 'select2'}),
+        }
+
+
+class SuiviProtocoleForm(forms.ModelForm):
+    class Meta:
+        model = SuiviProtocole
+        fields = ['protocole', 'nom', 'description', 'date_debut', 'date_fin']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class BilanParacliniqueForm(forms.ModelForm):
+    class Meta:
+        model = BilanParaclinique
+        fields = ['examen', 'description', 'doctor', 'is_initial_vih', 'comment']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'comment': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        patient = kwargs.pop('patient', None)
+        super().__init__(*args, **kwargs)
+        if patient:
+            self.fields['examen'].queryset = ExamenStandard.objects.filter(
+                is_active=True
+            ).order_by('type_examen__nom', 'nom')

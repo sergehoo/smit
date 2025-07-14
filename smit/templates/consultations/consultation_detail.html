@@ -307,10 +307,11 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
-                           class="btn btn-outline-secondary float-right mr-5"
-                           onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><em
-                                class="icon ni ni-reply-fill"></em> Bilan Initial VIH </a>
+                        <a href="{% url 'create_bilan_initial' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
+   class="btn btn-outline-secondary float-right mr-5"
+   onclick="return confirm('Êtes-vous sûr de vouloir créer le bilan initial VIH pour ce patient ?');">
+   <em class="icon ni ni-reply-fill"></em> Bilan Initial VIH
+</a>
 
 
                     </div>
@@ -334,7 +335,8 @@
                                 </div>
                                 <div class="col-2 position-relative">
 
-                                    <a href="#" class="btn btn-outline-lighter" style="right: 0; top: 0; left: 100%">
+                                    <a href="{% url 'telecharger_bilaninitial' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"
+                                       class="btn btn-outline-lighter" style="right: 0; top: 0; left: 100%">
                                         <em class="icon ni ni-printer"></em> Imprimer
                                     </a>
                                 </div>

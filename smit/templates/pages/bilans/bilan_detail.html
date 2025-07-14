@@ -1,0 +1,601 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-fluid">
+        <!-- Header avec boutons d'action -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="h2">Détails du Bilan Initial VIH</h1>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'bilan_list' %}">Bilans</a></li>
+                    <li class="breadcrumb-item active">Détails</li>
+                </ol>
+            </div>
+            <div class="col-md-6 text-right">
+                <div class="btn-group">
+                    <a href="{% url 'bilan_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> Retour
+                    </a>
+                    <button onclick="generatePDF()" class="btn btn-danger">
+                        <i class="fas fa-file-pdf mr-1"></i> Exporter
+                    </button>
+{#                    {% if can_edit %}#}
+                    <a href="{% url 'bilan_update' bilan.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit mr-1"></i> Modifier
+                    </a>
+{#                    {% endif %}#}
+{#                    {% if can_complete and bilan.is_pending %}#}
+                    <a href="{% url 'bilan_complete' bilan.pk %}" class="btn btn-success">
+                        <i class="fas fa-check mr-1"></i> Compléter
+                    </a>
+{#                    {% endif %}#}
+                     <a href="{% url 'suivi_send_from_bilan' patient_id=bilan.patient.id consultation_id=bilan.consultation.id %}" class="btn btn-outline-secondary">
+    Suivi <i class="fas fa-arrow-down-a-z ml-1"></i>
+</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte d'identité du patient -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user-injured mr-2"></i>Identité du Patient
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="avatar avatar-xxl">
+                                <span class="avatar-title rounded-circle bg-light text-dark" style="font-size: 2rem;">
+                                    {{ bilan.patient.nom|first|upper }}{{ bilan.patient.prenoms|first|upper }}
+                                </span>
+                            </div>
+                            <h4 class="mt-2">{{ bilan.patient.nom_complet }}</h4>
+                            <div class="badge badge-pill badge-light">
+                                <i class="fas fa-id-card mr-1"></i> {{ bilan.patient.code_patient }}
+                            </div>
+                        </div>
+                        <hr>
+                        <dl class="row">
+                            <dt class="col-sm-5">Âge/Sexe</dt>
+                            <dd class="col-sm-7">{{ bilan.patient.age }} ans / {{ bilan.patient.get_sexe_display }}</dd>
+
+                            <dt class="col-sm-5">Téléphone</dt>
+                            <dd class="col-sm-7">{{ bilan.patient.telephone|default:"Non renseigné" }}</dd>
+
+                            <dt class="col-sm-5">Adresse</dt>
+                            <dd class="col-sm-7">{{ bilan.patient.adresse|default:"Non renseignée"|truncatewords:5 }}</dd>
+
+                            <dt class="col-sm-5">Date diagnostic</dt>
+                            <dd class="col-sm-7">{{ bilan.patient.date_diagnostic|date:"d/m/Y"|default:"-" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations principales du bilan -->
+            <div class="col-lg-8">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-medical-alt mr-2"></i>Informations du Bilan
+                        </h5>
+                        <div>
+                            <span class="badge badge-{% if bilan.priority == 'high' %}danger{% elif bilan.priority == 'medium' %}warning{% else %}info{% endif %}">
+                                {{ bilan.get_priority_display }}
+                            </span>
+                            <span class="badge badge-{% if bilan.status == 'completed' %}success{% elif bilan.status == 'pending' %}secondary{% else %}warning{% endif %} ml-2">
+                                {{ bilan.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-5">Date création</dt>
+                                    <dd class="col-sm-7">{{ bilan.created_at|date:"d/m/Y H:i" }}</dd>
+
+                                    <dt class="col-sm-5">Médecin</dt>
+                                    <dd class="col-sm-7">{{ bilan.doctor.nom_complet }}</dd>
+
+                                    {% if bilan.hospitalization %}
+                                    <dt class="col-sm-5">Hospitalisation</dt>
+                                    <dd class="col-sm-7">
+                                        <a href="{{ bilan.hospitalization.get_absolute_url }}">
+                                            {{ bilan.hospitalization.motif|truncatewords:3 }}
+                                        </a>
+                                    </dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    {% if bilan.result_date %}
+                                    <dt class="col-sm-5">Date résultat</dt>
+                                    <dd class="col-sm-7">{{ bilan.result_date|date:"d/m/Y H:i" }}</dd>
+                                    {% endif %}
+
+                                    {% if bilan.technician %}
+                                    <dt class="col-sm-5">Technicien</dt>
+                                    <dd class="col-sm-7">{{ bilan.technician.nom_complet }}</dd>
+                                    {% endif %}
+
+                                    {% if bilan.is_critical %}
+                                    <dt class="col-sm-5">Statut</dt>
+                                    <dd class="col-sm-7"><span class="badge badge-danger">Critique</span></dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des examens et résultats -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-microscope mr-2"></i>Examens Demandés
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bilan.examens.all %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Nom de l'examen</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Résultat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for examen in bilan.examens.all %}
+                                    <tr>
+                                        <td>{{ examen.code }}</td>
+                                        <td>{{ examen.nom }}</td>
+                                        <td>{{ examen.type_examen.nom }}</td>
+                                        <td>{{ examen.description|truncatewords:10 }}</td>
+                                        <td>{{ examen.result }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">Aucun examen demandé pour ce bilan</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultats des examens -->
+        {% if bilan.result %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-flask mr-2"></i>Résultats des Examens
+                        </h5>
+                        {% if bilan.is_critical %}
+                        <span class="badge badge-danger">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Résultat Critique
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Paramètre</th>
+                                        <th>Résultat</th>
+                                        <th>Valeur normale</th>
+                                        <th>Unité</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key, value in bilan.result.items %}
+                                    <tr class="{% if value.is_abnormal %}table-danger{% endif %}">
+                                        <td><strong>{{ key }}</strong></td>
+                                        <td>{{ value.value }}</td>
+                                        <td>{{ value.reference }}</td>
+                                        <td>{{ value.unit }}</td>
+                                        <td>
+                                            {% if value.is_abnormal %}
+                                            <span class="badge badge-danger">Anormal</span>
+                                            {% else %}
+                                            <span class="badge badge-success">Normal</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recommandations intelligentes -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-robot mr-2"></i>Recommandations Intelligentes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Diagnostic VIH -->
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-virus mr-2"></i>Type de VIH</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if 'Western_Blot' in bilan.result %}
+                                            {% if bilan.result.Western_Blot.value == 'Positif' %}
+                                                <p class="text-danger"><strong>VIH-1 détecté</strong></p>
+                                                <p>Confirmation par Western Blot positive.</p>
+                                            {% else %}
+                                                <p class="text-warning"><strong>VIH-2 possible</strong></p>
+                                                <p>Nécessite des tests spécifiques pour confirmation.</p>
+                                            {% endif %}
+                                        {% else %}
+                                            <p class="text-muted">Test de typage non réalisé</p>
+                                            <p>Recommander un Western Blot pour déterminer le type de VIH.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Niveau d'urgence -->
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i>Niveau d'Urgence</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if bilan.is_critical %}
+                                            <p class="text-danger"><strong>Urgence critique</strong></p>
+                                            <ul>
+                                                <li>Hospitalisation immédiate recommandée</li>
+                                                <li>Début rapide du traitement ARV</li>
+                                                <li>Surveillance intensive nécessaire</li>
+                                            </ul>
+                                        {% elif bilan.priority == 'high' %}
+                                            <p class="text-warning"><strong>Urgence élevée</strong></p>
+                                            <ul>
+                                                <li>Consultation spécialisée dans les 48h</li>
+                                                <li>Évaluation pour traitement ARV</li>
+                                                <li>Surveillance rapprochée</li>
+                                            </ul>
+                                        {% else %}
+                                            <p class="text-success"><strong>Urgence standard</strong></p>
+                                            <ul>
+                                                <li>Consultation programmée sous 2 semaines</li>
+                                                <li>Évaluation clinique complète</li>
+                                                <li>Planification du suivi</li>
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Suivi recommandé -->
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-calendar-check mr-2"></i>Plan de Suivi</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if 'CD4' in bilan.result %}
+                                            {% if bilan.result.CD4.value < 200 %}
+                                                <p class="text-danger"><strong>Immunodépression sévère</strong></p>
+                                                <ul>
+                                                    <li>Début immédiat du TARV</li>
+                                                    <li>Prophylaxie au cotrimoxazole</li>
+                                                    <li>Suivi mensuel</li>
+                                                    <li>Dépistage des IO</li>
+                                                </ul>
+                                            {% elif bilan.result.CD4.value < 350 %}
+                                                <p class="text-warning"><strong>Immunodépression modérée</strong></p>
+                                                <ul>
+                                                    <li>Début du TARV recommandé</li>
+                                                    <li>Suivi trimestriel</li>
+                                                    <li>Éducation thérapeutique</li>
+                                                </ul>
+                                            {% else %}
+                                                <p class="text-info"><strong>Immunité préservée</strong></p>
+                                                <ul>
+                                                    <li>Évaluation pour TARV</li>
+                                                    <li>Suivi semestriel</li>
+                                                    <li>Prévention secondaire</li>
+                                                </ul>
+                                            {% endif %}
+                                        {% else %}
+                                            <p class="text-muted">Données CD4 manquantes</p>
+                                            <p>Recommander un test CD4 pour évaluer l'immunité.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommandations thérapeutiques -->
+                        <div class="card mt-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-pills mr-2"></i>Recommandations Thérapeutiques</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Traitement ARV recommandé :</h6>
+                                        {% if 'charge_virale' in bilan.result and bilan.result.charge_virale.value > 100000 %}
+                                            <p><strong>Schéma de première intention :</strong></p>
+                                            <ul>
+                                                <li>TDF + 3TC + DTG</li>
+                                                <li>Surveillance rapprochée</li>
+                                                <li>Évaluation de l'observance</li>
+                                            </ul>
+                                        {% else %}
+                                            <p><strong>Schéma standard :</strong></p>
+                                            <ul>
+                                                <li>ABC + 3TC + DTG</li>
+                                                <li>Suivi trimestriel</li>
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Prophylaxies recommandées :</h6>
+                                        <ul>
+                                            {% if 'CD4' in bilan.result and bilan.result.CD4.value < 200 %}
+                                                <li><strong>Cotrimoxazole</strong> quotidien</li>
+                                                <li>Dépistage TB</li>
+                                                <li>Vaccination (selon protocole)</li>
+                                            {% else %}
+                                                <li>Évaluation pour cotrimoxazole</li>
+                                                <li>Dépistage des comorbidités</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            {% for reco in bilan.recommandations_auto %}
+   <li>{{ reco }}</li>
+{% empty %}
+   <li>Aucune recommandation supplémentaire.</li>
+{% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Antécédents et infections opportunistes -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history mr-2"></i>Antécédents Médicaux
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bilan.antecedents_medicaux.all %}
+                        <ul class="list-group list-group-flush">
+                            {% for antecedent in bilan.antecedents_medicaux.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ antecedent.nom }}
+                                <span class="badge badge-primary">{{ antecedent.get_type_display }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="alert alert-info">Aucun antécédent médical enregistré</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-virus mr-2"></i>Infections Opportunistes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bilan.infections_opportunistes.all %}
+                        <ul class="list-group list-group-flush">
+                            {% for infection in bilan.infections_opportunistes.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ infection.nom }}
+                                <span class="badge badge-{% if infection.is_active %}danger{% else %}success{% endif %}">
+                                    {% if infection.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="alert alert-info">Aucune infection opportuniste enregistrée</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description et commentaires -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-file-medical mr-2"></i>Description Clinique
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bilan.description %}
+                        <div class="clinical-description">
+                            {{ bilan.description|linebreaks }}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">Aucune description clinique fournie</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card card-bordered mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-comment-medical mr-2"></i>Commentaires Médicaux
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if bilan.comment %}
+                        <div class="medical-comments">
+                            {{ bilan.comment|linebreaks }}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">Aucun commentaire médical</div>
+                        {% endif %}
+
+                        {% if bilan.report_file %}
+                        <hr>
+                        <div class="text-center mt-3">
+                            <a href="{{ bilan.report_file.url }}" class="btn btn-primary" target="_blank">
+                                <i class="fas fa-file-pdf mr-2"></i> Consulter le rapport complet
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Generation Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">Génération du PDF</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="pdfLoader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-3">Génération du rapport en cours...</p>
+                </div>
+                <div id="pdfSuccess" style="display: none;">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <p>Rapport généré avec succès!</p>
+                    <a id="pdfDownloadLink" href="#" class="btn btn-primary">
+                        <i class="fas fa-download mr-2"></i>Télécharger
+                    </a>
+                </div>
+                <div id="pdfError" style="display: none;">
+                    <i class="fas fa-times-circle fa-4x text-danger mb-3"></i>
+                    <p id="errorMessage">Erreur lors de la génération du rapport</p>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function generatePDF() {
+        $('#pdfModal').modal('show');
+        $('#pdfLoader').show();
+        $('#pdfSuccess').hide();
+        $('#pdfError').hide();
+
+        // Configuration pour le PDF
+        const element = document.createElement('div');
+        element.innerHTML = document.querySelector('.nk-content').innerHTML;
+
+        // Supprimer les éléments inutiles pour le PDF
+        $(element).find('.btn, .breadcrumb, .nk-sidebar').remove();
+
+        // Options du PDF
+        const opt = {
+            margin: 10,
+            filename: `bilan_initial_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Génération du PDF
+        setTimeout(() => {
+            html2pdf()
+                .from(element)
+                .set(opt)
+                .toPdf()
+                .get('pdf')
+                .then(function(pdf) {
+                    const pdfBlob = pdf.output('blob');
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                    $('#pdfLoader').hide();
+                    $('#pdfSuccess').show();
+                    $('#pdfDownloadLink').attr('href', pdfUrl);
+                    $('#pdfDownloadLink').attr('download', opt.filename);
+                })
+                .catch(function(error) {
+                    $('#pdfLoader').hide();
+                    $('#pdfError').show();
+                    $('#errorMessage').text('Erreur: ' + error.message);
+                    console.error('PDF generation error:', error);
+                });
+        }, 500);
+    }
+</script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('search-bilan');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#bilan-table tbody tr').forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

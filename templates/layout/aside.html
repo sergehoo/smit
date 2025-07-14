@@ -1,209 +1,5 @@
  {% load  static %}
 <!-- sidebar @s -->
-{##}
-{# <div class="nk-sidebar nk-sidebar-fixed " data-content="sidebarMenu">#}
-{#    <div class="nk-sidebar-element nk-sidebar-head">#}
-{#        <div class="nk-sidebar-brand">#}
-{#            <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">#}
-{#                <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}" alt="logo">#}
-{#                <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}" alt="logo-dark">#}
-{#                <span class="nio-version">SMIT</span>#}
-{#            </a>#}
-{#        </div>#}
-{#        <div class="nk-menu-trigger mr-n2">#}
-{#            <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu">#}
-{#                <em class="icon ni ni-arrow-left"></em>#}
-{#            </a>#}
-{#        </div>#}
-{#    </div>#}
-{#    <div class="nk-sidebar-element">#}
-{#        <div class="nk-sidebar-body" data-simplebar>#}
-{#            <div class="nk-sidebar-content">#}
-{#                <div class="nk-sidebar-menu">#}
-{#                    <ul class="nk-menu">#}
-{##}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Général</h6>#}
-{#                        </li>#}
-{##}
-                        {# Logique pour l'état actif #}
-{#                        <li class="nk-menu-item {% if current_url_name == 'home' %}active{% endif %}">#}
-{#                            <a href="{% url 'home' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-primary"><em#}
-{#                                        class="icon ni ni-dashboard-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Dashboard</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        <li class="nk-menu-item {% if current_url_name == 'global_search' %}active{% endif %}">#}
-{#                            <a href="{% url 'global_search' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-info"><em#}
-{#                                        class="icon ni ni-search"></em></span></span>#}
-{#                                <span class="nk-menu-text">Recherche Globale</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Accueil Patients</h6>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-item {% if current_url_name == 'attente' %}active{% endif %}">#}
-{#                            <a href="{% url 'attente' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-warning"><em#}
-{#                                        class="icon ni ni-users-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Salle d'attente</span>#}
-{#                                {% if apointments_nbr > 0 %}#}
-{#                                    <span class="nk-menu-badge bg-danger text-white">{{ apointments_nbr }}</span>#}
-{#                                {% endif %}#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-                        {# Regroupement des Rendez-vous #}
-{#                        <li class="nk-menu-item has-sub {% if current_url_name in 'appointment_list,appointment_over' %}active{% endif %}">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-success"><em#}
-{#                                        class="icon ni ni-calendar-booking-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Rendez-vous</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'appointment_list' %}active{% endif %}">#}
-{#                                    <a href="{% url 'appointment_list' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Tous les RDV</span></a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'appointment_over' %}active{% endif %}">#}
-{#                                    <a href="{% url 'appointment_over' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Patients Reçus</span></a></li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Parcours de Soins</h6>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-item {% if current_url_name == 'consultation_list' %}active{% endif %}">#}
-{#                            <a href="{% url 'consultation_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-primary"><em#}
-{#                                        class="icon ni ni-plus-medi-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Consultations</span>#}
-{#                                {% if consul_nbr > 0 %}<span class="nk-menu-badge">{{ consul_nbr }}</span>{% endif %}#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        <li class="nk-menu-item {% if current_url_name == 'urgences_list' %}active{% endif %}">#}
-{#                            <a href="{% url 'urgences_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-danger"><em#}
-{#                                        class="icon ni ni-ambulance"></em></span></span>#}
-{#                                <span class="nk-menu-text">Urgences</span>#}
-{#                                {% if urgencehospi > 0 %}#}
-{#                                    <span class="nk-menu-badge bg-danger">{{ urgencehospi }}</span>{% endif %}#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-                        {# Regroupement Hospitalisation #}
-{#                        <li class="nk-menu-item has-sub {% if current_url_name in 'hospitalisation,suivie_soins_list,hospitalised_patient,hospi_unites' %}active{% endif %}">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-indigo"><em#}
-{#                                        class="icon ni ni-building-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Hospitalisation</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'hospitalisation' %}active{% endif %}">#}
-{#                                    <a class="nk-menu-link" href="{% url 'hospitalisation' %}"><span#}
-{#                                            class="nk-menu-text">Patients en cours</span>#}
-{#                                        {% if Hospitaliza_encours > 0 %}#}
-{#                                            <span class="nk-menu-badge bg-danger">{{ Hospitaliza_encours }}</span>{% endif %}#}
-{#                                    </a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'suivie_soins_list' %}active{% endif %}">#}
-{#                                    <a class="nk-menu-link" href="{% url 'suivie_soins_list' %}"><span#}
-{#                                            class="nk-menu-text">Suivi des soins</span></a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'hospitalised_patient' %}active{% endif %}">#}
-{#                                    <a class="nk-menu-link" href="{% url 'hospitalised_patient' %}"><span#}
-{#                                            class="nk-menu-text">Historique</span></a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'hospi_unites' %}active{% endif %}"><a#}
-{#                                        class="nk-menu-link" href="{% url 'hospi_unites' %}"><span class="nk-menu-text">Unités / Lits</span></a>#}
-{#                                </li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-item {% if current_url_name == 'suivi_list' %}active{% endif %}">#}
-{#                            <a href="{% url 'suivi_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-success"><em#}
-{#                                        class="icon ni ni-folder-tree"></em></span></span>#}
-{#                                <span class="nk-menu-text">Suivi Post-Traitement</span>#}
-{#                                {% if suivi_nbr > 0 %}#}
-{#                                    <span class="nk-menu-badge bg-success text-white">{{ suivi_nbr }}</span>{% endif %}#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Services Techniques</h6>#}
-{#                        </li>#}
-{##}
-                        {# Regroupement Laboratoire #}
-{#                        <li class="nk-menu-item has-sub {% if current_url_name in 'echantillons_list,examen_list,examen_done_list' %}active{% endif %}">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-warning"><em#}
-{#                                        class="icon ni ni-beaker-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Laboratoire</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'echantillons_list' %}active{% endif %}">#}
-{#                                    <a href="{% url 'echantillons_list' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Prélèvements</span></a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'examen_list' %}active{% endif %}"><a#}
-{#                                        href="{% url 'examen_list' %}" class="nk-menu-link"><span class="nk-menu-text">Demandes</span>#}
-{#                                    {% if examencount > 0 %}#}
-{#                                        <span class="nk-menu-badge bg-danger">{{ examencount }}</span>{% endif %}</a>#}
-{#                                </li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'examen_done_list' %}active{% endif %}">#}
-{#                                    <a href="{% url 'examen_done_list' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Résultats</span></a></li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-                        {# Regroupement Pharmacie #}
-{#                        <li class="nk-menu-item has-sub {% if current_url_name in 'medicaments,mouvement-stock,commandes-list' %}active{% endif %}">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-info"><em#}
-{#                                        class="icon ni ni-capsule-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Pharmacie</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'medicaments' %}active{% endif %}"><a#}
-{#                                        href="{% url 'medicaments' %}" class="nk-menu-link"><span class="nk-menu-text">Médicaments</span></a>#}
-{#                                </li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'mouvement-stock' %}active{% endif %}">#}
-{#                                    <a href="{% url 'mouvement-stock' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Mouvements de Stock</span></a></li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'commandes-list' %}active{% endif %}">#}
-{#                                    <a href="{% url 'commandes-list' %}" class="nk-menu-link"><span#}
-{#                                            class="nk-menu-text">Commandes</span></a></li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Administration</h6>#}
-{#                        </li>#}
-{#                        <li class="nk-menu-item has-sub {% if current_url_name in 'employee_list,user_role' %}active{% endif %}">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon"><span class="icon-circle bg-gray"><em#}
-{#                                        class="icon ni ni-setting-fill"></em></span></span>#}
-{#                                <span class="nk-menu-text">Paramètres</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'employee_list' %}active{% endif %}">#}
-{#                                    <a href="{% url 'employee_list' %}" class="nk-menu-link"><span class="nk-menu-text">Gestion des Employés</span></a>#}
-{#                                </li>#}
-{#                                <li class="nk-menu-item {% if current_url_name == 'user_role' %}active{% endif %}"><a#}
-{#                                        href="{% url 'user_role' %}" class="nk-menu-link"><span class="nk-menu-text">Gestion des Rôles</span></a>#}
-{#                                </li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-{#                    </ul>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#</div>#}
-
 <div class="nk-sidebar nk-sidebar-fixed " data-content="sidebarMenu">
     <div class="nk-sidebar-element nk-sidebar-head">
         <div class="nk-sidebar-brand">
@@ -354,6 +150,14 @@
                         <li class="nk-menu-heading">
                             <h6 class="overline-title text-primary-alt">Suivi Patients</h6>
                         </li>
+                    
+                    <li class="nk-menu-item">
+                            <a href="{% url 'bilan_list' %}" class="nk-menu-link">
+                                <span class="nk-menu-icon"><i class="fa-solid fa-file-arrow-up"></i></span>
+                                <span class="nk-menu-text">Bilans Initiaux </span>
+                                <span class="nk-menu-badge bg-primary text-white">{{ bilaninitial }}</span>
+                            </a>
+                        </li>
                         <li class="nk-menu-item">
                             <a href="{% url 'suivi_list' %}" class="nk-menu-link">
                                 <span class="nk-menu-icon"><i class="fa-solid fa-folder-tree"></i></span>
@@ -361,6 +165,7 @@
                                 <span class="nk-menu-badge bg-danger text-white">{{ suivi_nbr }}</span>
                             </a>
                         </li>
+                    
 
 
 

@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import now
 from schedule.models import Calendar, Event
@@ -985,18 +986,21 @@ class Suivi(models.Model):
     mode = models.CharField(max_length=50, choices=[
         ('permanent', 'Permanent'),
         ('occasionnel', 'Occasionnel'),
-        ('periodique', 'Periodique')
-    ], blank=True, null=True, )
+        ('periodique', 'Periodique')], blank=True, null=True, )
     activite = models.ForeignKey(
         ServiceSubActivity, on_delete=models.CASCADE, related_name="suiviactivitepat",
         null=True, blank=True, verbose_name=_("Activité")
     )
-    services = models.ForeignKey(
-        Service, on_delete=models.SET_NULL, blank=True, null=True,
-        related_name='servicesuivipat', verbose_name=_("Service")
-    )
+    services = models.ForeignKey(Service, on_delete=models.SET_NULL, blank=True, null=True,
+                                 related_name='servicesuivipat', verbose_name=_("Service"))
     patient = models.ForeignKey(
         Patient, on_delete=models.CASCADE, related_name="suivimedecin", verbose_name=_("Patient")
+    )
+
+    bilan_initial = models.ForeignKey(
+        'BilanInitial', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='suivis',
+        verbose_name=_("Bilan Initial associé")
     )
 
     rdvconsult = models.ForeignKey(
@@ -1005,6 +1009,11 @@ class Suivi(models.Model):
     )
     rdvpharmacie = models.ForeignKey(
         RendezVous, on_delete=models.CASCADE, related_name='suivierdvpharma', null=True, blank=True,
+        verbose_name=_("Rendez-vous en pharmacie")
+    )
+
+    rdvconsultation = models.ForeignKey(
+        Consultation, on_delete=models.CASCADE, related_name='suiviconsultation', null=True, blank=True,
         verbose_name=_("Rendez-vous en pharmacie")
     )
 
@@ -1039,6 +1048,39 @@ class Suivi(models.Model):
     observations = models.TextField(
         null=True, blank=True, verbose_name=_("Observations générales")
     )
+    recommandations_auto = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("Recommandations automatiques")
+    )
+    # Évaluation clinique
+    stade_oms = models.PositiveSmallIntegerField(
+        choices=[(1, 'Stade 1'), (2, 'Stade 2'), (3, 'Stade 3'), (4, 'Stade 4')],
+        null=True, blank=True, verbose_name=_("Stade OMS")
+    )
+    presence_io = models.BooleanField(default=False, verbose_name=_("Infection opportuniste présente"))
+    effets_secondaires = models.TextField(null=True, blank=True, verbose_name=_("Effets secondaires rapportés"))
+
+    # Traitement
+    prophylaxie_cotrimoxazole = models.BooleanField(
+        default=False, verbose_name=_("Prophylaxie cotrimoxazole")
+    )
+
+    # Évaluation psychosociale
+    difficultes_psychosociales = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("Difficultés psychosociales identifiées")
+    )
+    soutien_familial = models.CharField(
+        max_length=20,
+        choices=[
+            ('bon', _("Bon")),
+            ('modere', _("Modéré")),
+            ('faible', _("Faible")),
+            ('absent', _("Absent")),
+        ],
+        null=True, blank=True,
+        verbose_name=_("Soutien familial")
+    )
     examens = models.ForeignKey('ParaclinicalExam', on_delete=models.SET_NULL, blank=True, null=True, )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1050,7 +1092,29 @@ class Suivi(models.Model):
         ordering = ['-date_suivi']
 
     def __str__(self):
-        return f"{self.patient.nom} - {self.services} - {self.date_suivi}"
+        return f"{self.patient} | {self.services} | {self.date_suivi}"
+
+    @property
+    def is_adherence_good(self):
+        return self.adherence_traitement == 'bonne'
+
+    @property
+    def is_lost_to_followup(self):
+        return self.statut_patient == 'perdu_de_vue'
+
+    def generate_auto_recommandations(self):
+        """
+        Exemple basique : génère un résumé intelligent.
+        À appeler lors de save() ou lors d'un calcul Celery.
+        """
+        recos = []
+        if self.cd4 and self.cd4 < 200:
+            recos.append("CD4 < 200 : début cotrimoxazole et TARV immédiat.")
+        if self.charge_virale and self.charge_virale > 100000:
+            recos.append("Charge virale élevée : renforcer l'observance et évaluer le schéma ARV.")
+        if self.is_lost_to_followup:
+            recos.append("Patient perdu de vue : action de rappel urgente recommandée.")
+        self.recommandations_auto = "\n".join(recos)
 
 
 RESULTATS_CHOICES = [
@@ -1606,6 +1670,7 @@ class BilanParaclinique(models.Model):
                               verbose_name="Statut de l'examen")
     report_file = models.FileField(upload_to="bilans/", null=True, blank=True, verbose_name="Fichier du rapport",
                                    db_index=True)
+    is_initial_vih = models.BooleanField(default=False, verbose_name="Fait partie du bilan initial VIH/SIDA ?")
 
     def __str__(self):
         return f"{self.patient.nom} - {self.examen.nom if self.examen else 'Examen non spécifié'} -- {self.examen.type_examen.nom} ({self.get_status_display()})"
@@ -2471,3 +2536,128 @@ class Echantillon(models.Model):
 
     def __str__(self):
         return f"{self.code_echantillon} - {self.examen_demande}"
+
+
+class BilanInitial(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('in_progress', 'En cours'),
+        ('completed', 'Complété'),
+        ('canceled', 'Annulé'),
+        ('En Suivi', 'En Suivi'),
+    ]
+    PRIORITY_CHOICES = [
+        ('low', 'Basse'),
+        ('medium', 'Moyenne'),
+        ('high', 'Haute'),
+        ('emergency', 'Urgence'),
+    ]
+
+    patient = models.ForeignKey(
+        'core.Patient',
+        on_delete=models.CASCADE,
+        related_name="bilans_init_patient",
+        verbose_name="Patient"
+    )
+
+    consultation = models.ForeignKey('Consultation', on_delete=models.CASCADE, related_name='bilanconsultation',
+                                     null=True, blank=True)
+
+    hospitalization = models.ForeignKey(
+        'Hospitalization', on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="bilans_init_hospi",
+        verbose_name="Hospitalisation associée"
+    )
+
+    examens = models.ManyToManyField(
+        'ExamenStandard', related_name='bilans_init_examens',
+        verbose_name="Examens demandés", blank=True
+    )
+
+    antecedents_medicaux = models.ManyToManyField(
+        'AntecedentsMedicaux', related_name='bilans_init_antecedents',
+        verbose_name="Antécédents médicaux", blank=True
+    )
+
+    infections_opportunistes = models.ManyToManyField(
+        'InfectionOpportuniste', related_name='bilans_init_infection_oppo',
+        verbose_name="Infections opportunistes", blank=True
+    )
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Statut")
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium', verbose_name="Priorité")
+    description = models.TextField(verbose_name="Description de l'examen")
+    result = models.JSONField(null=True, blank=True, verbose_name="Résultats")
+    result_date = models.DateTimeField(null=True, blank=True, verbose_name="Date du résultat")
+    reference_range = models.CharField(max_length=250, null=True, blank=True, verbose_name="Valeurs de référence")
+    unit = models.CharField(max_length=50, null=True, blank=True, verbose_name="Unité de mesure")
+
+    report_file = models.FileField(upload_to="bilans/reports/%Y/%m/%d/", null=True, blank=True,
+                                   verbose_name="Rapport d'examen")
+    is_critical = models.BooleanField(default=False, verbose_name="Résultat critique ?")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de mise à jour")
+
+    doctor = models.ForeignKey(
+        'core.Employee', on_delete=models.SET_NULL,
+        null=True, related_name="bilans_init_doc",
+        verbose_name="Médecin prescripteur"
+    )
+
+    comment = models.TextField(null=True, blank=True, verbose_name="Commentaires médicaux")
+
+    history = HistoricalRecords()
+
+    class Meta:
+        app_label = 'smit'
+        verbose_name = "Bilan initial VIH"
+        verbose_name_plural = "Bilans initiaux VIH"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['priority']),
+            models.Index(fields=['is_critical']),
+        ]
+
+    def __str__(self):
+        return f"{self.patient} - Examens: {', '.join([str(e) for e in self.examens.all()])}"
+
+    def clean(self):
+        if self.result:
+            for key, value in self.result.items():
+                if not isinstance(value, dict):
+                    raise ValidationError(f"Résultat {key} mal formé.")
+                if 'value' not in value or 'reference' not in value or 'unit' not in value:
+                    raise ValidationError(f"Résultat {key} incomplet.")
+
+    @property
+    def is_completed(self):
+        return self.status == 'completed'
+
+    @property
+    def is_pending(self):
+        return self.status == 'pending'
+
+    def get_param_status(self, param_name):
+        value = self.result.get(param_name)
+        if not value:
+            return None
+        return 'anormal' if value.get('is_abnormal') else 'normal'
+
+    @property
+    def recommandations_auto(self):
+        recos = []
+        cd4 = self.result.get('CD4', {}).get('value') if self.result else None
+        if cd4:
+            if cd4 < 200:
+                recos.append("CD4 < 200: Prophylaxie cotrimoxazole, TARV immédiat.")
+            elif cd4 < 350:
+                recos.append("CD4 entre 200-350: TARV recommandé, suivi rapproché.")
+        if self.is_critical:
+            recos.append("Résultat critique : hospitalisation immédiate.")
+        return recos
+
+    def get_absolute_url(self):
+        return reverse('bilan_detail', kwargs={'pk': self.pk})

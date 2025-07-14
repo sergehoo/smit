@@ -8,16 +8,22 @@
             <div class="nk-content-body">
 
                 <div class="nk-block-head nk-block-head-sm ">
-                    <div class="row rounded" style="height: 200px;background-repeat: no-repeat; background-image: url('{% static 'images/consultation_banner1.png' %}')">
+                    <div class="row rounded"
+                         style="height: 200px;background-repeat: no-repeat; background-image: url('{% static 'images/consultation_banner1.png' %}')">
                         <div class="nk-block-between">
 
                             <div class="nk-block-head-content">
-                                <h1 class="nk-block-title page-title ml-20" style="color: black; text-align: right" > Consultation
+                                <h1 class="nk-block-title page-title ml-20" style="color: black; text-align: right">
+                                    Consultation
                                     Patient</h1>
                                 <div class="nk-block-des">
                                     <h2 class="ml-5"> {{ consultationsdupatient.patient }}</h2>
-                                    <h6 class="ml-5">Code Patient: <span class="text-danger">{{ consultationsdupatient.patient.code_patient }}</span></h6>
-                                    <h6 class="ml-5">Code VIH: <span class="text-danger">{{ consultationsdupatient.patient.code_vih }}</span></h6>
+                                    <h6 class="ml-5">Code Patient: <span
+                                            class="text-danger">{{ consultationsdupatient.patient.code_patient }}</span>
+                                    </h6>
+                                    <h6 class="ml-5">Code VIH: <span
+                                            class="text-danger">{{ consultationsdupatient.patient.code_vih }}</span>
+                                    </h6>
 
                                 </div>
                             </div><!-- .nk-block-head-content -->
@@ -30,7 +36,9 @@
                             <a href="#" data-toggle="modal" data-target="#constanteover"
                                class="btn btn-outline-primary mr-4"><em class="icon ni ni-note-add"></em>Constantes</a>
                         {% else %}
-                             <a class="btn btn-outline-primary mr-4" href="{% url 'ajouter_constantes' patient_id=consultationsdupatient.patient.id %}"><em class="fa fa-edit mr-1"></em><span> Ajouter une Constante</span></a>
+                            <a class="btn btn-outline-primary mr-4"
+                               href="{% url 'ajouter_constantes' patient_id=consultationsdupatient.patient.id %}"><em
+                                    class="fa fa-edit mr-1"></em><span> Ajouter une Constante</span></a>
 
 
                         {% endif %}
@@ -270,10 +278,9 @@
                            class="btn btn-outline-primary mr-4"><em class="icon ni ni-folder"></em>Dossier</a>
 
 
-
-{#                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"#}
-{#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
-{#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
+                        {#                        <a href="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"#}
+                        {#                           class="btn btn-outline-danger float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir hospitaliser ce patient ?');"><i#}
+                        {#                                class="fa-solid fa-bed-pulse mr-1"></i> Hospitaliser ?</a>#}
                         <a href="" data-toggle="modal" data-target="#hospitalisationreq"
                            class="btn btn-outline-danger float-right mr-5"> <i class="fa-solid fa-bed-pulse mr-1"></i>
                             Hospitalisation</a>
@@ -289,7 +296,8 @@
                                         <h5 class="modal-title">Hospitalisation Patients
                                             {{ consultationsdupatient.patient }}</h5>
                                     </div>
-                                    <form action="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}" method="POST" enctype="application/x-www-form-urlencoded">
+                                    <form action="{% url 'mark_hospitalisation' consultation_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
+                                          method="POST" enctype="application/x-www-form-urlencoded">
                                         {% csrf_token %}
                                         <div class="modal-body">
 
@@ -308,11 +316,10 @@
                             </div>
                         </div>
 
-                        <a href="{% url 'send_to_suivie' consultationsvih_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}" class="btn btn-outline-secondary float-right mr-5" onclick="return confirm('Êtes-vous sûr de vouloir suivre ce patient ?');">
+                        <a href="{% url 'send_to_suivie' consultationsvih_id=consultationsdupatient.id patient_id=consultationsdupatient.patient.id %}"
+                           class="btn btn-outline-secondary float-right mr-5"
+                           onclick="return confirm('Êtes-vous sûr de vouloir suivre ce patient ?');">
                             <em class="icon ni ni-reply-fill"></em> Suivie VIH</a>
-                    
-             
-
 
 
                     </div>
@@ -324,28 +331,30 @@
                     <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
                             <blockquote class="blockquote text-center">
-                                <p class="mb-0">Motif de consultation du <strong class="text-primary">{{ consultationsdupatient.created_at }}</strong>:</p>
+                                <p class="mb-0">Motif de consultation du <strong
+                                        class="text-primary">{{ consultationsdupatient.created_at }}</strong>:</p>
                                 <footer class="blockquote-footer">{{ consultationsdupatient.reason }}</footer>
                             </blockquote>
                             <hr>
                             <div class="row m-4">
 
 
-                            <div class=" col-9 position-relative">
-         <h3 class="text-muted"> Bilan Initial VIH </h3>
+                                <div class=" col-9 position-relative">
+                                    <h3 class="text-muted"> Bilan Initial VIH </h3>
 
-</div>
-                                                  <div class="col-2 position-relative">
+                                </div>
+                                <div class="col-2 position-relative">
 
-    <a href="{% url 'telecharger_bilaninitial' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}" class="btn btn-outline-lighter" style="right: 0; top: 0; left: 100%">
-        <em class="icon ni ni-printer"></em> Imprimer
-    </a>
-                                                      
-</div>
+                                    <a href="{% url 'telecharger_bilaninitial' patient_id=consultationsdupatient.patient.id consultation_id=consultationsdupatient.id %}"
+                                       class="btn btn-outline-lighter" style="right: 0; top: 0; left: 100%">
+                                        <em class="icon ni ni-printer"></em> Imprimer
+                                    </a>
+
+                                </div>
 
 
                                 <div class="row col-12 mt-5">
-                                <div class="col-6 col-md-6 mb-5">
+                                    <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
                                             <div class="card-header">Test Rapide de dépistage
                                                 <button type="button"
@@ -402,7 +411,6 @@
                                                         class="icon ni ni-plus-circle-fill"></em></button>
 
 
-                                              
                                             </div>
                                             <div class="card-inner text-black-70">
                                                 <table class="table ">
@@ -541,7 +549,7 @@
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
 
-                                            <div class="card-header">Examens 
+                                            <div class="card-header">Examens
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
                                                         data-toggle="modal" data-target="#rendezvous"><em
@@ -586,7 +594,7 @@
                                     </div>
                                     <div class="col-6 col-md-6 mb-5">
                                         <div class="card text-black-100 border">
-                                            <div class="card-header">Prélèvement 
+                                            <div class="card-header">Prélèvement
 
                                                 <button type="button"
                                                         class="btn btn-dark  btn-icon btn-round float-right"
@@ -627,7 +635,6 @@
                                 </div>
 
 
-
                                 <div class="modal fade" tabindex="-1" id="testdepistage">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -637,7 +644,8 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title"> Depistage rapide</h5>
                                             </div>
-                                            <form method="post" action="{% url 'test_depistage-Rapide' consultation_id=consultationsdupatient.id %}">
+                                            <form method="post"
+                                                  action="{% url 'test_depistage-Rapide' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="fiagnosique">
@@ -679,7 +687,8 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Prélèvements</h5>
                                             </div>
-                                            <form method="post" action="{% url 'create_echantillon' consultation_id=consultationsdupatient.id %}">
+                                            <form method="post"
+                                                  action="{% url 'create_echantillon' consultation_id=consultationsdupatient.id %}">
                                                 {% csrf_token %}
                                                 <div class="modal-body">
                                                     <div id="fiagnosique">
@@ -781,107 +790,108 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Enquete VIH </h5>
                                             </div>
-<form action="{% url 'enquete_create' consultation_id=consultationsdupatient.id %}" method="post">
-    {% csrf_token %}
-    <div class="modal-body">
-        <div class="row">
-             <div class="form-group col-3">
-    {{ EnqueteVihForm.antecedents.label_tag }}
-    {{ EnqueteVihForm.antecedents }}
-            </div>
+                                            <form action="{% url 'enquete_create' consultation_id=consultationsdupatient.id %}"
+                                                  method="post">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="form-group col-3">
+                                                            {{ EnqueteVihForm.antecedents.label_tag }}
+                                                            {{ EnqueteVihForm.antecedents }}
+                                                        </div>
 
-             <div class="form-group col-3">
-    {{ EnqueteVihForm.evolutif_cdc_1993.label_tag }}
-    {{ EnqueteVihForm.evolutif_cdc_1993 }}
-</div>
-            <div class="form-group col-3">
-    {{ EnqueteVihForm.infection_opportuniste.label_tag }}
-    {{ EnqueteVihForm.infection_opportuniste }}
-</div>
-            <div class="form-group">
-    {{ EnqueteVihForm.score_karnofsky.label_tag }}
-    {{ EnqueteVihForm.score_karnofsky }}
-</div>
+                                                        <div class="form-group col-3">
+                                                            {{ EnqueteVihForm.evolutif_cdc_1993.label_tag }}
+                                                            {{ EnqueteVihForm.evolutif_cdc_1993 }}
+                                                        </div>
+                                                        <div class="form-group col-3">
+                                                            {{ EnqueteVihForm.infection_opportuniste.label_tag }}
+                                                            {{ EnqueteVihForm.infection_opportuniste }}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            {{ EnqueteVihForm.score_karnofsky.label_tag }}
+                                                            {{ EnqueteVihForm.score_karnofsky }}
+                                                        </div>
 
-            <div class="form-group col-2">
-    {{ EnqueteVihForm.prophylaxie_antiretrovirale.label_tag }}
-    {{ EnqueteVihForm.prophylaxie_antiretrovirale }}
-            </div>
-
-
-<div class="form-group col-10">
-    {{ EnqueteVihForm.prophylaxie_type.label_tag }}
-    {{ EnqueteVihForm.prophylaxie_type }}
-</div>
+                                                        <div class="form-group col-2">
+                                                            {{ EnqueteVihForm.prophylaxie_antiretrovirale.label_tag }}
+                                                            {{ EnqueteVihForm.prophylaxie_antiretrovirale }}
+                                                        </div>
 
 
-<div class="form-group col-2">
-    {{ EnqueteVihForm.traitement_antiretrovirale.label_tag }}
-    {{ EnqueteVihForm.traitement_antiretrovirale }}
-</div>
+                                                        <div class="form-group col-10">
+                                                            {{ EnqueteVihForm.prophylaxie_type.label_tag }}
+                                                            {{ EnqueteVihForm.prophylaxie_type }}
+                                                        </div>
 
 
-
-<div class="form-group col-10">
-    {{ EnqueteVihForm.traitement_type.label_tag }}
-    {{ EnqueteVihForm.traitement_type }}
-</div>
-
-
-<div class="form-group col-2">
-    {{ EnqueteVihForm.dernier_regime_antiretrovirale.label_tag }}
-    {{ EnqueteVihForm.dernier_regime_antiretrovirale }}
-</div>
+                                                        <div class="form-group col-2">
+                                                            {{ EnqueteVihForm.traitement_antiretrovirale.label_tag }}
+                                                            {{ EnqueteVihForm.traitement_antiretrovirale }}
+                                                        </div>
 
 
-<div class="form-group col-10">
-    {{ EnqueteVihForm.dernier_regime_antiretrovirale_type.label_tag }}
-    {{ EnqueteVihForm.dernier_regime_antiretrovirale_type }}
-</div>
-
-            <div class="form-group col-2">
-    {{ EnqueteVihForm.traitement_prophylactique_cotrimoxazole.label_tag }}
-    {{ EnqueteVihForm.traitement_prophylactique_cotrimoxazole }}
-</div>
+                                                        <div class="form-group col-10">
+                                                            {{ EnqueteVihForm.traitement_type.label_tag }}
+                                                            {{ EnqueteVihForm.traitement_type }}
+                                                        </div>
 
 
-             <div class="form-group col-2">
-    {{ EnqueteVihForm.sous_traitement.label_tag }}
-    {{ EnqueteVihForm.sous_traitement }}
-</div>
+                                                        <div class="form-group col-2">
+                                                            {{ EnqueteVihForm.dernier_regime_antiretrovirale.label_tag }}
+                                                            {{ EnqueteVihForm.dernier_regime_antiretrovirale }}
+                                                        </div>
 
 
-{#        {% for field in EnqueteVihForm %}#}
-{#            <div class="col-6">#}
-{#                <div class="form-group">#}
-{#                    {{ field.label_tag }}#}
-{#                    {{ field }}#}
-{#                    {% if field.help_text %}#}
-{#                        <small class="form-text text-muted">{{ field.help_text }}</small>#}
-{#                    {% endif %}#}
-{#                    {% if field.errors %}#}
-{#                        <div class="text-danger">#}
-{#                            {{ field.errors }}#}
-{#                        </div>#}
-{#                    {% endif %}#}
-{#                </div>#}
-{#            </div>#}
-{#        {% endfor %}#}
+                                                        <div class="form-group col-10">
+                                                            {{ EnqueteVihForm.dernier_regime_antiretrovirale_type.label_tag }}
+                                                            {{ EnqueteVihForm.dernier_regime_antiretrovirale_type }}
+                                                        </div>
+
+                                                        <div class="form-group col-2">
+                                                            {{ EnqueteVihForm.traitement_prophylactique_cotrimoxazole.label_tag }}
+                                                            {{ EnqueteVihForm.traitement_prophylactique_cotrimoxazole }}
+                                                        </div>
 
 
-        </div>
-    </div>
-    <div class="modal-footer bg-light">
-        <div class="col-md-12 float-right mb-10">
-            <button type="submit" class="btn btn-primary mb-10 float-right">
-                <i class="fa-solid fa-floppy-disk"></i> Enregistrer
-            </button>
-            <button type="reset" class="btn btn-secondary mb-10 mr-5 float-right">
-                <i class="fa-solid fa-floppy-disk"></i> Annuler
-            </button>
-        </div>
-    </div>
-</form>
+                                                        <div class="form-group col-2">
+                                                            {{ EnqueteVihForm.sous_traitement.label_tag }}
+                                                            {{ EnqueteVihForm.sous_traitement }}
+                                                        </div>
+
+
+                                                        {#        {% for field in EnqueteVihForm %}#}
+                                                        {#            <div class="col-6">#}
+                                                        {#                <div class="form-group">#}
+                                                        {#                    {{ field.label_tag }}#}
+                                                        {#                    {{ field }}#}
+                                                        {#                    {% if field.help_text %}#}
+                                                        {#                        <small class="form-text text-muted">{{ field.help_text }}</small>#}
+                                                        {#                    {% endif %}#}
+                                                        {#                    {% if field.errors %}#}
+                                                        {#                        <div class="text-danger">#}
+                                                        {#                            {{ field.errors }}#}
+                                                        {#                        </div>#}
+                                                        {#                    {% endif %}#}
+                                                        {#                </div>#}
+                                                        {#            </div>#}
+                                                        {#        {% endfor %}#}
+
+
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <div class="col-md-12 float-right mb-10">
+                                                        <button type="submit" class="btn btn-primary mb-10 float-right">
+                                                            <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+                                                        </button>
+                                                        <button type="reset"
+                                                                class="btn btn-secondary mb-10 mr-5 float-right">
+                                                            <i class="fa-solid fa-floppy-disk"></i> Annuler
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -914,36 +924,36 @@
                                         </div>
                                     </div>
                                 </div>
-{#                                <div class="modal fade" tabindex="-1" id="Examens">#}
-{#                                    <div class="modal-dialog" role="document">#}
-{#                                        <div class="modal-content">#}
-{#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
-{#                                                <em class="icon ni ni-cross"></em>#}
-{#                                            </a>#}
-{#                                            <div class="modal-header">#}
-{#                                                <h5 class="modal-title">Examen physique</h5>#}
-{#                                            </div>#}
-{##}
-{#                                            <form action="{% url 'Examens_create' consultation_id=consultationsdupatient.id %}"#}
-{#                                                  method="post">#}
-{#                                                {% csrf_token %}#}
-{#                                                <div class="modal-body">#}
-{#                                                    {{ examen_form }}            </div>#}
-{#                                                <div class="modal-footer bg-light">#}
-{#                                                    <div class="col-md-12 float-right mb-10">#}
-{#                                                        <button type="submit" class="btn btn-primary mb-10 float-right">#}
-{#                                                            <i class="fa-solid fa-floppy-disk"> </i> Enregistrer#}
-{#                                                        </button>#}
-{#                                                        <button type="reset"#}
-{#                                                                class="btn btn-secondary mb-10 mr-5 float-right"><i#}
-{#                                                                class="fa-solid fa-floppy-disk"> </i> Annuler#}
-{#                                                        </button>#}
-{#                                                    </div>#}
-{#                                                </div>#}
-{#                                            </form>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
+                                {#                                <div class="modal fade" tabindex="-1" id="Examens">#}
+                                {#                                    <div class="modal-dialog" role="document">#}
+                                {#                                        <div class="modal-content">#}
+                                {#                                            <a href="#" class="close" data-dismiss="modal" aria-label="Close">#}
+                                {#                                                <em class="icon ni ni-cross"></em>#}
+                                {#                                            </a>#}
+                                {#                                            <div class="modal-header">#}
+                                {#                                                <h5 class="modal-title">Examen physique</h5>#}
+                                {#                                            </div>#}
+                                {##}
+                                {#                                            <form action="{% url 'Examens_create' consultation_id=consultationsdupatient.id %}"#}
+                                {#                                                  method="post">#}
+                                {#                                                {% csrf_token %}#}
+                                {#                                                <div class="modal-body">#}
+                                {#                                                    {{ examen_form }}            </div>#}
+                                {#                                                <div class="modal-footer bg-light">#}
+                                {#                                                    <div class="col-md-12 float-right mb-10">#}
+                                {#                                                        <button type="submit" class="btn btn-primary mb-10 float-right">#}
+                                {#                                                            <i class="fa-solid fa-floppy-disk"> </i> Enregistrer#}
+                                {#                                                        </button>#}
+                                {#                                                        <button type="reset"#}
+                                {#                                                                class="btn btn-secondary mb-10 mr-5 float-right"><i#}
+                                {#                                                                class="fa-solid fa-floppy-disk"> </i> Annuler#}
+                                {#                                                        </button>#}
+                                {#                                                    </div>#}
+                                {#                                                </div>#}
+                                {#                                            </form>#}
+                                {#                                        </div>#}
+                                {#                                    </div>#}
+                                {#                                </div>#}
                                 <div class="modal fade" tabindex="-1" id="conseils">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -1067,34 +1077,37 @@
     </script>
 
     <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        var booleanTypePairs = [
-            { checkbox: 'prophylaxie_antiretrovirale', typeField: 'prophylaxie_type' },
-            { checkbox: 'traitement_antiretrovirale', typeField: 'traitement_type' },
-            { checkbox: 'dernier_regime_antiretrovirale', typeField: 'dernier_regime_antiretrovirale_type' },
-            { checkbox: 'traitement_prophylactique_cotrimoxazole', typeField: 'traitement_prophylactique_cotrimoxazole_type' },
-        ];
+        document.addEventListener('DOMContentLoaded', function () {
+            var booleanTypePairs = [
+                {checkbox: 'prophylaxie_antiretrovirale', typeField: 'prophylaxie_type'},
+                {checkbox: 'traitement_antiretrovirale', typeField: 'traitement_type'},
+                {checkbox: 'dernier_regime_antiretrovirale', typeField: 'dernier_regime_antiretrovirale_type'},
+                {
+                    checkbox: 'traitement_prophylactique_cotrimoxazole',
+                    typeField: 'traitement_prophylactique_cotrimoxazole_type'
+                },
+            ];
 
-        function toggleTypeField(checkboxId, typeFieldId) {
-            var checkbox = document.getElementById(checkboxId);
-            var typeField = document.getElementById(typeFieldId);
+            function toggleTypeField(checkboxId, typeFieldId) {
+                var checkbox = document.getElementById(checkboxId);
+                var typeField = document.getElementById(typeFieldId);
 
-            if (checkbox && typeField) {
-                if (checkbox.checked) {
-                    typeField.closest('.form-group').style.display = 'block';
-                } else {
-                    typeField.closest('.form-group').style.display = 'none';
+                if (checkbox && typeField) {
+                    if (checkbox.checked) {
+                        typeField.closest('.form-group').style.display = 'block';
+                    } else {
+                        typeField.closest('.form-group').style.display = 'none';
+                    }
                 }
             }
-        }
 
-        booleanTypePairs.forEach(function(pair) {
-            toggleTypeField(pair.checkbox, pair.typeField);
-
-            document.getElementById(pair.checkbox).addEventListener('change', function() {
+            booleanTypePairs.forEach(function (pair) {
                 toggleTypeField(pair.checkbox, pair.typeField);
+
+                document.getElementById(pair.checkbox).addEventListener('change', function () {
+                    toggleTypeField(pair.checkbox, pair.typeField);
+                });
             });
         });
-    });
-</script>
+    </script>
 {% endblock %}

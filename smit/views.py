@@ -10,9 +10,10 @@ import qrcode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator
-from django.db.models import Count, Avg, Prefetch
+from django.db import IntegrityError, transaction
+from django.db.models import Count, Avg, Prefetch, Q
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.http import request, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -40,9 +41,10 @@ from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, Consu
     SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
     HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm, \
-    PatientUpdateForm
+    PatientUpdateForm, TraitementARVForm, SuiviProtocoleForm, RendezVousForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
-    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV
+    Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV, BilanInitial, \
+    TypeBilanParaclinique, ExamenStandard, BilanParaclinique
 
 
 # Create your views here.
@@ -1662,10 +1664,73 @@ def suivi_send_create(request, consultationsvih_id, patient_id):
     return redirect('suivi_list')
 
 
+@login_required
+def suivi_send_from_bilan(request, consultation_id, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id)
+    consultation = get_object_or_404(Consultation, id=consultation_id)
+    # Récupérer le bilan initial associé à cette consultation s'il existe
+    bilaninitial = BilanInitial.objects.filter(
+        consultation=consultation_id,
+        # Si tu as un lien explicite entre Consultation et BilanInitial, utilise-le
+        # ex: bilaninitial = get_object_or_404(BilanInitial, consultation=consultation)
+    ).first()
+
+    if request.method == 'GET':  # Action déclenchée via un simple clic
+        try:
+            # Vérifier si un suivi existe déjà pour ce patient et cette consultation
+            suivi_existe = Suivi.objects.filter(
+                patient=patient,
+                activite=consultation.activite,
+                services=consultation.services,
+                # date_suivi=now().date()  # Vérifie un suivi créé aujourd'hui
+            ).exists()
+
+            if suivi_existe:
+                # Si un suivi existe déjà, afficher un message d'erreur
+                messages.error(request,
+                               f"Un suivi existe déjà pour le patient {patient.nom} pour cette activité et ce service.")
+                return redirect('suivi_list')
+
+            # Créer une nouvelle instance de suivi
+            suivi = Suivi.objects.create(
+                patient=patient,
+                activite=consultation.activite,  # Activité associée
+                services=consultation.services,  # Service associé
+                date_suivi=now().date(),  # Date de suivi (par défaut aujourd'hui)
+                poids=patient.latest_poids if hasattr(patient, 'latest_poids') else None,  # Poids, si disponible
+                observations=f"Suivi créé pour la consultation {consultation.numeros}.",
+                statut_patient='actif',  # Statut par défaut
+                adherence_traitement='bonne',  # Adhérence par défaut
+            )
+
+            # Mettre à jour la consultation (optionnel)
+            consultation.status = 'Completed'
+            consultation.save()
+
+            # Mettre à jour le statut du bilan initial si trouvé
+            if bilaninitial:
+                bilaninitial.status = 'suivi'
+                bilaninitial.save()
+
+            # Afficher un message de succès
+            messages.success(request, f"Suivi créé avec succès pour le patient {patient.nom}.")
+            return redirect('suivi_list')  # Rediriger vers la page de la liste des suivis
+
+        except Exception as e:
+            # Gérer les erreurs potentielles
+            messages.error(request, f"Une erreur s'est produite lors de la création du suivi : {e}")
+            return redirect('suivi_list')
+
+    # Si la méthode HTTP est incorrecte
+    messages.error(request, "Action non autorisée.")
+    return redirect('suivi_list')
+
+
 class SuiviListView(LoginRequiredMixin, ListView):
     model = Suivi
     template_name = "pages/suivi/suivi_list.html"
     context_object_name = "suivis"
+    ordering = '-created_at'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1783,36 +1848,115 @@ def create_rdv(request, suivi_id):
     })
 
 
+def get_clinical_history(request, patient_id):
+    # Récupère l'historique clinique pour les graphiques
+    suivis = Suivi.objects.filter(patient_id=patient_id).exclude(date_suivi__isnull=True).order_by('date_suivi')
+
+    # Données pour CD4
+    cd4_data = {
+        'dates': [s.date_suivi.strftime("%Y-%m-%d") for s in suivis if s.cd4],
+        'values': [s.cd4 for s in suivis if s.cd4]
+    }
+
+    # Données pour poids
+    weight_data = {
+        'dates': [s.date_suivi.strftime("%Y-%m-%d") for s in suivis if s.poids],
+        'values': [float(s.poids) for s in suivis if s.poids]
+    }
+
+    # Données pour charge virale
+    viral_load_data = {
+        'dates': [s.date_suivi.strftime("%Y-%m-%d") for s in suivis if s.charge_virale],
+        'values': [s.charge_virale for s in suivis if s.charge_virale]
+    }
+
+    return JsonResponse({
+        'cd4': cd4_data,
+        'weight': weight_data,
+        'viral_load': viral_load_data
+    })
+
+
+# def add_recommandation(request, suivi_id):
+#     if request.method == 'POST':
+#         suivi = get_object_or_404(Suivi, pk=suivi_id)
+#         text = request.POST.get('recommandation')
+#         if text:
+#             Recommandation.objects.create(suivi=suivi, text=text, created_by=request.user)
+#             messages.success(request, "Recommandation ajoutée avec succès")
+#         else:
+#             messages.error(request, "Le texte de la recommandation est vide")
+#
+#     return redirect('suivi_detail', pk=suivi_id)
+
+
 class SuiviDetailView(LoginRequiredMixin, DetailView):
     model = Suivi
     template_name = "pages/suivi/suivi_detail.html"
     context_object_name = "suividetail"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(
-            Prefetch(
-                'suivierdv',
-                queryset=RendezVous.objects.all()
-            ),
-            Prefetch(
-                'protocolessuivi',
-                queryset=SuiviProtocole.objects.select_related('protocole', 'protocole__type_protocole')
-                .order_by('protocole__type_protocole__nom')
-            )
+        return super().get_queryset().select_related(
+            'patient', 'services', 'examens'
+        ).prefetch_related(
+            Prefetch('suivierdv', queryset=RendezVous.objects.all()),
+            Prefetch('protocolessuivi', queryset=SuiviProtocole.objects.select_related(
+                'protocole', 'protocole__type_protocole'
+            ).order_by('protocole__type_protocole__nom')),
+            'suivitreatarv',
+            'suivicomorbide'
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        suivi = self.object
 
-        # Group protocols by their type
-        protocols = self.object.protocolessuivi.all()
+        # Générer les recommandations automatiques si elles n'existent pas
+        if not suivi.recommandations_auto:
+            suivi.generate_auto_recommandations()
+            suivi.save()
+
+        # Grouper les protocoles par type
+        protocols = suivi.protocolessuivi.all()
         grouped_protocols = {
-            key: list(group) for key, group in groupby(protocols, key=lambda p: p.protocole.type_protocole)
+            key: list(group) for key, group in groupby(
+                protocols,
+                key=lambda p: p.protocole.type_protocole
+            )
         }
 
-        # Add grouped protocols to the context
-        context['grouped_protocols'] = grouped_protocols
-        context['suivirdvform'] = RdvSuiviForm()
+        # Préparer les données pour les graphiques d'évolution
+        evolution_data = {
+            'dates': [],
+            'cd4': [],
+            'poids': [],
+            'charge_virale': []
+        }
+
+        # Récupérer tous les suivis du patient pour l'historique
+        suivis_anterieurs = Suivi.objects.filter(
+            patient=suivi.patient
+        ).exclude(date_suivi__isnull=True).order_by('date_suivi')
+
+        for s in suivis_anterieurs:
+            if s.date_suivi:
+                evolution_data['dates'].append(s.date_suivi.strftime("%Y-%m-%d"))
+            if s.cd4:
+                evolution_data['cd4'].append(s.cd4)
+            if s.poids:
+                evolution_data['poids'].append(float(s.poids))
+            if s.charge_virale:
+                evolution_data['charge_virale'].append(s.charge_virale)
+
+        context.update({
+            'grouped_protocols': grouped_protocols,
+            'suivirdvform': RdvSuiviForm(),
+            'evolution_data': evolution_data,
+            'now': timezone.now(),
+            'suivitraitementform': TraitementARVForm(),
+            'suiviprotocoleform': SuiviProtocoleForm(),
+            'suivirdvform': RendezVousForm(),
+        })
 
         return context
 
@@ -1841,3 +1985,191 @@ class UrgenceCreateView(LoginRequiredMixin, CreateView):
         form.instance.urgence = True
         form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
         return super().form_valid(form)
+
+
+# vue corrigée
+def create_bilan_initial(request, consultation_id, patient_id):
+    consultation = get_object_or_404(Consultation, pk=consultation_id)
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    try:
+        with transaction.atomic():
+            type_bilan, _ = TypeBilanParaclinique.objects.get_or_create(nom="Bilan Initial VIH")
+
+            examens_vih = [
+                "CD4",
+                "Charge Virale",
+                "Hémogramme",
+                "Glycémie",
+                "Sérologie HBV",
+                "Sérologie Syphilis",
+            ]
+
+            # Vérifie s'il existe déjà un BilanInitial global pour ce patient
+            bilan_initial = BilanInitial.objects.filter(
+                patient=patient,
+                description__icontains="Bilan initial VIH",
+                doctor=consultation.doctor
+            ).first()
+
+            if not bilan_initial:
+                bilan_initial = BilanInitial.objects.create(
+                    patient=patient,
+                    doctor=consultation.doctor,
+                    consultation=consultation,
+                    status='pending',
+                    description="Bilan initial VIH",
+                    priority='medium'
+                )
+
+            examens_ajoutes = 0
+
+            for examen_nom in examens_vih:
+                examen = ExamenStandard.objects.filter(
+                    nom=examen_nom,
+                    type_examen=type_bilan
+                ).first()
+
+                if not examen:
+                    messages.warning(request, f"L'examen '{examen_nom}' n'existe pas dans le type '{type_bilan}'.")
+                    continue
+
+                if not bilan_initial.examens.filter(pk=examen.pk).exists():
+                    bilan_initial.examens.add(examen)
+                    examens_ajoutes += 1
+
+            if examens_ajoutes:
+                messages.success(
+                    request,
+                    f"{examens_ajoutes} examens ajoutés au bilan initial VIH pour {patient}."
+                )
+            else:
+                messages.info(request, "Aucun examen n'a été ajouté car ils existent déjà ou sont manquants.")
+        # generate_bilan_pdf.delay(bilan.pk)
+
+    except IntegrityError:
+        messages.error(request, "Une erreur est survenue pendant la création du bilan initial. Veuillez réessayer.")
+    except Exception as e:
+        messages.error(request, f"Erreur inattendue : {str(e)}")
+
+    return redirect('consultation_detail', pk=consultation_id)
+
+
+class BilanListView(LoginRequiredMixin, ListView):
+    model = BilanInitial
+    template_name = 'pages/bilans/bilan_list.html'
+    context_object_name = 'bilans'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filtre pour les médecins: voir seulement leurs patients
+        # if self.request.user.role == 'doctor':
+        #     queryset = queryset.filter(doctor=self.request.user)
+
+        # Filtres supplémentaires
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        priority = self.request.GET.get('priority')
+        if priority:
+            queryset = queryset.filter(priority=priority)
+
+        is_critical = self.request.GET.get('is_critical')
+        if is_critical:
+            queryset = queryset.filter(is_critical=True)
+
+        return queryset.select_related(
+            'patient', 'hospitalization', 'doctor'
+        ).prefetch_related(
+            'examens'
+        )
+
+
+class BilanDetailView(LoginRequiredMixin, DetailView):
+    model = BilanInitial
+    template_name = 'pages/bilans/bilan_detail.html'
+    context_object_name = 'bilan'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class BilanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = BilanInitial
+    template_name = 'pages/bilans/bilan_form.html'
+    fields = [
+        'patient', 'hospitalization', 'examen',
+        'description', 'priority', 'comment'
+    ]
+    permission_required = 'bilans.add_bilaninitial'
+
+    def form_valid(self, form):
+        form.instance.doctor = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('bilan_detail', kwargs={'pk': self.object.pk})
+
+
+class BilanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = BilanInitial
+    template_name = 'bilans/bilan_form.html'
+    fields = [
+        'examen', 'description', 'priority',
+        'comment', 'status', 'result', 'reference_range',
+        'unit', 'is_critical'
+    ]
+    permission_required = 'bilans.change_bilaninitial'
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        if not self.request.user.is_superuser:
+            if self.request.user.role == 'doctor':
+                # Les médecins ne peuvent modifier que certains champs
+                allowed_fields = ['description', 'priority', 'comment']
+                for field in list(form.fields):
+                    if field not in allowed_fields:
+                        del form.fields[field]
+            elif self.request.user.role in ['technician', 'biologist']:
+                # Les techniciens peuvent seulement compléter les résultats
+                allowed_fields = ['result', 'reference_range', 'unit', 'is_critical']
+                for field in list(form.fields):
+                    if field not in allowed_fields:
+                        del form.fields[field]
+        return form
+
+    def form_valid(self, form):
+        if 'result' in form.changed_data:
+            form.instance.status = 'completed'
+            form.instance.technician = self.request.user
+            form.instance.result_date = timezone.now()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('bilan_detail', kwargs={'pk': self.object.pk})
+
+
+class BilanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = BilanInitial
+    template_name = 'bilans/bilan_confirm_delete.html'
+    success_url = reverse_lazy('bilan_list')
+    permission_required = 'bilans.delete_bilaninitial'
+
+
+class CompleteBilanView(LoginRequiredMixin, UpdateView):
+    model = BilanInitial
+    template_name = 'bilans/bilan_complete.html'
+    fields = ['result', 'reference_range', 'unit', 'is_critical']
+
+    def form_valid(self, form):
+        form.instance.status = 'completed'
+        form.instance.technician = self.request.user
+        form.instance.result_date = timezone.now()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('bilan_detail', kwargs={'pk': self.object.pk})

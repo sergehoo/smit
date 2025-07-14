@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
+from django.urls import reverse
+from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -10,7 +12,8 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     AntecedentsMedicaux, Symptomes, Analyse, Examen, Hospitalization, TestRapideVIH, EnqueteVih, MaladieOpportuniste, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
     ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
-    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation, Echantillon
+    Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation, Echantillon, \
+    BilanInitial
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -420,3 +423,106 @@ class MaladieAdmin(admin.ModelAdmin):
 @admin.register(BoxHospitalisation)
 class BoxHospitalisationAdmin(ImportExportModelAdmin):
     list_display = ('chambre', 'capacite', 'nom', 'occuper', 'occupant')
+
+
+@admin.register(BilanInitial)
+class BilanInitialAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'patient_link',
+        'status_badge',
+        'priority_badge',
+        'doctor',
+        'is_critical_display',
+        'created_at',
+        'admin_actions'
+    )
+    list_filter = (
+        'status', 'priority', 'is_critical', 'created_at'
+    )
+    search_fields = (
+        'patient__nom', 'patient__prenoms', 'patient__code_patient',
+         'description', 'comment'
+    )
+    autocomplete_fields = ('patient', )
+    filter_horizontal = ('examens',)
+    readonly_fields = ('created_at', 'updated_at')
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+
+    actions = ['mark_as_completed', 'mark_as_critical']
+
+    def patient_link(self, obj):
+        url = reverse('admin:core_patient_change', args=[obj.patient.id])
+        return format_html('<a href="{}">{}</a>', url, obj.patient)
+    patient_link.short_description = 'Patient'
+    patient_link.admin_order_field = 'patient__nom'
+
+    def status_badge(self, obj):
+        colors = {
+            'pending': 'secondary',
+            'in_progress': 'warning',
+            'completed': 'success',
+            'canceled': 'danger'
+        }
+        return format_html(
+            '<span class="badge badge-{}">{}</span>',
+            colors.get(obj.status, 'secondary'),
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Statut'
+
+    def priority_badge(self, obj):
+        colors = {
+            'low': 'info',
+            'medium': 'primary',
+            'high': 'warning',
+            'emergency': 'danger'
+        }
+        return format_html(
+            '<span class="badge badge-{}">{}</span>',
+            colors.get(obj.priority, 'info'),
+            obj.get_priority_display()
+        )
+    priority_badge.short_description = 'Priorité'
+
+    def is_critical_display(self, obj):
+        return format_html(
+            '<span class="badge badge-{}">{}</span>',
+            'danger' if obj.is_critical else 'success',
+            'Critique' if obj.is_critical else 'Normal'
+        )
+    is_critical_display.short_description = 'Criticité'
+
+    def admin_actions(self, obj):
+        return format_html(
+            '<div class="btn-group">'
+            '<a href="{}" class="btn btn-sm btn-primary" title="Voir">'
+            '<i class="fa fa-eye"></i></a>'
+            '<a href="{}" class="btn btn-sm btn-warning" title="Éditer">'
+            '<i class="fa fa-edit"></i></a>'
+            '</div>',
+            reverse('admin:smit_bilaninitial_change', args=[obj.id]),
+            reverse('admin:smit_bilaninitial_change', args=[obj.id])
+        )
+    admin_actions.short_description = 'Actions'
+
+    def mark_as_completed(self, request, queryset):
+        updated = queryset.update(status='completed')
+        self.message_user(request, f"{updated} bilans marqués comme complétés")
+    mark_as_completed.short_description = "Marquer comme complété"
+
+    def mark_as_critical(self, request, queryset):
+        updated = queryset.update(is_critical=True)
+        self.message_user(request, f"{updated} bilans marqués comme critiques")
+    mark_as_critical.short_description = "Marquer comme critique"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(doctor=request.user.employee)
+        return qs.select_related('patient', 'doctor')
+
+    class Media:
+        css = {'all': ('css/admin_bilans.css',)}
+        js = ('js/admin_bilans.js',)

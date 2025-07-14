@@ -36,7 +36,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     RendezVousConsultationUpdateView, PatientRecuListView, suivi_send_create, SuiviListView, SuiviDetailView, \
     create_rdv, UrgenceListView, UrgenceCreateView, test_rapide_consultation_generale_create, \
     delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
-    hospitalization_chart_data
+    hospitalization_chart_data, BilanListView, BilanCreateView, BilanDetailView, BilanUpdateView, BilanDeleteView, \
+    CompleteBilanView, create_bilan_initial, suivi_send_from_bilan
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -53,6 +54,7 @@ urlpatterns = [
                   path("select2/", include("django_select2.urls")),
                   path('api/hospitalization_chart_data/', hospitalization_chart_data,
                        name='hospitalization_chart_data'),
+                  path('', include('django_prometheus.urls')),
 
                   path('api/medicaments/', search_medications, name='search_medications'),
                   path('api/prescription/add/', add_prescription, name='add_prescription'),
@@ -114,6 +116,8 @@ urlpatterns = [
                        name='send_consultation'),
 
                   path('suivi/<int:patient_id>/<int:consultationsvih_id>', suivi_send_create, name='send_to_suivie'),
+
+                  path('suivi/<int:patient_id>/<int:consultation_id>', suivi_send_from_bilan, name='suivi_send_from_bilan'),
 
                   path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
                   path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
@@ -186,6 +190,17 @@ urlpatterns = [
                   path('send_employee_sms/<int:employee_id>', send_sms_view, name='send_sms_view'),
                   path('suivie_soins', SuivieSoinsListView.as_view(), name='suivie_soins_list'),
                   path('suivie_soins/detail<int:pk>', SuivieSoinsDetailView.as_view(), name='suivie_soins_detail'),
+
+                  path('bilan_initial', BilanListView.as_view(), name='bilan_list'),
+                  path('create/', BilanCreateView.as_view(), name='bilan_create'),
+                  path('<int:pk>/', BilanDetailView.as_view(), name='bilan_detail'),
+                  path('<int:pk>/update/', BilanUpdateView.as_view(), name='bilan_update'),
+                  path('<int:pk>/delete/', BilanDeleteView.as_view(), name='bilan_delete'),
+                  path('<int:pk>/complete/', CompleteBilanView.as_view(), name='bilan_complete'),
+                  path('create-bilan-initial/<int:consultation_id>/<int:patient_id>/', create_bilan_initial,
+                       name='create_bilan_initial'),
+
+
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

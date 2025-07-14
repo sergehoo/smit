@@ -110,7 +110,11 @@ INSTALLED_APPS = [
     'guardian',
     'phonenumber_field',
     'django_user_agents',
-    'django_tables2'
+    'django_tables2',
+    'django_prometheus',
+    'mathfilters',
+    'crispy_forms',
+    "crispy_bootstrap5",
 
     # 'django_select2',
 
@@ -140,6 +144,8 @@ MIDDLEWARE = [
     'smit.middlewares.SessionTimeoutMiddleware',
     'smit.middlewares.LogForbiddenMiddleware',
     'core.middleware.VisitCounterMiddleware',
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware'
 
 ]
 
@@ -159,36 +165,13 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
-                'smit.context_processors.services_processor',
-                'smit.context_processors.menu_processor',
+                'smit.context_processors.global_context',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'smitci.wsgi.application'
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-# local
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'smit.sqlite3',
-#     }
-# }
-# local one
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': 'smitciv2',
-#         'USER': 'postgres',
-#         'PASSWORD': 'weddingLIFE18',
-#         'HOST': 'localhost',
-#         'PORT': '5433',
-#     }
-# }
-#prod
 
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
@@ -240,10 +223,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-#gdal-config --libs >---commande linux ou mac os
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 LANGUAGES = [
     ('fr', 'Français'),
     ('en', 'English'),
@@ -280,6 +263,23 @@ TINYMCE_EXTRA_MEDIA = {
         ...
     ],
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('CELERY_BROKER_URL'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Assure-toi que Redis tourne
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Abidjan'  # ajuste pour ta timezone
+CELERY_BEAT_SCHEDULE = {}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -328,7 +328,6 @@ TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE_NUMBER = os.environ.get('messaging_service_sid')  # Numéro Twilio
 TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
 SITE_NAME = 'SMIT-CI'
-
 
 ORANGE_SMS_CLIENT_ID = config('ORANGE_SMS_CLIENT_ID')
 ORANGE_SMS_CLIENT_SECRET = config('ORANGE_SMS_CLIENT_SECRET')

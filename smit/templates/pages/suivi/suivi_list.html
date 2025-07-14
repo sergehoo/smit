@@ -32,15 +32,15 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    .animated-card {
-        animation: fadeIn 0.6s ease-out forwards;
-    }
+    {#.animated-card {#}
+    {#    animation: fadeIn 0.6s ease-out forwards;#}
+    {#}#}
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-    }
+    {#.card:hover {#}
+    {#    transform: translateY(-5px);#}
+    {#    box-shadow: 0 10px 20px rgba(0,0,0,0.1);#}
+    {#    transition: all 0.3s ease;#}
+    {#}#}
 
     /* Couleurs dynamiques */
     .bg-pulse-success {
@@ -135,7 +135,7 @@
                                 <li class="breadcrumb-item active">Suivi VIH</li>
                             </ol>
                         </nav>
-                        <h2 class="nk-block-title page-title">Suivi des Patients VIH <span class="badge badge-pill badge-primary ml-2">{{ suivis.paginator.count }}</span></h2>
+                        <h2 class="nk-block-title page-title mt-5">Suivi des Patients VIH <span class="badge badge-pill badge-primary ml-2">{{ suivis.paginator.count }}</span></h2>
                         <div class="nk-block-des text-soft">
                             <p>Gestion du suivi thérapeutique des patients séropositifs</p>
                         </div>
@@ -356,7 +356,7 @@
                                 </div>
 
                                 {% for suivi in suivis %}
-                                <div class="nk-tb-item animated-card" style="animation-delay: {{ forloop.counter|divisibleby:2|yesno:'0.1s,0.2s' }}" data-patient="{{ suivi.patient.nom_complet|lower }}" data-code="{{ suivi.patient.code_patient|lower }}">
+                                <div class="nk-tb-item" style="animation-delay: {{ forloop.counter|divisibleby:2|yesno:'0.1s,0.2s' }}" data-patient="{{ suivi.patient.nom_complet|lower }}" data-code="{{ suivi.patient.code_patient|lower }}">
                                     <div class="nk-tb-col nk-tb-col-check">
                                         <div class="custom-control custom-control-sm custom-checkbox notext">
                                             <input type="checkbox" class="custom-control-input" id="suivi-{{ suivi.id }}">
@@ -378,25 +378,25 @@
                                     <div class="nk-tb-col">
                                         <div class="user-card">
                                             <div class="user-avatar bg-dim-primary d-none d-sm-flex">
-                                                <span>{{ suivi.patient.initials }}</span>
+                                                <span>{{ suivi.patient.n }}</span>
                                             </div>
                                             <div class="user-info">
-                                                <span class="tb-lead">
-                                                    <span class="masked-name" id="masked-name-{{ suivi.patient.id }}-{{ forloop.counter }}">************</span>
-                                                    <span class="full-name d-none" id="full-name-{{ suivi.patient.id }}-{{ forloop.counter }}"></span>
-                                                    {% if perms.core.view_patient_name %}
-                                                    <button class="btn btn-xs btn-link p-0 ml-1 toggle-name-btn"
-                                                            data-patient-id="{{ suivi.patient.id }}"
-                                                            data-counter="{{ forloop.counter }}">
-                                                        <em class="icon ni ni-eye"></em>
-                                                    </button>
-                                                    {% else %}
-                                                    <span class="btn btn-xs btn-link p-0 ml-1" data-toggle="tooltip" title="Accès non autorisé">
-                                                        <em class="icon ni ni-lock"></em>
-                                                    </span>
-                                                    {% endif %}
-                                                </span>
-                                                <span class="sub-text">{{ suivi.patient.contact }}</span>
+                                                  <span>
+        <i class="fa-solid fa-user-alt"></i>
+        <span class="masked-name" id="masked-name-{{ suivi.patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ suivi.patient.id }}-{{ forloop.counter }}"></span>
+        {% if perms.core.view_patient_name %}
+            <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn" data-patient-id="{{ suivi.patient.id }}" data-counter="{{ forloop.counter }}">
+            <i class="fa-solid fa-eye"></i>
+        </button>
+        {% else %}
+            <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top"
+                  title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+        {% endif %}
+    </span>
+                                                <span class="sub-text"><i class="fa-solid fa-phone mr-1 "></i>{{ suivi.patient.contact }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -427,7 +427,7 @@
                                         </div>
                                         <span class="sub-text small">{{ suivi.get_adherence_traitement_display }}</span>
                                     </div>
-                                    <div class="nk-tb-col nk-tb-col-tools">
+                                    <div class="nk-tb-col nk-tb-col-tools ">
                                         <ul class="nk-tb-actions gx-1">
                                             <li>
                                                 <div class="drodown">
@@ -819,7 +819,8 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const ctx = document.getElementById('chartActifs').getContext('2d');
   const chart = new Chart(ctx, {
@@ -891,64 +892,6 @@
             });
         });
 
-        // Affichage du nom complet avec permission
-        document.querySelectorAll('.toggle-name-btn').forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                const patientId = this.dataset.patientId;
-                const counter = this.dataset.counter;
-                const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
-                const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
-                const icon = this.querySelector('em');
-
-                if (maskedName.classList.contains('d-none')) {
-                    // Masquer le nom
-                    maskedName.classList.remove('d-none');
-                    fullName.classList.add('d-none');
-                    icon.classList.remove('ni-eye-fill');
-                    icon.classList.add('ni-eye');
-                } else {
-                    // Afficher le nom (via AJAX si pas encore chargé)
-                    if (!fullName.textContent) {
-                        fetch(`/api/patient/${patientId}/name/`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.full_name) {
-                                    fullName.textContent = data.full_name;
-                                    maskedName.classList.add('d-none');
-                                    fullName.classList.remove('d-none');
-                                    icon.classList.remove('ni-eye');
-                                    icon.classList.add('ni-eye-fill');
-
-                                    // Animation de révélation
-                                    fullName.style.opacity = 0;
-                                    fullName.style.transform = 'translateY(5px)';
-                                    fullName.style.transition = 'all 0.3s ease';
-                                    setTimeout(() => {
-                                        fullName.style.opacity = 1;
-                                        fullName.style.transform = 'translateY(0)';
-                                    }, 10);
-                                }
-                            })
-                            .catch(error => console.error('Error:', error));
-                    } else {
-                        maskedName.classList.add('d-none');
-                        fullName.classList.remove('d-none');
-                        icon.classList.remove('ni-eye');
-                        icon.classList.add('ni-eye-fill');
-
-                        // Animation de révélation
-                        fullName.style.opacity = 0;
-                        fullName.style.transform = 'translateY(5px)';
-                        fullName.style.transition = 'all 0.3s ease';
-                        setTimeout(() => {
-                            fullName.style.opacity = 1;
-                            fullName.style.transform = 'translateY(0)';
-                        }, 10);
-                    }
-                }
-            });
-        });
 
         // Sélection multiple
         document.getElementById('selectAll').addEventListener('change', function () {
@@ -971,70 +914,44 @@
             });
         });
     </script>
-    <script>
-        // Recherche en temps réel
-        document.getElementById('search-patient').addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.nk-tb-item[data-patient], .nk-tb-item[data-code]');
-
-            rows.forEach(row => {
-                const patientName = row.getAttribute('data-patient');
-                const patientCode = row.getAttribute('data-code');
-
-                if (patientName.includes(searchTerm) || patientCode.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // Affichage du nom complet avec permission
+  <script>
         document.querySelectorAll('.toggle-name-btn').forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                const patientId = this.dataset.patientId;
-                const counter = this.dataset.counter;
+            button.addEventListener('click', function () {
+                const patientId = this.dataset.patientId; // ID du patient
+                const counter = this.dataset.counter; // Numéro unique pour cet élément
                 const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
                 const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
-                const icon = this.querySelector('em');
+                const icon = this.querySelector('i');
 
                 if (maskedName.classList.contains('d-none')) {
-                    // Masquer le nom
+                    // Revenir à l'affichage masqué
                     maskedName.classList.remove('d-none');
                     fullName.classList.add('d-none');
-                    icon.classList.remove('ni-eye-fill');
-                    icon.classList.add('ni-eye');
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else if (!fullName.textContent) {
+                    // Charger le nom complet via AJAX
+                    fetch(`/api/get-patient-all-name/${patientId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.full_name) {
+                                fullName.textContent = data.full_name; // Ajouter le nom complet
+                                maskedName.classList.add('d-none');
+                                fullName.classList.remove('d-none');
+                                icon.classList.remove('fa-eye');
+                                icon.classList.add('fa-eye-slash');
+                            } else {
+                                alert('Erreur : Impossible de charger le nom.');
+                            }
+                        })
+                        .catch(err => console.error('Erreur lors de la requête AJAX :', err));
                 } else {
-                    // Afficher le nom (via AJAX si pas encore chargé)
-                    if (!fullName.textContent) {
-                        fetch(`/api/patient/${patientId}/name/`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.full_name) {
-                                    fullName.textContent = data.full_name;
-                                    maskedName.classList.add('d-none');
-                                    fullName.classList.remove('d-none');
-                                    icon.classList.remove('ni-eye');
-                                    icon.classList.add('ni-eye-fill');
-                                }
-                            })
-                            .catch(error => console.error('Error:', error));
-                    } else {
-                        maskedName.classList.add('d-none');
-                        fullName.classList.remove('d-none');
-                        icon.classList.remove('ni-eye');
-                        icon.classList.add('ni-eye-fill');
-                    }
+                    // Afficher le nom complet déjà chargé
+                    maskedName.classList.add('d-none');
+                    fullName.classList.remove('d-none');
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
                 }
-            });
-        });
-
-        // Sélection multiple
-        document.getElementById('selectAll').addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('.nk-tb-item .custom-control-input');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
             });
         });
     </script>

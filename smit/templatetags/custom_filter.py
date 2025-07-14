@@ -33,3 +33,43 @@ def abs(value):
         return abs(value)
     except:
         return value
+
+
+@register.filter
+def calculate_weight_change(current_weight, patient):
+    # Calcule la variation de poids par rapport au poids initial
+    if not current_weight or not hasattr(patient, 'poids_initial') or not patient.poids_initial:
+        return ""
+
+    change = current_weight - patient.poids_initial
+    if change > 0:
+        return f"+{change:.1f} kg"
+    elif change < 0:
+        return f"{change:.1f} kg"
+    else:
+        return "stable"
+
+
+@register.filter
+def sub(value, arg):
+    """Soustrait arg à value"""
+    try:
+        return float(value) - float(arg)
+    except (ValueError, TypeError):
+        return 0
+
+@register.filter
+def div(value, arg):
+    """Divise value par arg"""
+    try:
+        return float(value) / float(arg)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
+
+@register.filter
+def mul(value, arg):
+    """Multiplie value par arg"""
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0

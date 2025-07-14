@@ -1,43 +1,9 @@
 from datetime import date
 
+from django.core.cache import cache
 from core.models import Patient
-from smit.models import Service, Appointment, Hospitalization, Consultation, Suivi, BilanParaclinique
+from smit.models import Service, Appointment, Hospitalization, Consultation, Suivi, BilanParaclinique, BilanInitial
 
-
-def services_processor(request):
-    services = Service.objects.all()
-    services = Service.objects.all()
-
-    return {'services': services, }
-
-
-def menu_processor(request):
-    today = date.today()
-    appointments_today = Appointment.objects.filter(date=today, status='Scheduled').count()
-    patient_nbr = Patient.objects.all().count()
-    appointments_all = Appointment.objects.all().count()
-    examens = BilanParaclinique.objects.filter(result=None).count()
-    examensdone = BilanParaclinique.objects.filter(result__isnull=False).count()
-    urgencehospi = Patient.objects.filter(urgence=True).count()
-
-
-    hospitalized_count = Hospitalization.objects.filter(discharge_date__isnull=True).count()
-    discharged_count = Hospitalization.objects.filter(discharge_date__isnull=False).count()
-    consultations = Consultation.objects.all().count()
-    suivi = Suivi.objects.all().count()
-    # vih_consult = Consultation.objects.filter(service='VIH-SIDA').count()
-
-    return {'apointments_nbr': appointments_today,
-            'patient_nbr': patient_nbr,
-            'appointments_all': appointments_all,
-            'Hospitaliza_encours': hospitalized_count,
-            'discharged_count': discharged_count,
-            'consul_nbr': consultations,
-            'suivi_nbr': suivi,
-            'examencount': examens,
-            'urgencehospi': urgencehospi,
-            'examensdonecount': examensdone
-            }
 
 # def check_accueil_group(request):
 #     is_accueil = False
@@ -91,3 +57,28 @@ def menu_processor(request):
 #         resultats_group = Group.objects.get(name='resultats')  # Assurez-vous que le nom du groupe est correct
 #         is_resultats = resultats_group in request.user.groups.all()
 #     return {'is_resultats': is_resultats}
+
+
+def global_context(request):
+    today = date.today()
+    cache_key = 'menu_context'
+    context = cache.get(cache_key)
+
+    if not context:
+        context = {
+            'services': Service.objects.all(),
+            'apointments_nbr': Appointment.objects.filter(date=today, status='Scheduled').count(),
+            'patient_nbr': Patient.objects.count(),
+            'appointments_all': Appointment.objects.count(),
+            'Hospitaliza_encours': Hospitalization.objects.filter(discharge_date__isnull=True).count(),
+            'discharged_count': Hospitalization.objects.filter(discharge_date__isnull=False).count(),
+            'consul_nbr': Consultation.objects.count(),
+            'suivi_nbr': Suivi.objects.count(),
+            'examencount': BilanParaclinique.objects.filter(result=None).count(),
+            'examensdonecount': BilanParaclinique.objects.filter(result__isnull=False).count(),
+            'urgencehospi': Patient.objects.filter(urgence=True).count(),
+            'bilaninitial': BilanInitial.objects.all().count(),
+        }
+        cache.set(cache_key, context, 60)  # Expire après 60 sec
+
+    return context

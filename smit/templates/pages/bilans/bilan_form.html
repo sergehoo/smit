@@ -1,0 +1,90 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">
+                {% if object %}Modifier{% else %}Créer{% endif %} un Bilan Initial
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Formulaire</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        {% for field in form %}
+                        <div class="form-group row">
+                            <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            <div class="col-sm-9">
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="form-group row">
+                            <div class="col-sm-9 offset-sm-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer
+                                </button>
+                                <a href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'bilan_list' %}{% endif %}" class="btn btn-secondary">
+                                    Annuler
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Aide</h6>
+                </div>
+                <div class="card-body">
+                    <h6>Instructions:</h6>
+                    <ul>
+                        <li>Remplissez tous les champs obligatoires marqués d'un *</li>
+                        <li>Pour les examens complexes, joignez un fichier PDF</li>
+                        <li>Les bilans critiques seront notifiés automatiquement</li>
+                    </ul>
+
+                    {% if object %}
+                    <hr>
+                    <h6>Historique:</h6>
+                    <p>Créé le {{ object.created_at|date:"d/m/Y" }} par {{ object.doctor }}</p>
+                    {% if object.updated_at %}
+                    <p>Dernière modification: {{ object.updated_at|date:"d/m/Y H:i" }}</p>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
