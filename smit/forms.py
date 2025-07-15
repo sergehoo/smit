@@ -750,14 +750,14 @@ class ConseilsForm(forms.ModelForm):
         fields = ['commentaires', ]
 
 
-class RendezvousForm(forms.ModelForm):
-    nom = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
-    descriptif = forms.CharField(required=False,
-                                 widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
-
-    class Meta:
-        model = Examen
-        fields = ['nom', 'descriptif']
+# class RendezvousForm(forms.ModelForm):
+#     nom = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+#     descriptif = forms.CharField(required=False,
+#                                  widget=forms.TextInput(attrs={'class': 'form-control form-control-lg '}))
+#
+#     class Meta:
+#         model = Examen
+#         fields = ['nom', 'descriptif']
 
 
 class ProtocolesForm(forms.ModelForm):
@@ -1809,9 +1809,11 @@ class BilanParacliniqueResultForm(forms.ModelForm):
 class TraitementARVForm(forms.ModelForm):
     class Meta:
         model = TraitementARV
-        fields = ['nom', 'description', 'dosage', 'forme_pharmaceutique',
-                  'type_traitement', 'duree_traitement', 'posologie_details',
-                  'effet_secondaire_courant', 'interaction_medicamenteuse', 'efficacite']
+        fields = [
+            'nom', 'description', 'dosage', 'forme_pharmaceutique',
+            'type_traitement', 'duree_traitement', 'posologie_details',
+            'effet_secondaire_courant', 'interaction_medicamenteuse', 'efficacite'
+        ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'posologie_details': forms.Textarea(attrs={'rows': 3}),
@@ -1819,18 +1821,37 @@ class TraitementARVForm(forms.ModelForm):
             'interaction_medicamenteuse': forms.Textarea(attrs={'rows': 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            existing_class = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = f'{existing_class} form-control'.strip()
+
 
 class ProtocoleForm(forms.ModelForm):
     class Meta:
         model = Protocole
-        fields = ['nom', 'description', 'type_protocole', 'duree', 'date_debut',
-                  'molecules', 'medicament', 'maladies', 'examens']
+        fields = [
+            'nom', 'description', 'type_protocole', 'duree', 'frequence', 'date_debut',
+            'molecules', 'medicament', 'maladies', 'examens'
+        ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
+            'date_debut': forms.DateInput(attrs={'class': 'datetime', 'type':'date'}),
             'molecules': forms.SelectMultiple(attrs={'class': 'select2'}),
             'medicament': forms.SelectMultiple(attrs={'class': 'select2'}),
             'examens': forms.SelectMultiple(attrs={'class': 'select2'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            widget_class = field.widget.attrs.get('class', '')
+            # Combine select2 et form-control pour les SelectMultiple
+            if isinstance(field.widget, forms.SelectMultiple):
+                field.widget.attrs['class'] = f'{widget_class} form-control'.strip()
+            else:
+                field.widget.attrs['class'] = f'{widget_class} form-control'.strip()
 
 
 class SuiviProtocoleForm(forms.ModelForm):
@@ -1840,6 +1861,11 @@ class SuiviProtocoleForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = f"{field.widget.attrs.get('class', '')} form-control".strip()
 
 
 class BilanParacliniqueForm(forms.ModelForm):
@@ -1858,3 +1884,87 @@ class BilanParacliniqueForm(forms.ModelForm):
             self.fields['examen'].queryset = ExamenStandard.objects.filter(
                 is_active=True
             ).order_by('type_examen__nom', 'nom')
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = f"{field.widget.attrs.get('class', '')} form-control".strip()
+
+
+class RendezVousSuiviForm(forms.ModelForm):
+    class Meta:
+        model = RendezVous
+        fields = [
+
+            'pharmacie',
+            'medicaments',
+            # 'service',
+            'doctor',
+            'date',
+            'time',
+            'reason',
+            # 'status',
+            'recurrence',
+            'recurrence_end_date',
+        ]
+
+        widgets = {
+            'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'pharmacie': forms.Select(attrs={'class': 'form-control'}),
+            'medicaments': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            # 'service': forms.Select(attrs={'class': 'form-control'}),
+            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'reason': forms.TextInput(attrs={'class': 'form-control'}),
+            # 'status': forms.Select(attrs={'class': 'form-control'}),
+            'recurrence': forms.Select(attrs={'class': 'form-control'}),
+            'recurrence_end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+        labels = {
+            'patient': 'Patient',
+            'pharmacie': 'Pharmacie',
+            'medicaments': 'Médicaments',
+            # 'service': 'Service',
+            'doctor': 'Docteur',
+            'date': 'Date',
+            'time': 'Heure',
+            'reason': 'Motif',
+            'status': 'Statut',
+            'recurrence': 'Récurrence',
+            'recurrence_end_date': 'Fin de la Récurrence',
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Capture the logged-in user from the view
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        recurrence = cleaned_data.get('recurrence')
+        recurrence_end_date = cleaned_data.get('recurrence_end_date')
+
+        # Ensure recurrence end date is after the appointment date
+        if recurrence != 'None' and recurrence_end_date and recurrence_end_date <= date:
+            self.add_error('recurrence_end_date',
+                           "La date de fin de la récurrence doit être après la date du rendez-vous.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Retrieve the instance being saved
+        instance = super().save(commit=False)
+
+        # Automatically set the pharmacy and doctor based on the logged-in user
+        if self.user and hasattr(self.user, 'employee'):
+            instance.pharmacie = self.user.employee.pharmacie
+            instance.doctor = self.user.employee
+
+        # Automatically set the status to "Scheduled"
+        if not instance.status:
+            instance.status = 'Scheduled'
+
+        if commit:
+            instance.save()
+
+        return instance

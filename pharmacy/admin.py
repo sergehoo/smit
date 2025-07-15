@@ -64,9 +64,10 @@ class ArticleCommandeAdmin(admin.ModelAdmin):
 
 @admin.register(RendezVous)
 class RendezVousAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'date', 'time', 'doctor', 'status')
+    list_display = ('patient', 'date', 'time', 'doctor', 'status','suivi')
     search_fields = ('patient__nom', 'doctor__nom')
     list_filter = ('status', 'date', 'recurrence')
+    autocomplete_fields = ['patient','suivi']
 
 
 @admin.register(Fournisseur)

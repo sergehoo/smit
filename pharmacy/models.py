@@ -317,7 +317,8 @@ class Commande(models.Model):
 class RendezVous(models.Model):
     patient = models.ForeignKey('core.Patient', on_delete=models.CASCADE)
     pharmacie = models.ForeignKey('Pharmacy', on_delete=models.SET_NULL, null=True, blank=True)
-    medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True, blank=True)
+    medicaments = models.ManyToManyField(Medicament, blank=True)
+    # medicaments = models.ForeignKey(Medicament, on_delete=models.SET_NULL, null=True, blank=True)
     service = models.ForeignKey('core.Service', on_delete=models.SET_NULL, null=True, blank=True)
     doctor = models.ForeignKey('core.Employee', on_delete=models.SET_NULL, null=True, blank=True)
     suivi = models.ForeignKey('smit.Suivi', on_delete=models.SET_NULL, related_name='suivierdv', null=True, blank=True)

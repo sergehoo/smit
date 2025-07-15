@@ -309,50 +309,44 @@ def is_ajax(request):
 def complete_appointment(request, pk):
     rendezvous = get_object_or_404(RendezVous, pk=pk)
 
-    # Vérifier que le rendez-vous n'est pas déjà terminé
     if rendezvous.status == 'Completed':
         messages.info(request, "Ce rendez-vous est déjà marqué comme terminé.")
-        return redirect('rendezvous_list')  # Remplacez par le nom de votre vue
+        return redirect('rendezvous_list')
 
-    medicament = rendezvous.medicaments
+    medicaments = rendezvous.medicaments.all()
 
-    if medicament:
+    if medicaments.exists():
         try:
-            with transaction.atomic():  # Assurez-vous que les opérations sont atomiques
-                # Vérifier si le stock est suffisant
-                if medicament.stock <= 0:
-                    raise ValidationError(f"Stock insuffisant pour le médicament {medicament.nom}.")
+            with transaction.atomic():
+                for medicament in medicaments:
+                    if medicament.stock <= 0:
+                        raise ValidationError(f"Stock insuffisant pour {medicament.nom}")
 
-                # Déduire une unité du stock
-                medicament.stock -= 0
-                medicament.save()
+                    medicament.stock -= 1
+                    medicament.save()
 
-                # Créer un mouvement de stock
-                MouvementStock.objects.create(
-                    medicament=medicament,
-                    patient=rendezvous.patient,
-                    quantite=1,  # Ajustez la quantité si nécessaire
-                    type_mouvement='Sortie'
-                )
+                    MouvementStock.objects.create(
+                        medicament=medicament,
+                        patient=rendezvous.patient,
+                        quantite=1,
+                        type_mouvement='Sortie'
+                    )
 
-                # Mettre à jour le statut du rendez-vous
                 rendezvous.status = 'Completed'
                 rendezvous.save()
 
-                messages.success(request,
-                                 f"Le rendez-vous de {rendezvous.patient} a été marqué comme terminé, et le mouvement de stock a été enregistré.")
+                messages.success(request, f"Rendez-vous terminé. Mouvement(s) de stock enregistré(s).")
+
         except ValidationError as e:
             messages.error(request, str(e))
-            return redirect('rendezvous_list')  # Remplacez par le nom de votre vue
+            return redirect('rendezvous_list')
     else:
         messages.warning(request, "Aucun médicament associé à ce rendez-vous.")
 
-    # Gérer les réponses AJAX si nécessaire
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({"status": "success", "message": "Appointment marked as completed and stock updated."})
 
-    # Redirection par défaut
-    return redirect('rendezvous_list')  # Remplacez par le nom de votre vue
+    return redirect('rendezvous_list')
 
 
 # Function to reschedule an appointment
@@ -432,7 +426,7 @@ class RendezVousListView(ListView):
     template_name = 'pharmacy/rendezvous_list.html'
     context_object_name = 'rendezvous_list'
     paginate_by = 10  # Nombre de rendez-vous par page
-    ordering = 'date'
+    ordering = '-created_at'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

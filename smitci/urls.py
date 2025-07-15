@@ -37,7 +37,8 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     create_rdv, UrgenceListView, UrgenceCreateView, test_rapide_consultation_generale_create, \
     delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
     hospitalization_chart_data, BilanListView, BilanCreateView, BilanDetailView, BilanUpdateView, BilanDeleteView, \
-    CompleteBilanView, create_bilan_initial, suivi_send_from_bilan
+    CompleteBilanView, create_bilan_initial, suivi_send_from_bilan, add_traitement_arv, add_suivi_protocole, add_bilan, \
+    add_rdv
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -117,7 +118,8 @@ urlpatterns = [
 
                   path('suivi/<int:patient_id>/<int:consultationsvih_id>', suivi_send_create, name='send_to_suivie'),
 
-                  path('suivi/<int:patient_id>/<int:consultation_id>', suivi_send_from_bilan, name='suivi_send_from_bilan'),
+                  path('suivi/<int:patient_id>/<int:consultation_id>', suivi_send_from_bilan,
+                       name='suivi_send_from_bilan'),
 
                   path('consultationdetail/<int:pk>', ConsultationSidaDetailView.as_view(), name='detail_consultation'),
                   path('consultation/vih', ConsultationSidaListView.as_view(), name='consultation_vih_list'),
@@ -200,6 +202,10 @@ urlpatterns = [
                   path('create-bilan-initial/<int:consultation_id>/<int:patient_id>/', create_bilan_initial,
                        name='create_bilan_initial'),
 
+                  path('suivi/<int:suivi_id>/add-traitement/', add_traitement_arv, name='add_traitement'),
+                  path('suivi/<int:suivi_id>/add-protocole/', add_suivi_protocole, name='add_protocole'),
+                  path('suivi/<int:suivi_id>/add-bilan/', add_bilan, name='add_bilan'),
+                  path('suivi/<int:suivi_id>/add-rdv/', add_rdv, name='add_rdv'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

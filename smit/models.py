@@ -1,3 +1,4 @@
+import calendar
 import datetime
 import random
 import unicodedata
@@ -21,7 +22,7 @@ from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_Res
 from torchvision.transforms import transforms
 
 from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices, Maladie
-from pharmacy.models import Medicament, Molecule, RendezVous
+from pharmacy.models import Medicament, Molecule, RendezVous, Pharmacy
 
 # from pharmacy.models import Medication
 RAPID_HIV_TEST_TYPES = [
@@ -172,6 +173,54 @@ class TypeProtocole(models.Model):
         return self.nom
 
 
+FREQUENCE_CHOICES = [
+    ('Mensuel', 'Mensuel'),
+    ('Bimestriel', 'Bimestriel'),
+    ('Trimestriel', 'Trimestriel'),
+    ('Semestriel', 'Semestriel'),
+]
+
+
+class Action(models.Model):
+    TYPE_CHOICES = [
+        ('SURVEILLANCE', 'Surveillance médicale'),
+        ('COUNSELING', 'Counseling'),
+        ('DEPISTAGE', 'Dépistage'),
+        ('NUTRITION', 'Support nutritionnel'),
+    ]
+
+    FREQUENCE_CHOICES = [
+        ('PONCTUEL', 'Ponctuel'),
+        ('QUOTIDIEN', 'Quotidien'),
+        ('HEBDOMADAIRE', 'Hebdomadaire'),
+        ('MENSUEL', 'Mensuel'),
+        ('TRIMESTRIEL', 'Trimestriel'),
+        ('SEMESTRIEL', 'Semestriel'),
+        ('ANNUEL', 'Annuel'),
+    ]
+
+    protocole = models.ForeignKey('Protocole', on_delete=models.CASCADE)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    description = models.TextField()
+    date_prevue = models.DateField()
+    frequence = models.CharField(max_length=50, choices=FREQUENCE_CHOICES)
+    completed = models.BooleanField(default=False)
+
+
+class Rappel(models.Model):
+    TYPE_CHOICES = [
+        ('SMS', 'SMS'),
+        ('EMAIL', 'Email'),
+        ('APPEL', 'Appel téléphonique'),
+    ]
+
+    protocole = models.ForeignKey('Protocole', on_delete=models.CASCADE)
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    message = models.TextField()
+    frequence = models.CharField(max_length=50, choices=Action.FREQUENCE_CHOICES)
+    active = models.BooleanField(default=True)
+
+
 class Protocole(models.Model):
     nom = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -179,6 +228,12 @@ class Protocole(models.Model):
     duree = models.PositiveIntegerField(null=True, blank=True)
     date_debut = models.DateField(null=True, blank=True)
     date_fin = models.DateField(null=True, blank=True)
+    frequence = models.CharField(
+        max_length=50,
+        choices=FREQUENCE_CHOICES,
+        default='Mensuel',
+        verbose_name="Fréquence de suivi pharmacie"
+    )
     molecules = models.ManyToManyField(Molecule)
     medicament = models.ManyToManyField(Medicament, verbose_name="Médicaments et posologies", blank=True)
     maladies = models.ForeignKey(Maladie, related_name="protocolesmaladies", on_delete=models.SET_NULL,
@@ -186,12 +241,142 @@ class Protocole(models.Model):
     examens = models.ManyToManyField('Examen', related_name="protocolesexam", blank=True, verbose_name="Examens requis")
 
     def save(self, *args, **kwargs):
+        # Calcul automatique de la date de fin si durée fournie
         if self.date_debut and self.duree:
             self.date_fin = self.date_debut + datetime.timedelta(days=self.duree)
+
         super().save(*args, **kwargs)
 
+    def _create_follow_up_actions(self, suivi, created_by=None):
+        """
+        Déclenche toutes les actions de suivi automatiques :
+        - RDV pharmacie
+        - Bilans biologiques
+        - Actions support/counseling
+        """
+        self._create_pharmacy_appointments(suivi, created_by)
+        self._create_biological_monitoring(suivi, created_by)
+        self._create_support_actions(suivi, created_by)
+
+    def _create_pharmacy_appointments(self, suivi, created_by=None):
+        """Crée les rendez-vous en pharmacie selon la fréquence"""
+        if not self.date_debut or not self.date_fin:
+            return
+
+        interval_mapping = {
+            'Mensuel': 1,
+            'Bimestriel': 2,
+            'Trimestriel': 3,
+            'Semestriel': 6,
+        }
+        interval_months = interval_mapping.get(self.frequence, 1)
+
+        # pharmacy_service = Service.objects.filter(nom__icontains='Pharmacie_VIH').first()
+        # if not pharmacy_service:
+        #     raise ValidationError("Le service 'Pharmacie' est introuvable.")
+        pharmacy_instance = Pharmacy.objects.filter(nom__icontains='Pharmacie_VIH').first()
+        if not pharmacy_instance:
+            raise ValidationError("La pharmacie correspondante est introuvable.")
+
+        current_date = self.date_debut
+        while current_date <= self.date_fin:
+            RendezVous.objects.create(
+                patient=suivi.patient,
+                pharmacie=pharmacy_instance,
+                date=current_date,
+                time=datetime.time(8, 0),
+                reason=f"Réapprovisionnement - {self.nom}",
+                status='Scheduled',
+                suivi=suivi,
+                created_by=created_by
+            )
+            current_date = self._add_months(current_date, interval_months)
+
+    def _create_biological_monitoring(self, suivi, created_by=None):
+        """Crée les bilans biologiques tous les 6 mois"""
+        if not self.date_debut or not self.date_fin:
+            return
+
+        lab_service = Service.objects.filter(nom__icontains='Laboratoire').first()
+        if not lab_service:
+            raise ValidationError("Le service 'Laboratoire' est introuvable.")
+
+        current_date = self.date_debut
+        while current_date <= self.date_fin:
+            rdv = RendezVous.objects.create(
+                patient=suivi.patient,
+                service=lab_service,
+                date=current_date,
+                time=datetime.time(8, 0),
+                reason="Bilan biologique (CD4, Charge virale)",
+                status='Scheduled',
+                suivi=suivi,
+                created_by=created_by
+            )
+            # Ajoute tous les médicaments du protocole
+            rdv.medicaments.add(*self.medicament.all())
+            current_date = self._add_months(current_date, 6)
+
+    def _create_support_actions(self, suivi, created_by=None):
+        """Crée les actions complémentaires de soutien"""
+        if not self.date_debut:
+            return
+
+        # Surveillance effets indésirables
+        Action.objects.create(
+            protocole=self,
+            type='SURVEILLANCE',
+            description="Surveillance des effets indésirables (foie, reins, métabolique)",
+            date_prevue=self.date_debut + datetime.timedelta(days=30),
+            frequence='MENSUEL'
+        )
+
+        # Counseling et soutien psycho-social
+        Action.objects.create(
+            protocole=self,
+            type='COUNSELING',
+            description="Session de counseling et soutien psycho-social",
+            date_prevue=self.date_debut + datetime.timedelta(days=15),
+            frequence='TRIMESTRIEL'
+        )
+
+        # Rappel SMS quotidien
+        Rappel.objects.create(
+            protocole=self,
+            type='SMS',
+            message=f"Rappel: Prise de traitement pour le protocole {self.nom}",
+            frequence='QUOTIDIEN'
+        )
+
+        # Dépistage IST/TB si ARV
+        if self.type_protocole and self.type_protocole.nom.upper() == 'ARV':
+            Action.objects.create(
+                protocole=self,
+                type='DEPISTAGE',
+                description="Dépistage IST et prévention TB",
+                date_prevue=self.date_debut + datetime.timedelta(days=60),
+                frequence='SEMESTRIEL'
+            )
+
+        # Support nutritionnel
+        Action.objects.create(
+            protocole=self,
+            type='NUTRITION',
+            description="Evaluation et conseils nutritionnels",
+            date_prevue=self.date_debut + datetime.timedelta(days=30),
+            frequence='TRIMESTRIEL'
+        )
+
+    def _add_months(self, source_date, months):
+        """Ajoute des mois à une date en gérant les débordements"""
+        month = source_date.month - 1 + months
+        year = source_date.year + month // 12
+        month = month % 12 + 1
+        day = min(source_date.day, calendar.monthrange(year, month)[1])
+        return datetime.date(year, month, day)
+
     def __str__(self):
-        return f"{self.nom} - {self.type_protocole.nom}"
+        return f"{self.nom} - {self.type_protocole.nom if self.type_protocole else ''}"
 
 
 class SuiviProtocole(models.Model):
@@ -204,6 +389,9 @@ class SuiviProtocole(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True,
                                    related_name='suivicreator')
+
+    class Meta:
+        unique_together = ('protocole', 'suivi')
 
     def __str__(self):
         return f"{self.protocole.nom} - {self.nom}"

@@ -5,37 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/management/commands/seed_suivis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/prometheus.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/tasks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/pdf/bilan_initial_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smitci/celery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dbnavigator.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dump.rdb" beforeDir="false" afterPath="$PROJECT_DIR$/dump.rdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/context_processors.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/context_processors.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/custom_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/custom_filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/filters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/logs/django_errors.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/details_consultation_VIH.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -248,7 +228,7 @@
       <workItem from="1749600399291" duration="7704000" />
       <workItem from="1750205743050" duration="14070000" />
       <workItem from="1751483378772" duration="43757000" />
-      <workItem from="1752410257173" duration="28698000" />
+      <workItem from="1752410257173" duration="54006000" />
     </task>
     <servers />
   </component>
@@ -271,17 +251,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>804</line>
+          <line>805</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1489</line>
+          <line>1490</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smitci/urls.py</url>
-          <line>128</line>
+          <line>130</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -316,17 +296,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/models.py</url>
-          <line>51</line>
+          <line>52</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>882</line>
+          <line>883</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pharmacy/models.py</url>
-          <line>357</line>
+          <line>358</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -341,12 +321,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1306</line>
+          <line>1307</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>160</line>
+          <line>161</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -396,7 +376,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1551</line>
+          <line>1552</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -409,10 +389,20 @@
           <line>332</line>
           <option name="timeStamp" value="49" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/smit/views.py</url>
+          <line>1980</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="django-line">
           <url>file://$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html</url>
           <line>312</line>
           <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="django-line">
+          <url>file://$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html</url>
+          <line>1051</line>
+          <option name="timeStamp" value="54" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -38,10 +38,11 @@ from core.utils.sms import send_sms
 from pharmacy.models import RendezVous
 from smit.filters import PatientFilter
 from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, ConsultationSendForm, ConsultationCreateForm, \
-    SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, RendezvousForm, \
+    SymptomesForm, ExamenForm, PrescriptionForm, AntecedentsMedicauxForm, AllergiesForm, ProtocolesForm, \
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
     HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm, \
-    PatientUpdateForm, TraitementARVForm, SuiviProtocoleForm, RendezVousForm
+    PatientUpdateForm, TraitementARVForm, SuiviProtocoleForm, RendezVousForm, BilanParacliniqueForm, \
+    RendezVousSuiviForm, ProtocoleForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV, BilanInitial, \
     TypeBilanParaclinique, ExamenStandard, BilanParaclinique
@@ -1046,7 +1047,7 @@ class RendezVousListView(LoginRequiredMixin, ListView):
     template_name = "pages/appointments/appointment_list.html"
     context_object_name = "rendezvous"
     paginate_by = 10
-    ordering = ['-date']
+    ordering = ['-created_at']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1889,6 +1890,93 @@ def get_clinical_history(request, patient_id):
 #
 #     return redirect('suivi_detail', pk=suivi_id)
 
+@login_required
+def add_traitement_arv(request, suivi_id):
+    suivi = get_object_or_404(Suivi, id=suivi_id)
+    if request.method == "POST":
+        form = TraitementARVForm(request.POST)
+        if form.is_valid():
+            traitement = form.save(commit=False)
+            traitement.suivi = suivi
+            traitement.patient = suivi.patient
+            traitement.save()
+            messages.success(request, "Traitement ARV ajouté avec succès.")
+        else:
+            messages.error(request, "Erreur lors de l'ajout du traitement ARV.")
+    return redirect(reverse('suivis-detail', kwargs={'pk': suivi.id}))
+
+
+@login_required
+def add_suivi_protocole(request, suivi_id):
+    suivi = get_object_or_404(Suivi, id=suivi_id)
+
+    if request.method == "POST":
+        form = ProtocoleForm(request.POST)
+        if form.is_valid():
+            protocole = form.save(commit=False)
+            protocole.save()
+            form.save_m2m()
+
+            # ⚠️ Vérifie que le protocole n’est pas déjà lié
+            if SuiviProtocole.objects.filter(suivi=suivi, protocole=protocole).exists():
+                messages.warning(request, f"🚫 Ce protocole est déjà lié à ce suivi.")
+                return redirect('suivis-detail', pk=suivi.id)
+
+            # Liaison Suivi-Protocole
+            SuiviProtocole.objects.create(
+                suivi=suivi,
+                protocole=protocole,
+                nom=protocole.nom,
+                description=protocole.description,
+                date_debut=protocole.date_debut,
+                date_fin=protocole.date_fin,
+                created_by=request.user.employee if hasattr(request.user, 'employee') else None
+            )
+
+            # Et ici tu passes bien suivi :
+            protocole._create_follow_up_actions(
+                suivi=suivi,
+                created_by=request.user.employee if hasattr(request.user, 'employee') else None
+            )
+
+            messages.success(request, "✅ Protocole créé et suivi généré !")
+            return redirect('suivis-detail', pk=suivi.id)
+        else:
+            print(form.errors)
+            messages.error(request, "Erreur lors de l'enregistrement du protocole.")
+
+    return redirect(reverse('suivis-detail', kwargs={'pk': suivi.id}))
+
+
+@login_required
+def add_bilan(request, suivi_id):
+    suivi = get_object_or_404(Suivi, id=suivi_id)
+    if request.method == "POST":
+        form = BilanParacliniqueForm(request.POST)
+        if form.is_valid():
+            bilan = form.save(commit=False)
+            bilan.patient = suivi.patient
+            bilan.save()
+            messages.success(request, "Examen prescrit avec succès.")
+        else:
+            messages.error(request, "Erreur lors de la prescription de l'examen.")
+    return redirect(reverse('suivi_detail', kwargs={'pk': suivi.id}))
+
+
+@login_required
+def add_rdv(request, suivi_id):
+    suivi = get_object_or_404(Suivi, id=suivi_id)
+    if request.method == "POST":
+        form = RendezVousSuiviForm(request.POST)
+        if form.is_valid():
+            rdv = form.save(commit=False)
+            rdv.patient = suivi.patient
+            rdv.save()
+            messages.success(request, "Rendez-vous planifié avec succès.")
+        else:
+            messages.error(request, "Erreur lors de la planification du rendez-vous.")
+    return redirect(reverse('suivis-detail', kwargs={'pk': suivi.id}))
+
 
 class SuiviDetailView(LoginRequiredMixin, DetailView):
     model = Suivi
@@ -1896,10 +1984,12 @@ class SuiviDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "suividetail"
 
     def get_queryset(self):
-        return super().get_queryset().select_related(
+        qs = super().get_queryset().select_related(
             'patient', 'services', 'examens'
         ).prefetch_related(
-            Prefetch('suivierdv', queryset=RendezVous.objects.all()),
+            Prefetch('suivierdv', queryset=RendezVous.objects.select_related(
+                'patient', 'pharmacie', 'service', 'doctor', 'suivi'
+            ).prefetch_related('medicaments').order_by('-date', '-time')),
             Prefetch('protocolessuivi', queryset=SuiviProtocole.objects.select_related(
                 'protocole', 'protocole__type_protocole'
             ).order_by('protocole__type_protocole__nom')),
@@ -1907,16 +1997,32 @@ class SuiviDetailView(LoginRequiredMixin, DetailView):
             'suivicomorbide'
         )
 
+        # Si tu veux filtrer la liste affichée côté tableau
+        filter_type = self.request.GET.get('filter')
+        if filter_type:
+            if filter_type == 'pharmacy':
+                qs = qs.filter(services__nom__icontains='pharma')
+            elif filter_type == 'consultation':
+                qs = qs.filter(services__nom__icontains='consult')
+            elif filter_type == 'completed':
+                qs = qs.filter(suivierdv__status='Completed')
+            elif filter_type == 'upcoming':
+                qs = qs.filter(suivierdv__status='Scheduled', suivierdv__date__gte=timezone.now().date())
+            elif filter_type == 'missed':
+                qs = qs.filter(suivierdv__status='Scheduled', suivierdv__date__lt=timezone.now().date())
+
+        return qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         suivi = self.object
 
-        # Générer les recommandations automatiques si elles n'existent pas
+        # Générer les recommandations auto si vide
         if not suivi.recommandations_auto:
             suivi.generate_auto_recommandations()
             suivi.save()
 
-        # Grouper les protocoles par type
+        # Grouper protocoles
         protocols = suivi.protocolessuivi.all()
         grouped_protocols = {
             key: list(group) for key, group in groupby(
@@ -1925,15 +2031,13 @@ class SuiviDetailView(LoginRequiredMixin, DetailView):
             )
         }
 
-        # Préparer les données pour les graphiques d'évolution
+        # Evolution patient
         evolution_data = {
             'dates': [],
             'cd4': [],
             'poids': [],
             'charge_virale': []
         }
-
-        # Récupérer tous les suivis du patient pour l'historique
         suivis_anterieurs = Suivi.objects.filter(
             patient=suivi.patient
         ).exclude(date_suivi__isnull=True).order_by('date_suivi')
@@ -1948,14 +2052,21 @@ class SuiviDetailView(LoginRequiredMixin, DetailView):
             if s.charge_virale:
                 evolution_data['charge_virale'].append(s.charge_virale)
 
+        # Comptage RDV
+        rdvs = suivi.suivierdv.all()
         context.update({
             'grouped_protocols': grouped_protocols,
-            'suivirdvform': RdvSuiviForm(),
             'evolution_data': evolution_data,
             'now': timezone.now(),
             'suivitraitementform': TraitementARVForm(),
             'suiviprotocoleform': SuiviProtocoleForm(),
-            'suivirdvform': RendezVousForm(),
+            'protocoleform': ProtocoleForm(),
+            'suivirdvform': RendezVousSuiviForm(),
+
+            'total_rdvs': rdvs.count(),
+            'completed_rdvs': rdvs.filter(status='Completed').count(),
+            'upcoming_rdvs': rdvs.filter(status='Scheduled', date__gte=timezone.now().date()).count(),
+            'missed_rdvs': rdvs.filter(status='Scheduled', date__lt=timezone.now().date()).count(),
         })
 
         return context
