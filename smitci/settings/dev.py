@@ -21,3 +21,4 @@ DATABASES = {
 }
 
 MPI_API_KEY = os.environ.get('MPI_API_KEY', default='key')
+

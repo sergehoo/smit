@@ -124,6 +124,7 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = "smitci.asgi.application"
 
 AUTHENTICATION_BACKENDS = (
+    'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',  # Authentification classique
     # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -132,6 +133,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'axes.middleware.AxesMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -199,8 +201,8 @@ ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
 #
-AXES_FAILURE_LIMIT = 5  # Bloquer après 5 essais
-AXES_COOLOFF_TIME = 1  # 1 heure d'attente après échec
+# AXES_FAILURE_LIMIT = 5  # Bloquer après 5 essais
+# AXES_COOLOFF_TIME = 1  # 1 heure d'attente après échec
 
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_EMAIL_REQUIRED = True
@@ -243,8 +245,8 @@ AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_COOLOFF_TIME = 1  # durée en heures avant déblocage auto
-AXES_ONLY_USER_FAILURES = True  # basé sur username seulement
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
 
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False

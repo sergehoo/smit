@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/logs/django_errors.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/dev.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +224,7 @@
       <workItem from="1749600399291" duration="7704000" />
       <workItem from="1750205743050" duration="14070000" />
       <workItem from="1751483378772" duration="43757000" />
-      <workItem from="1752410257173" duration="82118000" />
+      <workItem from="1752410257173" duration="86547000" />
     </task>
     <servers />
   </component>
