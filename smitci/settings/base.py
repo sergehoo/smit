@@ -277,18 +277,20 @@ TINYMCE_EXTRA_MEDIA = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('CELERY_BROKER_URL'),
+        'LOCATION': config('CACHE_URL'),  # ✅ Maintenant dédié pour le cache
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Assure-toi que Redis tourne
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Africa/Abidjan'  # ajuste pour ta timezone
+CELERY_TIMEZONE = 'Africa/Abidjan'
 CELERY_BEAT_SCHEDULE = {}
 
 # Internationalization
