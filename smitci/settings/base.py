@@ -115,6 +115,7 @@ INSTALLED_APPS = [
     'mathfilters',
     'crispy_forms',
     "crispy_bootstrap5",
+    'axes',
 
     # 'django_select2',
 
@@ -132,6 +133,7 @@ AUTHENTICATION_BACKENDS = (
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -235,6 +237,14 @@ LANGUAGES = [
 SITE_ID = 1
 USE_L10N = True
 # USE_THOUSAND_SEPARATOR = True
+
+# Configuration de base
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_COOLOFF_TIME = 1  # durée en heures avant déblocage auto
+AXES_ONLY_USER_FAILURES = True  # basé sur username seulement
+AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
 
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
