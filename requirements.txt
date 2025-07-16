@@ -189,3 +189,4 @@ yarl==1.18.3
 zipp==3.20.1
 zope.interface==7.0.3
 zopfli==0.2.3.post1
+django-axes
