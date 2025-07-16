@@ -1,720 +1,699 @@
 {% extends 'layout/base.html' %}
 {% load static %}
-{% load unicorn %}
 {% load humanize %}
+
 {% block content %}
     <div class="nk-content nk-content-fluid">
         <div class="container-xl wide-lg">
             <div class="nk-content-body">
+                <!-- En-tête amélioré -->
                 <div class="nk-block-head nk-block-head-sm">
-                    <div class="nk-block-between">
+                    <div class="nk-block-between g-3">
                         <div class="nk-block-head-content">
-                            <h3 class="nk-block-title page-title"> Liste des Prélèvements</h3>
-                            <div class="nk-block-des text-soft">
-                                <p> {{ patient_nbr }} Prélèvements enregistrés</p>
+                            <h3 class="nk-block-title page-title">
+                                <i class="fas fa-vial-circle-bolt text-primary"></i> Gestion des Prélèvements
+                            </h3>
+                            <div class="nk-block-des">
+                                <p class="lead-text">
+                                    <span class="badge badge-pill badge-light">{{ wpatient_nbr }}</span> prélèvements
+                                    enregistrés
+                                </p>
                             </div>
-                        </div><!-- .nk-block-head-content -->
+                        </div>
+
                         <div class="nk-block-head-content">
-                            <div class="toggle-wrap nk-block-tools-toggle">
-                                <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em
-                                        class="icon ni ni-menu-alt-r"></em></a>
-                                <div class="toggle-expand-content" data-content="pageMenu">
-                                    <ul class="nk-block-tools g-3">
-                                        <li><a href="#" class="btn btn-white btn-outline-light"><em
-                                                class="icon ni ni-download-cloud"></em><span>Export</span></a></li>
-                                        <li class="nk-block-tools-opt">
-                                            <div class="drodown">
-                                                <a href="" class="dropdown-toggle btn btn-icon btn-primary"
-                                                   data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <ul class="link-list-opt no-bdr">
-                                                        <li>
-                                                            <a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a>
-                                                        </li>
-                                                        <li><a href="#"><span>Rendez-vous</span></a></li>
-                                                        <li><a href="#"><span>Consultation</span></a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-primary" data-toggle="modal"
+                                   data-target="#newEchantillonModal">
+                                    <i class="fas fa-plus-circle mr-1"></i> Nouveau Prélèvement
+                                </a>
+                                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                                        data-toggle="dropdown">
+                                    <span class="sr-only">Options</span>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#"><i class="fas fa-file-export mr-1"></i>
+                                        Exporter</a>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-filter mr-1"></i> Filtres avancés</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#"><i class="fas fa-cog mr-1"></i> Paramètres</a>
                                 </div>
-                            </div><!-- .toggle-wrap -->
-                        </div><!-- .nk-block-head-content -->
-                    </div><!-- .nk-block-between -->
-                </div><!-- .nk-block-head -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cartes de statistiques -->
+                <div class="nk-block">
+                    <div class="row g-gs">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-bordered card-stats">
+            <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="overline-title">En attente</h6>
+                        <h2 class="text-primary">{{ total_en_attente }}</h2>
+                    </div>
+                    <div class="icon bg-primary-dim">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="progress progress-sm mt-3">
+                    <div class="progress-bar bg-primary" style="width: {{ pourcent_en_attente }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reprends la même logique pour les autres cartes -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-bordered card-stats">
+            <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="overline-title">Analysés</h6>
+                        <h2 class="text-success">{{ total_analyse }}</h2>
+                    </div>
+                    <div class="icon bg-success-dim">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="progress progress-sm mt-3">
+                    <div class="progress-bar bg-success" style="width: {{ pourcent_analyse }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte Rejetés -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-bordered card-stats">
+            <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="overline-title">Rejetés</h6>
+                        <h2 class="text-danger">{{ total_rejete }}</h2>
+                    </div>
+                    <div class="icon bg-danger-dim">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+                <div class="progress progress-sm mt-3">
+                    <div class="progress-bar bg-danger" style="width: {{ pourcent_rejete }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carte Stock -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-bordered card-stats">
+            <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="overline-title">Stock</h6>
+                        <h2 class="text-info">{{ total_stock }}</h2>
+                    </div>
+                    <div class="icon bg-info-dim">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                </div>
+                <div class="progress progress-sm mt-3">
+                    <div class="progress-bar bg-info" style="width: {{ pourcent_stock }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                </div>
+
+                <!-- Tableau des prélèvements -->
                 <div class="nk-block">
                     <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
-                            <div class="card-inner position-relative card-tools-toggle">
-                                <div class="card-title-group">
-                                    <div class="card-tools">
-                                        <div class="form-inline flex-nowrap gx-3">
-                                            <div class="form-wrap w-150px">
-                                                <select class="form-select form-select-sm" data-search="off"
-                                                        data-placeholder="Bulk Action">
-                                                    <option value="">Bulk Action</option>
-                                                    <option value="email">Send Email</option>
-                                                    <option value="group">Change Group</option>
-                                                    <option value="suspend">Suspend User</option>
-                                                    <option value="delete">Delete User</option>
-                                                </select>
-                                            </div>
-                                            <div class="btn-wrap">
-                                                <span class="d-none d-md-block"><button
-                                                        class="btn btn-dim btn-outline-light disabled">Apply</button></span>
-                                                <span class="d-md-none"><button
-                                                        class="btn btn-dim btn-outline-light btn-icon disabled"><em
-                                                        class="icon ni ni-arrow-right"></em></button></span>
-                                            </div>
-                                        </div><!-- .form-inline -->
-                                    </div><!-- .card-tools -->
-                                    <div class="card-tools mr-n1">
-                                        <ul class="btn-toolbar gx-1">
-                                            <li>
-                                                <a href="#" class="btn btn-icon search-toggle toggle-search"
-                                                   data-target="search"><em class="icon ni ni-search"></em></a>
-                                            </li><!-- li -->
-                                            <li class="btn-toolbar-sep"></li><!-- li -->
-                                            <li>
-                                                <div class="toggle-wrap">
-                                                    <a href="#" class="btn btn-icon btn-trigger toggle"
-                                                       data-target="cardTools"><em
-                                                            class="icon ni ni-menu-right"></em></a>
-                                                    <div class="toggle-content" data-content="cardTools">
-                                                        <ul class="btn-toolbar gx-1">
-                                                            <li class="toggle-close">
-                                                                <a href="#" class="btn btn-icon btn-trigger toggle"
-                                                                   data-target="cardTools"><em
-                                                                        class="icon ni ni-arrow-left"></em></a>
-                                                            </li><!-- li -->
-                                                            <li>
-                                                                <div class="dropdown">
-                                                                    <a href="#"
-                                                                       class="btn btn-trigger btn-icon dropdown-toggle"
-                                                                       data-toggle="dropdown">
-                                                                        <div class="dot dot-primary"></div>
-                                                                        <em class="icon ni ni-filter-alt"></em>
-                                                                    </a>
-                                                                    <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
-                                                                        <div class="dropdown-head">
-                                                                            <span class="sub-title dropdown-title">Filter Users</span>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-sm btn-icon">
-                                                                                    <em class="icon ni ni-more-h"></em>
-                                                                                </a>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="dropdown-body dropdown-body-rg">
-                                                                            <div class="row gx-6 gy-3">
-                                                                                <div class="col-6">
-                                                                                    <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                        <input type="checkbox"
-                                                                                               class="custom-control-input"
-                                                                                               id="hasBalance">
-                                                                                        <label class="custom-control-label"
-                                                                                               for="hasBalance"> Have
-                                                                                            Balance</label>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-6">
-                                                                                    <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                        <input type="checkbox"
-                                                                                               class="custom-control-input"
-                                                                                               id="hasKYC">
-                                                                                        <label class="custom-control-label"
-                                                                                               for="hasKYC"> KYC
-                                                                                            Verified</label>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-6">
-                                                                                    <div class="form-group">
-                                                                                        <label class="overline-title overline-title-alt">Role</label>
-                                                                                        <select class="form-select form-select-sm">
-                                                                                            <option value="any">Any
-                                                                                                Role
-                                                                                            </option>
-                                                                                            <option value="investor">
-                                                                                                Investor
-                                                                                            </option>
-                                                                                            <option value="seller">
-                                                                                                Seller
-                                                                                            </option>
-                                                                                            <option value="buyer">
-                                                                                                Buyer
-                                                                                            </option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-6">
-                                                                                    <div class="form-group">
-                                                                                        <label class="overline-title overline-title-alt">Status</label>
-                                                                                        <select class="form-select form-select-sm">
-                                                                                            <option value="any">Any
-                                                                                                Status
-                                                                                            </option>
-                                                                                            <option value="active">
-                                                                                                Active
-                                                                                            </option>
-                                                                                            <option value="pending">
-                                                                                                Pending
-                                                                                            </option>
-                                                                                            <option value="suspend">
-                                                                                                Suspend
-                                                                                            </option>
-                                                                                            <option value="deleted">
-                                                                                                Deleted
-                                                                                            </option>
-                                                                                        </select>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-12">
-                                                                                    <div class="form-group">
-                                                                                        <button type="button"
-                                                                                                class="btn btn-secondary">
-                                                                                            Filter
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="dropdown-foot between">
-                                                                            <a class="clickable" href="#">Reset
-                                                                                Filter</a>
-                                                                            <a href="#">Save Filter</a>
-                                                                        </div>
-                                                                    </div><!-- .filter-wg -->
-                                                                </div><!-- .dropdown -->
-                                                            </li><!-- li -->
-                                                            <li>
-                                                                <div class="dropdown">
-                                                                    <a href="#"
-                                                                       class="btn btn-trigger btn-icon dropdown-toggle"
-                                                                       data-toggle="dropdown">
-                                                                        <em class="icon ni ni-setting"></em>
-                                                                    </a>
-                                                                    <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                        <ul class="link-check">
-                                                                            <li><span>Show</span></li>
-                                                                            <li class="active"><a href="#">10</a></li>
-                                                                            <li><a href="#">20</a></li>
-                                                                            <li><a href="#">50</a></li>
-                                                                        </ul>
-                                                                        <ul class="link-check">
-                                                                            <li><span>Order</span></li>
-                                                                            <li class="active"><a href="#">DESC</a></li>
-                                                                            <li><a href="#">ASC</a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div><!-- .dropdown -->
-                                                            </li><!-- li -->
-                                                        </ul><!-- .btn-toolbar -->
-                                                    </div><!-- .toggle-content -->
-                                                </div><!-- .toggle-wrap -->
-                                            </li><!-- li -->
-                                        </ul><!-- .btn-toolbar -->
-                                    </div><!-- .card-tools -->
-                                </div><!-- .card-title-group -->
-                                <div class="card-search search-wrap" data-search="search">
-                                    <div class="card-body">
-                                        <div class="search-content">
-                                            <a href="#" class="search-back btn btn-icon toggle-search"
-                                               data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                            {#                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search Patient" unicorn:model="search_query">#}
-                                            <input type="text" placeholder="Search Patients"
-                                                   unicorn:model="search_query"/>
-                                        </div>
-                                    </div>
-                                </div><!-- .card-search -->
-                            </div><!-- .card-inner -->
                             <div class="card-inner p-0">
-                                <div class="nk-tb-list nk-tb-ulist is-compact">
-                                    <div class="nk-tb-item nk-tb-head">
-
-                                        <div class="nk-tb-col"><span class="sub-text">Code prélèvement</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Patient </span></div>
-                                        <div class="nk-tb-col tb-col-sm"><span class="sub-text">Type</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Consultation</span>
-                                        </div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Date</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Status</span></div>
-                                        <div class="nk-tb-col tb-col-lg"><span class="sub-text">Action</span></div>
-
-
-                                        <div class="nk-tb-col nk-tb-col-tools text-right">
-                                            <div class="dropdown">
-                                                <a href="#"
-                                                   class="btn btn-xs btn-outline-light btn-icon dropdown-toggle"
-                                                   data-toggle="dropdown" data-offset="0,5"><em
-                                                        class="icon ni ni-plus"></em></a>
-                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                    <ul class="link-tidy sm no-bdr">
-                                                        <li>
-                                                            <div class="custom-control custom-control-sm custom-checkbox">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                       checked="" id="bl">
-                                                                <label class="custom-control-label"
-                                                                       for="bl">Balance</label>
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <div class="custom-control custom-control-sm custom-checkbox">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                       checked="" id="ph">
-                                                                <label class="custom-control-label"
-                                                                       for="ph">Phone</label>
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <div class="custom-control custom-control-sm custom-checkbox">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                       id="vri">
-                                                                <label class="custom-control-label"
-                                                                       for="vri">Verified</label>
-                                                            </div>
-                                                        </li>
-                                                        <li>
-                                                            <div class="custom-control custom-control-sm custom-checkbox">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                       id="st">
-                                                                <label class="custom-control-label"
-                                                                       for="st">Status</label>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- .nk-tb-item -->
-                                    {% for preleve in echantillon.all %}
-                                        <div class="nk-tb-item">
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span><i
-                                                        class="fa-solid fa-vial"></i> {{ preleve.code_echantillon }}</span>
-                                            </div>
-                                            <div class="nk-tb-col">
-                                                <div class="user-card">
-                                                    <div class="user-name">
-                                                        <span class="tb-lead"><i
-                                                                class="fa-solid fa-calendar-check"></i> {{ preleve.patient }}</span>
+                                <div class="table-responsive">
+                                    <table class="table table-hover nk-tb-list">
+                                        <thead>
+                                        <tr class="nk-tb-item nk-tb-head">
+{#                                            <th class="nk-tb-col ">#}
+{#                                                <div class="custom-control custom-control-xs">#}
+{#                                                    ##}
+{#                                                </div>#}
+{#                                            </th>#}
+                                            <th class="nk-tb-col"><span>Code</span></th>
+                                            <th class="nk-tb-col"><span>Patient</span></th>
+                                            <th class="nk-tb-col"><span>Examen</span></th>
+                                            <th class="nk-tb-col"><span>Date</span></th>
+                                            <th class="nk-tb-col"><span>Resultat</span></th>
+                                            <th class="nk-tb-col text-center"><span>Statut</span></th>
+                                            <th class="nk-tb-col text-right"><span>Actions</span></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for preleve in echantillon.all %}
+                                            <tr class="nk-tb-item">
+{#                                                <td class="nk-tb-col">#}
+{#                                                    <div class="custom-control custom-control-xs text-left">#}
+{#                                                        {{ preleve.id }}#}
+{#                                                    </div>#}
+{#                                                </td>#}
+                                                <td class="nk-tb-col">
+                        <span class="badge badge-outline-primary">
+                            <i class="fas fa-vial mr-1"></i> {{ preleve.code_echantillon|default:"N/A" }}
+                        </span>
+                                                </td>
+                                                <td class="nk-tb-col">
+                                                    <div class="user-card">
+                                                        <div class="user-avatar bg-primary-dim">
+                                                            <span>{{ preleve.patient.nom|first|upper }}{{ preleve.patient.prenoms|first|upper }}</span>
+                                                        </div>
+                                                        <div class="user-info">
+                                                            <span class="tb-lead">{{ preleve.patient.nom }} {{ preleve.patient.prenoms }}</span>
+                                                            <span class="text-muted">{{ preleve.patient.code_patient }}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-sm">
-                                                <span><i
-                                                        class="fa-solid fa-calendar-check"></i> {{ preleve.type }}</span>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span><i class="fa-solid fa-virus"></i>{{ preleve.consultation }}</span>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-lg">
-                                                <span><i
-                                                        class="fa-solid fa-calendar-alt"></i>{{ preleve.created_at }}</span>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-lg">
-                                                <ul class="list-status">
-                                                    <li><span>{{ preleve.status_echantillons }}</span></li>
-                                                </ul>
-                                            </div>
+                                                </td>
 
-                                            <div class="nk-tb-col">
-                                                <span class="tb-status text-gray">{{ patient.patient.status }}</span>
+                                                <td class="nk-tb-col">
+                                                    <span>{{ preleve.examen_demande.nom|default:"N/A" }}</span>
+                                                </td>
+
+                                                <td class="nk-tb-col">
+                                                    <span class="text-soft">{{ preleve.date_collect|date:"d/m/Y H:i"|default:"N/A" }}</span>
+                                                </td>
+ <td class="nk-tb-col">
+                                                    result
+                                                </td>
+                                                <td class="nk-tb-col text-center">
+                                                    {% if preleve.status_echantillons == "En attente" %}
+                                                        <span class="badge badge-dim badge-warning">
+                                <i class="fas fa-clock mr-1"></i> {{ preleve.status_echantillons }}
+                            </span>
+                                                    {% elif preleve.status_echantillons == "Analysé" %}
+                                                        <span class="badge badge-dim badge-success">
+                                <i class="fas fa-check-circle mr-1"></i> {{ preleve.status_echantillons }}
+                            </span>
+                                                    {% elif preleve.status_echantillons == "Rejeté" %}
+                                                        <span class="badge badge-dim badge-danger">
+                                <i class="fas fa-times-circle mr-1"></i> {{ preleve.status_echantillons }}
+                            </span>
+                                                    {% else %}
+                                                        <span class="badge badge-dim badge-secondary">
+                                <i class="fas fa-question-circle mr-1"></i> {{ preleve.status_echantillons|default:"Non défini" }}
+                            </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="nk-tb-col text-right">
+
+                                                    <div class="drodown ">
+                                                        <button type="button" class="btn btn-xs btn-outline-primary mr-2"
+                                                                data-toggle="modal"
+                                                                data-target="#validatePrelevementModal{{ preleve.id }}">
+                                                            <i class="fas fa-check-circle mr-1"></i> Valider
+                                                        </button>
+                                                        <!-- ✅ MODAL -->
+                                                        <div class="modal fade"
+                                                             id="validatePrelevementModal{{ preleve.id }}" tabindex="-1"
+                                                             role="dialog"
+                                                             aria-labelledby="validatePrelevementModalLabel"
+                                                             aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered"
+                                                                 role="document">
+                                                                <div class="modal-content">
+
+                                                                    <div class="modal-header">
+                                                                        <h5 class="" id="">
+                                                                            Confirmation prélèvement
+                                                                            <strong>{{ preleve.patient }} {{ preleve.id }}</strong>
+                                                                            ?
+                                                                        </h5>
+                                                                        <button type="button" class="close"
+                                                                                data-dismiss="modal"
+                                                                                aria-label="Fermer">
+                                                                            <span aria-hidden="true">&times;</span>
+                                                                        </button>
+                                                                    </div>
+
+                                                                    <div class="modal-body">
+                                                                        <form method="POST"
+                                                                              action="{% url 'validate_serologie_vih_request' preleve_id=preleve.id %}">
+                                                                            {% csrf_token %}
+                                                                            <button type="button"
+                                                                                    class="btn btn-secondary"
+                                                                                    data-dismiss="modal">Annuler
+                                                                            </button>
+                                                                            <button type="submit"
+                                                                                    class="btn btn-success">
+                                                                                <i class="fas fa-check mr-1"></i>
+                                                                                Confirmer
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+
+                                                                    <div class="modal-footer">
+
+                                                                    </div>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <a href="#" class="btn btn-trigger btn-icon dropdown-toggle"
+                                                           data-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </a>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             style="z-index: 1">
+                                                            <ul class="link-list-opt no-bdr">
+                                                                <li>
+                                                                    <a href="#" data-toggle="modal"
+                                                                       data-target="#detailsEchantillon{{ preleve.id }}">
+                                                                        <i class="fas fa-eye mr-1"></i> Détails
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="#"><i class="fas fa-edit mr-1"></i>
+                                                                        Modifier</a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="{% url 'echantillon_detail' preleve.pk %}"><i class="fas fa-flask mr-1"></i>
+                                                                        Analyser</a>
+                                                                </li>
+                                                                <li class="divider"></li>
+                                                                <li>
+                                                                    <a href="#" class="text-danger"><i
+                                                                            class="fas fa-trash-alt mr-1"></i> Supprimer</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Modals (identique à la version originale) -->
+                            {% for preleve in echantillon.all %}
+                                <div class="modal fade" id="detailsEchantillon{{ preleve.id }}" tabindex="-1"
+                                     role="dialog">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-vial mr-2"></i> Détails du prélèvement
+                                                    #{{ preleve.code_echantillon }}
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
-                                            <div class="nk-tb-col nk-tb-col-tools">
-                                                <ul class="nk-tb-actions gx-2">
-                                                    <li class="nk-tb-action-hidden">
-                                                        <a href="#" class="btn btn-sm btn-icon btn-trigger"
-                                                           data-toggle="tooltip" data-placement="top" title="Consulter">
-                                                            <i class="fa-solid fa-edit fa-xl"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nk-tb-action-hidden">
-                                                        <a href="#" class="btn btn-sm btn-icon btn-trigger"
-                                                           data-toggle="tooltip" data-placement="top"
-                                                           title="Envoyer en Hospitalisation">
-                                                            <i class="fa-solid fa-bed-pulse fa-xl"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nk-tb-action-hidden">
-                                                        <a href="#" class="btn btn-sm btn-icon btn-trigger"
-                                                           data-toggle="tooltip" data-placement="top"
-                                                           title="Retirer de la liste">
-                                                            <i class="fa-solid fa-trash-alt fa-xl"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <div class="drodown">
-                                                            <a href="#"
-                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
-                                                               data-toggle="dropdown"><em
-                                                                    class="icon ni ni-more-h"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-                                                                    <li><a href="#"><em
-                                                                            class="icon ni ni-eye"></em><span>Voir Dossier </span></a>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="card card-bordered">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="card-title"><i
+                                                                        class="fas fa-user-injured mr-2"></i> Patient
+                                                                </h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="user-avatar bg-primary-dim mr-3">
+                                                                        <span>{{ preleve.patient.nom|first|upper }}{{ preleve.patient.prenoms|first|upper }}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h5>{{ preleve.patient.nom }} {{ preleve.patient.prenoms }}</h5>
+                                                                        <p class="text-muted mb-1">
+                                                                            Code: {{ preleve.patient.code_patient }}</p>
+                                                                        <p class="text-muted">
+                                                                            Âge: {{ preleve.patient.calculate_age }} ans</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card card-bordered mt-3">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="card-title"><i
+                                                                        class="fas fa-calendar-check mr-2"></i> Collecte
+                                                                </h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <ul class="list-group list-group-flush">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Date</span>
+                                                                        <span class="font-weight-bold">{{ preleve.created_at|date:"d/m/Y H:i" }}</span>
                                                                     </li>
-                                                                    <li><a href="#"><em
-                                                                            class="icon ni ni-repeat"></em><span>Orders</span></a>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Site</span>
+                                                                        <span class="font-weight-bold">{{ preleve.site_collect|default:"SMIT-Prelevement" }}</span>
                                                                     </li>
-                                                                    <li class="divider"></li>
-                                                                    <li><a href="#"><em
-                                                                            class="icon ni ni-shield-star"></em><span></span></a>
-                                                                    </li>
-                                                                    <li><a href="#"><em
-                                                                            class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a>
-                                                                    </li>
-                                                                    <li><a href="#"><em
-                                                                            class="fa fa-arrow-right mr-1"></em><span>Sortie</span></a>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Agent</span>
+                                                                        <span class="font-weight-bold">{{ preleve.agent_collect|default:"N/A" }}</span>
                                                                     </li>
                                                                 </ul>
                                                             </div>
                                                         </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <!-- Modal Trigger Code -->
 
-
-                                            <!-- Modal Content Code -->
-                                            <div class="modal fade" tabindex="-1"
-                                                 id="constante{{ patient.patient.id }}">
-                                                <div class="modal-dialog modal-lg" role="document">
-                                                    <div class="modal-content">
-                                                        <a href="#" class="close" data-dismiss="modal"
-                                                           aria-label="Close">
-                                                            <em class="icon ni ni-cross"></em>
-                                                        </a>
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Patient : <span
-                                                                    class="text-primary">{{ patient.patient }}</span>
-                                                                <span class="ml-20 text-gray">Prise de constantes</span>
-                                                            </h5>
-
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form method="post">
-                                                                {% csrf_token %}
-                                                                <div class="row m-4">
-                                                                    {% for field in constanteform %}
-                                                                        <div class="col-4 col-md-4 mb-3 ">
-
-                                                                            <label for="{{ field.label }}"
-                                                                                   class="form-label">{{ field.label }}</label>
-                                                                            {{ field }}
-
-                                                                            {% if field.help_text %}
-                                                                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                                                                            {% endif %}
-                                                                            {% for error in field.errors %}
-                                                                                <div class="text-danger">{{ error }}</div>
-                                                                            {% endfor %}
-                                                                        </div>
-                                                                    {% endfor %}
-                                                                    <div class="col-md-12 float-right mb-10">
-                                                                        <button type="submit"
-                                                                                class="btn btn-primary mb-10 float-right">
-                                                                            <i class="fa-solid fa-floppy-disk"> </i>
-                                                                            Enregistrer
-                                                                        </button>
-                                                                        <button type="reset"
-                                                                                class="btn btn-secondary mb-10 mr-5 float-right">
-                                                                            <i class="fa-solid fa-floppy-disk"> </i>
-                                                                            Annuler
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-
-
-                                                        </div>
-                                                        <div class="modal-footer bg-light">
-                                                            <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal fade" tabindex="-1"
-                                                 id="constanteover{{ patient.patient.id }}">
-                                                <div class="modal-dialog modal-lg" role="document">
-                                                    <div class="modal-content">
-                                                        <a href="#" class="close" data-dismiss="modal"
-                                                           aria-label="Close">
-                                                            <em class="icon ni ni-cross"></em>
-                                                        </a>
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Overview des constante du Patient :
-                                                                <span class="text-primary">{{ patient.patient }}</span>
-                                                            </h5>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="nk-block card card-bordered">
-
-                                                                {% if patient.patient.latest_constante %}
-                                                                    <h4>Deniere constante enregistrée le
-                                                                        : {{ patient.patient.latest_constante.created_at }} </h4>
-                                                                    <table class="table table-ulogs">
-                                                                        <thead class="thead-light">
-                                                                        <tr>
-                                                                            <th class="tb-col-os"><span
-                                                                                    class="overline-title">Libélé <span
-                                                                                    class="d-sm-none">/ IP</span></span>
-                                                                            </th>
-                                                                            <th class="tb-col-ip"><span
-                                                                                    class="overline-title">Valeure</span>
-                                                                            </th>
-                                                                            <th class="tb-col-time"><span
-                                                                                    class="overline-title">Observation</span>
-                                                                            </th>
-
-                                                                        </tr>
-                                                                        </thead>
-                                                                        <tbody>
-
-
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Tension systolique
-                                                                            </td>
-                                                                            <td class="tb-col-ip">
-                                                                                <span class="sub-text">{{ patient.patient.latest_constante.tension_systolique }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-                                                                                {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Tension diastolique
-                                                                            </td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.tension_diastolique }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.tension_diastolique < 60 or patient.patient.latest_constante.tension_diastolique > 90 %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                                                                {% endif %}</td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Frequence cardiaque
-                                                                            </td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.frequence_cardiaque }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.frequence_cardiaque < 60 or patient.patient.latest_constante.frequence_cardiaque > 100 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Frequence
-                                                                                respiratoire
-                                                                            </td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.frequence_respiratoire }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-                                                                                {% if patient.patient.latest_constante.frequence_respiratoire < 12 or patient.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Temperature</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.temperature }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.temperature < 36 or patient.patient.latest_constante.temperature > 37.5 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Saturation oxygene
-                                                                            </td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.saturation_oxygene }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.saturation_oxygene < 95 or patient.patient.latest_constante.saturation_oxygene > 100 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">Glycemie</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.glycemie }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.glycemie < 70 or patient.patient.latest_constante.glycemie > 140 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">poids</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.poids }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">taille</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.taille }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">pouls</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.pouls }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="tb-col-os">IMC</td>
-                                                                            <td class="tb-col-ip"><span
-                                                                                    class="sub-text">{{ patient.patient.latest_constante.imc }}</span>
-                                                                            </td>
-                                                                            <td class="tb-col-time">
-
-                                                                                {% if patient.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                    <span class="sub-text"><i
-                                                                                            class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                                                {% else %}
-                                                                                    <span class="sub-text font-italic"><i
-                                                                                            class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                                {% endif %}
-                                                                            </td>
-
-                                                                        </tr>
-                                                                        </tbody>
-                                                                    </table>
-
-                                                                {% else %}
-                                                                    Pas de constantes enregistrées
-                                                                {% endif %}
+                                                        <div class="card card-bordered mt-3">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="card-title"><i
+                                                                        class="fas fa-microscope mr-2"></i> Résultats
+                                                                </h6>
                                                             </div>
-
-
+                                                            <div class="card-body">
+                                                                <ul class="list-group list-group-flush">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Valeur</span>
+                                                                        <span class="font-weight-bold">{{ preleve.resultat|default:"N/A" }}</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </div>
-                                                        <div class="modal-footer bg-light">
-                                                            <span class="sub-text">Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="card card-bordered">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="card-title"><i class="fas fa-flask mr-2"></i>
+                                                                    Spécimen</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <ul class="list-group list-group-flush">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Type</span>
+                                                                        <span class="badge badge-{{ preleve.type.nom|lower }}">{{ preleve.type }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Examen demandé</span>
+                                                                        <span class="font-weight-bold">{{ preleve.examen_demande.nom|default:"N/A" }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Volume</span>
+                                                                        <span class="font-weight-bold">{{ preleve.volume|default:"N/A" }} ml</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Statut</span>
+                                                                        {% if preleve.status_echantillons == "En attente" %}
+                                                                            <span class="badge badge-warning">{{ preleve.status_echantillons }}</span>
+                                                                        {% elif preleve.status_echantillons == "Analysé" %}
+                                                                            <span class="badge badge-success">{{ preleve.status_echantillons }}</span>
+                                                                        {% elif preleve.status_echantillons == "Rejeté" %}
+                                                                            <span class="badge badge-danger">{{ preleve.status_echantillons }}</span>
+                                                                        {% else %}
+                                                                            <span class="badge badge-secondary">{{ preleve.status_echantillons|default:"Non défini" }}</span>
+                                                                        {% endif %}
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card card-bordered mt-3">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="card-title"><i
+                                                                        class="fas fa-box-archive mr-2"></i> Stockage
+                                                                </h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <ul class="list-group list-group-flush">
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Emplacement</span>
+                                                                        <span class="font-weight-bold">{{ preleve.storage_location|default:"N/A" }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Température</span>
+                                                                        <span class="font-weight-bold">{{ preleve.storage_temperature|default:"N/A" }}</span>
+                                                                    </li>
+                                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                        <span>Date expiration</span>
+                                                                        <span class="font-weight-bold">{{ preleve.expiration_date|default:"N/A" }}</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                    Fermer
+                                                </button>
+                                                <button type="button" class="btn btn-primary">
+                                                    <i class="fas fa-print mr-1"></i> Imprimer
+                                                </button>
                                             </div>
                                         </div>
-                                    {% endfor %}
-                                </div><!-- .nk-tb-list -->
-                            </div><!-- .card-inner -->
-                            <div class="card-inner">
-                                <ul class="pagination justify-content-center justify-content-md-start">
-                                    {% if page_obj.has_previous %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="listePatient/?page={{ page_obj.previous_page_number }}">Prev</a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                    {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
 
-                                    {% for num in page_obj.paginator.page_range %}
-                                        {% if page_obj.number == num %}
-                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                            <li class="page-item"><a class="page-link"
-                                                                     href="listePatient/?page={{ num }}">{{ num }}</a>
+                            <!-- Pagination -->
+                            <div class="card-inner">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-soft">
+                                        Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }}
+                                        sur {{ page_obj.paginator.count }} prélèvements
+                                    </div>
+                                    <ul class="pagination">
+                                        {% if page_obj.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
                                             </li>
                                         {% endif %}
-                                    {% endfor %}
 
-                                    {% if page_obj.has_next %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="listePatient/?page={{ page_obj.next_page_number }}">Next</a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                    {% endif %}
-                                </ul>
+                                        {% for num in page_obj.paginator.page_range %}
+                                            {% if page_obj.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if page_obj.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
                             </div>
-                            <!-- .card-inner -->
-                        </div><!-- .card-inner-group -->
-                    </div><!-- .card -->
-                </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal Nouveau Prélèvement -->
+    <div class="modal fade" id="newEchantillonModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-vial-circle-bolt mr-2"></i> Nouveau Prélèvement
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" action="# url 'add_echantillon' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Patient*</label>
+                                    <select class="form-control select2" name="patient" required>
+                                        <option value="">Sélectionner un patient</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.id }}">{{ patient.nom }} {{ patient.prenom }}
+                                                ({{ patient.code_patient }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Type d'échantillon*</label>
+                                    <select class="form-control" name="type_echantillon" required>
+                                        <option value="">Sélectionner un type</option>
+                                        {% for type in types_echantillon %}
+                                            <option value="{{ type.id }}">{{ type.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Examen demandé*</label>
+                                    <select class="form-control select2" name="examen_demande" required>
+                                        <option value="">Sélectionner un examen</option>
+                                        {% for examen in examens %}
+                                            <option value="{{ examen.id }}">{{ examen.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Volume (ml)</label>
+                                    <input type="number" step="0.1" class="form-control" name="volume"
+                                           placeholder="Ex: 5.0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Date de collecte</label>
+                                    <input type="datetime-local" class="form-control" name="date_collect">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Site de collecte</label>
+                                    <input type="text" class="form-control" name="site_collect"
+                                           placeholder="Ex: Bras gauche">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notes supplémentaires</label>
+                            <textarea class="form-control" name="notes" rows="3"
+                                      placeholder="Informations complémentaires..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-1"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+    <style>
+        .badge-blood {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .badge-urine {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+
+        .badge-tissue {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .card-stats {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .card-stats:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .bg-primary-dim {
+            background-color: rgba(70, 128, 255, 0.1);
+            color: #4680ff;
+        }
+
+        .bg-success-dim {
+            background-color: rgba(58, 191, 132, 0.1);
+            color: #3abf84;
+        }
+
+        .bg-danger-dim {
+            background-color: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+        }
+
+        .bg-info-dim {
+            background-color: rgba(12, 208, 223, 0.1);
+            color: #0cd0df;
+        }
+
+        .lead-text {
+            font-size: 1.1rem;
+            color: #526484;
+        }
+    </style>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            // Initialisation des select2
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Sélectionner une option'
+            });
+
+            // Gestion des modals
+            $('.modal').on('shown.bs.modal', function () {
+                $(this).find('.select2').select2({
+                    width: '100%',
+                    dropdownParent: $(this)
+                });
+            });
+
+            // Confirmation avant suppression
+            $('.btn-delete').click(function (e) {
+                e.preventDefault();
+                if (confirm('Voulez-vous vraiment supprimer ce prélèvement ?')) {
+                    window.location = $(this).attr('href');
+                }
+            });
+        });
+    </script>
 {% endblock %}

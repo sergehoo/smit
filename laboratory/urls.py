@@ -5,7 +5,8 @@ from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateVi
     AnalyseUpdateView, ExamenListView, ExamenDetailView, ExamenCreateView, ExamenUpdateView, ExamenDeleteView, \
     ExamenResultatsListView, create_echantillon, delete_echantillon, EchantillonListView, \
     create_echantillon_consultation_generale, delete_echantillon_consultation_generale, ExamenDoneListView, \
-    update_examen_result, export_examens_done, examens_by_type_paginated
+    update_examen_result, export_examens_done, examens_by_type_paginated, EchantillonCreateView, request_serologie_vih, \
+    validate_serologie_vih_request, EchantillonDetailView, update_echantillon_result
 from smitci import settings
 
 urlpatterns = [
@@ -19,7 +20,18 @@ urlpatterns = [
                   path('analyses/<int:pk>/delete/', AnalyseDeleteView.as_view(), name='analyse_delete'),
 
                   # URLS pour echantillon
+
+                  path('validate_serologie_vih_request/<int:preleve_id>/', validate_serologie_vih_request,
+                       name='validate_serologie_vih_request'),
                   path('prelevements/', EchantillonListView.as_view(), name='echantillons_list'),
+                  path('echantillons/<int:pk>/', EchantillonDetailView.as_view(), name='echantillon_detail'),
+                  path('echantillon/<int:pk>/update-result/', update_echantillon_result,
+                       name='update_echantillon_result'),
+
+                  path('echantillons/nouveau/', EchantillonCreateView.as_view(), name='echantillon_create'),
+
+                  path('request_serologie_vih', request_serologie_vih, name='request_serologie_vih'),
+
                   path('update_examen/<int:examen_id>/', update_examen_result, name='update_examen_result'),
 
                   # URLS pour echantillon

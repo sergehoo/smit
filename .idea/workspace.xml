@@ -5,17 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/smit/templates/laboratoire/echantillon_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/laboratoire/echantillon_form.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/rendezvous_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/laboratory/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/laboratory/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/laboratory/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/laboratory/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/custom_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/custom_filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/echantillon_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/echantillon_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/logs/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/logs/django_errors.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -228,7 +230,7 @@
       <workItem from="1749600399291" duration="7704000" />
       <workItem from="1750205743050" duration="14070000" />
       <workItem from="1751483378772" duration="43757000" />
-      <workItem from="1752410257173" duration="54006000" />
+      <workItem from="1752410257173" duration="76280000" />
     </task>
     <servers />
   </component>
@@ -256,7 +258,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1490</line>
+          <line>1500</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -346,7 +348,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/laboratory/views.py</url>
-          <line>83</line>
+          <line>87</line>
           <option name="timeStamp" value="40" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -376,7 +378,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1552</line>
+          <line>1562</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -391,8 +393,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1980</line>
+          <line>1990</line>
           <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/smit/views.py</url>
+          <line>1445</line>
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="django-line">
           <url>file://$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html</url>
@@ -403,6 +410,11 @@
           <url>file://$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html</url>
           <line>1051</line>
           <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="django-line">
+          <url>file://$PROJECT_DIR$/smit/templates/pages/bilans/bilan_detail.html</url>
+          <line>151</line>
+          <option name="timeStamp" value="56" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

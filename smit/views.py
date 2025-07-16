@@ -45,7 +45,7 @@ from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, Consu
     RendezVousSuiviForm, ProtocoleForm
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV, BilanInitial, \
-    TypeBilanParaclinique, ExamenStandard, BilanParaclinique
+    TypeBilanParaclinique, ExamenStandard, BilanParaclinique, Echantillon
 
 
 # Create your views here.
@@ -1450,22 +1450,32 @@ class ConsultationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['service'] = self.object.service  # Ajoutez le service parent au contexte
-        context['formconsult'] = ConsultationCreateForm()  # Ajoutez le service parent au contexte
+        consultation = self.object  # 🔑 la consultation actuelle
+
+        # ✅ Vérifier s'il y a déjà un échantillon pour sérologie VIH
+        serologie_vih_exist = Echantillon.objects.filter(
+            consultation=consultation,
+            patient=consultation.patient,
+            # examen_demande__nom__icontains="VIH"
+        ).exists()
+
+        context['serologie_vih_exist'] = serologie_vih_exist
+
+        # ✅ Tout ton contexte habituel
+        context['formconsult'] = ConsultationCreateForm()
         context['examen_form'] = ExamenForm()
         context['prescription_form'] = PrescriptionForm()
         context['antecedentsMedicaux_form'] = AntecedentsMedicauxForm()
         context['allergies_form'] = AllergiesForm()
         context['conseils_form'] = ConseilsForm()
-        # context['EnqueteVihForm'] = EnqueteVihForm()
         context['hospit_form'] = HospitalizationSendForm()
         context['hospit_request'] = HospitalizationForm()
         context['depistage_form'] = TestRapideVIHForm()
         context['prelevement_form'] = EchantillonForm()
         context['suivisform'] = SuiviSendForm()
-
         context['symptomes_form'] = SymptomesForm()
         context['symptomes_forms'] = [SymptomesForm(prefix=str(i)) for i in range(1)]
+
         return context
 
 
@@ -2099,6 +2109,7 @@ class UrgenceCreateView(LoginRequiredMixin, CreateView):
 
 
 # vue corrigée
+@login_required
 def create_bilan_initial(request, consultation_id, patient_id):
     consultation = get_object_or_404(Consultation, pk=consultation_id)
     patient = get_object_or_404(Patient, pk=patient_id)
@@ -2116,7 +2127,7 @@ def create_bilan_initial(request, consultation_id, patient_id):
                 "Sérologie Syphilis",
             ]
 
-            # Vérifie s'il existe déjà un BilanInitial global pour ce patient
+            # Vérifie s'il existe déjà un bilan
             bilan_initial = BilanInitial.objects.filter(
                 patient=patient,
                 description__icontains="Bilan initial VIH",
@@ -2134,6 +2145,7 @@ def create_bilan_initial(request, consultation_id, patient_id):
                 )
 
             examens_ajoutes = 0
+            prelevements_crees = 0
 
             for examen_nom in examens_vih:
                 examen = ExamenStandard.objects.filter(
@@ -2142,28 +2154,51 @@ def create_bilan_initial(request, consultation_id, patient_id):
                 ).first()
 
                 if not examen:
-                    messages.warning(request, f"L'examen '{examen_nom}' n'existe pas dans le type '{type_bilan}'.")
+                    messages.warning(request, f"L'examen '{examen_nom}' n'existe pas pour '{type_bilan}'.")
                     continue
 
                 if not bilan_initial.examens.filter(pk=examen.pk).exists():
                     bilan_initial.examens.add(examen)
                     examens_ajoutes += 1
 
-            if examens_ajoutes:
-                messages.success(
-                    request,
-                    f"{examens_ajoutes} examens ajoutés au bilan initial VIH pour {patient}."
-                )
-            else:
-                messages.info(request, "Aucun examen n'a été ajouté car ils existent déjà ou sont manquants.")
-        # generate_bilan_pdf.delay(bilan.pk)
+                # Créer un échantillon seulement si inexistant
+                echantillon_existe = Echantillon.objects.filter(
+                    consultation=consultation,
+                    patient=patient,
+                    examen_demande=examen
+                ).exists()
+
+                if not echantillon_existe:
+                    echantillon = Echantillon.objects.create(
+                        code_echantillon=generate_echantillon_code(),
+                        examen_demande=examen,
+                        patient=patient,
+                        consultation=consultation,
+                        status_echantillons='Demande',
+                    )
+                    prelevements_crees += 1
+
+            messages.success(
+                request,
+                f"✅ {examens_ajoutes} examens ajoutés au bilan et {prelevements_crees} demandes de prélèvement créées."
+                if examens_ajoutes or prelevements_crees
+                else "⚠️ Aucun nouvel examen ou prélèvement n'a été créé."
+            )
 
     except IntegrityError:
-        messages.error(request, "Une erreur est survenue pendant la création du bilan initial. Veuillez réessayer.")
+        messages.error(request, "Erreur lors de la création du bilan initial. Veuillez réessayer.")
     except Exception as e:
         messages.error(request, f"Erreur inattendue : {str(e)}")
 
     return redirect('consultation_detail', pk=consultation_id)
+
+
+def generate_echantillon_code():
+    """
+    Génère un code échantillon unique : un entier de 8 chiffres commençant par 2
+    """
+    import random
+    return str(random.randint(20000000, 29999999))
 
 
 class BilanListView(LoginRequiredMixin, ListView):
@@ -2206,6 +2241,20 @@ class BilanDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        bilan = self.object
+
+        # Prépare un mapping examen_id → échantillon (si existant)
+        echantillons_map = {}
+
+        for examen in bilan.examens.all():
+            echantillon = Echantillon.objects.filter(
+                examen_demande=examen,
+                patient=bilan.patient,
+                consultation=bilan.consultation
+            ).order_by('-created_at').first()
+            echantillons_map[examen.id] = echantillon
+
+        context['echantillons_map'] = echantillons_map
         return context
 
 

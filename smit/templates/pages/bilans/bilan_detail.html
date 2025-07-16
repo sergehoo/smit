@@ -1,5 +1,6 @@
 {% extends 'layout/base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="nk-content nk-content-fluid">
@@ -149,33 +150,64 @@
                     </div>
                     <div class="card-body">
                         {% if bilan.examens.all %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Nom de l'examen</th>
-                                        <th>Type</th>
-                                        <th>Description</th>
-                                        <th>Résultat</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for examen in bilan.examens.all %}
-                                    <tr>
-                                        <td>{{ examen.code }}</td>
-                                        <td>{{ examen.nom }}</td>
-                                        <td>{{ examen.type_examen.nom }}</td>
-                                        <td>{{ examen.description|truncatewords:10 }}</td>
-                                        <td>{{ examen.result }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>Code</th>
+                <th>Nom de l'examen</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Résultat</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for examen in bilan.examens.all %}
+            <tr>
+                <td>
+  {% with echantillon=echantillons_map|get_item:examen.id %}
+    {% if echantillon %}<a href="{% url 'echantillon_detail' pk=echantillon.id %}" class="btn btn-sm btn-outline-primary mt-1">
+        {{ echantillon.code_echantillon }}
+     </a>
+    {% else %}
+      <span class="text-muted">Aucun prélèvement</span>
+    {% endif %}
+  {% endwith %}
+</td>
+                <td>{{ examen.nom }}</td>
+                <td>{{ examen.type_examen.nom }}</td>
+                <td>{{ examen.description|truncatewords:10 }}</td>
+                <td>
+                    {% with echantillon=echantillons_map|get_item:examen.id %}
+                        {% if echantillon %}
+                            <span class="badge badge-{% if echantillon.resultat == 'Négatif' %}success{% elif echantillon.resultat == 'Positif' %}danger{% else %}secondary{% endif %}">
+                                {{ echantillon.resultat|default:"En attente" }}
+                            </span>
                         {% else %}
-                        <div class="alert alert-warning">Aucun examen demandé pour ce bilan</div>
+                            <span class="text-muted">Non renseigné</span>
                         {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with echantillon=echantillons_map|get_item:examen.id %}
+  {% if echantillon %}
+    <a href="{% url 'echantillon_detail' pk=echantillon.id %}" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-eye"></i> Voir Prélèvement
+    </a>
+  {% else %}
+    <span class="text-muted">-</span>
+  {% endif %}
+{% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning">Aucun examen demandé pour ce bilan</div>
+{% endif %}
                     </div>
                 </div>
             </div>

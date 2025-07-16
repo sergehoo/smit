@@ -1,9 +1,12 @@
 import json
+import random
 from collections import defaultdict
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -14,11 +17,12 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin, RequestConfig, LazyPaginator, SingleTableView
 
+from core.models import Patient
 from core.ressources import BilanParacliniqueResource
 from core.tables import BilanParacliniqueTable
 from smit.filters import ExamenDoneFilter, ExamenFilter
 from smit.forms import EchantillonForm, BilanParacliniqueResultForm
-from smit.models import Examen, Analyse, Consultation, Echantillon, BilanParaclinique
+from smit.models import Examen, Analyse, Consultation, Echantillon, BilanParaclinique, ExamenStandard
 
 
 # Create your views here.
@@ -99,7 +103,6 @@ def delete_echantillon_consultation_generale(request, echantillon_id, consultati
 @login_required
 @require_POST
 def update_examen_result(request, examen_id):
-
     examen = get_object_or_404(BilanParaclinique, id=examen_id)
 
     result = request.POST.get("result")
@@ -314,3 +317,203 @@ class EchantillonListView(ListView):
     model = Echantillon
     template_name = 'echantillon_list.html'  # Nom du template à créer
     context_object_name = 'echantillon'
+    ordering = ['-created_at']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Comptes dynamiques
+        total_en_attente = Echantillon.objects.filter(status_echantillons='Demande').count()
+        total_analyse = Echantillon.objects.filter(status_echantillons='Analysé').count()
+        total_rejete = Echantillon.objects.filter(status_echantillons='Rejeté').count()
+        total_stock = Echantillon.objects.filter(used=False).count()
+
+        # Tu peux ajouter un pourcentage si tu veux les barres de progression réalistes
+        total_all = Echantillon.objects.count() or 1  # éviter division par zéro
+
+        context['total_en_attente'] = total_en_attente
+        context['pourcent_en_attente'] = round(total_en_attente / total_all * 100)
+
+        context['total_analyse'] = total_analyse
+        context['pourcent_analyse'] = round(total_analyse / total_all * 100)
+
+        context['total_rejete'] = total_rejete
+        context['pourcent_rejete'] = round(total_rejete / total_all * 100)
+
+        context['total_stock'] = total_stock
+        context['pourcent_stock'] = round(total_stock / total_all * 100)
+
+        return context
+
+
+@login_required
+def request_serologie_vih(request):
+    patient_id = request.GET.get('patient')
+    consultation_id = request.GET.get('consultation')
+
+    patient = get_object_or_404(Patient, pk=patient_id)
+    consultation = get_object_or_404(Consultation, pk=consultation_id)
+
+    # Optionnel : tu peux chercher un `Examen` standardisé pour sérologie VIH
+    examen = ExamenStandard.objects.filter(nom__icontains='Sérologie VIH').first()
+
+    Echantillon.objects.create(
+        patient=patient,
+        consultation=consultation,
+        examen_demande=examen,
+        status_echantillons='Demande',
+        test_rapid=True
+    )
+
+    messages.success(request, "✅ Demande de prélèvement sérologie VIH créée.")
+    return redirect('consultation_detail', pk=consultation_id)
+
+
+def generate_echantillon_code():
+    """
+    Génère un code échantillon à 8 chiffres, commençant par 2.
+    Exemple : 23456789
+    """
+    code = f"2{random.randint(1000000, 9999999)}"
+    return code
+
+
+@login_required
+def validate_serologie_vih_request(request, preleve_id):
+    # ⚡️ Récupérer l’échantillon existant
+    echantillon = get_object_or_404(Echantillon, pk=preleve_id)
+
+    # Vérifier si déjà validé
+    if echantillon.status_echantillons == 'Validé':
+        messages.info(request, "✅ Cette demande est déjà validée.")
+        return redirect('echantillons_list')
+
+    # Compléter les champs si besoin
+    echantillon.status_echantillons = 'Validé'
+
+    # S'assurer que l’examen demandé est bien un Examen VIH
+    if not echantillon.examen_demande:
+        examen_vih = ExamenStandard.objects.filter(
+            nom__icontains="VIH"
+        ).first()
+        if examen_vih:
+            echantillon.examen_demande = examen_vih
+
+    # Générer un code si absent
+    if not echantillon.code_echantillon:
+        echantillon.code_echantillon = f"2{random.randint(1000000, 9999999)}"
+
+    echantillon.save()
+
+    messages.success(request, "✅ Demande de prélèvement validée et mise à jour.")
+    return redirect('echantillons_list')
+
+
+@login_required
+def update_echantillon_result(request, pk):
+    echantillon = get_object_or_404(Echantillon, pk=pk)
+
+    if request.method == 'POST':
+        echantillon.resultat = request.POST.get('resultat')
+        date_analyse = request.POST.get('date_analyse')
+        if date_analyse:
+            echantillon.date_analyse = datetime.strptime(date_analyse, '%Y-%m-%dT%H:%M')
+        echantillon.commentaire_resultat = request.POST.get('commentaire', '')
+        echantillon.save()
+
+        messages.success(request, 'Le résultat a été mis à jour avec succès.')
+        return redirect('echantillon_detail', pk=echantillon.pk)
+
+    return redirect('echantillon_detail', pk=echantillon.pk)
+
+
+class EchantillonDetailView(DetailView):
+    model = Echantillon
+    template_name = 'laboratoire/echantillon_detail.html'
+    context_object_name = 'echantillon'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        echantillon = self.object
+
+        # Historique des modifications
+        context['history'] = echantillon.history.all()[:5]
+
+        # Statut du prélèvement
+        context['status_info'] = self.get_status_info(echantillon)
+
+        # Informations complémentaires
+        context['storage_info'] = {
+            'location': echantillon.storage_location or "Non spécifié",
+            'temperature': echantillon.storage_temperature or "Non spécifié",
+        }
+
+        return context
+
+    def get_status_info(self, echantillon):
+        """Retourne les informations de statut formatées"""
+        status_map = {
+            'En attente': {'class': 'warning', 'icon': 'clock'},
+            'Analysé': {'class': 'success', 'icon': 'check-circle'},
+            'Rejeté': {'class': 'danger', 'icon': 'times-circle'},
+            'Stocké': {'class': 'info', 'icon': 'box'}
+        }
+        status = echantillon.status_echantillons or 'En attente'
+        return {
+            'text': status,
+            'class': status_map.get(status, {}).get('class', 'secondary'),
+            'icon': status_map.get(status, {}).get('icon', 'question-circle')
+        }
+
+
+class EchantillonCreateView(CreateView):
+    model = Echantillon
+    template_name = 'laboratoire/echantillon_form.html'
+    fields = [
+        'code_echantillon', 'examen_demande', 'type', 'cathegorie',
+        'patient', 'consultation', 'suivi', 'date_collect', 'site_collect',
+        'agent_collect', 'volume', 'storage_information', 'storage_location',
+        'storage_temperature',
+        'status_echantillons',  # Assure-toi qu'il est dans ton modèle
+        'linked', 'used',  # Très utile pour les tests rapides
+        'resultat',  # Si tu l’as ajouté pour VIH antigénique
+    ]
+    success_url = reverse_lazy('echantillon_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        # ✅ Fermer correctement ton Q(...)
+        form.fields['patient'].queryset = Patient.objects.filter(
+            Q(status='actif') | Q(status='hospitalisé')
+        )
+
+        form.fields['date_collect'].widget.attrs.update({'class': 'datetimepicker'})
+
+        form.fields['examen_demande'].queryset = Examen.objects.all()
+
+        return form
+
+    def form_valid(self, form):
+        # ✅ Génère un code unique
+        form.instance.code_echantillon = self.generate_echantillon_code()
+
+        # ✅ Si ton modèle a bien created_by
+        if hasattr(form.instance, 'created_by'):
+            form.instance.created_by = self.request.user
+
+        response = super().form_valid(form)
+        messages.success(self.request, "✅ Prélèvement créé avec succès !")
+        return response
+
+    def generate_echantillon_code(self):
+        """Génère un code unique basé sur date/heure"""
+        prefix = "ECH"
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        return f"{prefix}{timestamp}"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Nouveau Prélèvement"
+        context['help_text'] = "Remplissez tous les champs requis pour enregistrer un nouveau prélèvement."
+        return context

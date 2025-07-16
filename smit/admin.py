@@ -33,10 +33,10 @@ class EchantillonAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Informations générales", {
-            "fields": ("code_echantillon", "patient", "examen_demande", "consultation", "date_collect", "site_collect", "agent_collect")
+            "fields": ("code_echantillon", "patient", "examen_demande",'suivi', "consultation", "date_collect", "site_collect", "agent_collect")
         }),
         ("Stockage et état", {
-            "fields": ("status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume", "expiration_date")
+            "fields": ("status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume")
         }),
         ("État de l'échantillon", {
             "fields": ("linked", "used")
