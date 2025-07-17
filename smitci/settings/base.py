@@ -185,10 +185,22 @@ DBBACKUP_STORAGE_OPTIONS = {'location': os.path.join(BASE_DIR, 'dbbackup/')}
 PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
 
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
-# Configurer pour que la session expire uniquement après inactivité
-SESSION_SAVE_EVERY_REQUEST = False  # La session ne sera pas prolongée à chaque requête
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Durée de vie du cookie de session (30 jours)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 jours
+
+# Le cookie sera transmis uniquement en HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Le cookie n'est pas accessible depuis JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax'  # 'Strict' si tu veux bloquer les requêtes inter-sites (moins souple)
+
+# Permet de garder la session même après fermeture du navigateur
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Tu peux activer ceci si tu veux prolonger la session à chaque requête :
+# SESSION_SAVE_EVERY_REQUEST = True  # (optionnel selon besoin)
 
 ACCOUNT_ADAPTER = 'core.account_adapter.NoNewUsersAccountAdapter'
 LOGOUT_REDIRECT_URL = 'account_login'
@@ -210,8 +222,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_CHANGE_PASSWORD_REDIRECT_URL = "/accounts/password/change/"
 ACCOUNT_RESET_PASSWORD_REDIRECT_URL = "/accounts/password/reset/done/"
 #
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -243,10 +254,14 @@ USE_L10N = True
 # Configuration de base
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
-AXES_LOCK_OUT_AT_FAILURE = True
+
 AXES_COOLOFF_TIME = 1  # durée en heures avant déblocage auto
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
 AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+
+AXES_LOCKOUT_PARAMETERS = [['username', 'ip_address']]
+AXES_VERBOSE = True  # Pour logguer dans la console
+AXES_FAILURE_LOG_PER_USER_LIMIT = 100  # Historique d’échecs par user
 
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
