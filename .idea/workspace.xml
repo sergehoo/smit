@@ -4,19 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pharmacy/templates/partials/pagination.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_form.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
-    </list>
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -232,7 +220,7 @@
       <workItem from="1750205743050" duration="14070000" />
       <workItem from="1751483378772" duration="43757000" />
       <workItem from="1752410257173" duration="91623000" />
-      <workItem from="1752916445497" duration="13482000" />
+      <workItem from="1752916445497" duration="13823000" />
     </task>
     <servers />
   </component>
