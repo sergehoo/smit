@@ -1,0 +1,62 @@
+{% if is_paginated %}
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.date_range %}&date_range={{ filters.date_range }}{% endif %}{% if filters.medicament %}&medicament={{ filters.medicament }}{% endif %}" aria-label="Première">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.date_range %}&date_range={{ filters.date_range }}{% endif %}{% if filters.medicament %}&medicament={{ filters.medicament }}{% endif %}" aria-label="Précédente">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&laquo;&laquo;</span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">&laquo;</span>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.date_range %}&date_range={{ filters.date_range }}{% endif %}{% if filters.medicament %}&medicament={{ filters.medicament }}{% endif %}">{{ num }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.date_range %}&date_range={{ filters.date_range }}{% endif %}{% if filters.medicament %}&medicament={{ filters.medicament }}{% endif %}" aria-label="Suivante">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if filters.type %}&type={{ filters.type }}{% endif %}{% if filters.date_range %}&date_range={{ filters.date_range }}{% endif %}{% if filters.medicament %}&medicament={{ filters.medicament }}{% endif %}" aria-label="Dernière">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">&raquo;</span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">&raquo;&raquo;</span>
+            </li>
+        {% endif %}
+    </ul>
+
+    <div class="text-center text-muted mt-2">
+        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }} -
+        Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ page_obj.paginator.count }} mouvements
+    </div>
+</nav>
+{% endif %}

@@ -1,0 +1,300 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <h5 class="card-title">{{ title }}</h5>
+                            <div class="text-muted">
+                                Créé il y a {{ time_since_creation|naturaltime }}
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Section Principale -->
+                            <div class="col-lg-8">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Médicament</span>
+                                                    <span class="detail-value">
+                                                        <a href="{% url 'medicaments-detail' mouvement.medicament.id %}">
+                                                            {{ mouvement.medicament.nom }}
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Type</span>
+                                                    <span class="detail-value">
+                                                        <span class="badge badge-{% if mouvement.type_mouvement == 'Entrée' %}success{% else %}danger{% endif %}">
+                                                            {{ mouvement.type_mouvement }}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Quantité</span>
+                                                    <span class="detail-value">{{ mouvement.quantite }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Date</span>
+                                                    <span class="detail-value">{{ mouvement.date_mouvement|date:"d/m/Y H:i" }}</span>
+                                                </div>
+                                            </div>
+
+                                            {% if mouvement.type_mouvement == 'Entrée' %}
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Fournisseur</span>
+                                                    <span class="detail-value">
+                                                        {% if mouvement.fournisseur %}
+                                                            <a href="# url 'fournisseur_detail' mouvement.fournisseur.id %}">
+                                                                {{ mouvement.fournisseur.nom }}
+                                                            </a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Commande</span>
+                                                    <span class="detail-value">
+                                                        {% if mouvement.commande %}
+                                                            <a href="{% url 'commandes-detail' mouvement.commande.id %}">
+                                                                #{{ mouvement.commande.numero }}
+                                                            </a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Patient</span>
+                                                    <span class="detail-value">
+                                                        {% if mouvement.patient %}
+                                                            <a href="{% url 'patient_detail' mouvement.patient.id %}">
+                                                                {{ mouvement.patient.nom_complet }}
+                                                            </a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Employé</span>
+                                                    <span class="detail-value">
+                                                        {% if mouvement.employee %}
+                                                            {{ mouvement.employee.nom_complet }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Pharmacie</span>
+                                                    <span class="detail-value">
+                                                        {% if mouvement.pharmacie %}
+                                                            {{ mouvement.pharmacie.nom }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section Notes/Historique -->
+                                <div class="card card-bordered mt-4">
+                                    <div class="card-inner">
+                                        <h6 class="title">Notes</h6>
+                                        {% if mouvement.notes %}
+                                            <p>{{ mouvement.notes }}</p>
+                                        {% else %}
+                                            <p class="text-muted">Aucune note associée à ce mouvement.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar avec Statistiques -->
+                            <div class="col-lg-4">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <h6 class="title">Statistiques du médicament</h6>
+
+                                        <div class="stats-summary">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Stock actuel</span>
+                                                <span class="stat-value">{{ mouvement.medicament.stock }}</span>
+                                            </div>
+
+                                            <div class="stat-item">
+                                                <span class="stat-label">Total entrées</span>
+                                                <span class="stat-value text-success">{{ stats.total_entrees }}</span>
+                                            </div>
+
+                                            <div class="stat-item">
+                                                <span class="stat-label">Total sorties</span>
+                                                <span class="stat-value text-danger">{{ stats.total_sorties }}</span>
+                                            </div>
+
+                                            <div class="stat-item">
+                                                <span class="stat-label">Mouvements totaux</span>
+                                                <span class="stat-value">{{ stats.mouvements_count }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Derniers mouvements -->
+                                <div class="card card-bordered mt-4">
+                                    <div class="card-inner">
+                                        <h6 class="title">Derniers mouvements</h6>
+
+                                        <ul class="movement-list">
+                                            {% for mvt in stock_history %}
+                                            <li class="movement-item {% if mvt.id == mouvement.id %}current{% endif %}">
+                                                <div class="movement-type">
+                                                    <span class="badge badge-{% if mvt.type_mouvement == 'Entrée' %}success{% else %}danger{% endif %}">
+                                                        {{ mvt.type_mouvement|slice:":1" }}
+                                                    </span>
+                                                </div>
+                                                <div class="movement-details">
+                                                    <span class="movement-quantity">{{ mvt.quantite }}</span>
+                                                    <span class="movement-date">{{ mvt.date_mouvement|date:"d/m H:i" }}</span>
+                                                </div>
+                                                {% if mvt.id != mouvement.id %}
+                                                <div class="movement-action">
+                                                    <a href="{% url 'mouvementstock_detail' mvt.id %}" class="btn btn-sm btn-dim">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </li>
+                                            {% empty %}
+                                            <li class="text-muted">Aucun autre mouvement trouvé</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="{% url 'mouvement-stock' %}" class="btn btn-light">
+                                <em class="icon ni ni-arrow-left"></em> Retour à la liste
+                            </a>
+                            <div>
+                                <a href="# url 'mouvementstock_update' mouvement.id %}" class="btn btn-primary">
+                                    <em class="icon ni ni-edit"></em> Modifier
+                                </a>
+                                <a href="# url 'mouvementstock_delete' mouvement.id %}" class="btn btn-danger">
+                                    <em class="icon ni ni-trash"></em> Supprimer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-item {
+    margin-bottom: 1rem;
+}
+.detail-label {
+    display: block;
+    font-weight: 500;
+    color: #526484;
+    font-size: 0.875rem;
+}
+.detail-value {
+    display: block;
+    font-size: 1rem;
+    color: #364a63;
+}
+.stats-summary {
+    padding: 0.5rem 0;
+}
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f2f3;
+}
+.stat-label {
+    font-weight: 500;
+}
+.stat-value {
+    font-weight: 600;
+}
+.movement-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.movement-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f2f3;
+}
+.movement-item.current {
+    background-color: #f8f9fa;
+}
+.movement-type {
+    width: 30px;
+}
+.movement-details {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+.movement-quantity {
+    font-weight: 500;
+}
+.movement-date {
+    color: #8a9099;
+    font-size: 0.875rem;
+}
+.movement-action {
+    width: 40px;
+    text-align: right;
+}
+</style>
+{% endblock %}

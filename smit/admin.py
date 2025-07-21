@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -13,7 +14,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
     ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
     Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation, Echantillon, \
-    BilanInitial
+    BilanInitial, ResultatAnalyse
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -33,15 +34,162 @@ class EchantillonAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Informations générales", {
-            "fields": ("code_echantillon", "patient", "examen_demande",'suivi', "consultation", "date_collect", "site_collect", "agent_collect")
+            "fields": (
+            "code_echantillon", "patient", "examen_demande", 'suivi', "consultation", "date_collect", "site_collect",
+            "agent_collect")
         }),
         ("Stockage et état", {
-            "fields": ("status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume")
+            "fields": (
+            "status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume")
         }),
         ("État de l'échantillon", {
             "fields": ("linked", "used")
         }),
     )
+
+
+@admin.register(ResultatAnalyse)
+class ResultatAnalyseAdmin(ImportExportModelAdmin):
+    list_display = (
+        'get_echantillon_link',
+        'valeur',
+        'unite',
+        'get_status_badge',
+        'date_resultat',
+        'valide_par',
+        'get_fichier_link',
+        'created_at'
+    )
+    list_filter = (
+        'status',
+        'date_resultat',
+        'valide_par',
+        'echantillon__type',
+    )
+    search_fields = (
+        'echantillon__code_echantillon',
+        'echantillon__dossier__fact_numero',
+        'echantillon__patient__nom',
+        'echantillon__patient__prenom',
+        'valeur',
+        'texte_extrait',
+    )
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+        'get_texte_extrait_preview',
+        'get_fichier_preview',
+    )
+    fieldsets = (
+        ('Informations de base', {
+            'fields': (
+                'echantillon',
+                ('valeur', 'unite', 'valeur_reference'),
+                'interpretation',
+                'status',
+                'valide_par',
+                'date_resultat',
+            )
+        }),
+        ('Fichier et contenu', {
+            'fields': (
+                'fichier_resultat',
+                'get_fichier_preview',
+                'get_texte_extrait_preview',
+            )
+        }),
+        ('Métadonnées', {
+            'fields': (
+                ('created_at', 'updated_at'),
+            )
+        }),
+    )
+    # autocomplete_fields = ['echantillon', 'valide_par']
+    date_hierarchy = 'date_resultat'
+    ordering = ('-date_resultat',)
+    list_per_page = 20
+    actions = ['valider_resultats', 'rejeter_resultats']
+
+    def get_echantillon_link(self, obj):
+        link = reverse("admin:logistique_echantillon_change", args=[obj.echantillon.id])
+        return format_html('<a href="{}">{}</a>', link, obj.echantillon)
+
+    get_echantillon_link.short_description = "Échantillon"
+    get_echantillon_link.admin_order_field = 'echantillon'
+
+    def get_fichier_link(self, obj):
+        if obj.fichier_resultat:
+            return format_html(
+                '<a href="{}" target="_blank">📄 {}</a>',
+                obj.fichier_resultat.url,
+                obj.nom_fichier
+            )
+        return "-"
+
+    get_fichier_link.short_description = "Fichier"
+
+    def get_fichier_preview(self, obj):
+        if obj.fichier_resultat:
+            return mark_safe(f"""
+                <div>
+                    <a href="{obj.fichier_resultat.url}" target="_blank">
+                        <i class="fas fa-file-pdf"></i> Télécharger le fichier
+                    </a>
+                </div>
+            """)
+        return "Aucun fichier"
+
+    get_fichier_preview.short_description = "Aperçu du fichier"
+
+    def get_texte_extrait_preview(self, obj):
+        if obj.texte_extrait:
+            preview = obj.texte_extrait[:300] + ('...' if len(obj.texte_extrait) > 300 else '')
+            return format_html(
+                '<div style="max-height: 200px; overflow: auto; padding: 10px; border: 1px solid #eee; background: #f9f9f9;">{}</div>',
+                preview)
+        return "Aucun texte extrait"
+
+    get_texte_extrait_preview.short_description = "Contenu extrait"
+
+    def get_status_badge(self, obj):
+        status_colors = {
+            'draft': 'secondary',
+            'pending': 'warning',
+            'validated': 'success',
+            'rejected': 'danger',
+            'corrected': 'info',
+        }
+        return format_html(
+            '<span class="badge badge-{}">{}</span>',
+            status_colors.get(obj.status, 'secondary'),
+            obj.get_status_display()
+        )
+
+    get_status_badge.short_description = "Statut"
+    get_status_badge.admin_order_field = 'status'
+
+    @admin.action(description="Valider les résultats sélectionnés")
+    def valider_resultats(self, request, queryset):
+        updated = queryset.filter(status__in=['draft', 'pending', 'corrected']) \
+            .update(status='validated', valide_par=request.user)
+        self.message_user(request, f"{updated} résultats validés avec succès.")
+
+    @admin.action(description="Rejeter les résultats sélectionnés")
+    def rejeter_resultats(self, request, queryset):
+        updated = queryset.exclude(status='validated') \
+            .update(status='rejected')
+        self.message_user(request, f"{updated} résultats rejetés avec succès.")
+
+    class Media:
+        css = {
+            'all': ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css']
+        }
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if not request.user.is_superuser:
+            qs = qs.filter(echantillon__agent_collect=request.user)
+        return qs.select_related('echantillon', 'valide_par', 'echantillon__patient')
 
 
 @admin.register(Appointment)
@@ -159,7 +307,6 @@ class AllergiesAdmin(admin.ModelAdmin):
     pass
 
 
-
 @admin.register(Symptomes)
 class AllergiesAdmin(admin.ModelAdmin):
     pass
@@ -190,7 +337,7 @@ class AnalyseAdmin(admin.ModelAdmin):
 
 @admin.register(Hospitalization)
 class HospitalizationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'patient','bed']
+    list_display = ['id', 'patient', 'bed']
 
 
 @admin.register(Prescription)
@@ -442,9 +589,9 @@ class BilanInitialAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'patient__nom', 'patient__prenoms', 'patient__code_patient',
-         'description', 'comment'
+        'description', 'comment'
     )
-    autocomplete_fields = ('patient', )
+    autocomplete_fields = ('patient',)
     filter_horizontal = ('examens',)
     readonly_fields = ('created_at', 'updated_at')
     date_hierarchy = 'created_at'
@@ -455,6 +602,7 @@ class BilanInitialAdmin(admin.ModelAdmin):
     def patient_link(self, obj):
         url = reverse('admin:core_patient_change', args=[obj.patient.id])
         return format_html('<a href="{}">{}</a>', url, obj.patient)
+
     patient_link.short_description = 'Patient'
     patient_link.admin_order_field = 'patient__nom'
 
@@ -470,6 +618,7 @@ class BilanInitialAdmin(admin.ModelAdmin):
             colors.get(obj.status, 'secondary'),
             obj.get_status_display()
         )
+
     status_badge.short_description = 'Statut'
 
     def priority_badge(self, obj):
@@ -484,6 +633,7 @@ class BilanInitialAdmin(admin.ModelAdmin):
             colors.get(obj.priority, 'info'),
             obj.get_priority_display()
         )
+
     priority_badge.short_description = 'Priorité'
 
     def is_critical_display(self, obj):
@@ -492,6 +642,7 @@ class BilanInitialAdmin(admin.ModelAdmin):
             'danger' if obj.is_critical else 'success',
             'Critique' if obj.is_critical else 'Normal'
         )
+
     is_critical_display.short_description = 'Criticité'
 
     def admin_actions(self, obj):
@@ -505,16 +656,19 @@ class BilanInitialAdmin(admin.ModelAdmin):
             reverse('admin:smit_bilaninitial_change', args=[obj.id]),
             reverse('admin:smit_bilaninitial_change', args=[obj.id])
         )
+
     admin_actions.short_description = 'Actions'
 
     def mark_as_completed(self, request, queryset):
         updated = queryset.update(status='completed')
         self.message_user(request, f"{updated} bilans marqués comme complétés")
+
     mark_as_completed.short_description = "Marquer comme complété"
 
     def mark_as_critical(self, request, queryset):
         updated = queryset.update(is_critical=True)
         self.message_user(request, f"{updated} bilans marqués comme critiques")
+
     mark_as_critical.short_description = "Marquer comme critique"
 
     def get_queryset(self, request):

@@ -16,10 +16,10 @@ urlpatterns = [
                   path('medicaments/delete', MedicamentDeleteView.as_view(), name='medicaments-delete'),
 
                   path('mouvement/stock/', MouvementStockListView.as_view(), name='mouvement-stock'),
-                  path('mouvement/stock/details', MouvementStockDetailView.as_view(), name='mouvement-detail'),
+                  path('mouvement/stock/details<int:pk>', MouvementStockDetailView.as_view(), name='mouvement-detail'),
                   path('mouvement/stock/create', MouvementStockCreateView.as_view(), name='mouvement-create'),
                   path('mouvement/stock/update', MouvementStockUpdateView.as_view(), name='mouvement-update'),
-                  path('mouvement/stock/delete', MouvementStockDeleteView.as_view(), name='mouvement-delete'),
+                  path('mouvement/stock/delete<int:pk>', MouvementStockDeleteView.as_view(), name='mouvement-delete'),
 
                   path('rdv', RendezVousListView.as_view(), name='rendezvous_list'),
                   path('search_rendezvous/', search_rendezvous, name='search_rendezvous'),

@@ -1,0 +1,156 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <h5 class="card-title">{{ title }}</h5>
+                        </div>
+                        <form method="post" id="mouvementForm">
+                            {% csrf_token %}
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.medicament.label }}</label>
+                                        {{ form.medicament }}
+                                        {% if form.medicament.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.medicament.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.type_mouvement.label }}</label>
+                                        {{ form.type_mouvement }}
+                                        {% if form.type_mouvement.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.type_mouvement.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.quantite.label }}</label>
+                                        {{ form.quantite }}
+                                        <small class="text-muted" id="stockInfo"></small>
+                                        {% if form.quantite.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.quantite.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Champs conditionnels -->
+                                <div class="col-md-6" id="patientField">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.patient.label }}</label>
+                                        {{ form.patient }}
+                                        {% if form.patient.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.patient.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="fournisseurField">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.fournisseur.label }}</label>
+                                        {{ form.fournisseur }}
+                                        {% if form.fournisseur.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.fournisseur.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="commandeField">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.commande.label }}</label>
+                                        {{ form.commande }}
+                                        {% if form.commande.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.commande.errors.as_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                <a href="{% url 'mouvement-stock' %}" class="btn btn-light">Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Afficher/masquer les champs selon le type de mouvement
+    const typeMouvement = document.getElementById('id_type_mouvement');
+    const patientField = document.getElementById('patientField');
+    const fournisseurField = document.getElementById('fournisseurField');
+    const commandeField = document.getElementById('commandeField');
+    const medicamentSelect = document.getElementById('id_medicament');
+    const stockInfo = document.getElementById('stockInfo');
+
+    function toggleFields() {
+        if (typeMouvement.value === 'Sortie') {
+            patientField.style.display = 'block';
+            fournisseurField.style.display = 'none';
+            commandeField.style.display = 'none';
+        } else if (typeMouvement.value === 'Entrée') {
+            patientField.style.display = 'none';
+            fournisseurField.style.display = 'block';
+            commandeField.style.display = 'block';
+        } else {
+            patientField.style.display = 'none';
+            fournisseurField.style.display = 'none';
+            commandeField.style.display = 'none';
+        }
+    }
+
+    // Afficher le stock disponible quand on sélectionne un médicament
+    function updateStockInfo() {
+        const medicamentId = medicamentSelect.value;
+        if (medicamentId) {
+            fetch(`/api/medicaments/${medicamentId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    stockInfo.textContent = `Stock disponible: ${data.stock}`;
+                });
+        } else {
+            stockInfo.textContent = '';
+        }
+    }
+
+    // Initialisation
+    toggleFields();
+    typeMouvement.addEventListener('change', toggleFields);
+    medicamentSelect.addEventListener('change', updateStockInfo);
+
+    // Mettre à jour au chargement si un médicament est déjà sélectionné
+    if (medicamentSelect.value) {
+        updateStockInfo();
+    }
+});
+</script>
+{% endblock %}

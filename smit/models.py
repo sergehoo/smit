@@ -1,14 +1,20 @@
 import calendar
 import datetime
+import logging
+import os
 import random
 import unicodedata
 import uuid
+from pathlib import Path
+
+import pdfplumber
 import torch
 import torchvision.models as torch_models
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
+from django.core.validators import FileExtensionValidator
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -23,6 +29,8 @@ from torchvision.transforms import transforms
 
 from core.models import Patient, Service, Employee, ServiceSubActivity, Patient_statut_choices, Maladie
 from pharmacy.models import Medicament, Molecule, RendezVous, Pharmacy
+
+logger = logging.getLogger(__name__)
 
 # from pharmacy.models import Medication
 RAPID_HIV_TEST_TYPES = [
@@ -2735,6 +2743,9 @@ class Echantillon(models.Model):
     test_rapid = models.BooleanField(default=False)
     history = HistoricalRecords()
 
+    @property
+    def nb_resultats(self):
+        return self.resultats.count()
 
     def save(self, *args, **kwargs):
         # ✅ Auto-complète date_collect si manquante
@@ -2744,6 +2755,192 @@ class Echantillon(models.Model):
 
     def __str__(self):
         return f"{self.code_echantillon} - {self.examen_demande}"
+
+
+class ResultatAnalyse(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Brouillon'),
+        ('pending', 'En attente de validation'),
+        ('validated', 'Validé'),
+        ('rejected', 'Rejeté'),
+        ('corrected', 'Corrigé'),
+    ]
+
+    echantillon = models.ForeignKey(
+        'Echantillon',
+        on_delete=models.CASCADE,
+        related_name='echanti_resultats',
+        verbose_name="Échantillon analysé",
+        help_text="Échantillon associé à ce résultat"
+    )
+    valeur = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Résultat numérique",
+        help_text="Valeur numérique du résultat"
+    )
+    interpretation = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Interprétation clinique",
+        help_text="Commentaires et interprétation du résultat"
+    )
+    unite = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        verbose_name="Unité de mesure",
+        help_text="Unité dans laquelle est exprimé le résultat"
+    )
+    valeur_reference = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Valeurs de référence",
+        help_text="Plage de valeurs normales"
+    )
+    fichier_resultat = models.FileField(
+        upload_to='resultats/%Y/%m/%d/',
+        null=True,
+        blank=True,
+        verbose_name="Fichier du résultat",
+        help_text="PDF, image ou autre document contenant le résultat",
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf'])
+        ]
+    )
+    texte_extrait = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Texte extrait",
+        help_text="Contenu textuel extrait du fichier résultat"
+    )
+    date_resultat = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Date d'émission",
+        help_text="Date et heure de production du résultat"
+    )
+    valide_par = models.ForeignKey(
+        'core.Employee',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='employee_valide',
+        verbose_name="Validé par",
+        help_text="Personne ayant validé ce résultat"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+        verbose_name="Statut",
+        help_text="État actuel du résultat"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière modification")
+    history = HistoricalRecords(
+        excluded_fields=['texte_extrait'],
+        history_change_reason_field=models.TextField(null=True)
+    )
+
+    class Meta:
+        verbose_name = "Résultat d'analyse"
+        verbose_name_plural = "Résultats d'analyse"
+        ordering = ['-date_resultat']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['date_resultat']),
+            models.Index(fields=['echantillon']),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['echantillon'],
+                condition=models.Q(status='validated'),
+                name='unique_resultat_valide_par_echantillon'
+            )
+        ]
+
+    def __str__(self):
+        return f"Résultat #{self.id} - {self.get_status_display()}"
+
+    def clean(self):
+        """Validation des données avant sauvegarde"""
+        if self.status == 'validated' and not self.valide_par:
+            raise ValidationError("Un résultat validé doit avoir un validateur désigné")
+
+        if self.valeur and not self.unite:
+            raise ValidationError("Une unité doit être spécifiée pour les résultats numériques")
+
+    def save(self, *args, **kwargs):
+        """Sauvegarde avec traitement du fichier PDF"""
+        self.clean()
+
+        fichier_change = False
+        if self.pk:
+            original = ResultatAnalyse.objects.get(pk=self.pk)
+            fichier_change = original.fichier_resultat != self.fichier_resultat
+
+        super().save(*args, **kwargs)
+
+        if fichier_change and self.fichier_resultat:
+            self._process_uploaded_file()
+
+    def _process_uploaded_file(self):
+        """Traite le fichier uploadé et extrait le texte"""
+        try:
+            file_path = self.fichier_resultat.path
+            if Path(file_path).suffix.lower() == '.pdf':
+                self.texte_extrait = self._extract_text_from_pdf(file_path)
+                self.save(update_fields=['texte_extrait'])
+        except Exception as e:
+            logger.error(f"Erreur traitement fichier résultat {self.id}: {str(e)}")
+            self.texte_extrait = f"Erreur d'extraction: {str(e)}"
+            self.save(update_fields=['texte_extrait'])
+
+    @staticmethod
+    def _extract_text_from_pdf(file_path):
+        """Extrait le texte d'un fichier PDF"""
+        if not os.path.exists(file_path):
+            return ""
+
+        try:
+            import pdfplumber
+            full_text = []
+
+            with pdfplumber.open(file_path) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        full_text.append(text)
+
+            return "\n".join(full_text).strip() if full_text else ""
+
+        except ImportError:
+            logger.warning("pdfplumber non installé - impossible d'extraire le texte")
+            return "Extraction PDF non disponible"
+        except Exception as e:
+            logger.error(f"Erreur extraction PDF: {str(e)}")
+            return f"Erreur d'extraction: {str(e)}"
+
+    @property
+    def est_valide(self):
+        """Vérifie si le résultat est validé"""
+        return self.status == 'validated'
+
+    @property
+    def nom_fichier(self):
+        """Retourne le nom du fichier sans le chemin"""
+        return Path(self.fichier_resultat.name).name if self.fichier_resultat else ""
+
+    def marquer_comme_valide(self, validateur):
+        """Marque le résultat comme validé"""
+        if self.status != 'validated':
+            self.status = 'validated'
+            self.valide_par = validateur
+            self.save(update_fields=['status', 'valide_par'])
+            return True
+        return False
 
 
 class BilanInitial(models.Model):

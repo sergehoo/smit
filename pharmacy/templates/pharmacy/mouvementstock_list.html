@@ -1,154 +1,214 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 {% load unicorn %}
+
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                           <div class="nk-block">
-    <div class="card card-bordered card-stretch">
-        <div class="card-inner-group">
-            <div class="container mt-4">
-                <h2 class="mb-4">Liste des Mouvements de Stock</h2>
-                <table id="mouvementStockTable" class="table table-bordered table-striped nk-tb-list nk-tb-ulist">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="selectAll" title="Tout sélectionner"></th>
-                            <th>ID</th>
-                            <th>Médicament</th>
-                            <th>Patient</th>
-                            <th>Quantité</th>
-                            <th>Type de Mouvement</th>
-                            <th>Date du Mouvement</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <!-- Section des statistiques -->
+                <div class="row g-gs mb-4">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-lg bg-light-primary rounded-circle">
+                                        <em class="icon ni ni-activity"></em>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5 class="fs-base mb-0">Total Mouvements</h5>
+                                        <div class="fs-2 fw-bold">{{ stats.total_mouvements }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-lg bg-light-success rounded-circle">
+                                        <em class="icon ni ni-arrow-down"></em>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5 class="fs-base mb-0">Entrées</h5>
+                                        <div class="fs-2 fw-bold">{{ stats.total_entrees }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-lg bg-light-danger rounded-circle">
+                                        <em class="icon ni ni-arrow-up"></em>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5 class="fs-base mb-0">Sorties</h5>
+                                        <div class="fs-2 fw-bold">{{ stats.total_sorties }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon icon-lg bg-light-info rounded-circle">
+                                        <em class="icon ni ni-trend-up"></em>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5 class="fs-base mb-0">Solde</h5>
+                                        <div class="fs-2 fw-bold">{{ stats.solde }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtres -->
+                <div class="card card-bordered mb-4">
+                    <div class="card-inner">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Type de mouvement</label>
+                                <select name="type" class="form-select">
+                                    <option value="">Tous</option>
+                                    <option value="Entrée" {% if filters.type == 'Entrée' %}selected{% endif %}>Entrées</option>
+                                    <option value="Sortie" {% if filters.type == 'Sortie' %}selected{% endif %}>Sorties</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Période</label>
+                                <select name="date_range" class="form-select">
+                                    <option value="">Toutes</option>
+                                    <option value="today" {% if filters.date_range == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                    <option value="week" {% if filters.date_range == 'week' %}selected{% endif %}>7 derniers jours</option>
+                                    <option value="month" {% if filters.date_range == 'month' %}selected{% endif %}>30 derniers jours</option>
+                                    <option value="year" {% if filters.date_range == 'year' %}selected{% endif %}>Année en cours</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Médicament</label>
+                                <select name="medicament" class="form-select">
+                                    <option value="">Tous</option>
+                                    {% for med in top_medicaments_sorties %}
+                                        <option value="{{ med.medicament_id }}" {% if filters.medicament == med.medicament_id|stringformat:"s" %}selected{% endif %}>{{ med.medicament__nom }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filtrer</button>
+                                <a href="{% url 'mouvement-stock' %}" class="btn btn-light ms-2">Réinitialiser</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tableau principal -->
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="title">Liste des Mouvements de Stock</h5>
+                                <a href="{% url 'mouvement-create' %}" class="btn btn-primary">
+                                    <em class="icon ni ni-plus"></em> Ajouter un mouvement
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-inner p-0">
+                            <table id="mouvementStockTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Médicament</th>
+                                        <th>Type</th>
+                                        <th>Quantité</th>
+                                        <th>Patient/Fournisseur</th>
+                                        <th>Pharmacie</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mouvement in mouvements %}
+                                    <tr>
+                                        <td>{{ mouvement.id }}</td>
+                                        <td>{{ mouvement.medicament.nom }}</td>
+                                        <td>
+                                            <span class="badge badge-{% if mouvement.type_mouvement == 'Entrée' %}success{% else %}danger{% endif %}">
+                                                {{ mouvement.type_mouvement }}
+                                            </span>
+                                        </td>
+                                        <td>{{ mouvement.quantite }}</td>
+                                        <td>
+                                            {% if mouvement.type_mouvement == 'Entrée' %}
+                                                {{ mouvement.fournisseur.nom|default:"-" }}
+                                            {% else %}
+                                                {{ mouvement.patient.nom_complet|default:"-" }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ mouvement.pharmacie.nom|default:"-" }}</td>
+                                        <td>{{ mouvement.date_mouvement|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <a href="{% url 'mouvement-detail' mouvement.pk %}" class="btn btn-sm btn-primary" title="Voir">
+                                                <em class="icon ni ni-eye"></em>
+                                            </a>
+                                            <a href="#% url 'mouvement_stock_delete' mouvement.id %}" class="btn btn-sm btn-danger" title="Supprimer">
+                                                <em class="icon ni ni-trash"></em>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-inner">
+                            {% include 'partials/pagination.html' %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques et top médicaments -->
+                <div class="row g-gs mt-4">
+                    <div class="col-lg-6">
+                        <div class="card card-bordered h-100">
+                            <div class="card-inner">
+                                <h5 class="title">Top 5 médicaments (Sorties)</h5>
+                                <ul class="list-group">
+                                    {% for med in stats.top_medicaments_sorties %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ med.medicament__nom }}
+                                        <span class="badge bg-primary rounded-pill">{{ med.total }} unités</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card card-bordered h-100">
+                            <div class="card-inner">
+                                <h5 class="title">Top 5 médicaments (Entrées)</h5>
+                                <ul class="list-group">
+                                    {% for med in stats.top_medicaments_entrees %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ med.medicament__nom }}
+                                        <span class="badge bg-success rounded-pill">{{ med.total }} unités</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
-                        </div>
-                    </div>
-                </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const mouvementTable = $('#mouvementStockTable').DataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                ajax: {
-                    url: "{% url 'api_mouvement_stock_list' %}",
-                    type: "GET",
-                },
-                columns: [
-                    {
-                        data: null,
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return `<input type="checkbox" class="rowCheckbox" value="${row.id}" title="Sélectionner ce mouvement">`;
-                        },
-                    },
-                    {data: "id", title: "ID", orderable: true},
-                    {data: "medicament", title: "Médicament", orderable: true},
-                    {data: "patient", title: "Patient", orderable: true},
-                    {data: "quantite", title: "Quantité", orderable: true},
-                    {data: "type_mouvement", title: "Type de Mouvement", orderable: true},
-                    {data: "date_mouvement", title: "Date du Mouvement", orderable: true},
-                    {
-                        data: null,
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return `
-                            <button class="btn btn-sm btn-primary" onclick="viewDetails(${row.id})">Voir</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteMovement(${row.id})">Supprimer</button>`;
-                        },
-                    },
-                ],
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json",
-                },
-                dom: "Bfrtip",
-                buttons: [
-                    {
-                        extend: "copyHtml5",
-                        text: '<i class="fa fa-copy"></i> Copier',
-                        className: "btn btn-outline-secondary btn-sm",
-                    },
-                    {
-                        extend: "excelHtml5",
-                        text: '<i class="fa fa-file-excel"></i> Exporter Excel',
-                        className: "btn btn-outline-success btn-sm",
-                        exportOptions: {
-                            modifier: {
-                                selected: true,
-                            },
-                        },
-                    },
-                    {
-                        extend: "pdfHtml5",
-                        text: '<i class="fa fa-file-pdf"></i> Exporter PDF',
-                        className: "btn btn-outline-danger btn-sm",
-                        exportOptions: {
-                            modifier: {
-                                selected: true,
-                            },
-                        },
-                    },
-                    {
-                        extend: "print",
-                        text: '<i class="fa fa-print"></i> Imprimer',
-                        className: "btn btn-outline-info btn-sm",
-                        exportOptions: {
-                            modifier: {
-                                selected: true,
-                            },
-                        },
-                    },
-                ],
-                select: {
-                    style: "multi",
-                    selector: "td:first-child input[type='checkbox']",
-                },
-                order: [[1, "desc"]],
-            });
-
-            // Gestion de la case "Tout sélectionner"
-            document.getElementById("selectAll").addEventListener("change", function () {
-                const isChecked = this.checked;
-                $('.rowCheckbox').prop("checked", isChecked).trigger("change");
-            });
-
-            // Gestion des cases individuelles
-            $('#mouvementStockTable tbody').on('change', '.rowCheckbox', function () {
-                const row = mouvementTable.row($(this).closest('tr'));
-                if (this.checked) {
-                    row.select();
-                } else {
-                    row.deselect();
-                }
-
-                // Mettre à jour la case "Tout sélectionner"
-                const allChecked = $('.rowCheckbox').length === $('.rowCheckbox:checked').length;
-                $('#selectAll').prop("checked", allChecked);
-            });
-
-            // Ajouter les boutons d'exportation à l'interface
-            mouvementTable.buttons().container().appendTo('#mouvementStockTable_wrapper .col-md-6:eq(0)');
-
-            // Fonction Voir les détails
-            window.viewDetails = function (id) {
-                alert(`Voir les détails pour l'ID : ${id}`);
-            };
-
-            // Fonction Supprimer un mouvement
-            window.deleteMovement = function (id) {
-                if (confirm("Voulez-vous vraiment supprimer ce mouvement ?")) {
-                    alert(`Mouvement ID : ${id} supprimé.`);
-                    // Ajoutez une logique AJAX pour supprimer si nécessaire.
-                }
-            };
-        });
-    </script>
 {% endblock %}

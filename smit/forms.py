@@ -16,7 +16,7 @@ from core.models import situation_matrimoniales_choices, villes_choices, Sexe_ch
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
     Patient_statut_choices, CasContact, Location
 
-from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande
+from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande, Fournisseur, MouvementStock
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
@@ -1837,7 +1837,7 @@ class ProtocoleForm(forms.ModelForm):
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
-            'date_debut': forms.DateInput(attrs={'class': 'datetime', 'type':'date'}),
+            'date_debut': forms.DateInput(attrs={'class': 'datetime', 'type': 'date'}),
             'molecules': forms.SelectMultiple(attrs={'class': 'select2'}),
             'medicament': forms.SelectMultiple(attrs={'class': 'select2'}),
             'examens': forms.SelectMultiple(attrs={'class': 'select2'}),
@@ -1968,3 +1968,68 @@ class RendezVousSuiviForm(forms.ModelForm):
             instance.save()
 
         return instance
+
+
+class MouvementStockForm(forms.ModelForm):
+    patient = forms.ModelChoiceField(
+        queryset=Patient.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'})
+    )
+    fournisseur = forms.ModelChoiceField(
+        queryset=Fournisseur.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    commande = forms.ModelChoiceField(
+        queryset=Commande.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'})
+    )
+
+
+
+    class Meta:
+        model = MouvementStock
+        fields = ['medicament', 'quantite', 'type_mouvement', 'patient', 'fournisseur', 'commande']
+        widgets = {
+            'medicament': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+            'quantite': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'type_mouvement': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        # Adaptation dynamique des champs selon le type de mouvement
+        if 'type_mouvement' in self.data:
+            mouvement_type = self.data.get('type_mouvement')
+            self._adjust_fields_for_mouvement_type(mouvement_type)
+        elif self.instance.pk:
+            self._adjust_fields_for_mouvement_type(self.instance.type_mouvement)
+
+    def _adjust_fields_for_mouvement_type(self, mouvement_type):
+        """Adapte les champs requis selon le type de mouvement"""
+        if mouvement_type == 'Entrée':
+            self.fields['fournisseur'].required = True
+            self.fields['commande'].required = True
+            self.fields['patient'].required = False
+        elif mouvement_type == 'Sortie':
+            self.fields['patient'].required = True
+            self.fields['fournisseur'].required = False
+            self.fields['commande'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        mouvement_type = cleaned_data.get('type_mouvement')
+        quantite = cleaned_data.get('quantite')
+        medicament = cleaned_data.get('medicament')
+
+        if mouvement_type and quantite and medicament:
+            if mouvement_type == 'Sortie' and quantite > medicament.stock:
+                raise forms.ValidationError(
+                    f"Quantité en sortie ({quantite}) dépasse le stock disponible ({medicament.stock})"
+                )
+
+        return cleaned_data

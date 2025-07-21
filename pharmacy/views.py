@@ -1,9 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum, Count
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
@@ -16,7 +18,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from pharmacy.models import Medicament, CathegorieMolecule, Molecule, MouvementStock, StockAlert, Commande, \
     ArticleCommande, RendezVous
 from smit.forms import MedicamentForm, RescheduleAppointmentForm, RendezVousForm, ArticleCommandeForm, CommandeForm, \
-    ArticleCommandeFormSet
+    ArticleCommandeFormSet, MouvementStockForm
 
 
 # Create your views here.
@@ -143,21 +145,203 @@ class MedicamentDeleteView(DeleteView):
     success_url = reverse_lazy('medicament_list')
 
 
+
+
 class MouvementStockListView(ListView):
     model = MouvementStock
     template_name = 'pharmacy/mouvementstock_list.html'
+    context_object_name = 'mouvements'
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related(
+            'medicament', 'patient', 'fournisseur', 'commande', 'employee', 'pharmacie'
+        )
+
+        # Filtres
+        self.filters = {
+            'type': self.request.GET.get('type'),
+            'medicament': self.request.GET.get('medicament'),
+            'date_range': self.request.GET.get('date_range'),
+            'pharmacie': self.request.GET.get('pharmacie'),
+        }
+
+        if self.filters['type']:
+            queryset = queryset.filter(type_mouvement=self.filters['type'])
+
+        if self.filters['medicament']:
+            queryset = queryset.filter(medicament_id=self.filters['medicament'])
+
+        if self.filters['pharmacie']:
+            queryset = queryset.filter(pharmacie_id=self.filters['pharmacie'])
+
+        if self.filters['date_range']:
+            if self.filters['date_range'] == 'today':
+                today = timezone.now().date()
+                queryset = queryset.filter(date_mouvement__date=today)
+            elif self.filters['date_range'] == 'week':
+                week_ago = timezone.now() - timedelta(days=7)
+                queryset = queryset.filter(date_mouvement__gte=week_ago)
+            elif self.filters['date_range'] == 'month':
+                month_ago = timezone.now() - timedelta(days=30)
+                queryset = queryset.filter(date_mouvement__gte=month_ago)
+            elif self.filters['date_range'] == 'year':
+                year_ago = timezone.now() - timedelta(days=365)
+                queryset = queryset.filter(date_mouvement__gte=year_ago)
+
+        return queryset.order_by('-date_mouvement')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Statistiques globales
+        total_mouvements = self.get_queryset().count()
+        total_sorties = self.get_queryset().filter(type_mouvement='Sortie').aggregate(Sum('quantite'))[
+                            'quantite__sum'] or 0
+        total_entrees = self.get_queryset().filter(type_mouvement='Entrée').aggregate(Sum('quantite'))[
+                            'quantite__sum'] or 0
+
+        # Statistiques temporelles
+        today = timezone.now().date()
+        week_ago = timezone.now() - timedelta(days=7)
+        month_ago = timezone.now() - timedelta(days=30)
+        year_ago = timezone.now() - timedelta(days=365)
+
+        mouvements_today = self.model.objects.filter(date_mouvement__date=today).count()
+        mouvements_week = self.model.objects.filter(date_mouvement__gte=week_ago).count()
+        mouvements_month = self.model.objects.filter(date_mouvement__gte=month_ago).count()
+        mouvements_year = self.model.objects.filter(date_mouvement__gte=year_ago).count()
+
+        # Top médicaments (sorties)
+        top_medicaments_sorties = (
+            self.model.objects.filter(type_mouvement='Sortie')
+            .values('medicament__nom', 'medicament_id')
+            .annotate(total=Sum('quantite'), count=Count('id'))
+            .order_by('-total')[:5]
+        )
+
+        # Top médicaments (entrées)
+        top_medicaments_entrees = (
+            self.model.objects.filter(type_mouvement='Entrée')
+            .values('medicament__nom', 'medicament_id')
+            .annotate(total=Sum('quantite'), count=Count('id'))
+            .order_by('-total')[:5]
+        )
+
+        # Mouvements récents pour le dashboard
+        recent_mouvements = self.model.objects.all().order_by('-date_mouvement')[:5]
+
+        context.update({
+            'stats': {
+                'total_mouvements': total_mouvements,
+                'total_sorties': total_sorties,
+                'total_entrees': total_entrees,
+                'solde': total_entrees - total_sorties,
+                'mouvements_today': mouvements_today,
+                'mouvements_week': mouvements_week,
+                'mouvements_month': mouvements_month,
+                'mouvements_year': mouvements_year,
+                'top_medicaments_sorties': top_medicaments_sorties,
+                'top_medicaments_entrees': top_medicaments_entrees,
+            },
+            'filters': self.filters,
+            'recent_mouvements': recent_mouvements,
+            'today': today,
+        })
+
+        return context
 
 
-class MouvementStockDetailView(DetailView):
+class MouvementStockDetailView(LoginRequiredMixin, DetailView):
     model = MouvementStock
     template_name = 'pharmacy/mouvementstock_detail.html'
+    context_object_name = 'mouvement'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mouvement = self.object
+
+        # Informations complémentaires
+        context['title'] = f"Détails du mouvement #{mouvement.id}"
+        context['now'] = timezone.now()
+
+        # Historique des modifications du médicament associé
+        if mouvement.medicament:
+            context['stock_history'] = mouvement.medicament.mouvements.all().order_by('-date_mouvement')[:5]
+
+        # Calcul de la durée depuis la création
+        context['time_since_creation'] = context['now'] - mouvement.date_mouvement
+
+        # Statistiques pour ce médicament
+        if mouvement.medicament:
+            context['stats'] = {
+                'total_entrees': mouvement.medicament.mouvements.filter(
+                    type_mouvement='Entrée'
+                ).aggregate(Sum('quantite'))['quantite__sum'] or 0,
+                'total_sorties': mouvement.medicament.mouvements.filter(
+                    type_mouvement='Sortie'
+                ).aggregate(Sum('quantite'))['quantite__sum'] or 0,
+                'mouvements_count': mouvement.medicament.mouvements.count(),
+            }
+
+        return context
 
 
 class MouvementStockCreateView(CreateView):
     model = MouvementStock
-    fields = ['medicament', 'quantite', 'type_mouvement']
+    form_class = MouvementStockForm
     template_name = 'pharmacy/mouvementstock_form.html'
     success_url = reverse_lazy('mouvementstock_list')
+
+    def get_form_kwargs(self):
+        """Passer la requête au formulaire pour accéder à l'utilisateur courant"""
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+        """Validation personnalisée et traitement avant sauvegarde"""
+        try:
+            # Vérifier le stock pour les sorties
+            mouvement = form.save(commit=False)
+
+            if mouvement.type_mouvement == 'Sortie':
+                if mouvement.quantite > mouvement.medicament.stock:
+                    form.add_error('quantite', f"Stock insuffisant. Stock disponible: {mouvement.medicament.stock}")
+                    return self.form_invalid(form)
+
+                # Mettre à jour le stock immédiatement
+                mouvement.medicament.stock -= mouvement.quantite
+                mouvement.medicament.save()
+
+            elif mouvement.type_mouvement == 'Entrée':
+                mouvement.medicament.stock += mouvement.quantite
+                mouvement.medicament.save()
+
+            # Assigner l'employé connecté et la pharmacie
+            if self.request.user.is_authenticated:
+                if hasattr(self.request.user, 'employee'):
+                    mouvement.employee = self.request.user.employee
+                    if hasattr(self.request.user.employee, 'pharmacie'):
+                        mouvement.pharmacie = self.request.user.employee.pharmacie
+
+            mouvement.save()
+            messages.success(self.request, "Mouvement de stock enregistré avec succès!")
+            return super().form_valid(form)
+
+        except ValidationError as e:
+            form.add_error(None, e)
+            return self.form_invalid(form)
+        except Exception as e:
+            form.add_error(None, f"Une erreur est survenue: {str(e)}")
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        """Ajout d'informations contextuelles supplémentaires"""
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Créer un nouveau mouvement de stock"
+        context['medicaments'] = Medicament.objects.all().order_by('nom')
+        return context
 
 
 class MouvementStockUpdateView(UpdateView):
