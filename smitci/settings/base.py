@@ -255,12 +255,13 @@ USE_L10N = True
 # Configuration de base
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
-
+AXES_USE_X_FORWARDED_FOR = True
 AXES_COOLOFF_TIME = 1  # durée en heures avant déblocage auto
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 AXES_VERBOSE = True  # Pour logguer dans la console
 AXES_FAILURE_LOG_PER_USER_LIMIT = 100  # Historique d’échecs par user
+AXES_PROXY_ORDER = 'left-most'
 
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
