@@ -1,0 +1,218 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <h5 class="card-title">{{ title }}</h5>
+                            <span class="badge badge-{{ resultat.get_status_color }}">
+                                {{ resultat.get_status_display }}
+                            </span>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Colonne principale -->
+                            <div class="col-lg-8">
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Échantillon</span>
+                                                    <span class="detail-value">
+                                                        <a href="{% url 'echantillon_detail' resultat.echantillon.id %}">
+                                                            #{{ resultat.echantillon.id }}
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Patient</span>
+                                                    <span class="detail-value">
+                                                        {{ resultat.echantillon.patient.nom_complet }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {% if resultat.valeur %}
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Résultat</span>
+                                                    <span class="detail-value">
+                                                        {{ resultat.valeur }} {{ resultat.unite }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Valeurs de référence</span>
+                                                    <span class="detail-value">
+                                                        {{ resultat.valeur_reference|default:"-" }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="col-12">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Interprétation</span>
+                                                    <span class="detail-value">
+                                                        {{ resultat.interpretation|default:"Aucune interprétation fournie"|linebreaks }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {% if resultat.fichier_resultat %}
+                                            <div class="col-12">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Fichier résultat</span>
+                                                    <span class="detail-value">
+                                                        <a href="{{ resultat.fichier_resultat.url }}" target="_blank" class="btn btn-dim btn-primary">
+                                                            <em class="icon ni ni-file-text"></em> {{ resultat.nom_fichier }}
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Historique des modifications -->
+                                <div class="card card-bordered mt-4">
+                                    <div class="card-inner">
+                                        <h6 class="title">Historique des modifications</h6>
+                                        <div class="timeline">
+                                            {% for record in history %}
+                                            <div class="timeline-item">
+                                                <div class="timeline-status">
+                                                    <span class="icon ni ni-{% if forloop.first %}check-circle{% else %}circle{% endif %}"></span>
+                                                </div>
+                                                <div class="timeline-date">{{ record.history_date|date:"d/m/Y H:i" }}</div>
+                                                <div class="timeline-data">
+                                                    <h6 class="timeline-title">{{ record.get_status_display }}</h6>
+                                                    <div class="timeline-des">
+                                                        <p>Modifié par: {{ record.history_user.get_full_name|default:"Système" }}</p>
+                                                        {% if record.history_change_reason %}
+                                                        <p>Raison: {{ record.history_change_reason }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% empty %}
+                                            <p class="text-muted">Aucun historique disponible</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar -->
+                            <div class="col-lg-4">
+                                <!-- Métadonnées -->
+                                <div class="card card-bordered">
+                                    <div class="card-inner">
+                                        <h6 class="title">Métadonnées</h6>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Créé le</span>
+                                            <span class="detail-value">
+                                                {{ resultat.created_at|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Dernière modification</span>
+                                            <span class="detail-value">
+                                                {{ resultat.updated_at|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Date résultat</span>
+                                            <span class="detail-value">
+                                                {{ resultat.date_resultat|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </div>
+                                        {% if resultat.valide_par %}
+                                        <div class="detail-item">
+                                            <span class="detail-label">Validé par</span>
+                                            <span class="detail-value">
+                                                {{ resultat.valide_par.get_full_name }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="card card-bordered mt-4">
+                                    <div class="card-inner">
+                                        <h6 class="title">Actions</h6>
+                                        <div class="d-flex flex-column gap-2">
+                                            {% if not resultat.est_valide and can_validate %}
+                                            <a href="{% url 'resultatanalyse_validate' resultat.pk %}" class="btn btn-success">
+                                                <em class="icon ni ni-check-circle"></em> Valider
+                                            </a>
+                                            {% endif %}
+
+                                            {% if perms.laboratory.change_resultatanalyse and not resultat.est_valide %}
+                                            <a href="{% url 'resultatanalyse_update' resultat.pk %}" class="btn btn-primary">
+                                                <em class="icon ni ni-edit"></em> Modifier
+                                            </a>
+                                            {% endif %}
+
+                                            {% if perms.laboratory.correct_resultatanalyse and resultat.est_valide %}
+                                            <a href="{% url 'resultatanalyse_correct' resultat.pk %}" class="btn btn-warning">
+                                                <em class="icon ni ni-edit-alt"></em> Corriger
+                                            </a>
+                                            {% endif %}
+
+                                            {% if perms.laboratory.delete_resultatanalyse and not resultat.est_valide %}
+                                            <a href="{% url 'resultatanalyse_delete' resultat.pk %}" class="btn btn-danger">
+                                                <em class="icon ni ni-trash"></em> Supprimer
+                                            </a>
+                                            {% endif %}
+
+                                            <a href="{% url 'resultatanalyse_list' %}" class="btn btn-light">
+                                                <em class="icon ni ni-arrow-left"></em> Retour à la liste
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-item {
+    margin-bottom: 1rem;
+}
+.detail-label {
+    display: block;
+    font-weight: 500;
+    color: #526484;
+    font-size: 0.875rem;
+}
+.detail-value {
+    display: block;
+    font-size: 1rem;
+    color: #364a63;
+}
+.badge-draft { background-color: #6c757d; }
+.badge-pending { background-color: #fd7e14; }
+.badge-validated { background-color: #28a745; }
+.badge-rejected { background-color: #dc3545; }
+.badge-corrected { background-color: #17a2b8; }
+</style>
+{% endblock %}

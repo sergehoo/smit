@@ -1,4 +1,5 @@
 from django.conf.urls.static import static
+from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateView, AnalyseDeleteView, \
@@ -6,7 +7,9 @@ from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateVi
     ExamenResultatsListView, create_echantillon, delete_echantillon, EchantillonListView, \
     create_echantillon_consultation_generale, delete_echantillon_consultation_generale, ExamenDoneListView, \
     update_examen_result, export_examens_done, examens_by_type_paginated, EchantillonCreateView, request_serologie_vih, \
-    validate_serologie_vih_request, EchantillonDetailView, update_echantillon_result
+    validate_serologie_vih_request, EchantillonDetailView, update_echantillon_result, ResultatAnalyseListView, \
+    ResultatAnalyseCreateView, ResultatAnalyseDetailView, ResultatAnalyseUpdateView, ResultatAnalyseDeleteView, \
+    ResultatAnalyseValidateView, ResultatAnalyseCorrigerView, validate_resultat_ajax
 from smitci import settings
 
 urlpatterns = [
@@ -63,6 +66,62 @@ urlpatterns = [
                   path('examen/<int:consultation_id>/echantillon/<int:echantillon_id>/delete/',
                        delete_echantillon_consultation_generale,
                        name='delete_echantillon_consultation_generale'),
+                  path(
+                      'resultatanalyse_list',
+                      login_required(ResultatAnalyseListView.as_view()),
+                      name='resultatanalyse_list'
+                  ),
+
+                  # Création
+                  path('nouveau/resultatanalyse_create',login_required(ResultatAnalyseCreateView.as_view()),
+                      name='resultatanalyse_create'
+                  ),
+                  path(
+                      'echantillon/<int:echantillon_id>/nouveau/',login_required(ResultatAnalyseCreateView.as_view()),
+                      name='resultatanalyse_create_for_echantillon'
+                  ),
+
+                  # Détail
+                  path(
+                      'resultatanalyse_detail/<int:pk>/',
+                      login_required(ResultatAnalyseDetailView.as_view()),
+                      name='resultatanalyse_detail'
+                  ),
+
+                  # Modification
+                  path(
+                      'resultatanalyse_update/<int:pk>/modifier/',
+                      login_required(ResultatAnalyseUpdateView.as_view()),
+                      name='resultatanalyse_update'
+                  ),
+
+                  # Suppression
+                  path(
+                      '<int:pk>/supprimer/',
+                      login_required(ResultatAnalyseDeleteView.as_view()),
+                      name='resultatanalyse_delete'
+                  ),
+
+                  # Validation
+                  path(
+                      'resultatanalyse_validate/<int:pk>/valider/',
+                      login_required(ResultatAnalyseValidateView.as_view()),
+                      name='resultatanalyse_validate'
+                  ),
+
+                  # Correction
+                  path(
+                      'resultatanalyse_correct/<int:pk>/corriger/',
+                      login_required(ResultatAnalyseCorrigerView.as_view()),
+                      name='resultatanalyse_correct'
+                  ),
+
+                  # Validation AJAX
+                  path(
+                      'resultatanalyse_validate_ajax/api/<int:pk>/valider/',
+                      login_required(validate_resultat_ajax),
+                      name='resultatanalyse_validate_ajax'
+                  ),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

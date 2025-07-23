@@ -1,0 +1,174 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <h5 class="card-title">{{ title }}</h5>
+                        </div>
+                        <form method="post" enctype="multipart/form-data" id="resultatForm">
+                            {% csrf_token %}
+
+                            <div class="row g-3">
+                                <!-- Colonne Principale -->
+                                <div class="col-lg-8">
+                                    <div class="card card-bordered">
+                                        <div class="card-inner">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.echantillon.label }}</label>
+                                                        {{ form.echantillon }}
+                                                        {% if form.echantillon.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.echantillon.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.status.label }}</label>
+                                                        {{ form.status }}
+                                                        {% if form.status.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.status.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.valeur.label }}</label>
+                                                        {{ form.valeur }}
+                                                        {% if form.valeur.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.valeur.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.unite.label }}</label>
+                                                        {{ form.unite }}
+                                                        {% if form.unite.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.unite.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.valeur_reference.label }}</label>
+                                                        {{ form.valeur_reference }}
+                                                        {% if form.valeur_reference.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.valeur_reference.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ form.interpretation.label }}</label>
+                                                        {{ form.interpretation }}
+                                                        {% if form.interpretation.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {{ form.interpretation.errors.as_text }}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Colonne Secondaire -->
+                                <div class="col-lg-4">
+                                    <div class="card card-bordered">
+                                        <div class="card-inner">
+                                            <h6 class="title">Fichier Résultat</h6>
+                                            <div class="form-group">
+                                                <label class="form-label">{{ form.fichier_resultat.label }}</label>
+                                                {% if form.instance.fichier_resultat %}
+                                                    <div class="mb-3">
+                                                        <a href="{{ form.instance.fichier_resultat.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <em class="icon ni ni-file-text"></em> Voir fichier actuel
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                                {{ form.fichier_resultat }}
+                                                {% if form.fichier_resultat.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.fichier_resultat.errors.as_text }}
+                                                    </div>
+                                                {% endif %}
+                                                <small class="text-muted">Formats acceptés: PDF uniquement</small>
+                                            </div>
+
+                                            <div class="form-group mt-4">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <em class="icon ni ni-save"></em> Enregistrer
+                                                </button>
+                                                <a href="{% url 'resultatanalyse_list' %}" class="btn btn-light">
+                                                    <em class="icon ni ni-arrow-left"></em> Annuler
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise à jour dynamique du statut
+    const statusField = document.getElementById('id_status');
+    if (statusField) {
+        statusField.addEventListener('change', function() {
+            if (this.value === 'validated') {
+                alert('Attention: La validation est irréversible sans permission spéciale');
+            }
+        });
+    }
+
+    // Prévisualisation du fichier
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const fileName = this.files[0].name;
+                const fileSize = (this.files[0].size / (1024*1024)).toFixed(2);
+
+                if (!fileName.endsWith('.pdf')) {
+                    alert('Seuls les fichiers PDF sont acceptés');
+                    this.value = '';
+                } else if (fileSize > 5) {
+                    alert('Fichier trop volumineux (max 5MB)');
+                    this.value = '';
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

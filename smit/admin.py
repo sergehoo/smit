@@ -51,7 +51,6 @@ class EchantillonAdmin(admin.ModelAdmin):
 @admin.register(ResultatAnalyse)
 class ResultatAnalyseAdmin(ImportExportModelAdmin):
     list_display = (
-        'get_echantillon_link',
         'valeur',
         'unite',
         'get_status_badge',
@@ -110,12 +109,6 @@ class ResultatAnalyseAdmin(ImportExportModelAdmin):
     list_per_page = 20
     actions = ['valider_resultats', 'rejeter_resultats']
 
-    def get_echantillon_link(self, obj):
-        link = reverse("admin:logistique_echantillon_change", args=[obj.echantillon.id])
-        return format_html('<a href="{}">{}</a>', link, obj.echantillon)
-
-    get_echantillon_link.short_description = "Échantillon"
-    get_echantillon_link.admin_order_field = 'echantillon'
 
     def get_fichier_link(self, obj):
         if obj.fichier_resultat:

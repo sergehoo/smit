@@ -24,7 +24,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Diagnostic, AvisMedical, EffetIndesirable, HistoriqueMaladie, Observation, CommentaireInfirmier, Suivi, \
     UniteHospitalisation, TypeAntecedent, TypeEchantillon, CathegorieEchantillon, Echantillon, ModeDeVie, Appareil, \
     ProblemePose, ResumeSyndromique, ExamenStandard, ImagerieMedicale, BilanParaclinique, SuiviProtocole, Protocole, \
-    TraitementARV
+    TraitementARV, ResultatAnalyse
 from django_select2 import forms as s2forms
 
 POSOLOGY_CHOICES = [
@@ -2033,3 +2033,53 @@ class MouvementStockForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+class ResultatAnalyseForm(forms.ModelForm):
+    class Meta:
+        model = ResultatAnalyse
+        fields = [
+            'echantillon', 'valeur', 'unite', 'valeur_reference',
+            'interpretation', 'fichier_resultat', 'status'
+        ]
+        widgets = {
+            'echantillon': forms.Select(attrs={'class': 'form-select'}),
+            'valeur': forms.TextInput(attrs={'class': 'form-control'}),
+            'unite': forms.TextInput(attrs={'class': 'form-control'}),
+            'valeur_reference': forms.TextInput(attrs={'class': 'form-control'}),
+            'interpretation': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'fichier_resultat': forms.FileInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Limiter les choix d'échantillons selon les permissions
+        if not self.instance.pk or self.instance.status == 'draft':
+            self.fields['status'].choices = [
+                ('draft', 'Brouillon'),
+                ('pending', 'En attente de validation'),
+            ]
+        else:
+            self.fields['status'].disabled = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        valeur = cleaned_data.get('valeur')
+        unite = cleaned_data.get('unite')
+
+        if valeur and not unite:
+            raise ValidationError("Une unité doit être spécifiée pour les résultats numériques")
+
+        return cleaned_data
+
+
+class ResultatValidationForm(forms.ModelForm):
+    commentaire = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        label="Commentaire de validation"
+    )
+
+    class Meta:
+        model = ResultatAnalyse
+        fields = ['commentaire']

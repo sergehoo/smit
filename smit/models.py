@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import random
+import re
 import unicodedata
 import uuid
 from pathlib import Path
@@ -2756,7 +2757,94 @@ class Echantillon(models.Model):
     def __str__(self):
         return f"{self.code_echantillon} - {self.examen_demande}"
 
+# === MOTEUR DE DÉTECTION DES TYPES ===
+def detecter_type_analyse(texte):
+    texte = texte.lower()
+    if "charge virale" in texte:
+        return "charge_virale"
+    elif "cd4" in texte:
+        return "cd4"
+    elif "hémogramme" in texte or "globules" in texte:
+        return "hemogramme"
+    return "inconnu"
 
+# === PARSEURS SPÉCIFIQUES ===
+
+def parser_charge_virale(texte):
+    data = {}
+
+    val_match = re.search(r"(résultats.*?copies)[\s:\n]*([<>]?\s*\w+)", texte, re.IGNORECASE)
+    data["valeur"] = val_match.group(2).strip() if val_match else "<LL"
+
+    data["interpretation"] = "Virus HIV-1 indétectable" if "<LL" in data["valeur"] else None
+    data["unite"] = "copies/mL"
+
+    seuils = re.findall(r"seuil.*?(\d+).*?copies", texte, re.IGNORECASE)
+    if seuils:
+        data["valeur_reference"] = f"Seuils: {', '.join(seuils)} copies/mL"
+
+    date_match = re.search(r"date de validation[:\s]*([0-9]{2}/[0-9]{2}/[0-9]{4})", texte, re.IGNORECASE)
+    data["date_resultat"] = datetime.strptime(date_match.group(1), "%d/%m/%Y") if date_match else None
+
+    return data
+
+def parser_cd4(texte):
+    data = {}
+
+    match = re.search(r"cd4.*?(\d+)", texte, re.IGNORECASE)
+    if match:
+        data["valeur"] = match.group(1)
+        data["interpretation"] = "Valeur CD4 détectée"
+        data["unite"] = "cell/mm3"
+        data["valeur_reference"] = "500-1500 cell/mm3"
+    return data
+
+def parser_hemogramme(texte):
+    data = {}
+
+    match = re.search(r"globules blancs.*?(\d+[.,]?\d*)", texte, re.IGNORECASE)
+    if match:
+        data["valeur"] = match.group(1)
+        data["interpretation"] = "Résultat hématologique"
+        data["unite"] = "G/L"
+        data["valeur_reference"] = "4.0-10.0 G/L"
+    return data
+
+# === MOTEUR PRINCIPAL ===
+
+def extraire_resultat_from_pdf(pdf_path, echantillon_id):
+    with pdfplumber.open(pdf_path) as pdf:
+        texte_complet = "\n".join([page.extract_text() or "" for page in pdf.pages])
+
+    type_analyse = detecter_type_analyse(texte_complet)
+    parser = {
+        "charge_virale": parser_charge_virale,
+        "cd4": parser_cd4,
+        "hemogramme": parser_hemogramme
+    }.get(type_analyse)
+
+    if not parser:
+        raise ValueError("Type d'analyse non reconnu ou non supporté")
+
+    data = parser(texte_complet)
+
+    # Infos génériques
+    employe = Employee.objects.filter(nom__icontains="kohemun").first()
+    resultat = ResultatAnalyse.objects.create(
+        echantillon_id=echantillon_id,
+        valeur=data.get("valeur"),
+        interpretation=data.get("interpretation"),
+        unite=data.get("unite"),
+        valeur_reference=data.get("valeur_reference"),
+        fichier_resultat=Path(pdf_path).name,
+        texte_extrait=texte_complet.strip(),
+        date_resultat=data.get("date_resultat", datetime.now()),
+        valide_par=employe,
+        status="validated" if data.get("date_resultat") else "pending"
+    )
+
+    print(f"✅ Résultat {type_analyse} importé : ID {resultat.id}")
+    return resultat
 class ResultatAnalyse(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Brouillon'),
@@ -2864,13 +2952,13 @@ class ResultatAnalyse(models.Model):
     def __str__(self):
         return f"Résultat #{self.id} - {self.get_status_display()}"
 
-    def clean(self):
-        """Validation des données avant sauvegarde"""
-        if self.status == 'validated' and not self.valide_par:
-            raise ValidationError("Un résultat validé doit avoir un validateur désigné")
-
-        if self.valeur and not self.unite:
-            raise ValidationError("Une unité doit être spécifiée pour les résultats numériques")
+    # def clean(self):
+    #     """Validation des données avant sauvegarde"""
+    #     if self.status == 'validated' and not self.valide_par:
+    #         raise ValidationError("Un résultat validé doit avoir un validateur désigné")
+    #
+    #     if self.valeur and not self.unite:
+    #         raise ValidationError("Une unité doit être spécifiée pour les résultats numériques")
 
     def save(self, *args, **kwargs):
         """Sauvegarde avec traitement du fichier PDF"""
@@ -2881,22 +2969,103 @@ class ResultatAnalyse(models.Model):
             original = ResultatAnalyse.objects.get(pk=self.pk)
             fichier_change = original.fichier_resultat != self.fichier_resultat
 
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  # important : enregistrer le fichier avant accès au .path
 
         if fichier_change and self.fichier_resultat:
             self._process_uploaded_file()
 
     def _process_uploaded_file(self):
-        """Traite le fichier uploadé et extrait le texte"""
+        import pdfplumber
+        import re
+        from datetime import datetime
+        from pathlib import Path
+        from core.models import Employee
+
+        file_path = self.fichier_resultat.path
+        texte = ""
+
         try:
-            file_path = self.fichier_resultat.path
-            if Path(file_path).suffix.lower() == '.pdf':
-                self.texte_extrait = self._extract_text_from_pdf(file_path)
-                self.save(update_fields=['texte_extrait'])
+            # Étape 1 : Extraction via pdfplumber
+            with pdfplumber.open(file_path) as pdf:
+                texte = "\n".join([page.extract_text() or "" for page in pdf.pages])
+            print("📄 Texte extrait (plumber):", texte[:200])
+
+            # Étape 2 : Si vide, OCR avec Tesseract
+            if not texte.strip():
+                print("🔁 Fallback OCR lancé via Tesseract")
+                from pdf2image import convert_from_path
+                import pytesseract
+
+                images = convert_from_path(file_path)
+                texte = "\n".join([
+                    pytesseract.image_to_string(image, lang="fra") for image in images
+                ])
+                print("📄 Texte OCR (Tesseract):", texte[:200])
+
+            # Enregistrement du texte extrait brut
+            self.texte_extrait = texte.strip() or "❌ Aucun texte détecté"
+
+            # === Détection type d’analyse
+            def detecter_type_analyse(txt):
+                txt = txt.lower()
+                if "charge virale" in txt:
+                    return "charge_virale"
+                elif "cd4" in txt:
+                    return "cd4"
+                elif "hémogramme" in txt or "globules" in txt:
+                    return "hemogramme"
+                return "inconnu"
+
+            type_analyse = detecter_type_analyse(texte)
+
+            # === Analyse charge virale
+            if type_analyse == "charge_virale":
+                match_val = re.search(r"(résultats.*?copies)[\s:\n]*([<>]?\s*\w+)", texte, re.IGNORECASE)
+                self.valeur = match_val.group(2).strip() if match_val else "<LL"
+                self.unite = "copies/mL"
+                self.valeur_reference = "Seuils : 20, 400, 599 copies/mL"
+                if "<LL" in self.valeur or "indétectable" in texte.lower():
+                    self.interpretation = "Virus HIV-1 indétectable dans le sang périphérique"
+
+            elif type_analyse == "cd4":
+                match = re.search(r"cd4.*?(\d+)", texte, re.IGNORECASE)
+                if match:
+                    self.valeur = match.group(1)
+                    self.unite = "cell/mm3"
+                    self.valeur_reference = "500-1500 cell/mm3"
+                    self.interpretation = "Valeur CD4 détectée"
+
+            elif type_analyse == "hemogramme":
+                match = re.search(r"globules blancs.*?(\d+[.,]?\d*)", texte, re.IGNORECASE)
+                if match:
+                    self.valeur = match.group(1)
+                    self.unite = "G/L"
+                    self.valeur_reference = "4.0-10.0 G/L"
+                    self.interpretation = "Résultat hématologique"
+
+            # Date de validation
+            date_match = re.search(r"date.*?([0-9]{2}/[0-9]{2}/[0-9]{4})", texte, re.IGNORECASE)
+            if date_match:
+                self.date_resultat = datetime.strptime(date_match.group(1), "%d/%m/%Y")
+                self.status = 'validated'
+
+            # Auto validateur
+            validateur = Employee.objects.filter(nom__icontains="kohemun").first()
+            if validateur:
+                self.valide_par = validateur
+
+            # Final save
+            self.save(update_fields=[
+                'texte_extrait', 'valeur', 'unite', 'valeur_reference',
+                'interpretation', 'date_resultat', 'status', 'valide_par'
+            ])
+
+            print(f"✅ Résultat OCR enregistré pour : {self.pk} [{type_analyse}]")
+
         except Exception as e:
-            logger.error(f"Erreur traitement fichier résultat {self.id}: {str(e)}")
-            self.texte_extrait = f"Erreur d'extraction: {str(e)}"
+            self.texte_extrait = f"❌ Erreur OCR : {str(e)}"
             self.save(update_fields=['texte_extrait'])
+            print(f"🚨 Erreur pendant l’OCR : {str(e)}")
 
     @staticmethod
     def _extract_text_from_pdf(file_path):

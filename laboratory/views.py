@@ -1,15 +1,17 @@
 import json
 import random
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -21,8 +23,8 @@ from core.models import Patient
 from core.ressources import BilanParacliniqueResource
 from core.tables import BilanParacliniqueTable
 from smit.filters import ExamenDoneFilter, ExamenFilter
-from smit.forms import EchantillonForm, BilanParacliniqueResultForm
-from smit.models import Examen, Analyse, Consultation, Echantillon, BilanParaclinique, ExamenStandard
+from smit.forms import EchantillonForm, BilanParacliniqueResultForm, ResultatAnalyseForm, ResultatValidationForm
+from smit.models import Examen, Analyse, Consultation, Echantillon, BilanParaclinique, ExamenStandard, ResultatAnalyse
 
 
 # Create your views here.
@@ -126,7 +128,7 @@ def update_examen_result(request, examen_id):
     return JsonResponse({"success": True, "message": "✅ Résultat enregistré avec succès."})
 
 
-class ExamenListView(ListView):
+class ExamenListView(LoginRequiredMixin,ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
@@ -223,7 +225,7 @@ def examens_by_type_paginated(request, type_slug):
     return HttpResponse(status=400)
 
 
-class ExamenDoneListView(FilterView, ListView):
+class ExamenDoneListView(LoginRequiredMixin,FilterView, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_done_list.html'
     context_object_name = 'examens'
@@ -249,7 +251,7 @@ class ExamenDoneListView(FilterView, ListView):
         return context
 
 
-class ExamenResultatsListView(ListView):
+class ExamenResultatsListView(LoginRequiredMixin,ListView):
     model = Examen
     template_name = 'lab/examen_result_list.html'  # Nom du template à créer
     context_object_name = 'resultats'
@@ -268,14 +270,14 @@ class ExamenCreateView(CreateView):
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après création
 
 
-class ExamenUpdateView(UpdateView):
+class ExamenUpdateView(LoginRequiredMixin,UpdateView):
     model = Examen
     template_name = 'examen_form.html'  # Nom du template à créer
     fields = '__all__'
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après mise à jour
 
 
-class ExamenDeleteView(DeleteView):
+class ExamenDeleteView(LoginRequiredMixin,DeleteView):
     model = Examen
     template_name = 'examen_confirm_delete.html'  # Nom du template à créer
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après suppression
@@ -287,33 +289,33 @@ class AnalyseListView(ListView):
     context_object_name = 'analyses'
 
 
-class AnalyseDetailView(DetailView):
+class AnalyseDetailView(LoginRequiredMixin,DetailView):
     model = Analyse
     template_name = 'analyse_detail.html'  # Nom du template à créer
     context_object_name = 'analyse'
 
 
-class AnalyseCreateView(CreateView):
+class AnalyseCreateView(LoginRequiredMixin,CreateView):
     model = Analyse
     template_name = 'analyse_form.html'  # Nom du template à créer
     fields = '__all__'  # Utilisez tous les champs du modèle
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après création
 
 
-class AnalyseUpdateView(UpdateView):
+class AnalyseUpdateView(LoginRequiredMixin,UpdateView):
     model = Analyse
     template_name = 'analyse_form.html'  # Nom du template à créer
     fields = '__all__'
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après mise à jour
 
 
-class AnalyseDeleteView(DeleteView):
+class AnalyseDeleteView(LoginRequiredMixin,DeleteView):
     model = Analyse
     template_name = 'analyse_confirm_delete.html'  # Nom du template à créer
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après suppression
 
 
-class EchantillonListView(ListView):
+class EchantillonListView(LoginRequiredMixin,ListView):
     model = Echantillon
     template_name = 'echantillon_list.html'  # Nom du template à créer
     context_object_name = 'echantillon'
@@ -427,7 +429,7 @@ def update_echantillon_result(request, pk):
     return redirect('echantillon_detail', pk=echantillon.pk)
 
 
-class EchantillonDetailView(DetailView):
+class EchantillonDetailView(LoginRequiredMixin,DetailView):
     model = Echantillon
     template_name = 'laboratoire/echantillon_detail.html'
     context_object_name = 'echantillon'
@@ -466,7 +468,7 @@ class EchantillonDetailView(DetailView):
         }
 
 
-class EchantillonCreateView(CreateView):
+class EchantillonCreateView(LoginRequiredMixin,CreateView):
     model = Echantillon
     template_name = 'laboratoire/echantillon_form.html'
     fields = [
@@ -517,3 +519,200 @@ class EchantillonCreateView(CreateView):
         context['title'] = "Nouveau Prélèvement"
         context['help_text'] = "Remplissez tous les champs requis pour enregistrer un nouveau prélèvement."
         return context
+
+
+class ResultatAnalyseListView(LoginRequiredMixin, ListView):
+    model = ResultatAnalyse
+    template_name = 'laboratory/resultatanalyse_list.html'
+    context_object_name = 'resultats'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related(
+            'echantillon', 'valide_par', 'echantillon__patient'
+        ).order_by('-date_resultat')
+
+        # Filtres
+        self.status_filter = self.request.GET.get('status')
+        self.patient_filter = self.request.GET.get('patient')
+        self.date_filter = self.request.GET.get('date_range')
+
+        if self.status_filter:
+            queryset = queryset.filter(status=self.status_filter)
+
+        if self.patient_filter:
+            queryset = queryset.filter(echantillon__patient__id=self.patient_filter)
+
+        if self.date_filter:
+            if self.date_filter == 'today':
+                queryset = queryset.filter(date_resultat__date=timezone.now().date())
+            elif self.date_filter == 'week':
+                queryset = queryset.filter(date_resultat__gte=timezone.now() - timedelta(days=7))
+            elif self.date_filter == 'month':
+                queryset = queryset.filter(date_resultat__gte=timezone.now() - timedelta(days=30))
+
+        # Restriction pour les techniciens (ne voient que leurs résultats)
+        if not self.request.user.has_perm('laboratory.view_all_resultats'):
+            queryset = queryset.filter(created_by=self.request.user)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_choices'] = ResultatAnalyse.STATUS_CHOICES
+        context['filters'] = {
+            'status': self.status_filter,
+            'patient': self.patient_filter,
+            'date_range': self.date_filter,
+        }
+        return context
+
+
+class ResultatAnalyseCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = ResultatAnalyse
+    form_class = ResultatAnalyseForm
+    template_name = 'laboratory/resultatanalyse_form.html'
+    permission_required = 'laboratory.add_resultatanalyse'
+    success_url = reverse_lazy('resultatanalyse_list')
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'echantillon_id' in self.kwargs:
+            echantillon = get_object_or_404(Echantillon, pk=self.kwargs['echantillon_id'])
+            initial['echantillon'] = echantillon
+        return initial
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        response = super().form_valid(form)
+        messages.success(self.request, "Résultat créé avec succès!")
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = "Créer un nouveau résultat"
+        return context
+class ResultatAnalyseUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = ResultatAnalyse
+    form_class = ResultatAnalyseForm
+    template_name = 'laboratory/resultatanalyse_form.html'
+    permission_required = 'laboratory.change_resultatanalyse'
+    success_url = reverse_lazy('resultatanalyse_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        # Empêcher la modification des résultats validés sans permission spéciale
+        obj = self.get_object()
+        if obj.est_valide and not request.user.has_perm('laboratory.can_modify_validated'):
+            raise PermissionDenied("Vous ne pouvez pas modifier un résultat validé")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Résultat mis à jour avec succès!")
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f"Modifier le résultat #{self.object.id}"
+        return context
+
+
+class ResultatAnalyseDetailView(LoginRequiredMixin, DetailView):
+    model = ResultatAnalyse
+    template_name = 'laboratory/resultatanalyse_detail.html'
+    context_object_name = 'resultat'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        resultat = self.object
+
+        context['title'] = f"Résultat #{resultat.id}"
+        context['can_validate'] = self.request.user.has_perm('laboratory.validate_resultatanalyse')
+        context['history'] = resultat.history.all().order_by('-history_date')[:10]
+
+        # Statistiques pour l'échantillon
+        context['stats'] = {
+            'total_resultats': ResultatAnalyse.objects.filter(
+                echantillon=resultat.echantillon
+            ).count(),
+            'resultats_valides': ResultatAnalyse.objects.filter(
+                echantillon=resultat.echantillon,
+                status='validated'
+            ).count(),
+        }
+
+        return context
+
+
+class ResultatAnalyseDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = ResultatAnalyse
+    template_name = 'laboratory/resultatanalyse_confirm_delete.html'
+    permission_required = 'laboratory.delete_resultatanalyse'
+    success_url = reverse_lazy('resultatanalyse_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        # Empêcher la suppression des résultats validés
+        obj = self.get_object()
+        if obj.est_valide:
+            raise PermissionDenied("Vous ne pouvez pas supprimer un résultat validé")
+        return super().dispatch(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Résultat supprimé avec succès!")
+        return super().delete(request, *args, **kwargs)
+
+
+class ResultatAnalyseValidateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = ResultatAnalyse
+    form_class = ResultatValidationForm
+    template_name = 'laboratory/resultatanalyse_validate.html'
+    permission_required = 'laboratory.validate_resultatanalyse'
+
+    def form_valid(self, form):
+        form.instance.valide_par = self.request.user
+        form.instance.status = 'validated'
+        response = super().form_valid(form)
+        messages.success(self.request, "Résultat validé avec succès!")
+        return response
+
+    def get_success_url(self):
+        return reverse('resultatanalyse_detail', kwargs={'pk': self.object.pk})
+
+
+class ResultatAnalyseCorrigerView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = ResultatAnalyse
+    form_class = ResultatAnalyseForm
+    template_name = 'laboratory/resultatanalyse_correct.html'
+    permission_required = 'laboratory.correct_resultatanalyse'
+    success_url = reverse_lazy('resultatanalyse_list')
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['status'] = 'corrected'
+        return initial
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Résultat marqué comme corrigé!")
+        return response
+
+
+# Vue API pour la validation AJAX
+def validate_resultat_ajax(request, pk):
+    if not request.user.has_perm('laboratory.validate_resultatanalyse'):
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+
+    resultat = get_object_or_404(ResultatAnalyse, pk=pk)
+
+    if resultat.marquer_comme_valide(request.user):
+        return JsonResponse({
+            'success': True,
+            'status': resultat.get_status_display(),
+            'validated_by': resultat.valide_par.get_full_name(),
+            'validated_at': timezone.now().strftime("%d/%m/%Y %H:%M")
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'error': 'Le résultat est déjà validé'
+        })

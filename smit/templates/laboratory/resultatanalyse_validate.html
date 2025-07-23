@@ -1,0 +1,81 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-head">
+                            <h5 class="card-title">Validation du Résultat #{{ object.id }}</h5>
+                        </div>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="alert alert-warning">
+                                <em class="icon ni ni-alert"></em>
+                                <strong>Attention:</strong> Cette action est irréversible. Veuillez vérifier attentivement les informations avant validation.
+                            </div>
+
+                            <div class="card card-bordered mb-4">
+                                <div class="card-inner">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Patient</span>
+                                                <span class="detail-value">
+                                                    {{ object.echantillon.patient.nom_complet }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Résultat</span>
+                                                <span class="detail-value">
+                                                    {% if object.valeur %}
+                                                        {{ object.valeur }} {{ object.unite }}
+                                                    {% else %}
+                                                        <span class="text-muted">Non spécifié</span>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Interprétation</span>
+                                                <span class="detail-value">
+                                                    {{ object.interpretation|default:"Aucune interprétation fournie"|linebreaks }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">{{ form.commentaire.label }}</label>
+                                {{ form.commentaire }}
+                                <small class="text-muted">Optionnel - Ce commentaire sera enregistré dans l'historique</small>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-success">
+                                    <em class="icon ni ni-check-circle"></em> Confirmer la Validation
+                                </button>
+                                <a href="{% url 'resultatanalyse_detail' object.id %}" class="btn btn-light">
+                                    <em class="icon ni ni-arrow-left"></em> Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <div class="nk-block">
+                <!-- Filtres et Actions -->
+                <div class="card card-bordered mb-4">
+                    <div class="card-inner">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="title">Résultats d'Analyses</h5>
+                            <a href="{% url 'resultatanalyse_create' %}" class="btn btn-primary">
+                                <em class="icon ni ni-plus"></em> Nouveau Résultat
+                            </a>
+                        </div>
+                        <form method="get" class="row g-3 mt-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Statut</label>
+                                <select name="status" class="form-select">
+                                    <option value="">Tous les statuts</option>
+                                    {% for status in status_choices %}
+                                        <option value="{{ status.0 }}" {% if filters.status == status.0 %}selected{% endif %}>
+                                            {{ status.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Période</label>
+                                <select name="date_range" class="form-select">
+                                    <option value="">Toutes périodes</option>
+                                    <option value="today" {% if filters.date_range == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                    <option value="week" {% if filters.date_range == 'week' %}selected{% endif %}>7 derniers jours</option>
+                                    <option value="month" {% if filters.date_range == 'month' %}selected{% endif %}>30 derniers jours</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Patient</label>
+                                <input type="text" name="patient" class="form-control" placeholder="ID Patient" value="{{ filters.patient }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filtrer</button>
+                                <a href="?" class="btn btn-light ms-2">Réinitialiser</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tableau des Résultats -->
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Patient</th>
+                                            <th>Échantillon</th>
+                                            <th>Résultat</th>
+                                            <th>Statut</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for resultat in resultats %}
+                                        <tr>
+                                            <td>#{{ resultat.id }}</td>
+                                            <td>
+                                                <a href="{% url 'detail_patient' resultat.echantillon.patient.id %}">
+                                                    {{ resultat.echantillon.patient.nom_complet }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'echantillon_detail' resultat.echantillon.id %}">
+                                                    #{{ resultat.echantillon.id }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if resultat.valeur %}
+                                                    {{ resultat.valeur }} {{ resultat.unite }}
+                                                {% else %}
+                                                    <span class="text-muted">Non spécifié</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-{{ resultat.get_status_color }}">
+                                                    {{ resultat.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ resultat.date_resultat|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <a href="{% url 'resultatanalyse_detail' resultat.id %}" class="btn btn-sm btn-primary" title="Voir">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </a>
+                                                    {% if not resultat.est_valide %}
+                                                    <a href="{% url 'resultatanalyse_update' resultat.id %}" class="btn btn-sm btn-warning" title="Modifier">
+                                                        <em class="icon ni ni-edit"></em>
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                Aucun résultat trouvé
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-inner">
+                            {% include 'partials/pagination.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
