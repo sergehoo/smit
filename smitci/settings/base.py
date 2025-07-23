@@ -256,7 +256,8 @@ USE_L10N = True
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
 AXES_USE_X_FORWARDED_FOR = True
-AXES_COOLOFF_TIME = 1  # durée en heures avant déblocage auto
+AXES_COOLOFF_TIME = timedelta(hours=1)  # durée en heures avant déblocage auto
+AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 AXES_VERBOSE = True  # Pour logguer dans la console
