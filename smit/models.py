@@ -2757,6 +2757,7 @@ class Echantillon(models.Model):
     def __str__(self):
         return f"{self.code_echantillon} - {self.examen_demande}"
 
+
 # === MOTEUR DE DÉTECTION DES TYPES ===
 def detecter_type_analyse(texte):
     texte = texte.lower()
@@ -2767,6 +2768,7 @@ def detecter_type_analyse(texte):
     elif "hémogramme" in texte or "globules" in texte:
         return "hemogramme"
     return "inconnu"
+
 
 # === PARSEURS SPÉCIFIQUES ===
 
@@ -2788,6 +2790,7 @@ def parser_charge_virale(texte):
 
     return data
 
+
 def parser_cd4(texte):
     data = {}
 
@@ -2799,6 +2802,7 @@ def parser_cd4(texte):
         data["valeur_reference"] = "500-1500 cell/mm3"
     return data
 
+
 def parser_hemogramme(texte):
     data = {}
 
@@ -2809,6 +2813,7 @@ def parser_hemogramme(texte):
         data["unite"] = "G/L"
         data["valeur_reference"] = "4.0-10.0 G/L"
     return data
+
 
 # === MOTEUR PRINCIPAL ===
 
@@ -2845,6 +2850,8 @@ def extraire_resultat_from_pdf(pdf_path, echantillon_id):
 
     print(f"✅ Résultat {type_analyse} importé : ID {resultat.id}")
     return resultat
+
+
 class ResultatAnalyse(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Brouillon'),
@@ -3050,7 +3057,7 @@ class ResultatAnalyse(models.Model):
                 self.status = 'validated'
 
             # Auto validateur
-            validateur = Employee.objects.filter(nom__icontains="kohemun").first()
+            validateur = Employee.objects.filter(user__first_name__icontains="kohemun").first()
             if validateur:
                 self.valide_par = validateur
 

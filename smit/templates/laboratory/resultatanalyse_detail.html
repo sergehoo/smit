@@ -26,7 +26,7 @@
                                                     <span class="detail-label">Échantillon</span>
                                                     <span class="detail-value">
                                                         <a href="{% url 'echantillon_detail' resultat.echantillon.id %}">
-                                                            #{{ resultat.echantillon.id }}
+                                                            {{ resultat.echantillon.code_echantillon }}
                                                         </a>
                                                     </span>
                                                 </div>
@@ -36,7 +36,7 @@
                                                 <div class="detail-item">
                                                     <span class="detail-label">Patient</span>
                                                     <span class="detail-value">
-                                                        {{ resultat.echantillon.patient.nom_complet }}
+                                                        {{ resultat.echantillon.patient }}
                                                     </span>
                                                 </div>
                                             </div>

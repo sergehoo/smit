@@ -71,12 +71,12 @@
                                             <td>#{{ resultat.id }}</td>
                                             <td>
                                                 <a href="{% url 'detail_patient' resultat.echantillon.patient.id %}">
-                                                    {{ resultat.echantillon.patient.nom_complet }}
+                                                    {{ resultat.echantillon.patient }}
                                                 </a>
                                             </td>
                                             <td>
                                                 <a href="{% url 'echantillon_detail' resultat.echantillon.id %}">
-                                                    #{{ resultat.echantillon.id }}
+                                                    {{ resultat.echantillon.code_echantillon }}
                                                 </a>
                                             </td>
                                             <td>

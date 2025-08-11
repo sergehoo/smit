@@ -35,7 +35,8 @@ from xhtml2pdf import pisa
 
 from core.models import Patient, Maladie, Employee
 from core.utils.notifications import get_employees_to_notify
-from core.utils.sms import send_sms, optimize_sms_text, send_whatsapp
+from core.utils.sms import send_sms, optimize_sms_text
+from core.utils.whatsapp_meta import send_whatsapp_text
 from pharmacy.models import Medicament, FORME_MEDICAMENT_CHOICES
 from smit.forms import HospitalizationSendForm, ConstanteForm, SigneFonctionnelForm, \
     IndicateurBiologiqueForm, IndicateurFonctionnelForm, IndicateurSubjectifForm, PrescriptionHospiForm, \
@@ -725,23 +726,84 @@ class HospitalizationUrgenceCreateView(CreateView):
     template_name = "pages/hospitalization/hospitalization_urgence_create.html"
     success_url = reverse_lazy('hospitalisation')  # Redirige après la création
 
+    # def form_valid(self, form):
+    #     response = super().form_valid(form)
+    #
+    #     # Envoi du SMS après création
+    #     hospitalization = self.object
+    #     patient = hospitalization.patient
+    #     chambre = hospitalization.bed.box.chambre if hospitalization.bed else "N/A"
+    #     lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
+    #     formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
+    #
+    #     message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été hospitalisé en urgence: {lit}, {chambre},le {formatted_date}."
+    #     safe_message = optimize_sms_text(message)
+    #     send_sms(get_employees_to_notify(), safe_message)
+    #
+    #     messages.success(self.request, f"Hospitalisation d'urgence créée pour {patient.nom}. SMS envoyé.")
+    #     return response
+
     def form_valid(self, form):
         response = super().form_valid(form)
 
-        # Envoi du SMS après création
         hospitalization = self.object
         patient = hospitalization.patient
         chambre = hospitalization.bed.box.chambre if hospitalization.bed else "N/A"
         lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
         formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
 
-        message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été hospitalisé en urgence: {lit}, {chambre},le {formatted_date}."
-        safe_message = optimize_sms_text(message)
-        send_sms(get_employees_to_notify(), safe_message)
+        # Message unique pour les deux canaux
+        raw_message = (
+            f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été "
+            f"hospitalisé en urgence : {lit}, {chambre}, le {formatted_date}."
+        )
+        sms_message = optimize_sms_text(raw_message)  # garde ta logique (longueur, accents, etc.)
+        recipients = get_employees_to_notify()        # -> liste de numéros E.164 : +22507...
 
-        messages.success(self.request, f"Hospitalisation d'urgence créée pour {patient.nom}. SMS envoyé.")
+        sms_ok, wa_ok = False, False
+        sms_err, wa_err = None, None
+
+        # 1) SMS (Orange)
+        try:
+            if recipients:
+                send_sms(recipients, sms_message)
+                sms_ok = True
+        except Exception as e:
+            sms_err = str(e)
+
+        # 2) WhatsApp (Meta Cloud API)
+        try:
+            if recipients:
+                # session message (si hors 24h, passe par send_whatsapp_template(...))
+                send_whatsapp_text(recipients, raw_message, preview_url=False)
+                wa_ok = True
+        except Exception as e:
+            wa_err = str(e)
+
+        # Feedback utilisateur
+        if sms_ok and wa_ok:
+            messages.success(
+                self.request,
+                f"Hospitalisation d'urgence créée pour {patient.nom}. SMS + WhatsApp envoyés."
+            )
+        elif sms_ok and not wa_ok:
+            messages.warning(
+                self.request,
+                f"Hospitalisation créée. SMS envoyé, WhatsApp non envoyé : {wa_err}"
+            )
+        elif wa_ok and not sms_ok:
+            messages.warning(
+                self.request,
+                f"Hospitalisation créée. WhatsApp envoyé, SMS non envoyé : {sms_err}"
+            )
+        else:
+            messages.warning(
+                self.request,
+                f"Hospitalisation créée, mais aucun message n'a pu être envoyé. "
+                f"SMS: {sms_err} | WhatsApp: {wa_err}"
+            )
+
         return response
-
 
 # Constante PDF Export View
 @login_required

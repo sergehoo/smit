@@ -128,7 +128,7 @@ def update_examen_result(request, examen_id):
     return JsonResponse({"success": True, "message": "✅ Résultat enregistré avec succès."})
 
 
-class ExamenListView(LoginRequiredMixin,ListView):
+class ExamenListView(LoginRequiredMixin, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
@@ -225,7 +225,7 @@ def examens_by_type_paginated(request, type_slug):
     return HttpResponse(status=400)
 
 
-class ExamenDoneListView(LoginRequiredMixin,FilterView, ListView):
+class ExamenDoneListView(LoginRequiredMixin, FilterView, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_done_list.html'
     context_object_name = 'examens'
@@ -251,7 +251,7 @@ class ExamenDoneListView(LoginRequiredMixin,FilterView, ListView):
         return context
 
 
-class ExamenResultatsListView(LoginRequiredMixin,ListView):
+class ExamenResultatsListView(LoginRequiredMixin, ListView):
     model = Examen
     template_name = 'lab/examen_result_list.html'  # Nom du template à créer
     context_object_name = 'resultats'
@@ -270,14 +270,14 @@ class ExamenCreateView(CreateView):
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après création
 
 
-class ExamenUpdateView(LoginRequiredMixin,UpdateView):
+class ExamenUpdateView(LoginRequiredMixin, UpdateView):
     model = Examen
     template_name = 'examen_form.html'  # Nom du template à créer
     fields = '__all__'
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après mise à jour
 
 
-class ExamenDeleteView(LoginRequiredMixin,DeleteView):
+class ExamenDeleteView(LoginRequiredMixin, DeleteView):
     model = Examen
     template_name = 'examen_confirm_delete.html'  # Nom du template à créer
     success_url = reverse_lazy('examen_list')  # Redirige vers la liste des examens après suppression
@@ -289,33 +289,33 @@ class AnalyseListView(ListView):
     context_object_name = 'analyses'
 
 
-class AnalyseDetailView(LoginRequiredMixin,DetailView):
+class AnalyseDetailView(LoginRequiredMixin, DetailView):
     model = Analyse
     template_name = 'analyse_detail.html'  # Nom du template à créer
     context_object_name = 'analyse'
 
 
-class AnalyseCreateView(LoginRequiredMixin,CreateView):
+class AnalyseCreateView(LoginRequiredMixin, CreateView):
     model = Analyse
     template_name = 'analyse_form.html'  # Nom du template à créer
     fields = '__all__'  # Utilisez tous les champs du modèle
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après création
 
 
-class AnalyseUpdateView(LoginRequiredMixin,UpdateView):
+class AnalyseUpdateView(LoginRequiredMixin, UpdateView):
     model = Analyse
     template_name = 'analyse_form.html'  # Nom du template à créer
     fields = '__all__'
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après mise à jour
 
 
-class AnalyseDeleteView(LoginRequiredMixin,DeleteView):
+class AnalyseDeleteView(LoginRequiredMixin, DeleteView):
     model = Analyse
     template_name = 'analyse_confirm_delete.html'  # Nom du template à créer
     success_url = reverse_lazy('analyse_list')  # Redirige vers la liste des analyses après suppression
 
 
-class EchantillonListView(LoginRequiredMixin,ListView):
+class EchantillonListView(LoginRequiredMixin, ListView):
     model = Echantillon
     template_name = 'echantillon_list.html'  # Nom du template à créer
     context_object_name = 'echantillon'
@@ -429,7 +429,7 @@ def update_echantillon_result(request, pk):
     return redirect('echantillon_detail', pk=echantillon.pk)
 
 
-class EchantillonDetailView(LoginRequiredMixin,DetailView):
+class EchantillonDetailView(LoginRequiredMixin, DetailView):
     model = Echantillon
     template_name = 'laboratoire/echantillon_detail.html'
     context_object_name = 'echantillon'
@@ -468,7 +468,7 @@ class EchantillonDetailView(LoginRequiredMixin,DetailView):
         }
 
 
-class EchantillonCreateView(LoginRequiredMixin,CreateView):
+class EchantillonCreateView(LoginRequiredMixin, CreateView):
     model = Echantillon
     template_name = 'laboratoire/echantillon_form.html'
     fields = [
@@ -592,6 +592,8 @@ class ResultatAnalyseCreateView(LoginRequiredMixin, PermissionRequiredMixin, Cre
         context = super().get_context_data(**kwargs)
         context['title'] = "Créer un nouveau résultat"
         return context
+
+
 class ResultatAnalyseUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = ResultatAnalyse
     form_class = ResultatAnalyseForm

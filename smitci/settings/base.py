@@ -251,6 +251,7 @@ LANGUAGES = [
 SITE_ID = 1
 USE_L10N = True
 # USE_THOUSAND_SEPARATOR = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Configuration de base
 AXES_ENABLED = True
@@ -259,11 +260,11 @@ AXES_USE_X_FORWARDED_FOR = True
 AXES_COOLOFF_TIME = timedelta(hours=1)  # durée en heures avant déblocage auto
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
-AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address","user_agent"]
 AXES_VERBOSE = True  # Pour logguer dans la console
 AXES_FAILURE_LOG_PER_USER_LIMIT = 100  # Historique d’échecs par user
 AXES_PROXY_ORDER = 'left-most'
-
+AXES_USE_USER_AGENT = True
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
 TINYMCE_DEFAULT_CONFIG = {
@@ -359,6 +360,14 @@ TWILIO_PHONE_NUMBER = os.environ.get('messaging_service_sid')  # Numéro Twilio
 TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
 SITE_NAME = 'SMIT-CI'
 
+ORANGE_TOKEN_URL = config("ORANGE_TOKEN_URL", default="https://api.orange.com/oauth/v3/token")
+ORANGE_SMS_URL = config("ORANGE_SMS_URL", default="https://api.orange.com/smsmessaging/v1/outbound/{}/requests")
 ORANGE_SMS_CLIENT_ID = config('ORANGE_SMS_CLIENT_ID')
 ORANGE_SMS_CLIENT_SECRET = config('ORANGE_SMS_CLIENT_SECRET')
 ORANGE_SMS_SENDER = config('ORANGE_SMS_SENDER')
+
+# ==== META WHATSAPP CLOUD API ====
+META_WA_API_VERSION = config("META_WA_API_VERSION", default="v20.0")
+META_WA_BASE_URL = config("META_WA_BASE_URL", default="https://graph.facebook.com")
+META_WA_PHONE_NUMBER_ID = config("META_WA_PHONE_NUMBER_ID")   # ex: "123456789012345"
+META_WA_ACCESS_TOKEN = config("META_WA_ACCESS_TOKEN")         # token long-lived
