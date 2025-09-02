@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/smit/templates/pages/landing.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/6596121.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/keneya_benefits.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/keneya_dashboard.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -281,7 +273,7 @@
       <workItem from="1754920940013" duration="12907000" />
       <workItem from="1755531238491" duration="1536000" />
       <workItem from="1755733265540" duration="2472000" />
-      <workItem from="1756221098675" duration="5991000" />
+      <workItem from="1756221098675" duration="6918000" />
     </task>
     <servers />
   </component>
