@@ -1,0 +1,502 @@
+{% load static %}
+{% load unicorn %}
+
+<!DOCTYPE html>
+<html lang="fr-FR" class="js no-touch">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="Afriq Consulting" />
+  <meta name="description" content="KENEYA est un système de gestion hospitalière (HIS) complet, optimisé pour la performance et la sécurité, qui simplifie les opérations de santé en Afrique." />
+  <meta name="keywords" content="KENEYA, SMIT, gestion des hôpitaux, santé, Afriq Consulting, hospital management, ressources hospitalières, consultations, hospitalisations, gestion médicale" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#3b5d92" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="KENEYA – SMIT | Hospital Resources Management" />
+  <meta property="og:description" content="Système complet pour la gestion des ressources hospitalières, conçu pour simplifier les opérations de santé." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://smitci.com" />
+  <meta property="og:image" content="{% static 'images/keneya_preview.png' %}" />
+  <meta property="og:locale" content="fr_FR" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="KENEYA – SMIT | Hospital Resources Management" />
+  <meta name="twitter:description" content="Optimisez la gestion des ressources hospitalières avec KENEYA, développé par Afriq Consulting." />
+  <meta name="twitter:image" content="{% static 'images/keneya_preview.png' %}" />
+
+  <link rel="canonical" href="https://smitci.com" />
+  <link rel="shortcut icon" href="{% static 'images/favicon.png' %}" />
+  <title>SMIT | KENEYA – Hospital Resources Management</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}" />
+  <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}" />
+
+  <!-- GSAP (deferred) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha512-7S6tY0x9b8k2wWmQm1lO1mC+8r2z6j5y2m+wQH3SgH2CM6G1c7sUhq1xqD0+2zY5xqO2H4sJQ0kTQ9O9n2qXcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha512-G1Vv3m+qz9w6T8eIu8rXw9mVw1zj8O1Yqz0G9b1ZgqVqv2i8gC2zv3sXkQq1p3o1lV9jzX9m2b6Kq3Vb6rY2xw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    :root {
+      --primary: #3b5d92;
+      --primary-light: #4a6cf7;
+      --secondary: #10b981;
+      --accent: #f97316;
+      --light: #f8f9fa;
+      --dark: #1e293b;
+      --text: #334155;
+      --text-light: #64748b;
+      --shadow-sm: 0 2px 10px rgba(0,0,0,.08);
+      --shadow-md: 0 10px 30px rgba(0,0,0,.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html:focus-within { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.6; overflow-x: hidden; background: #fff; }
+
+    /* Ensure anchor targets account for fixed header */
+    [id] { scroll-margin-top: 90px; }
+
+    /* Header */
+    .landing-header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 1.2rem 0; transition: all .4s cubic-bezier(.4,0,.2,1); background: rgba(255,255,255,.95); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: var(--shadow-sm); }
+    .landing-header.scrolled { padding: .8rem 0; box-shadow: 0 4px 20px rgba(0,0,0,.12); background: rgba(255,255,255,.98); }
+    .header-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container { display: flex; align-items: center; }
+    .logo-img { height: 40px; width: auto; transition: transform .3s ease; }
+    .logo-container:hover .logo-img { transform: scale(1.05); }
+    nav { display: flex; align-items: center; gap: 1rem; }
+    .nav-menu { display: flex; list-style: none; gap: 2rem; }
+    .nav-link { text-decoration: none; color: var(--text); font-weight: 500; position: relative; padding: .5rem 0; transition: color .3s ease; }
+    .nav-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+    .nav-link:hover { color: var(--primary); }
+    .nav-link::after { content: ""; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--primary); transition: width .3s ease; }
+    .nav-link:hover::after { width: 100%; }
+    .cta-button { background: var(--primary); color: #fff; border: none; padding: .6rem 1.5rem; border-radius: 999px; font-weight: 600; cursor: pointer; transition: all .3s ease; box-shadow: 0 4px 6px rgba(74,108,247,.2); text-decoration: none; display: inline-block; }
+    .cta-button:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(74,108,247,.3); }
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--dark); width: 44px; height: 44px; border-radius: 8px; }
+    .mobile-menu-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    /* Hero */
+    .hero { padding: 10rem 0 6rem; background: linear-gradient(135deg, #f6f9ff 0%, #e9f2ff 100%); position: relative; overflow: hidden; }
+    .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; z-index: 0; }
+    .hero::before { top: -100px; right: -100px; width: 500px; height: 500px; background: rgba(59,93,146,.05); }
+    .hero::after { bottom: -150px; left: -150px; width: 600px; height: 600px; background: rgba(16,185,129,.05); }
+    .hero-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; position: relative; z-index: 2; }
+    .hero-content h1 { font-size: clamp(2rem, 4vw + 1rem, 3.5rem); font-weight: 800; color: var(--dark); margin-bottom: 1.2rem; line-height: 1.15; letter-spacing: -.01em; }
+    .hero-content h1 span { color: var(--primary); }
+    .hero-content p { font-size: 1.125rem; color: var(--text-light); margin-bottom: 2rem; }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .primary-btn, .secondary-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .85rem 1.4rem; border-radius: 999px; font-weight: 600; text-decoration: none; transition: all .3s ease; }
+    .primary-btn { background: var(--primary); color: #fff; box-shadow: 0 4px 6px rgba(74,108,247,.2); }
+    .primary-btn:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(74,108,247,.3); }
+    .secondary-btn { color: var(--primary); border: 2px solid var(--primary); background: transparent; }
+    .secondary-btn:hover { background: rgba(59,93,146,.08); transform: translateY(-2px); }
+    .hero-image { position: relative; animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%{ transform: translateY(0) } 50%{ transform: translateY(-16px) } 100%{ transform: translateY(0) } }
+    .hero-image img { width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow-lg); }
+
+    /* Sections */
+    .features, .benefits, .testimonials, .cta-section { padding: 6rem 0; }
+
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: clamp(1.6rem, 2vw + .8rem, 2.5rem); color: var(--dark); margin-bottom: .8rem; font-weight: 800; }
+    .section-title p { font-size: 1.1rem; color: var(--text-light); max-width: 680px; margin: 0 auto; }
+
+    .features { background: #fff; }
+    .features-grid { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .feature-card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md); transition: transform .25s ease, box-shadow .25s ease; text-align: center; }
+    .feature-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,.12); }
+    .feature-icon { width: 72px; height: 72px; background: rgba(59,93,146,.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; transition: all .25s ease; }
+    .feature-card:hover .feature-icon { background: var(--primary); color: #fff; transform: scale(1.08); }
+    .feature-icon i { font-size: 1.7rem; }
+    .feature-card h3 { font-size: 1.3rem; margin-bottom: .7rem; color: var(--dark); font-weight: 700; }
+    .feature-card p { color: var(--text-light); }
+
+    .benefits { background: linear-gradient(135deg, #f6f9ff 0%, #e9f2ff 100%); }
+    .benefits-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .benefits-image img { width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow-lg); }
+    .benefits-content h2 { font-size: clamp(1.6rem, 2vw + .8rem, 2.5rem); color: var(--dark); margin-bottom: 1rem; font-weight: 800; }
+    .benefits-content p { font-size: 1.05rem; color: var(--text-light); margin-bottom: 1.4rem; }
+    .benefits-list { list-style: none; }
+    .benefits-list li { margin-bottom: .8rem; display: flex; align-items: flex-start; gap: .8rem; }
+    .benefits-list li i { color: var(--secondary); font-size: 1.2rem; margin-top: .15rem; }
+
+    .testimonials { background: #fff; }
+    .testimonials-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .testimonial-card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md); transition: transform .25s ease, box-shadow .25s ease; }
+    .testimonial-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,.12); }
+    .testimonial-text { font-style: italic; color: var(--text); margin-bottom: 1.2rem; position: relative; padding-left: 1.4rem; }
+    .testimonial-text::before { content: '"'; font-size: 3rem; color: var(--primary-light); position: absolute; left: -.4rem; top: -1rem; opacity: .3; line-height: 1; }
+    .testimonial-author { display: flex; align-items: center; gap: 1rem; }
+    .author-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; }
+    .author-info h4 { font-weight: 700; color: var(--dark); font-size: 1rem; }
+    .author-info p { font-size: .9rem; color: var(--text-light); }
+
+    .cta-section { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; text-align: center; }
+    .cta-container { max-width: 800px; margin: 0 auto; padding: 0 2rem; }
+    .cta-section h2 { font-size: clamp(1.6rem, 2vw + .8rem, 2.5rem); margin-bottom: 1rem; font-weight: 800; }
+    .cta-section p { font-size: 1.1rem; margin-bottom: 2rem; opacity: .9; }
+    .cta-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .white-btn, .outline-white-btn { display: inline-flex; align-items: center; justify-content: center; padding: .85rem 1.4rem; border-radius: 999px; font-weight: 700; text-decoration: none; transition: all .3s ease; }
+    .white-btn { background: #fff; color: var(--primary); }
+    .white-btn:hover { background: rgba(255,255,255,.9); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,.15); }
+    .outline-white-btn { background: transparent; color: #fff; border: 2px solid #fff; }
+    .outline-white-btn:hover { background: rgba(255,255,255,.1); transform: translateY(-2px); }
+
+    .footer { background: var(--dark); color: #fff; padding: 4rem 0 2rem; }
+    .footer-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; }
+    .footer-logo img { height: 40px; width: auto; }
+    .footer-about p { opacity: .75; margin: 1rem 0 1.2rem; }
+    .social-links { display: flex; gap: .8rem; }
+    .social-links a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; text-decoration: none; transition: all .25s ease; }
+    .social-links a:hover { background: var(--primary); transform: translateY(-3px); }
+    .footer-links h3, .footer-contact h3 { font-size: 1.15rem; margin-bottom: 1rem; position: relative; padding-bottom: .5rem; }
+    .footer-links h3::after, .footer-contact h3::after { content: ""; position: absolute; bottom: 0; left: 0; width: 44px; height: 2px; background: var(--primary); }
+    .footer-links ul { list-style: none; }
+    .footer-links ul li { margin-bottom: .7rem; }
+    .footer-links ul li a { color: rgba(255,255,255,.8); text-decoration: none; transition: all .2s ease; }
+    .footer-links ul li a:hover { color: #fff; padding-left: 5px; }
+    .footer-contact p { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .8rem; opacity: .85; }
+    .footer-contact p i { margin-top: .25rem; min-width: 16px; }
+    .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,.12); margin-top: 2rem; opacity: .75; font-size: .92rem; }
+    .footer-bottom a { color: #a5b4fc; text-decoration: none; }
+
+    /* Animations helpers */
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .slide-in-left { opacity: 0; transform: translateX(-50px); transition: opacity .6s ease, transform .6s ease; }
+    .slide-in-left.visible { opacity: 1; transform: translateX(0); }
+    .slide-in-right { opacity: 0; transform: translateX(50px); transition: opacity .6s ease, transform .6s ease; }
+    .slide-in-right.visible { opacity: 1; transform: translateX(0); }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero-container, .benefits-container { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-image, .benefits-image { order: -1; }
+    }
+    @media (max-width: 768px) {
+      .nav-menu { position: fixed; top: 80px; left: -100%; width: 100%; height: calc(100vh - 80px); background: #fff; flex-direction: column; align-items: center; justify-content: center; transition: left .35s ease; box-shadow: 0 10px 27px rgba(0,0,0,.05); z-index: 999; }
+      .nav-menu.active { left: 0; }
+      .mobile-menu-btn { display: inline-grid; place-items: center; }
+      .hero-buttons, .cta-buttons { flex-direction: column; gap: .8rem; }
+      .primary-btn, .secondary-btn, .white-btn, .outline-white-btn { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 576px) {
+      .header-container { padding: 0 1rem; }
+      .features, .benefits, .testimonials, .cta-section { padding: 4rem 0; }
+      .footer-container { grid-template-columns: 1fr; }
+      .footer-contact p { flex-direction: column; gap: .4rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#home" class="sr-only" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Aller au contenu</a>
+
+  <!-- Header -->
+  <header class="landing-header" id="header" role="banner">
+    <div class="header-container">
+      <div class="logo-container">
+        <a href="#home" class="logo-link" aria-label="KENEYA – Accueil">
+          <img class="logo-img" src="{% static 'images/logokeneya260.png' %}" alt="Logo KENEYA" width="160" height="40" />
+        </a>
+      </div>
+
+      <nav aria-label="Navigation principale">
+        <ul class="nav-menu" id="nav-menu" role="menubar">
+          <li role="none"><a role="menuitem" href="#features" class="nav-link">Fonctionnalités</a></li>
+          <li role="none"><a role="menuitem" href="#benefits" class="nav-link">Avantages</a></li>
+          <li role="none"><a role="menuitem" href="#testimonials" class="nav-link">Témoignages</a></li>
+          <li role="none"><a role="menuitem" href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-controls="nav-menu" aria-expanded="false" aria-label="Ouvrir le menu">
+          <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+      </nav>
+
+      <a href="#demo" class="cta-button">Demander une démo</a>
+    </div>
+  </header>
+
+  <main id="home" role="main">
+    <!-- Hero Section -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1 id="hero-title" class="fade-in">Optimisez la gestion de votre <span>établissement de santé</span></h1>
+          <p class="fade-in" style="transition-delay:.2s">KENEYA est une solution complète de gestion hospitalière qui simplifie vos processus, améliore l'efficacité et optimise l'utilisation de vos ressources.</p>
+          <div class="hero-buttons">
+            <a href="#demo" class="primary-btn fade-in" style="transition-delay:.35s">Démarrer maintenant <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            <a href="#features" class="secondary-btn fade-in" style="transition-delay:.35s">En savoir plus</a>
+          </div>
+        </div>
+        <div class="hero-image fade-in" style="transition-delay:.25s">
+          <img src="{% static 'images/keneya_dashboard.png' %}" alt="Aperçu du tableau de bord KENEYA" loading="eager" fetchpriority="high" width="1200" height="800" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features" aria-labelledby="features-title">
+      <div class="section-title">
+        <h2 id="features-title" class="fade-in">Fonctionnalités principales</h2>
+        <p class="fade-in" style="transition-delay:.2s">Découvrez comment KENEYA transforme la gestion de votre établissement de santé</p>
+      </div>
+
+      <div class="features-grid" role="list">
+        <article class="feature-card slide-in-left" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-user-injured"></i></div>
+          <h3>Gestion des patients</h3>
+          <p>Suivi complet du dossier patient, historique médical, rendez-vous et consultations en un seul endroit.</p>
+        </article>
+
+        <article class="feature-card slide-in-left" style="transition-delay:.15s" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></div>
+          <h3>Planification intelligente</h3>
+          <p>Optimisez l'emploi du temps du personnel et la gestion des salles de consultation et d'hospitalisation.</p>
+        </article>
+
+        <article class="feature-card slide-in-left" style="transition-delay:.3s" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-pills"></i></div>
+          <h3>Gestion pharmaceutique</h3>
+          <p>Contrôle des stocks, gestion des ordonnances et suivi des médicaments en temps réel.</p>
+        </article>
+
+        <article class="feature-card slide-in-right" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-file-invoice-dollar"></i></div>
+          <h3>Facturation intégrée</h3>
+          <p>Générez des factures détaillées, gérez les paiements et suivez les recettes facilement.</p>
+        </article>
+
+        <article class="feature-card slide-in-right" style="transition-delay:.15s" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-chart-line"></i></div>
+          <h3>Tableaux de bord analytiques</h3>
+          <p>Visualisez les données clés et prenez des décisions éclairées.</p>
+        </article>
+
+        <article class="feature-card slide-in-right" style="transition-delay:.3s" role="listitem">
+          <div class="feature-icon" aria-hidden="true"><i class="fas fa-shield-alt"></i></div>
+          <h3>Sécurité des données</h3>
+          <p>Protégez les informations sensibles grâce à une sécurité avancée.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits" id="benefits" aria-labelledby="benefits-title">
+      <div class="benefits-container">
+        <div class="benefits-image slide-in-left">
+          <img src="{% static 'images/keneya_benefits.png' %}" alt="Avantages clés de KENEYA" loading="lazy" width="1200" height="800" />
+        </div>
+        <div class="benefits-content">
+          <h2 id="benefits-title" class="fade-in">Pourquoi choisir KENEYA&nbsp;?</h2>
+          <p class="fade-in" style="transition-delay:.2s">Conçue pour les réalités opérationnelles des établissements de santé en Afrique.</p>
+          <ul class="benefits-list" role="list">
+            <li class="fade-in" style="transition-delay:.2s"><i class="fas fa-check-circle" aria-hidden="true"></i><div>Jusqu'à 40% d'efficacité opérationnelle en plus*</div></li>
+            <li class="fade-in" style="transition-delay:.3s"><i class="fas fa-check-circle" aria-hidden="true"></i><div>Moins d'erreurs administratives et médicales</div></li>
+            <li class="fade-in" style="transition-delay:.4s"><i class="fas fa-check-circle" aria-hidden="true"></i><div>Meilleure expérience patient</div></li>
+            <li class="fade-in" style="transition-delay:.5s"><i class="fas fa-check-circle" aria-hidden="true"></i><div>Optimisation des ressources</div></li>
+            <li class="fade-in" style="transition-delay:.6s"><i class="fas fa-check-circle" aria-hidden="true"></i><div>Rapports décisionnels détaillés</div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials" aria-labelledby="testimonials-title">
+      <div class="section-title">
+        <h2 id="testimonials-title" class="fade-in">Ils nous font confiance</h2>
+        <p class="fade-in" style="transition-delay:.2s">Découvrez les retours de nos clients</p>
+      </div>
+
+      <div class="testimonials-container">
+        <div class="testimonials-grid">
+          <figure class="testimonial-card fade-in">
+            <blockquote class="testimonial-text">KENEYA a révolutionné la gestion de notre clinique. Nous avons réduit le temps d'attente des patients de 30% et amélioré notre efficacité globale.</blockquote>
+            <figcaption class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true"><i class="fas fa-user-md" style="font-size:24px;color:#3b5d92"></i></div>
+              <div class="author-info"><h4>Dr. Jean Kouassi</h4><p>Directeur, Polyclinique Les Jardins</p></div>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card fade-in" style="transition-delay:.15s">
+            <blockquote class="testimonial-text">La gestion des stocks de médicaments était un défi. Avec KENEYA, nous avons éliminé les ruptures et optimisé nos commandes.</blockquote>
+            <figcaption class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true"><i class="fas fa-user-nurse" style="font-size:24px;color:#3b5d92"></i></div>
+              <div class="author-info"><h4>Mme. Aminata Diarra</h4><p>Pharmacienne, Hôpital Central</p></div>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card fade-in" style="transition-delay:.3s">
+            <blockquote class="testimonial-text">Les tableaux de bord analytiques nous permettent de décider en temps réel. Indispensable.</blockquote>
+            <figcaption class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true"><i class="fas fa-user-tie" style="font-size:24px;color:#3b5d92"></i></div>
+              <div class="author-info"><h4>M. Samuel Traoré</h4><p>Administrateur, Centre Médical Saint‑Michel</p></div>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="demo" aria-labelledby="demo-title">
+      <div class="cta-container">
+        <h2 id="demo-title" class="fade-in">Prêt à transformer votre établissement&nbsp;?</h2>
+        <p class="fade-in" style="transition-delay:.2s">Rejoignez les établissements qui font déjà confiance à KENEYA.</p>
+        <div class="cta-buttons">
+          <a href="#contact" class="white-btn fade-in" style="transition-delay:.35s">Demander une démo</a>
+          <a href="{% static 'docs/keneya_brochure.pdf' %}" class="outline-white-btn fade-in" style="transition-delay:.35s" download>Télécharger la brochure</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-about">
+        <div class="footer-logo"><img src="{% static 'images/logokeneya260.png' %}" alt="Logo KENEYA" width="160" height="40" /></div>
+        <p>KENEYA est une solution de gestion hospitalière développée par Afriq Consulting pour répondre aux défis des établissements de santé en Afrique.</p>
+        <div class="social-links" aria-label="Réseaux sociaux">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <nav class="footer-links" aria-label="Liens rapides">
+        <h3>Liens rapides</h3>
+        <ul>
+          <li><a href="#home">Accueil</a></li>
+          <li><a href="#features">Fonctionnalités</a></li>
+          <li><a href="#benefits">Avantages</a></li>
+          <li><a href="#testimonials">Témoignages</a></li>
+          <li><a href="#demo">Démo</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer-links" aria-label="Support">
+        <h3>Support</h3>
+        <ul>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Centre d'aide</a></li>
+          <li><a href="/privacy">Politique de confidentialité</a></li>
+          <li><a href="/terms">Conditions d'utilisation</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer-contact">
+        <h3>Contact</h3>
+        <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Abidjan, Côte d'Ivoire</p>
+        <p><i class="fas fa-phone-alt" aria-hidden="true"></i> <a href="tel:+22520304050" style="color:inherit;text-decoration:none">+225 20 30 40 50</a></p>
+        <p><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:info@keneya-smit.com" style="color:inherit;text-decoration:none">info@keneya-smit.com</a></p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; {{ now }} KENEYA – SMIT. Tous droits réservés. Développé par <a href="https://afriqconsulting.com">AFRIQ CONSULTING</a></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu toggle with ARIA
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const navMenu = document.getElementById('nav-menu');
+      const header = document.getElementById('header');
+
+      function setExpanded(state) {
+        mobileMenuBtn.setAttribute('aria-expanded', state ? 'true' : 'false');
+        mobileMenuBtn.setAttribute('aria-label', state ? 'Fermer le menu' : 'Ouvrir le menu');
+        mobileMenuBtn.innerHTML = state ? '<i class="fas fa-times" aria-hidden="true"></i>' : '<i class="fas fa-bars" aria-hidden="true"></i>';
+      }
+
+      if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+          const willOpen = !navMenu.classList.contains('active');
+          navMenu.classList.toggle('active');
+          setExpanded(willOpen);
+        });
+
+        // Close menu on link click
+        navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+          if (navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            setExpanded(false);
+          }
+        }));
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+          if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            if (navMenu.classList.contains('active')) {
+              navMenu.classList.remove('active');
+              setExpanded(false);
+            }
+          }
+        });
+      }
+
+      // Header scroll effect
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+      });
+
+      // Intersection Observer for scroll animations
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        }
+      }, { root: null, rootMargin: '0px', threshold: 0.1 });
+
+      document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => observer.observe(el));
+
+      // GSAP animations (if loaded)
+      const useGsap = () => typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+      const runGsap = () => {
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.from('.hero-content h1', { duration: 1, y: 50, opacity: 0, ease: 'power3.out' });
+        gsap.from('.hero-content p', { duration: 1, y: 30, opacity: 0, delay: 0.2, ease: 'power3.out' });
+        gsap.from('.hero-buttons', { duration: 1, y: 30, opacity: 0, delay: 0.4, ease: 'power3.out' });
+        gsap.from('.hero-image', { duration: 1, scale: 0.94, opacity: 0, delay: 0.3, ease: 'power3.out' });
+
+        gsap.utils.toArray('.feature-card').forEach(card => {
+          gsap.from(card, { scrollTrigger: { trigger: card, start: 'top 85%', toggleActions: 'play none none none' }, duration: .8, y: 30, opacity: 0, ease: 'power3.out' });
+        });
+
+        gsap.from('.benefits-image', { scrollTrigger: { trigger: '.benefits', start: 'top 70%', toggleActions: 'play none none none' }, duration: 1, x: -50, opacity: 0, ease: 'power3.out' });
+        gsap.from('.benefits-content h2', { scrollTrigger: { trigger: '.benefits', start: 'top 70%' }, duration: .8, y: 30, opacity: 0, ease: 'power3.out' });
+        gsap.from('.benefits-content p', { scrollTrigger: { trigger: '.benefits', start: 'top 70%' }, duration: .8, y: 30, opacity: 0, delay: .2, ease: 'power3.out' });
+        gsap.utils.toArray('.benefits-list li').forEach((item, i) => {
+          gsap.from(item, { scrollTrigger: { trigger: '.benefits', start: 'top 70%' }, duration: .6, x: -30, opacity: 0, delay: i * .1, ease: 'power3.out' });
+        });
+      };
+
+      if (useGsap()) runGsap(); else {
+        // If GSAP scripts are deferred, run when they load
+        window.addEventListener('load', () => { if (useGsap()) runGsap(); });
+      }
+    });
+  </script>
+
+  <noscript>
+    <style>.fade-in,.slide-in-left,.slide-in-right{opacity:1;transform:none}</style>
+  </noscript>
+</body>
+</html>

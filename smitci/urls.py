@@ -38,7 +38,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
     hospitalization_chart_data, BilanListView, BilanCreateView, BilanDetailView, BilanUpdateView, BilanDeleteView, \
     CompleteBilanView, create_bilan_initial, suivi_send_from_bilan, add_traitement_arv, add_suivi_protocole, add_bilan, \
-    add_rdv
+    add_rdv, Landing
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -76,6 +76,7 @@ urlpatterns = [
                        name='admin_password_reset'),
 
                   path('', HomePageView.as_view(), name='home'),
+                  path('landing', Landing.as_view(), name='landingview'),
                   path('listePatient/', PatientListView.as_view(), name='global_search'),
                   path('modifierPatient/<int:pk>', PatientUpdateView.as_view(), name='update_patient'),
                   path('detailPatient/<int:pk>', PatientDetailView.as_view(), name='detail_patient'),

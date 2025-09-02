@@ -45,6 +45,8 @@ ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'http://s
 CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'http://smitci.com']
 CORS_ALLOWED_ORIGINS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'https://smitci.com']
 
+
+
 # ALLOWED_HOSTS = ['154.56.60.195', 'smitci.com', 'www.smitci.com', 'localhost', '127.0.0.1']
 # CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://smitci.com,https://www.smitci.com',
 #                               cast=lambda v: [s.strip() for s in v.split(',')])
@@ -365,6 +367,7 @@ ORANGE_SMS_URL = config("ORANGE_SMS_URL", default="https://api.orange.com/smsmes
 ORANGE_SMS_CLIENT_ID = config('ORANGE_SMS_CLIENT_ID')
 ORANGE_SMS_CLIENT_SECRET = config('ORANGE_SMS_CLIENT_SECRET')
 ORANGE_SMS_SENDER = config('ORANGE_SMS_SENDER')
+
 
 # ==== META WHATSAPP CLOUD API ====
 META_WA_API_VERSION = config("META_WA_API_VERSION", default="v20.0")

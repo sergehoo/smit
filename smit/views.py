@@ -56,6 +56,11 @@ def hospitalization_chart_data(request):
     return JsonResponse(stats, safe=False)
 
 
+class Landing(TemplateView):
+    # form_class = LoginForm
+    template_name = "pages/landing.html"
+
+
 class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
     # form_class = LoginForm
