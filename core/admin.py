@@ -57,4 +57,4 @@ admin_site = CustomAdminSite(name="admin")
 admin.site.index_title = "Admin SMIT"
 admin.site.site_header = "Administration du site"
 admin.site.site_title = "Admin"
-admin.site.index_title = f"Total des visites : {VisitCounter.objects.count()}"
+# admin.site.index_title = f"Total des visites : {VisitCounter.objects.count()}"
