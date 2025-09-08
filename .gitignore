@@ -2,7 +2,7 @@
 # Ignore .env files
 .env
 
-docker-compose.yml
+
 Dockerfile
 smitci/logs/django_errors.log
 logs
