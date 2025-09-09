@@ -21,7 +21,9 @@ services:
       PG_DATA: /data
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
       interval: 10s
@@ -33,7 +35,9 @@ services:
   redis:
     image: redis:7
     restart: always
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -100,7 +104,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     cpus: "0.60"
     mem_limit: "768m"
 
@@ -121,7 +127,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     cpus: "0.30"
     mem_limit: "512m"
 
