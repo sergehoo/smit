@@ -32,7 +32,6 @@ services:
 
   redis:
     image: redis:7
-    container_name: smit_redis
     restart: always
     networks: [smitci_network]
     healthcheck:
@@ -84,8 +83,7 @@ services:
   celeryworker:
     build:
       context: .
-    dockerfile: Dockerfile
-    container_name: smit_celery_worker
+      dockerfile: Dockerfile   # ✅ placé sous build
     command: >
       celery -A smitci worker
       --loglevel=warning
@@ -110,7 +108,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: smit_celery_beat
     command: >
       celery -A smitci beat
       --loglevel=warning
