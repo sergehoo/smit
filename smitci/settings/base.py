@@ -186,16 +186,6 @@ PHONENUMBER_DB_FORMAT = "NATIONAL"
 PHONENUMBER_DEFAULT_FORMAT = "E164"
 
 
-# Durée de vie du cookie de session (30 jours)
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 jours
-
-# Le cookie sera transmis uniquement en HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-# Le cookie n'est pas accessible depuis JavaScript
-SESSION_COOKIE_SAMESITE = 'Lax'  # 'Strict' si tu veux bloquer les requêtes inter-sites (moins souple)
-
 # Permet de garder la session même après fermeture du navigateur
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
@@ -212,9 +202,7 @@ ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
-#
-# AXES_FAILURE_LIMIT = 5  # Bloquer après 5 essais
-# AXES_COOLOFF_TIME = 1  # 1 heure d'attente après échec
+
 
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_EMAIL_REQUIRED = True
