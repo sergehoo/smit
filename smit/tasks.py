@@ -3,9 +3,11 @@ import os
 
 from celery import shared_task
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.db import transaction
 from django.template.loader import render_to_string
 from weasyprint import HTML
-from smit.models import BilanInitial
+from smit.models import BilanInitial, ImagerieMedicale, analyser_image
 
 
 @shared_task
@@ -33,3 +35,25 @@ def generate_bilan_pdf(bilan_id):
 
 
     return bilan.report_file
+
+
+@shared_task(queue="default")
+def lancer_analyse_imagerie(imagerie_id: int):
+    obj = ImagerieMedicale.objects.get(pk=imagerie_id)
+    if not obj.image_file:
+        return
+    path = default_storage.path(obj.image_file.name)
+    result = analyser_image(path)  # ta fonction
+
+    texte = (
+        f"📌 Interprétation IA : {result['categorie']}\n"
+        f"⚠️ Probabilité d'anomalie : {result['probabilite']}%\n"
+        f"🚦 Niveau de risque : {result['niveau_risque']}"
+    )
+
+    # Atomic update
+    with transaction.atomic():
+        obj.interpretation_ia = texte
+        obj.detection_json = result.get("detection", {})
+        obj.status = "completed"
+        obj.save(update_fields=["interpretation_ia","detection_json","status"])
