@@ -257,15 +257,20 @@ USE_L10N = True
 # Configuration de base
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
-AXES_USE_X_FORWARDED_FOR = True
-AXES_COOLOFF_TIME = timedelta(hours=1)  # durée en heures avant déblocage auto
+AXES_COOLOFF_TIME = timedelta(hours=1)  # durée avant déblocage auto
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
-AXES_LOCKOUT_PARAMETERS = ["username", "ip_address","user_agent"]
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address", "user_agent"]
 AXES_VERBOSE = True  # Pour logguer dans la console
 AXES_FAILURE_LOG_PER_USER_LIMIT = 100  # Historique d’échecs par user
-AXES_PROXY_ORDER = 'left-most'
-AXES_USE_USER_AGENT = True
+
+# ✅ Nouveau style
+AXES_USE_X_FORWARDED_FOR = True
+AXES_META_PRECEDENCE_ORDER = [
+    "HTTP_X_FORWARDED_FOR",  # priorise l’IP envoyée par Traefik/proxy
+    "REMOTE_ADDR",           # fallback
+]
+AXES_PROXY_DEPTH = 1  # profondeur des proxies (ajuste si tu as plusieurs reverse proxies)
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
 TINYMCE_DEFAULT_CONFIG = {
