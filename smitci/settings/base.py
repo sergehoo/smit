@@ -41,17 +41,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 # Cast manuel de DEBUG (les valeurs des .env sont des chaînes)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'http://smitci.com', '*']
-CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'http://smitci.com']
+ALLOWED_HOSTS = ['smitci.com', 'www.smitci.com']
+CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'https://www.smitci.com']
 CORS_ALLOWED_ORIGINS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'https://smitci.com']
-
-
-
-# ALLOWED_HOSTS = ['154.56.60.195', 'smitci.com', 'www.smitci.com', 'localhost', '127.0.0.1']
-# CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://smitci.com,https://www.smitci.com',
-#                               cast=lambda v: [s.strip() for s in v.split(',')])
-# CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='https://smitci.com,https://www.smitci.com',
-#                               cast=lambda v: [s.strip() for s in v.split(',')])
+SESSION_COOKIE_DOMAIN = ".smitci.com"
+CSRF_COOKIE_DOMAIN = ".smitci.com"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "Lax"
 
 LOGGING = {
     'version': 1,
@@ -136,7 +134,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 MIDDLEWARE = [
-
     'django.middleware.security.SecurityMiddleware',
     'axes.middleware.AxesMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
