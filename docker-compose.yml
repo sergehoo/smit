@@ -76,7 +76,7 @@ services:
     labels:
       - traefik.enable=true
       # ==== Router HTTPS
-      - traefik.http.routers.smitci.rule=Host(`smitci.com`, `www.smitci.com`)
+      - traefik.http.routers.smitci.rule=Host(`smitci.com`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls.certresolver=lets
       # ==== Service (port interne du conteneur)
