@@ -3,6 +3,6 @@
 .env
 
 
-Dockerfile
+
 smitci/logs/django_errors.log
 logs
