@@ -41,15 +41,30 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 # Cast manuel de DEBUG (les valeurs des .env sont des chaînes)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['smitci.com', 'www.smitci.com']
-CSRF_TRUSTED_ORIGINS = ['https://smitci.com', 'https://www.smitci.com']
-CORS_ALLOWED_ORIGINS = ['https://smitci.com', 'smitci.com', 'www.smitci.com', 'https://smitci.com']
+ALLOWED_HOSTS = ["smitci.com", "www.smitci.com"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://smitci.com",
+    "https://www.smitci.com",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://smitci.com",
+    "https://www.smitci.com",
+]
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Cookies
 SESSION_COOKIE_DOMAIN = ".smitci.com"
 CSRF_COOKIE_DOMAIN = ".smitci.com"
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+SECURE_SSL_REDIRECT = True
 
 LOGGING = {
     'version': 1,
