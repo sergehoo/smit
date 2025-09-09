@@ -72,7 +72,7 @@ services:
     labels:
       - traefik.enable=true
       # ==== Router HTTPS
-      - traefik.http.routers.smitci.rule=Host(`smitci.afriqconsulting.net`)
+      - traefik.http.routers.smitci.rule=Host(`smitci.com`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls.certresolver=lets
       # ==== Service (port interne du conteneur)
@@ -140,7 +140,7 @@ services:
     mem_limit: "128m"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.smitadminer.rule=Host(`adminer.afriqconsulting.net`)
+      - traefik.http.routers.smitadminer.rule=Host(`adminer.smitci.com`)
       - traefik.http.routers.smitadminer.entrypoints=websecure
       - traefik.http.routers.smitadminer.tls.certresolver=lets
       - traefik.http.services.smitadminer.loadbalancer.server.port=8080
