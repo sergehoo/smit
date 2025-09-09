@@ -1,7 +1,8 @@
-
 networks:
   smitci_network:
     driver: bridge
+  proxy:
+    external: true   # <- réseau Traefik
 
 volumes:
   pgdata:
@@ -26,7 +27,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    # Limites (compatibles docker compose classique)
     cpus: "1.0"
     mem_limit: "1536m"
 
@@ -34,8 +34,6 @@ services:
     image: redis:7
     container_name: smit_redis
     restart: always
-    ports:
-      - "6388:6379"
     networks: [smitci_network]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -49,15 +47,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Réduit le coût Gunicorn (2 workers / 2 threads)
     command: >
       gunicorn smitci.wsgi:application
       --bind 0.0.0.0:8000
       --workers 2 --threads 2
       --timeout 60
       --log-level warning
-    ports:
-      - "1909:8000"
     volumes:
       - .:/smitci-app
       - static_volume:/smitci-app/static
@@ -70,14 +65,26 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     cpus: "0.80"
     mem_limit: "2024m"
+    labels:
+      - traefik.enable=true
+      # ==== Router HTTPS
+      - traefik.http.routers.smitci.rule=Host(`smitci.afriqconsulting.net`)
+      - traefik.http.routers.smitci.entrypoints=websecure
+      - traefik.http.routers.smitci.tls.certresolver=lets
+      # ==== Service (port interne du conteneur)
+      - traefik.http.services.smitci.loadbalancer.server.port=8000
+      # ==== Middlewares (si tu les as définis sur Traefik)
+      - traefik.http.routers.smitci.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
 
   celeryworker:
     build:
       context: .
-      dockerfile: Dockerfile
+    dockerfile: Dockerfile
     container_name: smit_celery_worker
     command: >
       celery -A smitci worker
@@ -124,224 +131,158 @@ services:
   smitadminer:
     image: adminer
     restart: always
-    ports:
-      - "1910:8080"
     environment:
       ADMINER_DEFAULT_SERVER: smitDB
     depends_on:
       smitDB:
         condition: service_healthy
-    networks: [smitci_network]
+    networks:
+      - smitci_network
+      - proxy
     cpus: "0.10"
     mem_limit: "128m"
-#version: "3.9"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.smitadminer.rule=Host(`adminer.afriqconsulting.net`)
+      - traefik.http.routers.smitadminer.entrypoints=websecure
+      - traefik.http.routers.smitadminer.tls.certresolver=lets
+      - traefik.http.services.smitadminer.loadbalancer.server.port=8080
+      - traefik.http.routers.smitadminer.middlewares=traefik-auth@docker,sec-headers@docker,compress@docker,ratelimit@docker
+
+
+#networks:
+#  smitci_network:
+#    driver: bridge
+#
+#volumes:
+#  pgdata:
+#  static_volume:
+#  media_volume:
+#  logs_volume:
 #
 #services:
+#  smitDB:
+#    image: postgis/postgis:16-3.4
+#    restart: always
+#    environment:
+#      POSTGRES_DB: ${DATABASE_NAME}
+#      POSTGRES_USER: ${DATABASE_USER}
+#      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+#      PG_DATA: /data
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+#    networks: [smitci_network]
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#    # Limites (compatibles docker compose classique)
+#    cpus: "1.0"
+#    mem_limit: "1536m"
+#
+#  redis:
+#    image: redis:7
+#    container_name: smit_redis
+#    restart: always
+#    ports:
+#      - "6388:6379"
+#    networks: [smitci_network]
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#    cpus: "0.20"
+#    mem_limit: "256m"
+#
 #  smitweb:
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
-#      target: web
-#    #    container_name: smit_web
+#    # Réduit le coût Gunicorn (2 workers / 2 threads)
 #    command: >
-#      bash -lc "
-#        set -euo pipefail;
-#        python -V;
-#        echo DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-<non_defini>};
-#        python -m pip check || true;
-#        python manage.py check --deploy -v 3 || true;
-#        python - <<'PY'
-#    import django, traceback
-#    print('>>> trying django.setup()…')
-#    try:
-#      django.setup()
-#      print('>>> django.setup() OK')
-#    except Exception as e:
-#      print('>>> django.setup() FAILED:', e)
-#      traceback.print_exc()
-#      raise
-#    PY
-#    python manage.py migrate;
-#    python manage.py collectstatic --noinput;
-#    gunicorn smitci.wsgi:application --bind 0.0.0.0:8000 --workers=1 --timeout=180 --log-level=debug --error-logfile - --access-logfile - --capture-output --preload
-#    "
-#    env_file:
-#      - .env
+#      gunicorn smitci.wsgi:application
+#      --bind 0.0.0.0:8000
+#      --workers 2 --threads 2
+#      --timeout 60
+#      --log-level warning
 #    ports:
 #      - "1909:8000"
+#    volumes:
+#      - .:/smitci-app
+#      - static_volume:/smitci-app/static
+#      - media_volume:/smitci-app/media
+#      - logs_volume:/var/log/app
+#    env_file: [.env]
+#    restart: always
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
 #      redis:
 #        condition: service_healthy
-#    networks:
-#      - smitci_network
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD", "curl", "-fsS", "http://localhost:8000/healthz" ]
-#      interval: 30s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 40s
-#    # Volumes de médias/statics persistants
-#    volumes:
-#      - static_volume:/smitci-app/static
-#      - staticfiles_volume:/smitci-app/staticfiles
-#      - media_volume:/smitci-app/media
-#      - logs_volume:/smitci-app/logs
-#    # Astuce: expose une route /healthz dans Django (URL simple qui renvoie 200)
+#    networks: [smitci_network]
+#    cpus: "0.80"
+#    mem_limit: "2024m"
 #
 #  celeryworker:
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
-#      target: celery
-#    #    container_name: smit_celery_worker
-#    command: celery -A smitci worker --loglevel=info -Q default
-#    env_file:
-#      - .env
+#    container_name: smit_celery_worker
+#    command: >
+#      celery -A smitci worker
+#      --loglevel=warning
+#      --concurrency=1 --autoscale=2,1
+#      --prefetch-multiplier=1 -Ofair
+#      --max-tasks-per-child=100
+#      --without-gossip --without-mingle
+#    volumes:
+#      - .:/smitci-app
+#    env_file: [.env]
+#    restart: always
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
 #      redis:
 #        condition: service_healthy
-#    networks:
-#      - smitci_network
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD", "bash", "-lc", "celery -A smitci inspect ping -d celery@$$HOSTNAME | grep -q pong" ]
-#      interval: 60s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 30s
-#    volumes:
-#      - logs_volume:/smitci-app/logs
+#    networks: [smitci_network]
+#    cpus: "0.60"
+#    mem_limit: "768m"
 #
 #  celerybeat:
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
-#      target: beat
 #    container_name: smit_celery_beat
-#    command: celery -A smitci beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-#    env_file:
-#      - .env
+#    command: >
+#      celery -A smitci beat
+#      --loglevel=warning
+#      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+#    volumes:
+#      - .:/smitci-app
+#    env_file: [.env]
+#    restart: always
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
 #      redis:
 #        condition: service_healthy
-#    networks:
-#      - smitci_network
-#    restart: always
-#    volumes:
-#      - logs_volume:/smitci-app/logs
-#  redis:
-#    image: redis:7-alpine
-#    container_name: smit_redis
-#    ports:
-#      - "6379:6379"
-#    networks:
-#      - smitci_network
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD", "redis-cli", "ping" ]
-#      interval: 10s
-#      timeout: 3s
-#      retries: 10
-#
-#  smitDB:
-#    image: postgis/postgis:16-3.4
-#    #    container_name: smit_db
-#    environment:
-#      POSTGRES_DB: ${DB_NAME}
-#      POSTGRES_USER: ${DB_USER}
-#      POSTGRES_PASSWORD: ${DB_PASSWORD}
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
-#    networks:
-#      smitci_network:
-#        aliases:
-#          - smitDB
-#          - smit_db
-#    restart: always
-#    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h 127.0.0.1" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 20
-#      start_period: 20s
+#    networks: [smitci_network]
+#    cpus: "0.30"
+#    mem_limit: "512m"
 #
 #  smitadminer:
 #    image: adminer
-#    #    container_name: smit_adminer
+#    restart: always
 #    ports:
 #      - "1910:8080"
 #    environment:
-#      - ADMINER_DEFAULT_SERVER=smitDB
+#      ADMINER_DEFAULT_SERVER: smitDB
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
-#    networks:
-#      - smitci_network
-#    restart: always
+#    networks: [smitci_network]
+#    cpus: "0.10"
+#    mem_limit: "128m"
 #
-#  prometheus:
-#    image: prom/prometheus:latest
-#    #    container_name: smit_prometheus
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-#    ports:
-#      - "9090:9090"
-#    networks:
-#      - smitci_network
-#    restart: always
-#
-#  # Pour la visibilité des conteneurs (metrics cgroups), ajoute cadvisor
-#  cadvisor:
-#    image: gcr.io/cadvisor/cadvisor:v0.47.2
-#    #    container_name: smit_cadvisor
-#    ports:
-#      - "8082:8080"
-#    volumes:
-#      - /:/rootfs:ro
-#      - /var/run:/var/run:ro
-#      - /sys:/sys:ro
-#      - /var/lib/docker/:/var/lib/docker:ro
-#    networks:
-#      - smitci_network
-#    restart: always
-#
-#  nodeexporter:
-#    image: prom/node-exporter:latest
-#    #    container_name: smit_node_exporter
-#    ports:
-#      - "9100:9100"
-#    networks:
-#      - smitci_network
-#    restart: always
-#
-#  grafana:
-#    image: grafana/grafana:latest
-#    #    container_name: smit_grafana
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      - prometheus
-#    networks:
-#      - smitci_network
-#    environment:
-#      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER:-admin}
-#      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
-#    restart: always
-#
-#volumes:
-#  pgdata:
-#  static_volume:
-#  staticfiles_volume:
-#  media_volume:
-#  logs_volume:
-#
-#networks:
-#  smitci_network:
-#    driver: bridge

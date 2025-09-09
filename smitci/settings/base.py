@@ -306,7 +306,7 @@ CACHES = {
 }
 
 CELERY_BROKER_URL = config('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+# CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -314,6 +314,21 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Abidjan'
 CELERY_BEAT_SCHEDULE = {}
 
+# Beat: évite le polling agressif
+CELERY_BEAT_MAX_LOOP_INTERVAL = 60  # 30–120s selon ton besoin
+
+# Événements et résultats inutiles = CPU/IO en moins
+CELERY_SEND_EVENTS = False
+task_send_sent_event = False
+task_ignore_result = True
+CELERY_RESULT_BACKEND = None
+
+# Prefetch calme les pics
+worker_prefetch_multiplier = 1
+task_acks_late = True
+
+# Connexions broker plus sages
+broker_pool_limit = 5
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -374,3 +389,4 @@ META_WA_API_VERSION = config("META_WA_API_VERSION", default="v20.0")
 META_WA_BASE_URL = config("META_WA_BASE_URL", default="https://graph.facebook.com")
 META_WA_PHONE_NUMBER_ID = config("META_WA_PHONE_NUMBER_ID")   # ex: "123456789012345"
 META_WA_ACCESS_TOKEN = config("META_WA_ACCESS_TOKEN")         # token long-lived
+
