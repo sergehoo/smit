@@ -1,3 +1,4 @@
+
 networks:
   smitci_network:
     driver: bridge
@@ -21,10 +22,13 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks: [smitci_network]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ogah -d smitci"]
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 10
+    # Limites (compatibles docker compose classique)
+    cpus: "1.0"
+    mem_limit: "1536m"
 
   redis:
     image: redis:7
@@ -38,11 +42,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    cpus: "0.20"
+    mem_limit: "256m"
 
   smitweb:
     build:
       context: .
       dockerfile: Dockerfile
+    # Réduit le coût Gunicorn (2 workers / 2 threads)
+    command: >
+      gunicorn smitci.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 2 --threads 2
+      --timeout 60
+      --log-level warning
     ports:
       - "1909:8000"
     volumes:
@@ -58,6 +71,8 @@ services:
       redis:
         condition: service_healthy
     networks: [smitci_network]
+    cpus: "0.80"
+    mem_limit: "2024m"
 
   celeryworker:
     build:
@@ -81,8 +96,8 @@ services:
       redis:
         condition: service_healthy
     networks: [smitci_network]
-    # Limites CPU (facultatif, selon version de Compose)
-    # cpus: "0.60"
+    cpus: "0.60"
+    mem_limit: "768m"
 
   celerybeat:
     build:
@@ -103,9 +118,9 @@ services:
       redis:
         condition: service_healthy
     networks: [smitci_network]
-    # cpus: "0.30"
+    cpus: "0.30"
+    mem_limit: "512m"
 
-  # Adminer pour PostgreSQL
   smitadminer:
     image: adminer
     restart: always
@@ -117,61 +132,8 @@ services:
       smitDB:
         condition: service_healthy
     networks: [smitci_network]
-
-  # Flower (monitoring Celery) — désactivé par défaut, lance-le avec: docker compose --profile flower up -d flower
-  flower:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: smit_flower
-    command: >
-      celery -A smitci flower --port=5555
-      --refresh=10 --max-tasks=1000
-    ports:
-      - "5555:5555"
-    env_file: [.env]
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks: [smitci_network]
-    profiles: ["flower"]
-    restart: unless-stopped
-    # cpus: "0.25"
-
-  # Stack monitoring — désactivée par défaut (profil "monitoring")
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: smit_prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9092:9090"
-    networks: [smitci_network]
-    profiles: ["monitoring"]
-    restart: unless-stopped
-
-  nodeexporter:
-    image: prom/node-exporter:latest
-    container_name: smit_node_exporter
-    ports:
-      - "9100:9100"
-    networks: [smitci_network]
-    profiles: ["monitoring"]
-    restart: unless-stopped
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: smit_grafana
-    ports:
-      - "3016:3000"
-    depends_on:
-      - prometheus
-    networks: [smitci_network]
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    profiles: ["monitoring"]
-    restart: unless-stopped
+    cpus: "0.10"
+    mem_limit: "128m"
 #version: "3.9"
 #
 #services:
