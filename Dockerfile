@@ -10,8 +10,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # ---- dépendances système (runtime + build)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Postgres / GDAL
-    gdal-bin libgdal-dev libpq-dev \
+    # GeoDjango / Postgres
+    gdal-bin libgdal-dev libpq-dev proj-bin proj-data \
     # Build tools pour pip
     gcc python3-dev python3-setuptools \
     # WeasyPrint (runtime)
@@ -20,55 +20,44 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 libffi-dev libxml2 libxslt1.1 \
     # Codecs/Images + polices
     libjpeg62-turbo libpng16-16 fonts-dejavu-core fonts-liberation \
+    # Outils utiles
+    postgresql-client \
  && rm -rf /var/lib/apt/lists/*
 
-# GDAL env
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
-ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
+# ---- GDAL/PROJ env
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
+    GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so \
+    GDAL_DATA=/usr/share/gdal \
+    PROJ_LIB=/usr/share/proj
 
-# ---- pip + libs Python
+# ---- pip + deps projet
 RUN pip install --upgrade pip
-
-# ⚠️ Installe d’abord torch/torchvision puis torchxrayvision et co.
-# (versions CPU compatibles Python 3.9 ; ajuste si besoin)
-RUN pip install --no-cache-dir \
-    "torch==2.2.2" "torchvision==0.17.2" \
-    torchxrayvision==0.0.32 pydicom scikit-image numpy
-
-# Dépendances du projet
 COPY requirements.txt /smitci-app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ---- (optionnel) Pré-télécharger les poids après installation
-ENV TORCH_HOME=/opt/torch-cache
-RUN mkdir -p ${TORCH_HOME} && chmod -R 777 ${TORCH_HOME}
-# Si tu veux vraiment embarquer les poids dans l’image (sinon à commenter)
-RUN python - <<'PY'
-from torchvision.models import resnet50, ResNet50_Weights
-from torchvision.models.detection import fasterrcnn_resnet50_fpn, FasterRCNN_ResNet50_FPN_Weights
-# Téléchargements dans $TORCH_HOME
-resnet50(weights=ResNet50_Weights.DEFAULT).eval()
-fasterrcnn_resnet50_fpn(weights=FasterRCNN_ResNet50_FPN_Weights.DEFAULT).eval()
-print("Poids torchvision téléchargés.")
-PY
+# ⚠️ (Optionnel) torch & co → à mettre plutôt dans l'image worker
+# RUN pip install --no-cache-dir \
+#     "torch==2.2.2" "torchvision==0.17.2" \
+#     torchxrayvision==0.0.32 pydicom scikit-image numpy
+# # (Optionnel) pré-téléchargement de poids — je déconseille en image web
+# ENV TORCH_HOME=/opt/torch-cache
+# RUN mkdir -p ${TORCH_HOME} && chmod -R 777 ${TORCH_HOME}
+# RUN python - <<'PY'
+# print("SKIP pretrained weights in web image.")
+# PY
 
 # ---- code
 COPY . /smitci-app/
-WORKDIR /smitci-app
 
-# Copie l'entrypoint et rends-le exécutable
+# ---- entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
 ENTRYPOINT ["/entrypoint.sh"]
-# Client psql (utile scripts mgts/backup)
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
- && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
-CMD ["gunicorn", "smitci.wsgi:application", "--bind=0.0.0.0:8000", "--workers=4", "--timeout=180", "--log-level=debug"]
-
+# ❌ Retirer CMD pour éviter les conflits avec `command:` dans compose
+# CMD ["gunicorn", "smitci.wsgi:application", "--bind=0.0.0.0:8000", "--workers=4", "--timeout=180", "--log-level=debug"]
 
 
 

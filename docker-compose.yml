@@ -2,7 +2,7 @@ networks:
   smitci_network:
     driver: bridge
   proxy:
-    external: true   # réseau Traefik existant
+    external: true   # réseau Traefik (uniquement pour smitweb/adminer)
 
 volumes:
   pgdata:
@@ -20,7 +20,7 @@ services:
       PG_DATA: /data
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks: [smitci_network, proxy]
+    networks: [smitci_network]   # ← plus de proxy ici
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
       interval: 10s
@@ -31,7 +31,7 @@ services:
     image: redis:7
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", "900 1"]
-    networks: [smitci_network, proxy]
+    networks: [smitci_network]   # ← plus de proxy ici
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG >/dev/null 2>&1 || exit 1"]
       interval: 10s
@@ -49,6 +49,9 @@ services:
       --timeout 60
       --log-level warning
     env_file: [.env]
+    environment:
+      RUN_MIGRATIONS: "1"
+      RUN_COLLECTSTATIC: "1"
     volumes:
       - .:/smitci-app
       - static_volume:/smitci-app/static
@@ -60,13 +63,12 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks: [smitci_network, proxy]
-    # Healthcheck sans curl (utilise Python déjà présent dans l'image)
-#    healthcheck:
-#      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
-#      interval: 10s
-#      timeout: 3s
-#      retries: 12
-#      start_period: 40s
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 40s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
@@ -100,7 +102,7 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    networks: [smitci_network, proxy]
+    networks: [smitci_network]
 
   celerybeat:
     build:
@@ -119,10 +121,10 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
-    networks: [smitci_network, proxy]
+    networks: [smitci_network]
 
   smitadminer:
-    profiles: ["admin"]   # lancer au besoin: `docker compose --profile admin up -d smitadminer`
+    profiles: ["admin"]   # lancer au besoin
     image: adminer
     restart: unless-stopped
     environment:
@@ -140,7 +142,6 @@ services:
       - traefik.http.services.smitadminer.loadbalancer.server.port=8080
       - traefik.http.services.smitadminer.loadbalancer.server.scheme=http
       - traefik.http.routers.smitadminer.middlewares=traefik-auth@docker,sec-headers@docker,compress@docker,ratelimit@docker
-
 #networks:
 #  smitci_network:
 #    driver: bridge
