@@ -55,13 +55,23 @@ PY
 
 # ---- code
 COPY . /smitci-app/
+WORKDIR /smitci-app
 
+# Copie l'entrypoint et rends-le exécutable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 # Client psql (utile scripts mgts/backup)
 RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
  && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8000
 CMD ["gunicorn", "smitci.wsgi:application", "--bind=0.0.0.0:8000", "--workers=4", "--timeout=180", "--log-level=debug"]
+
+
+
+
 #FROM python:3.9-slim
 #LABEL authors="ogahserge"
 #
