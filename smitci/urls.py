@@ -17,6 +17,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import path, include
 
@@ -40,7 +41,14 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     CompleteBilanView, create_bilan_initial, suivi_send_from_bilan, add_traitement_arv, add_suivi_protocole, add_bilan, \
     add_rdv, Landing
 
+
+def healthz(_):
+    # ⚡ rapide : sans requête DB
+    return JsonResponse({"status": "ok"})
+
+
 urlpatterns = [
+                  path("healthz", healthz),
                   path('admin/', admin.site.urls),
                   path('accounts/', include('allauth.urls')),
                   path('accounts/signup/', lambda request: redirect('/')),
