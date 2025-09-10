@@ -29,8 +29,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    cpus: "1.0"
-    mem_limit: "1536m"
+
 
   redis:
     image: redis:7
