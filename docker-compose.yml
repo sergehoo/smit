@@ -2,13 +2,12 @@ networks:
   smitci_network:
     driver: bridge
   proxy:
-    external: true   # réseau Traefik
+    external: true   # réseau Traefik existant
 
 volumes:
   pgdata:
   static_volume:
   media_volume:
-  logs_volume:
 
 services:
   smitDB:
@@ -21,43 +20,23 @@ services:
       PG_DATA: /data
     volumes:
       - pgdata:/var/lib/postgresql/data
-    networks:
-      - smitci_network
-      - proxy
+    networks: [smitci_network, proxy]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
-    # 👉 Laisse Postgres respirer (éviter les hard-limits justes)
-    # cpus: "2"
-    # mem_limit: "2536m"   # <- retiré
-    shm_size: "512m"
-    ulimits:
-      nofile:
-        soft: 8192
-        hard: 8192
-    logging:
-      driver: "json-file"
-      options: { max-size: "10m", max-file: "3" }
 
   redis:
     image: redis:7
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", "900 1"]
-    networks:
-      - smitci_network
-      - proxy
+    networks: [smitci_network, proxy]
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG || exit 1"]
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
-    cpus: "0.20"
-    mem_limit: "256m"
-    logging:
-      driver: "json-file"
-      options: { max-size: "5m", max-file: "2" }
 
   smitweb:
     build:
@@ -69,45 +48,35 @@ services:
       --workers 2 --threads 2
       --timeout 60
       --log-level warning
+    env_file: [.env]
     volumes:
       - .:/smitci-app
       - static_volume:/smitci-app/static
       - media_volume:/smitci-app/media
-      - logs_volume:/var/log/app
-    env_file: [.env]
-    restart: unless-stopped
     depends_on:
       smitDB:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - smitci_network
-      - proxy
-    cpus: "0.80"
-    mem_limit: "2048m"
+    restart: unless-stopped
+    networks: [smitci_network, proxy]
+    # Healthcheck sans curl (utilise Python déjà présent dans l'image)
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/healthz || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
       start_period: 40s
-    logging:
-      driver: "json-file"
-      options: { max-size: "10m", max-file: "3" }
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-
       # Router HTTPS
       - traefik.http.routers.smitci.rule=Host(`smitci.com`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls.certresolver=lets
-
       # Service (port interne)
       - traefik.http.services.smitci.loadbalancer.server.port=8000
       - traefik.http.services.smitci.loadbalancer.server.scheme=http
-
       # Middlewares (doivent exister côté Traefik)
       - traefik.http.routers.smitci.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
 
@@ -122,23 +91,16 @@ services:
       --prefetch-multiplier=1 -Ofair
       --max-tasks-per-child=100
       --without-gossip --without-mingle
+    env_file: [.env]
     volumes:
       - .:/smitci-app
-    env_file: [.env]
-    restart: unless-stopped
     depends_on:
       smitDB:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - smitci_network
-      - proxy
-    cpus: "0.60"
-    mem_limit: "768m"
-    logging:
-      driver: "json-file"
-      options: { max-size: "10m", max-file: "3" }
+    restart: unless-stopped
+    networks: [smitci_network, proxy]
 
   celerybeat:
     build:
@@ -148,26 +110,19 @@ services:
       celery -A smitci beat
       --loglevel=warning
       --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file: [.env]
     volumes:
       - .:/smitci-app
-    env_file: [.env]
-    restart: unless-stopped
     depends_on:
       smitDB:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - smitci_network
-      - proxy
-    cpus: "0.30"
-    mem_limit: "512m"
-    logging:
-      driver: "json-file"
-      options: { max-size: "5m", max-file: "2" }
+    restart: unless-stopped
+    networks: [smitci_network, proxy]
 
   smitadminer:
-    profiles: ["admin"]   # ← lancé à la demande: `docker compose --profile admin up -d smitadminer`
+    profiles: ["admin"]   # lancer au besoin: `docker compose --profile admin up -d smitadminer`
     image: adminer
     restart: unless-stopped
     environment:
@@ -175,11 +130,16 @@ services:
     depends_on:
       smitDB:
         condition: service_healthy
-    networks:
-      - smitci_network
-      - proxy
-    cpus: "0.10"
-
+    networks: [smitci_network, proxy]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.smitadminer.rule=Host(`adminer.smitci.com`)
+      - traefik.http.routers.smitadminer.entrypoints=websecure
+      - traefik.http.routers.smitadminer.tls.certresolver=lets
+      - traefik.http.services.smitadminer.loadbalancer.server.port=8080
+      - traefik.http.services.smitadminer.loadbalancer.server.scheme=http
+      - traefik.http.routers.smitadminer.middlewares=traefik-auth@docker,sec-headers@docker,compress@docker,ratelimit@docker
 
 #networks:
 #  smitci_network:
