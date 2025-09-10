@@ -61,12 +61,12 @@ services:
     restart: unless-stopped
     networks: [smitci_network, proxy]
     # Healthcheck sans curl (utilise Python déjà présent dans l'image)
-    healthcheck:
-      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
-      interval: 10s
-      timeout: 3s
-      retries: 12
-      start_period: 40s
+#    healthcheck:
+#      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+#      interval: 10s
+#      timeout: 3s
+#      retries: 12
+#      start_period: 40s
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
