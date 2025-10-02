@@ -8,6 +8,7 @@ volumes:
   pgdata:
   static_volume:
   media_volume:
+  torch_cache:
 
 services:
   smitDB:
