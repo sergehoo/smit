@@ -80,18 +80,28 @@ services:
       - traefik.enable=true
       - traefik.docker.network=proxy
 
-      # Router HTTPS principal
-      - traefik.http.routers.smitci.rule=Host(`smitci.com`)
+      # Router public HTTPS (host dans .env : SMITCI_HOST=smitci.com)
+      - traefik.http.routers.smitci.rule=Host(`${SMITCI_HOST}`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls=true
       - traefik.http.routers.smitci.tls.certresolver=lets
+      - traefik.http.routers.smitci.service=smitci-svc
 
-      # Service (nom = "smitci") pointant sur le port interne 8000
-      - traefik.http.services.smitci.loadbalancer.server.port=8000
-      - traefik.http.services.smitci.loadbalancer.server.scheme=http
+      # Service amont HTTP:8000
+      - traefik.http.services.smitci-svc.loadbalancer.server.port=8000
+      - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
 
-      # Middlewares (doivent exister côté Traefik)
-      - traefik.http.routers.smitci.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
+      # Middlewares (optionnels si déjà globalement définis)
+      - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
+      - traefik.http.middlewares.smitci-sec-headers.headers.stsSeconds=31536000
+      - traefik.http.middlewares.smitci-sec-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.smitci-sec-headers.headers.stsPreload=true
+      - traefik.http.middlewares.smitci-sec-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.smitci-sec-headers.headers.frameDeny=true
+      - traefik.http.middlewares.smitci-sec-headers.headers.referrerPolicy=strict-origin-when-cross-origin
+      - traefik.http.middlewares.smitci-compress.compress=true
+      - traefik.http.middlewares.smitci-rl.ratelimit.average=150
+      - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
 
   celeryworker:
     build:
