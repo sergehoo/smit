@@ -144,7 +144,7 @@ services:
         condition: service_healthy
     networks: [smitci_network, proxy]
     labels:
-      - traefik.enable=true
+      - traefik.enable=false
       - traefik.docker.network=proxy
       - traefik.http.routers.smitadminer.rule=Host(`adminer.smitci.com`)
       - traefik.http.routers.smitadminer.entrypoints=websecure

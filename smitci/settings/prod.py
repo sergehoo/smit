@@ -48,7 +48,7 @@ AXES_PROXY_DEPTH = 1  # profondeur des proxies (ajuste si tu as plusieurs revers
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
-ALLOWED_HOSTS = ["smitci.com", "www.smitci.com"]
+ALLOWED_HOSTS = ["smitci.com", "www.smitci.com", "localhost", "127.0.0.1"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://smitci.com",
