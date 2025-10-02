@@ -77,6 +77,7 @@ services:
       - traefik.http.routers.smitci.rule=Host(`smitci.com`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls.certresolver=lets
+      - traefik.http.routers.smitci.service=smitci-svc
       # Service (port interne)
       - traefik.http.services.smitci.loadbalancer.server.port=8000
       - traefik.http.services.smitci.loadbalancer.server.scheme=http
