@@ -83,6 +83,7 @@ services:
       # Router HTTPS principal
       - traefik.http.routers.smitci.rule=Host(`smitci.com`)
       - traefik.http.routers.smitci.entrypoints=websecure
+      - traefik.http.routers.smitci.tls=true
       - traefik.http.routers.smitci.tls.certresolver=lets
 
       # Service (nom = "smitci") pointant sur le port interne 8000
