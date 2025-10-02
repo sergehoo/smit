@@ -21,4 +21,4 @@ DATABASES = {
 }
 
 MPI_API_KEY = os.environ.get('MPI_API_KEY', default='key')
-
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30

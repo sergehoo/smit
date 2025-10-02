@@ -5,9 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/entrypoint.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/smit/templates/lab/examen_done_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/laboratory/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/laboratory/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/laboratory/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/laboratory/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/lab/examen_done_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/lab/examen_done_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/bilans/bilan_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/hospitalization/hospitalization_urgence_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/hospitalization/hospitalization_urgence_create.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_create.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_create.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/dev.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/prod.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/prod.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,34 +67,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Django Server.smitci.executor&quot;: &quot;Run&quot;,
-    &quot;Docker.docker-compose.yml.smit-db: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ogahserge/Documents/smitci/static/images&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.smitci.executor": "Run",
+    "Docker.docker-compose.yml.smit-db: Compose Deployment.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "django.template.preview.state": "SHOW_EDITOR",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/ogahserge/Documents/SMIT/smitci",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;,
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite",
+      "postgresql"
     ],
-    &quot;stardust.markdown.MarkdownSplitEditorSuppressor:keyList&quot;: []
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/static/images" />
@@ -276,7 +292,10 @@
       <workItem from="1755531238491" duration="1536000" />
       <workItem from="1755733265540" duration="2472000" />
       <workItem from="1756221098675" duration="12635000" />
-      <workItem from="1756932574404" duration="33443000" />
+      <workItem from="1756932574404" duration="39781000" />
+      <workItem from="1757900861151" duration="598000" />
+      <workItem from="1758293535079" duration="1254000" />
+      <workItem from="1759319496443" duration="16407000" />
     </task>
     <servers />
   </component>
@@ -299,12 +318,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>810</line>
+          <line>811</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1505</line>
+          <line>1506</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -334,7 +353,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2427</line>
+          <line>2446</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -349,7 +368,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>888</line>
+          <line>889</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -369,12 +388,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1312</line>
+          <line>1313</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>166</line>
+          <line>167</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -424,7 +443,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1567</line>
+          <line>1568</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -439,12 +458,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1995</line>
+          <line>1996</line>
           <option name="timeStamp" value="53" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smit/views.py</url>
-          <line>1450</line>
+          <line>1451</line>
           <option name="timeStamp" value="55" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -459,7 +478,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/laboratory/views.py</url>
-          <line>683</line>
+          <line>707</line>
           <option name="timeStamp" value="60" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

@@ -1488,18 +1488,14 @@ class RdvSuiviForm(forms.ModelForm):
 
 class UrgencePatientForm(forms.ModelForm):
     nom = forms.CharField(required=True, widget=forms.TextInput(
-        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom', }))
-    prenoms = forms.CharField(required=True,
-                              widget=forms.TextInput(
-                                  attrs={'class': 'form-control form-control-lg form-control-outlined',
-                                         'placeholder': 'prenom', }))
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'nom'}))
+    prenoms = forms.CharField(required=True, widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'prenom'}))
+    contact = forms.CharField(required=True, widget=forms.TextInput(
+        attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
+               'placeholder': '0701020304', 'id': 'phone'}))
 
-    contact = forms.CharField(required=True,
-                              widget=forms.TextInput(
-                                  attrs={'type': 'tel', 'class': 'form-control form-control-lg form-control-outlined',
-                                         'placeholder': '0701020304', 'id': 'phone'}))
-
-    lieu_naissance = forms.ChoiceField(required=False, choices=villes_choices, widget=forms.Select(
+    lieu_naissance = forms.ChoiceField(required=True, choices=villes_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'outlined'}))
     date_naissance = forms.DateField(required=True,
@@ -1510,14 +1506,12 @@ class UrgencePatientForm(forms.ModelForm):
     genre = forms.ChoiceField(required=True, choices=Sexe_choices,
                               widget=forms.Select(
                                   attrs={'class': 'form-control form-control-lg form-control-outlined', }))
-    nationalite = forms.ChoiceField(required=False, choices=nationalite_choices,
+    nationalite = forms.ChoiceField(required=True, choices=nationalite_choices,
                                     widget=forms.Select(
                                         attrs={
                                             'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
                                             'data-search': 'on', 'id': 'nationalite'}))
-    ethnie = forms.ChoiceField(required=False, choices=ethnic_groups, widget=forms.Select(
-        attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-               'data-search': 'on', 'id': 'ethnie'}))
+
     profession = forms.ChoiceField(required=False, choices=professions_choices, widget=forms.Select(
         attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ', 'data-search': 'on',
                'id': 'profession'}))
@@ -1529,12 +1523,33 @@ class UrgencePatientForm(forms.ModelForm):
                                      widget=forms.Select(
                                          attrs={'class': 'form-control  form-control-lg form-control-outlined',
                                                 'id': 'outlined', }))
+    employeur = forms.CharField(required=False, widget=forms.TextInput(
+        attrs={'class': 'form-control form-control-lg form-control-outlined', 'placeholder': 'Fonction Publique', }))
 
     commune = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control form-control-lg form-control-outlined select2 form-select ',
-                                   'data-search': 'on', 'id': 'commune'})
+                                   'data-search': 'on', })
+    )
+
+    # … tes ChoiceField existants (lieu_naissance, genre, nationalite, etc.) …
+
+    commune = forms.ModelChoiceField(
+        queryset=Location.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control form-control-lg form-control-outlined select2 form-select',
+            'data-search': 'on', 'id': 'commune'
+        })
+    )
+    # ➕ “Autre commune”
+    nouvelle_commune = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg form-control-outlined',
+            'placeholder': 'Entrez la nouvelle commune'
+        })
     )
 
     class Meta:
@@ -1542,51 +1557,69 @@ class UrgencePatientForm(forms.ModelForm):
         fields = [
             'nom', 'prenoms', 'contact',
             'lieu_naissance', 'date_naissance', 'genre', 'nationalite',
-            'profession', 'groupe_sanguin', 'niveau_etude', 'commune',
+            'profession', 'groupe_sanguin', 'niveau_etude', 'commune', 'nouvelle_commune',
         ]
-        widgets = {'date_naissance': forms.DateInput(attrs={'type': 'date'}), }
+        widgets = {
+            'date_naissance': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
 
     def clean_contact(self):
-        contact = self.cleaned_data.get('contact')
+        contact = (self.cleaned_data.get('contact') or '').strip()
         try:
             parsed_number = phonenumbers.parse(contact, 'CI')
             if not phonenumbers.is_valid_number(parsed_number):
-                raise ValidationError("Invalid phone number format.")
+                raise ValidationError("Numéro de téléphone invalide.")
         except phonenumbers.phonenumberutil.NumberParseException:
-            raise ValidationError("Invalid phone number.")
+            raise ValidationError("Numéro de téléphone invalide.")
         return phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
-
-    def clean_commune(self):
-        commune = self.cleaned_data.get('commune')
-        nouvelle_commune = self.cleaned_data.get('nouvelle_commune')
-
-        if not commune and not nouvelle_commune:
-            raise ValidationError("Veuillez sélectionner une commune ou en ajouter une nouvelle.")
-
-        if nouvelle_commune:
-            # Si une nouvelle commune est renseignée, elle est prioritaire
-            # Vous pouvez ajouter une logique pour enregistrer cette nouvelle commune dans votre base de données ici
-            # Exemple :
-            # Commune.objects.get_or_create(name=nouvelle_commune)
-            return nouvelle_commune
-
-        return commune
 
     def clean_date_naissance(self):
         date_naissance = self.cleaned_data.get('date_naissance')
+        if not date_naissance:
+            return date_naissance
         today = datetime.today().date()
-
-        # Calculate the maximum and minimum valid birth dates
-        min_date_naissance = today - timedelta(days=365.25)  # Approximately 1 year ago
-        max_date_naissance = today - timedelta(days=365.25 * 120)  # Approximately 120 years ago
-
-        # Check if the date is outside the allowed range
-        if date_naissance > min_date_naissance:
+        min_age = today - timedelta(days=365)  # ≥ 1 an
+        max_age = today - timedelta(days=int(365.25 * 120))  # ≤ 120 ans
+        if date_naissance > min_age:
             raise ValidationError("La date de naissance doit être supérieure à 1 an.")
-        elif date_naissance < max_date_naissance:
+        if date_naissance < max_age:
             raise ValidationError("La date de naissance doit être inférieure à 120 ans.")
-
         return date_naissance
+
+    def clean(self):
+        cleaned = super().clean()
+        commune = cleaned.get('commune')
+        nouvelle = (cleaned.get('nouvelle_commune') or '').strip()
+
+        if not commune and not nouvelle:
+            self.add_error('commune', "Sélectionnez une commune ou ajoutez-en une nouvelle.")
+        if nouvelle:
+            # crée/récupère Location par nom (case-insensitive)
+            obj, _ = Location.objects.get_or_create(name__iexact=nouvelle, defaults={'name': nouvelle})
+            cleaned['commune'] = obj
+        return cleaned
+
+
+class UrgenceHospitalizationStep2Form(forms.ModelForm):
+    class Meta:
+        model = Hospitalization
+        fields = ['admission_date', 'bed', 'reason_for_admission', ]
+        widgets = {
+            'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'reason_for_admission': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            # 'activite': forms.Select(attrs={'class': 'form-control'}),
+            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
+            'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
+
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        # Exemple : vérifier que le lit n’est pas déjà occupé (si ta logique existe)
+        # bed = cleaned.get('bed')
+        # if bed and bed.occupe_actuellement():
+        #     self.add_error('bed', "Ce lit est déjà occupé.")
+        return cleaned
 
 
 class HospitalizationDischargeForm(forms.ModelForm):
@@ -1987,8 +2020,6 @@ class MouvementStockForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'})
     )
 
-
-
     class Meta:
         model = MouvementStock
         fields = ['medicament', 'quantite', 'type_mouvement', 'patient', 'fournisseur', 'commande']
@@ -2033,6 +2064,7 @@ class MouvementStockForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
 
 class ResultatAnalyseForm(forms.ModelForm):
     class Meta:

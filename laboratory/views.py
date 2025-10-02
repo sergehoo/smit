@@ -250,6 +250,30 @@ class ExamenDoneListView(LoginRequiredMixin, FilterView, ListView):
         context["type_bilans_counts"] = bilan_counts
         return context
 
+class ExamenDoneDetailView(LoginRequiredMixin, DetailView):
+    model = BilanParaclinique
+    template_name = 'lab/examen_done_detail.html'
+    context_object_name = 'bilan'
+    paginate_by = 10
+    filterset_class = ExamenDoneFilter
+
+    def get_queryset(self):
+        return BilanParaclinique.objects.filter(
+            result__isnull=False
+        ).select_related('patient', 'doctor', 'examen', 'examen__type_examen')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        bilan_counts = (
+            BilanParaclinique.objects
+            .filter(result__isnull=False)
+            .values('examen__type_examen__nom')
+            .annotate(count=Count('id'))
+            .order_by('examen__type_examen__nom')
+        )
+        context["type_bilans_counts"] = bilan_counts
+        return context
 
 class ExamenResultatsListView(LoginRequiredMixin, ListView):
     model = Examen

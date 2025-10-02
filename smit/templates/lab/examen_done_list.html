@@ -93,7 +93,7 @@
                         <td>{{ exam.created_at|date:"d M Y" }}</td>
                         <td><span class="badge bg-info">{{ exam.get_status_display }}</span></td>
                         <td>
-                            <a href="#" class="btn btn-xs btn-outline-info">
+                            <a href="{% url 'examen_done_detail' exam.pk %}" class="btn btn-xs btn-outline-info">
                                 <i class="ni ni-eye"></i>
                             </a>
                         </td>

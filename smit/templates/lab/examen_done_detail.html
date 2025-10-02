@@ -1,0 +1,514 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête de page -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb breadcrumb-arrow mb-0">
+                                <li class="breadcrumb-item"><a href="{% url 'examen_done_list' %}">Analyses effectués</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Détail de l'examen</li>
+                            </ol>
+                        </nav>
+                        <h3 class="nk-block-title page-title mt-2">Détail de l'examen #{{ bilan.id }}</h3>
+                        <div class="nk-block-des text-soft">
+                            <p>Résultats complets et informations détaillées de l'analyse</p>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <div class="toggle-wrap nk-block-tools-toggle">
+                            <a href="#" class="btn btn-icon btn-trigger toggle-expand me-n1" data-target="pageMenu">
+                                <em class="icon ni ni-more-v"></em>
+                            </a>
+                            <div class="toggle-expand-content" data-content="pageMenu">
+                                <ul class="nk-block-tools g-3">
+                                    <li>
+                                        <a href="{% url 'examen_done_list' %}" class="btn btn-outline-secondary">
+                                            <em class="icon ni ni-arrow-left"></em>
+                                            <span>Retour à la liste</span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-block-tools-opt">
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                <em class="icon ni ni-download"></em>
+                                                <span>Exporter</span>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end">
+                                                <ul class="link-list-opt no-bdr">
+                                                    <li>
+                                                        <a href="">
+                                                            <em class="icon ni ni-file-pdf"></em>
+                                                            <span>PDF</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="">
+                                                            <em class="icon ni ni-file-csv"></em>
+                                                            <span>CSV</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="nk-block">
+                <div class="row g-4">
+                    <!-- Colonne principale -->
+                    <div class="col-12 col-xl-8">
+                        <!-- Carte des résultats -->
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="card-title-group">
+                                    <div class="card-title">
+                                        <h5 class="title">📋 Résultats de l'examen</h5>
+                                    </div>
+                                    <div class="card-tools">
+                                        {% if bilan.status == 'completed' %}
+                                            <span class="badge badge-dim bg-success">{{ bilan.get_status_display }}</span>
+                                        {% elif bilan.status == 'pending' %}
+                                            <span class="badge badge-dim bg-warning">{{ bilan.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge badge-dim bg-danger">{{ bilan.get_status_display }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <div class="row g-3">
+                                        <div class="col-sm-6">
+                                            <span class="text-soft fw-semibold fs-13px">Nom de l'examen:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.examen.nom|default:"Non spécifié" }}</div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-soft fw-semibold fs-13px">Type d'examen:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.examen.type_examen.nom|default:"Non spécifié" }}</div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-soft fw-semibold fs-13px">Date de création:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.created_at|date:"d/m/Y H:i" }}</div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-soft fw-semibold fs-13px">Date du résultat:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.result_date|date:"d/m/Y H:i"|default:"Non disponible" }}</div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Résultat principal -->
+                                    <div class="mb-4">
+                                        <span class="text-soft fw-semibold fs-13px">Résultat:</span>
+                                        <div class="mt-2">
+                                            {% if bilan.result|length > 50 %}
+                                                <div class="alert alert-info" role="alert">
+                                            {% else %}
+                                                <div class="alert alert-primary" role="alert">
+                                            {% endif %}
+                                                <div class="d-flex">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="alert-heading mb-2">Valeur mesurée</h6>
+                                                        <p class="mb-0 fs-16px fw-bold">{{ bilan.result|default:"En attente de résultat" }}</p>
+                                                        {% if bilan.unit %}
+                                                            <span class="text-muted fs-12px">Unité: {{ bilan.unit }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% if bilan.reference_range %}
+                                                    <div class="flex-shrink-0">
+                                                        <div class="text-end">
+                                                            <h6 class="text-muted mb-1">Valeur de référence</h6>
+                                                            <span class="badge badge-dim bg-light text-dark">{{ bilan.reference_range }}</span>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    {% if bilan.description %}
+                                    <div class="mb-4">
+                                        <span class="text-soft fw-semibold fs-13px">Description:</span>
+                                        <div class="mt-2 p-3 bg-light rounded">
+                                            <p class="mb-0">{{ bilan.description }}</p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Commentaire du médecin -->
+                                    {% if bilan.comment %}
+                                    <div class="mb-4">
+                                        <span class="text-soft fw-semibold fs-13px">Commentaire du médecin:</span>
+                                        <div class="mt-2 p-3 bg-primary bg-opacity-10 rounded border-start border-primary border-3">
+                                            <p class="mb-0">{{ bilan.comment }}</p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Fichier de rapport -->
+                                    {% if bilan.report_file %}
+                                    <div class="mb-4">
+                                        <span class="text-soft fw-semibold fs-13px">Fichier de rapport:</span>
+                                        <div class="mt-2">
+                                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                                <div class="flex-shrink-0">
+                                                    <em class="icon ni ni-file-pdf fs-20px text-danger"></em>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h6 class="mb-1">Rapport d'examen</h6>
+                                                    <span class="text-muted fs-12px">{{ bilan.report_file.size|filesizeformat }}</span>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <a href="{{ bilan.report_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <em class="icon ni ni-download"></em>
+                                                        <span>Télécharger</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Historique des modifications -->
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">📝 Historique</h5>
+                                <div class="timeline">
+                                    <div class="timeline-item">
+                                        <div class="timeline-time">{{ bilan.created_at|date:"d/m/Y H:i" }}</div>
+                                        <div class="timeline-dot bg-primary"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Examen créé</h6>
+                                            <span class="text-muted">Demande d'examen initiale</span>
+                                        </div>
+                                    </div>
+                                    {% if bilan.result_date %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-time">{{ bilan.result_date|date:"d/m/Y H:i" }}</div>
+                                        <div class="timeline-dot bg-success"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Résultat disponible</h6>
+                                            <span class="text-muted">Résultat de l'examen enregistré</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne latérale -->
+                    <div class="col-12 col-xl-4">
+                        <!-- Informations patient -->
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <h5 class="card-title">👤 Informations patient</h5>
+                                <div class="mt-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="user-avatar bg-primary">
+                                            <span>{{ bilan.patient.nom|first|upper }}{{ bilan.patient.prenoms|first|upper }}</span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-0">{{ bilan.patient.nom|upper }} {{ bilan.patient.prenoms|upper }}</h6>
+                                            <span class="text-muted fs-12px">ID: {{ bilan.patient.id }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Date de naissance:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.patient.date_naissance|date:"d/m/Y"|default:"Non renseignée" }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Âge:</span>
+                                            <div class="fw-bold fs-14px">
+                                                {% if bilan.patient.date_naissance %}
+                                                    {{ bilan.patient.date_naissance|timesince }}
+                                                {% else %}
+                                                    Non renseigné
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Sexe:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.patient.get_sexe_display|default:"Non renseigné" }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <a href="{% url 'detail_patient' bilan.patient.id %}" class="btn btn-sm btn-outline-primary w-100">
+                                            <em class="icon ni ni-profile"></em>
+                                            <span>Voir dossier patient</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations médecin -->
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">👨‍⚕️ Médecin prescripteur</h5>
+                                <div class="mt-3">
+                                    {% if bilan.doctor %}
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="user-avatar bg-success">
+                                            <span>{{ bilan.doctor.nom|first|upper }}{{ bilan.doctor.prenom|first|upper }}</span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-0">Dr. {{ bilan.doctor.nom|upper }} {{ bilan.doctor.prenom|upper }}</h6>
+                                            <span class="text-muted fs-12px">{{ bilan.doctor.specialite|default:"Médecin" }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Service:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.doctor.service|default:"Non spécifié" }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Contact:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.doctor.telephone|default:"Non renseigné" }}</div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center text-muted py-3">
+                                        <em class="icon ni ni-user-alt fs-24px mb-2"></em>
+                                        <p class="mb-0">Médecin non spécifié</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations hospitalisation -->
+                        {% if bilan.hospitalisation %}
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">🏥 Hospitalisation</h5>
+                                <div class="mt-3">
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Date d'admission:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.hospitalisation.admission_date|date:"d/m/Y" }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Unité:</span>
+                                            <div class="fw-bold fs-14px">{{ bilan.hospitalisation.bed.box.chambre.unite|default:"Non spécifié" }}</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Chambre:<span class="font-weight-bolder text-info">{{ bilan.hospitalisation.bed.box.chambre.nom }}</span></span>
+                                            <div class="fw-bold fs-14px">{{ bilan.hospitalisation.bed.nom|default:"Non spécifiée" }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <a href="{% url 'hospitalisationdetails' bilan.hospitalisation.id %}" class="btn btn-sm btn-outline-secondary w-100">
+                                            <em class="icon ni ni-hospital"></em>
+                                            <span>Voir hospitalisation</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions rapides -->
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">⚡ Actions rapides</h5>
+                                <div class="mt-3">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPrintReport">
+                                            <em class="icon ni ni-printer"></em>
+
+                                        </button>
+                                        {% if perms.lab.change_bilanparaclinique %}
+                                        <a href="" class="btn btn-outline-secondary">
+                                            <em class="icon ni ni-edit"></em>
+
+                                        </a>
+                                        {% endif %}
+                                        {% if perms.lab.delete_bilanparaclinique %}
+                                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalDeleteExamen">
+                                            <em class="icon ni ni-trash"></em>
+
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'impression -->
+<div class="modal fade" id="modalPrintReport" tabindex="-1">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🖨️ Impression du rapport</h5>
+                <a href="#" class="close" data-bs-dismiss="modal">
+                    <em class="icon ni ni-cross"></em>
+                </a>
+            </div>
+            <div class="modal-body">
+                <p>Sélectionnez les options d'impression :</p>
+                <div class="form-group">
+                    <label class="form-label">Format d'impression</label>
+                    <div class="form-control-wrap">
+                        <select class="form-select" id="printFormat">
+                            <option value="standard">Standard</option>
+                            <option value="detailed">Détaillé</option>
+                            <option value="minimal">Minimal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="includeComments" checked>
+                        <label class="form-check-label" for="includeComments">
+                            Inclure les commentaires
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <em class="icon ni ni-printer"></em>
+                    <span>Imprimer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de suppression -->
+{% if perms.lab.delete_bilanparaclinique %}
+<div class="modal fade" id="modalDeleteExamen" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🗑️ Supprimer l'examen</h5>
+                <a href="#" class="close" data-bs-dismiss="modal">
+                    <em class="icon ni ni-cross"></em>
+                </a>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cet examen ?</p>
+                <div class="alert alert-warning" role="alert">
+                    <em class="icon ni ni-alert-circle"></em>
+                    <span>Cette action est irréversible. Toutes les données associées à cet examen seront définitivement supprimées.</span>
+                </div>
+                <div class="bg-light rounded p-3">
+                    <strong>Examen #{{ bilan.id }}</strong><br>
+                    <span class="text-muted">{{ bilan.examen.nom }} - {{ bilan.patient.nom }} {{ bilan.patient.prenoms }}</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <em class="icon ni ni-trash"></em>
+                        <span>Supprimer définitivement</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Styles CSS additionnels -->
+<style>
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-time {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #0d6efd;
+}
+
+@media print {
+    .nk-header,
+    .nk-sidebar,
+    .nk-footer,
+    .btn,
+    .modal,
+    .breadcrumb,
+    .card-tools {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    .container-xl {
+        max-width: 100% !important;
+    }
+}
+</style>
+
+{% endblock %}

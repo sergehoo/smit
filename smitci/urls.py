@@ -39,7 +39,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
     hospitalization_chart_data, BilanListView, BilanCreateView, BilanDetailView, BilanUpdateView, BilanDeleteView, \
     CompleteBilanView, create_bilan_initial, suivi_send_from_bilan, add_traitement_arv, add_suivi_protocole, add_bilan, \
-    add_rdv, Landing
+    add_rdv, Landing, UrgencePatientCreateAPI, HospitalizationCreateAPI
 
 
 def healthz(_):
@@ -196,6 +196,10 @@ urlpatterns = [
                        name='get_patient_all_name'),
                   path('urgence/liste', UrgenceListView.as_view(), name='urgences_list'),
                   path('urgence/create/', UrgenceCreateView.as_view(), name='urgence_create'),
+                  path('api/urgences/patient/', UrgencePatientCreateAPI.as_view(), name='urgence_patient_api'),
+                  path('api/urgences/<int:patient_id>/hospitalisation/', HospitalizationCreateAPI.as_view(),
+                       name='urgence_hosp_api'),
+
                   path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(),
                        name='hospitalization_urgence_create'),
                   path('send_employee_sms/<int:employee_id>', send_sms_view, name='send_sms_view'),

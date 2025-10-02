@@ -2275,6 +2275,8 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
                 imageries_by_type[type_nom] = []
             imageries_by_type[type_nom].append(imagerie)
 
+        context['calendar_days'] = self.generate_calendar_days()
+
         context["imageries_by_type"] = imageries_by_type
         context["imageries_count"] = imageries.count()
 
@@ -2324,6 +2326,23 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context['missed_executions'] = missed_executions
         return context
 
+    def generate_calendar_days(self, days=7):
+        """Génère les jours du calendrier avec leurs créneaux horaires"""
+        from datetime import datetime, timedelta
+
+        calendar_days = []
+        today = datetime.now().date()
+
+        for i in range(days):
+            current_date = today + timedelta(days=i)
+            calendar_days.append({
+                'date': current_date,
+                'is_today': i == 0,
+                'is_past': i < 0,
+                'time_slots': ['morning', 'noon', 'evening']  # Matin, Midi, Soir
+            })
+
+        return calendar_days
     def post(self, request, *args, **kwargs):
         form_type = request.POST.get("form_type")  # Get the form type
         hospitalisation = self.get_object()

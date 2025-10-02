@@ -3,6 +3,31 @@ from django import template
 register = template.Library()
 
 
+@register.filter
+def get_execution_for_day(prescription, date):
+    """Récupère les exécutions d'une prescription pour une date donnée"""
+    return prescription.executions.filter(
+        scheduled_time__date=date
+    )
+
+
+@register.filter
+def get_execution_for_time(executions, time_slot):
+    """Récupère l'exécution pour un créneau horaire donné"""
+    time_mapping = {
+        'morning': (6, 12),  # 6h-12h
+        'noon': (12, 14),  # 12h-14h
+        'evening': (18, 23)  # 18h-23h
+    }
+
+    if time_slot in time_mapping:
+        start_hour, end_hour = time_mapping[time_slot]
+        for execution in executions:
+            if start_hour <= execution.scheduled_time.hour < end_hour:
+                return execution
+    return None
+
+
 @register.filter(name='add_class')
 def add_class(field, css_class):
     return field.as_widget(attrs={'class': css_class})
@@ -58,6 +83,7 @@ def sub(value, arg):
     except (ValueError, TypeError):
         return 0
 
+
 @register.filter
 def div(value, arg):
     """Divise value par arg"""
@@ -65,6 +91,7 @@ def div(value, arg):
         return float(value) / float(arg)
     except (ValueError, TypeError, ZeroDivisionError):
         return 0
+
 
 @register.filter
 def mul(value, arg):

@@ -21,6 +21,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
+from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
@@ -42,7 +43,7 @@ from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, Consu
     ConseilsForm, HospitalizationSendForm, TestRapideVIHForm, EnqueteVihForm, ConsultationForm, EchantillonForm, \
     HospitalizationForm, AppointmentUpdateForm, SuiviSendForm, RdvSuiviForm, UrgencePatientForm, CasContactForm, \
     PatientUpdateForm, TraitementARVForm, SuiviProtocoleForm, RendezVousForm, BilanParacliniqueForm, \
-    RendezVousSuiviForm, ProtocoleForm
+    RendezVousSuiviForm, ProtocoleForm, UrgenceHospitalizationStep2Form
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV, BilanInitial, \
     TypeBilanParaclinique, ExamenStandard, BilanParaclinique, Echantillon
@@ -2100,17 +2101,69 @@ class UrgenceListView(LoginRequiredMixin, ListView):
         return Patient.objects.filter(urgence=True)
 
 
-class UrgenceCreateView(LoginRequiredMixin, CreateView):
-    model = Patient
+# class UrgenceCreateView(LoginRequiredMixin, CreateView):
+#     model = Patient
+#     template_name = "pages/urgence/urgence_create.html"
+#     form_class = UrgencePatientForm
+#     success_url = reverse_lazy('urgences_list')  # Rediriger après la création
+#
+#     def form_valid(self, form):
+#         # Forcer le champ urgence à True
+#         form.instance.urgence = True
+#         form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
+#         return super().form_valid(form)
+class UrgenceCreateView(LoginRequiredMixin, TemplateView):
     template_name = "pages/urgence/urgence_create.html"
-    form_class = UrgencePatientForm
-    success_url = reverse_lazy('urgences_list')  # Rediriger après la création
 
-    def form_valid(self, form):
-        # Forcer le champ urgence à True
-        form.instance.urgence = True
-        form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
-        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from .forms import UrgencePatientForm, UrgenceHospitalizationStep2Form
+        ctx['form'] = UrgencePatientForm()
+        ctx['step2_form'] = UrgenceHospitalizationStep2Form()
+        return ctx
+
+
+class UrgencePatientCreateAPI(LoginRequiredMixin, View):
+    """ Étape 1 (AJAX) — crée le patient en urgence. """
+
+    def post(self, request):
+        form = UrgencePatientForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                patient = form.save(commit=False)
+                patient.urgence = True
+                if hasattr(request.user, 'employee'):
+                    patient.created_by = request.user.employee
+                patient.save()
+                form.save_m2m()
+            return JsonResponse({
+                "ok": True,
+                "patient_id": patient.pk,
+                "detail": "Patient enregistré avec succès.",
+                "next": reverse('urgence_hosp_api', args=[patient.pk])
+            })
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+
+
+class HospitalizationCreateAPI(LoginRequiredMixin, View):
+    """ Étape 2 (AJAX) — crée l'hospitalisation pour un patient donné. """
+
+    def post(self, request, patient_id):
+        patient = get_object_or_404(Patient, pk=patient_id)
+        form = UrgenceHospitalizationStep2Form(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                hosp = form.save(commit=False)
+                hosp.patient = patient
+                hosp.doctor = request.user
+                hosp.save()
+                form.save_m2m()
+            return JsonResponse({
+                "ok": True,
+                "detail": "Admission en urgence créée avec succès.",
+                "redirect": reverse('urgences_list')
+            })
+        return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
 # vue corrigée
@@ -2282,9 +2335,9 @@ class BilanCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
 class BilanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = BilanInitial
-    template_name = 'bilans/bilan_form.html'
+    template_name = 'pages/bilans/bilan_form.html'
     fields = [
-        'examen', 'description', 'priority',
+        'description', 'priority',
         'comment', 'status', 'result', 'reference_range',
         'unit', 'is_critical'
     ]
@@ -2320,14 +2373,14 @@ class BilanUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
 class BilanDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = BilanInitial
-    template_name = 'bilans/bilan_confirm_delete.html'
+    template_name = 'pages/bilans/bilan_confirm_delete.html'
     success_url = reverse_lazy('bilan_list')
     permission_required = 'bilans.delete_bilaninitial'
 
 
 class CompleteBilanView(LoginRequiredMixin, UpdateView):
     model = BilanInitial
-    template_name = 'bilans/bilan_complete.html'
+    template_name = 'pages/bilans/bilan_complete.html'
     fields = ['result', 'reference_range', 'unit', 'is_critical']
 
     def form_valid(self, form):

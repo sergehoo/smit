@@ -1,90 +1,533 @@
 {% extends 'layout/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3">
-                {% if object %}Modifier{% else %}Créer{% endif %} un Bilan Initial
-            </h1>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Formulaire</h6>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête de page -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb breadcrumb-arrow mb-0">
+                                <li class="breadcrumb-item"><a href="{% url 'bilan_list' %}">Bilans VIH</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    {% if object %}Modifier{% else %}Créer{% endif %} Bilan
+                                </li>
+                            </ol>
+                        </nav>
+                        <h3 class="nk-block-title page-title mt-2">
+                            <i class="fas fa-vial text-primary me-2"></i>
+                            {% if object %}Modifier le Bilan #{{ object.id }}{% else %}Nouveau Bilan Initial VIH{% endif %}
+                        </h3>
+                        <div class="nk-block-des text-soft">
+                            <p>{% if object %}Mise à jour des informations du bilan{% else %}Formulaire de création d'un nouveau bilan initial VIH{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <a href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'bilan_list' %}{% endif %}"
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Retour
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+            </div>
 
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
+            <!-- Contenu principal -->
+            <div class="nk-block">
+                <div class="row g-4">
+                    <!-- Formulaire principal -->
+                    <div class="col-12 col-xl-8">
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <div class="card-title-group">
+                                    <div class="card-title">
+                                        <h5 class="title">
+                                            <i class="fas fa-edit text-primary me-2"></i>
+                                            Informations du bilan
+                                        </h5>
+                                    </div>
+                                    {% if object %}
+                                    <div class="card-tools">
+                                        {% if object.status == 'completed' %}
+                                            <span class="badge badge-dim bg-success">{{ object.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge badge-dim bg-primary">{{ object.get_status_display }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <form method="post" enctype="multipart/form-data" class="mt-4">
+                                    {% csrf_token %}
+
+                                    <!-- Messages d'erreur généraux -->
+                                    {% if form.non_field_errors %}
+                                    <div class="alert alert-danger alert-icon">
+                                        <em class="icon ni ni-cross-circle"></em>
+                                        <strong>Erreurs :</strong>
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Informations patient (lecture seule) -->
+                                    {% if object %}
+                                    <div class="alert alert-info alert-icon">
+                                        <em class="icon ni ni-info"></em>
+                                        <div class="alert-text">
+                                            <strong>Patient :</strong> {{ object.patient.nom|upper }} {{ object.patient.prenoms|upper }}
+                                            {% if object.hospitalization %}
+                                            • <strong>Hospitalisation :</strong> {{ object.hospitalization.service.nom|default:"Non spécifié" }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Champs du formulaire -->
+                                    <div class="row g-3">
+                                        <!-- Description -->
+                                        {% if 'description' in form.fields %}
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.description.id_for_label }}">
+                                                    {{ form.description.label }}
+                                                    {% if form.description.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.description }}
+                                                    {% if form.description.help_text %}
+                                                    <div class="form-note">{{ form.description.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.description.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.description.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Priorité -->
+                                        {% if 'priority' in form.fields %}
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.priority.id_for_label }}">
+                                                    {{ form.priority.label }}
+                                                    {% if form.priority.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.priority }}
+                                                    {% if form.priority.help_text %}
+                                                    <div class="form-note">{{ form.priority.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.priority.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.priority.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Statut -->
+                                        {% if 'status' in form.fields %}
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.status.id_for_label }}">
+                                                    {{ form.status.label }}
+                                                    {% if form.status.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.status }}
+                                                    {% if form.status.help_text %}
+                                                    <div class="form-note">{{ form.status.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.status.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.status.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Résultat (JSON Field) -->
+                                        {% if 'result' in form.fields %}
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.result.id_for_label }}">
+                                                    {{ form.result.label }}
+                                                    {% if form.result.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    <textarea
+                                                        name="{{ form.result.name }}"
+                                                        id="{{ form.result.id_for_label }}"
+                                                        class="form-control"
+                                                        rows="8"
+                                                        placeholder='{"CD4": {"value": 350, "reference": "500-1500", "unit": "cellules/μL", "is_abnormal": true}, "Charge_virale": {"value": 10000, "reference": "<50", "unit": "copies/mL", "is_abnormal": true}}'
+                                                    >{% if form.result.value %}{{ form.result.value }}{% endif %}</textarea>
+                                                    {% if form.result.help_text %}
+                                                    <div class="form-note">
+                                                        Format JSON attendu. Exemple: {"paramètre": {"value": 123, "reference": "100-200", "unit": "mg/dL", "is_abnormal": false}}
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if form.result.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.result.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Valeurs de référence -->
+                                        {% if 'reference_range' in form.fields %}
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.reference_range.id_for_label }}">
+                                                    {{ form.reference_range.label }}
+                                                    {% if form.reference_range.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.reference_range }}
+                                                    {% if form.reference_range.help_text %}
+                                                    <div class="form-note">{{ form.reference_range.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.reference_range.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.reference_range.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Unité de mesure -->
+                                        {% if 'unit' in form.fields %}
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.unit.id_for_label }}">
+                                                    {{ form.unit.label }}
+                                                    {% if form.unit.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.unit }}
+                                                    {% if form.unit.help_text %}
+                                                    <div class="form-note">{{ form.unit.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.unit.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.unit.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Résultat critique -->
+                                        {% if 'is_critical' in form.fields %}
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <div class="custom-control custom-switch">
+                                                    {{ form.is_critical }}
+                                                    <label class="custom-control-label" for="{{ form.is_critical.id_for_label }}">
+                                                        {{ form.is_critical.label }}
+                                                    </label>
+                                                </div>
+                                                {% if form.is_critical.help_text %}
+                                                <div class="form-note">{{ form.is_critical.help_text }}</div>
+                                                {% endif %}
+                                                {% if form.is_critical.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.is_critical.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Commentaires médicaux -->
+                                        {% if 'comment' in form.fields %}
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label" for="{{ form.comment.id_for_label }}">
+                                                    {{ form.comment.label }}
+                                                    {% if form.comment.field.required %}<span class="text-danger">*</span>{% endif %}
+                                                </label>
+                                                <div class="form-control-wrap">
+                                                    {{ form.comment }}
+                                                    {% if form.comment.help_text %}
+                                                    <div class="form-note">{{ form.comment.help_text }}</div>
+                                                    {% endif %}
+                                                    {% if form.comment.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ form.comment.errors }}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Boutons d'action -->
+                                    <div class="row g-3 mt-4 pt-4 border-top">
+                                        <div class="col-12">
+                                            <div class="form-group text-end">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save me-1"></i>
+                                                    {% if object %}Mettre à jour{% else %}Créer le bilan{% endif %}
+                                                </button>
+                                                <a href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'bilan_list' %}{% endif %}"
+                                                   class="btn btn-outline-secondary ms-2">
+                                                    <i class="fas fa-times me-1"></i>
+                                                    Annuler
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar d'informations -->
+                    <div class="col-12 col-xl-4">
+                        <!-- Aide et instructions -->
+                        <div class="card card-bordered">
+                            <div class="card-inner">
+                                <h5 class="card-title">
+                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                    Instructions
+                                </h5>
+                                <div class="mt-3">
+                                    <div class="alert alert-light alert-icon">
+                                        <em class="icon ni ni-alert-circle"></em>
+                                        <div class="alert-text">
+                                            <strong>Champs obligatoires</strong> marqués d'un <span class="text-danger">*</span>
+                                        </div>
+                                    </div>
+
+                                    <h6 class="text-uppercase text-soft fs-13px mb-2">Rôles et permissions :</h6>
+                                    <ul class="list-unstyled fs-14px">
+                                        <li class="mb-2">
+                                            <i class="fas fa-user-md text-success me-2"></i>
+                                            <strong>Médecin :</strong> Prescription et commentaires
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-flask text-warning me-2"></i>
+                                            <strong>Technicien/Biologiste :</strong> Saisie des résultats
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-shield-alt text-danger me-2"></i>
+                                            <strong>Administrateur :</strong> Accès complet
+                                        </li>
+                                    </ul>
+
+                                    {% if 'result' in form.fields %}
+                                    <hr>
+                                    <h6 class="text-uppercase text-soft fs-13px mb-2">Format des résultats :</h6>
+                                    <div class="bg-light rounded p-3 fs-12px">
+                                        <code>
+{<br>
+&nbsp;&nbsp;"CD4": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"value": 350,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"reference": "500-1500",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"unit": "cellules/μL",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"is_abnormal": true<br>
+&nbsp;&nbsp;}<br>
+}
+                                        </code>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations patient -->
+                        {% if object %}
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">
+                                    <i class="fas fa-user-injured text-primary me-2"></i>
+                                    Informations patient
+                                </h5>
+                                <div class="mt-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="user-avatar bg-primary">
+                                            <span>{{ object.patient.nom|first|upper }}{{ object.patient.prenoms|first|upper }}</span>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-0">{{ object.patient.nom|upper }} {{ object.patient.prenoms|upper }}</h6>
+                                            <span class="text-muted fs-12px">ID: {{ object.patient.id }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Date de création:</span>
+                                            <div class="fw-bold fs-14px">{{ object.created_at|date:"d/m/Y H:i" }}</div>
+                                        </div>
+                                        {% if object.doctor %}
+                                        <div class="col-12">
+                                            <span class="text-soft fw-semibold fs-13px">Médecin prescripteur:</span>
+                                            <div class="fw-bold fs-14px">Dr. {{ object.doctor.nom }} {{ object.doctor.prenom }}</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         {% endif %}
 
-                        {% for field in form %}
-                        <div class="form-group row">
-                            <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                            </label>
-                            <div class="col-sm-9">
-                                {{ field }}
-                                {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                                {% endif %}
-                                {% if field.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ field.errors }}
+                        <!-- Recommandations automatiques -->
+                        {% if object and object.recommandations_auto %}
+                        <div class="card card-bordered mt-4">
+                            <div class="card-inner">
+                                <h5 class="card-title">
+                                    <i class="fas fa-robot text-warning me-2"></i>
+                                    Recommandations automatiques
+                                </h5>
+                                <div class="mt-3">
+                                    {% for reco in object.recommandations_auto %}
+                                    <div class="alert alert-warning alert-icon p-2 mb-2">
+                                        <em class="icon ni ni-alert-fill"></em>
+                                        <div class="alert-text fs-13px">{{ reco }}</div>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                {% endif %}
                             </div>
                         </div>
-                        {% endfor %}
-
-                        <div class="form-group row">
-                            <div class="col-sm-9 offset-sm-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Enregistrer
-                                </button>
-                                <a href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'bilan_list' %}{% endif %}" class="btn btn-secondary">
-                                    Annuler
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Aide</h6>
-                </div>
-                <div class="card-body">
-                    <h6>Instructions:</h6>
-                    <ul>
-                        <li>Remplissez tous les champs obligatoires marqués d'un *</li>
-                        <li>Pour les examens complexes, joignez un fichier PDF</li>
-                        <li>Les bilans critiques seront notifiés automatiquement</li>
-                    </ul>
-
-                    {% if object %}
-                    <hr>
-                    <h6>Historique:</h6>
-                    <p>Créé le {{ object.created_at|date:"d/m/Y" }} par {{ object.doctor }}</p>
-                    {% if object.updated_at %}
-                    <p>Dernière modification: {{ object.updated_at|date:"d/m/Y H:i" }}</p>
-                    {% endif %}
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Styles CSS additionnels -->
+<style>
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.custom-switch .custom-control-label::before {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.card-title-group {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    margin-bottom: 0;
+}
+
+.card-tools {
+    flex-shrink: 0;
+}
+
+/* Amélioration de l'apparence des champs */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+/* Style pour le textarea des résultats JSON */
+textarea.form-control {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Badges colorés pour les statuts */
+.badge.bg-success { background-color: #198754 !important; }
+.badge.bg-primary { background-color: #0d6efd !important; }
+.badge.bg-warning { background-color: #ffc107 !important; color: #000; }
+.badge.bg-danger { background-color: #dc3545 !important; }
+</style>
+
+<!-- Script pour améliorer l'UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation en temps réel du champ JSON
+    const resultField = document.getElementById('{{ form.result.id_for_label }}');
+    if (resultField) {
+        resultField.addEventListener('blur', function() {
+            try {
+                if (this.value.trim()) {
+                    JSON.parse(this.value);
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            } catch (e) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                console.error('JSON invalide:', e);
+            }
+        });
+    }
+
+    // Mise à jour automatique du statut si résultat saisi
+    const statusField = document.getElementById('{{ form.status.id_for_label }}');
+    if (resultField && statusField) {
+        resultField.addEventListener('change', function() {
+            if (this.value.trim() && statusField.value === 'pending') {
+                statusField.value = 'completed';
+            }
+        });
+    }
+
+    // Alertes pour les résultats critiques
+    const criticalSwitch = document.getElementById('{{ form.is_critical.id_for_label }}');
+    if (criticalSwitch) {
+        criticalSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                if (!confirm('⚠️ Marquer ce résultat comme critique ? Cela déclenchera des alertes médicales.')) {
+                    this.checked = false;
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
