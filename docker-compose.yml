@@ -64,7 +64,8 @@ services:
     restart: unless-stopped
     networks: [smitci_network, proxy]
     healthcheck:
-      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+#      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\ntry:\n  urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2)\n  sys.exit(0)\nexcept Exception:\n  sys.exit(1)\nPY"]
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8000/healthz || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 12
