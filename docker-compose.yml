@@ -124,6 +124,7 @@ services:
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
+      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
     logging: *logging_rotated
     deploy: *deploy_limits
 
