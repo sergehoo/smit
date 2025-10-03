@@ -50,6 +50,8 @@ WORKDIR /smitci-app
 # Paquets RUNTIME seulement (plus léger que builder)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev libpq-dev proj-bin proj-data \
+    libgeos-dev \   # <— AJOUT
+    gcc python3-dev python3-setuptools \
     libcairo2 libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
     libgdk-pixbuf-2.0-0 libharfbuzz0b libfribidi0 \
     libglib2.0-0 libffi-dev libxml2 libxslt1.1 \
@@ -57,6 +59,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
  && rm -rf /var/lib/apt/lists/*
 
+# GDAL/PROJ/GEOS env
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal \
+    GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so \
+    GDAL_DATA=/usr/share/gdal \
+    PROJ_LIB=/usr/share/proj \
+    GEOS_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgeos_c.so \
+    GEOS_CONFIG=/usr/bin/geos-config
 # Copie du venv et du code/statics depuis le builder
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
