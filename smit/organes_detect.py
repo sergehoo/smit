@@ -11,7 +11,7 @@ from skimage.measure import label, regionprops
 
 from torchvision.models import resnet50, ResNet50_Weights
 resnet_weights = ResNet50_Weights.DEFAULT
-classification_model = resnet50(weights=resnet_weights).eval()
+classification_model = resnet50(weights=None).eval()
 transform_cls = resnet_weights.transforms()
 
 
