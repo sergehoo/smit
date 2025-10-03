@@ -68,11 +68,15 @@ services:
       --max-requests 800 --max-requests-jitter 200
       --timeout 60 --graceful-timeout 30
       --keep-alive 5
-      --log-level warning
+      --log-level info
+      --error-logfile - --access-logfile -
+      --capture-output
     env_file: [.env]
     environment:
       RUN_MIGRATIONS: "0"        # pas de migrations au boot (option: 1 si voulu)
       RUN_COLLECTSTATIC: "0"     # collectstatic déjà fait à la build
+      DJANGO_SETTINGS_MODULE: smitci.settings
+      PYTHONUNBUFFERED: "1"
     # ⚠️ En prod, éviter le bind mount du code (I/O + invalidations)
     volumes:
       - static_volume:/smitci-app/static
