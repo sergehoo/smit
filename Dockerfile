@@ -50,7 +50,7 @@ WORKDIR /smitci-app
 # Paquets RUNTIME seulement (plus léger que builder)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gdal-bin libgdal-dev libpq-dev proj-bin proj-data \
-    libgeos-dev \   # <— AJOUT
+    libgeos-dev \
     gcc python3-dev python3-setuptools \
     libcairo2 libpango-1.0-0 libpangoft2-1.0-0 libpangocairo-1.0-0 \
     libgdk-pixbuf-2.0-0 libharfbuzz0b libfribidi0 \
