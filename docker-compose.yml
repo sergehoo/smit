@@ -73,7 +73,8 @@ services:
     command: >
       gunicorn smitci.wsgi:application
       --bind 0.0.0.0:8000
-      --workers 1 --threads 2
+      --workers 1 --threads 4
+      --worker-tmp-dir /dev/shm
       --max-requests 800 --max-requests-jitter 200
       --timeout 180 --graceful-timeout 60
       --keep-alive 5
@@ -86,6 +87,8 @@ services:
       RUN_COLLECTSTATIC: "0"     # collectstatic déjà fait à la build
       DJANGO_SETTINGS_MODULE: smitci.settings
       PYTHONUNBUFFERED: "1"
+      WHITENOISE_MAX_AGE: "2592000"   # 30 jours
+      WHITENOISE_USE_FINDERS: "False" # en prod
       # Facultatif : tu peux aussi les mettre dans .env uniquement
       # DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
       # CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}

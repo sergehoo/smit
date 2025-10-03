@@ -41,7 +41,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 # Cast manuel de DEBUG (les valeurs des .env sont des chaînes)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -127,6 +126,7 @@ AUTHENTICATION_BACKENDS = (
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'axes.middleware.AxesMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -189,7 +189,6 @@ ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/'
 # ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
-
 
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_EMAIL_REQUIRED = True
@@ -308,11 +307,12 @@ STATICFILES_DIRS = [BASE_DIR.parent / 'static']
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+WHITENOISE_MAX_AGE = int(os.getenv("WHITENOISE_MAX_AGE", 60 * 60 * 24 * 30))  # 30j
+WHITENOISE_USE_FINDERS = os.getenv("WHITENOISE_USE_FINDERS", "False") == "True"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -341,10 +341,8 @@ ORANGE_SMS_CLIENT_ID = config('ORANGE_SMS_CLIENT_ID')
 ORANGE_SMS_CLIENT_SECRET = config('ORANGE_SMS_CLIENT_SECRET')
 ORANGE_SMS_SENDER = config('ORANGE_SMS_SENDER')
 
-
 # ==== META WHATSAPP CLOUD API ====
 META_WA_API_VERSION = config("META_WA_API_VERSION", default="v20.0")
 META_WA_BASE_URL = config("META_WA_BASE_URL", default="https://graph.facebook.com")
-META_WA_PHONE_NUMBER_ID = config("META_WA_PHONE_NUMBER_ID")   # ex: "123456789012345"
-META_WA_ACCESS_TOKEN = config("META_WA_ACCESS_TOKEN")         # token long-lived
-
+META_WA_PHONE_NUMBER_ID = config("META_WA_PHONE_NUMBER_ID")  # ex: "123456789012345"
+META_WA_ACCESS_TOKEN = config("META_WA_ACCESS_TOKEN")  # token long-lived
