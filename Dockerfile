@@ -73,6 +73,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /smitci-app /smitci-app
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl wget \
+ && rm -rf /var/lib/apt/lists/*
 # Entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
