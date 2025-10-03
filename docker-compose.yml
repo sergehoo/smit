@@ -97,13 +97,19 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
+
+      # Router public HTTPS (host dans .env : SMITCI_HOST=smitci.com)
       - traefik.http.routers.smitci.rule=Host(`${SMITCI_HOST}`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls=true
       - traefik.http.routers.smitci.tls.certresolver=lets
       - traefik.http.routers.smitci.service=smitci-svc
+
+      # Service amont HTTP:8000
       - traefik.http.services.smitci-svc.loadbalancer.server.port=8000
       - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
+
+      # Middlewares (optionnels si déjà globalement définis)
       - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
       - traefik.http.middlewares.smitci-sec-headers.headers.stsSeconds=31536000
       - traefik.http.middlewares.smitci-sec-headers.headers.stsIncludeSubdomains=true
