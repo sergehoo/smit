@@ -120,6 +120,10 @@ services:
       - traefik.http.middlewares.smitci-compress.compress=true
       - traefik.http.middlewares.smitci-rl.ratelimit.average=150
       - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
+
+      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
+      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
+      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
     logging: *logging_rotated
     deploy: *deploy_limits
 
