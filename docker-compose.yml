@@ -1,4 +1,3 @@
-
 networks:
   smitci_network:
     driver: bridge
@@ -9,8 +8,7 @@ volumes:
   pgdata:
   static_volume:
   media_volume:
-  # Optionnel : persistance Redis (décommente si tu veux)
-  # redis_data:
+  # redis_data:   # décommente si tu veux persister Redis
 
 x-logging-rotated: &logging_rotated
   driver: "json-file"
@@ -22,23 +20,20 @@ x-deploy-limits: &deploy_limits
   resources:
     limits:
       cpus: "1.5"
-      memory: 1024M           # 1 Go pour web/celery. Si OOM, passe à 1536M.
+      memory: 1024M
     reservations:
       cpus: "0.5"
       memory: 512M
 
 services:
-
   smitDB:
     image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
-      # Ces variables DOIVENT exister dans .env
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      # ⚠️ variable correcte = PGDATA (et non PG_DATA). On garde l’emplacement par défaut.
-      # PGDATA: /var/lib/postgresql/data
+      # PGDATA: /var/lib/postgresql/data   # emplacement par défaut
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks: [smitci_network]
@@ -53,7 +48,7 @@ services:
   redis:
     image: redis:7
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", "900 1"]
+    command: ["redis-server","--appendonly","yes","--appendfsync","everysec","--save","900 1"]
     networks: [smitci_network]
     # volumes:
     #   - redis_data:/data
@@ -69,7 +64,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # 🔧 Plus stable en RAM limitée : 1 worker / 2 threads, timeout + long au cold start
+    # sobres en RAM : 1 worker / 4 threads, tmp en mémoire
     command: >
       gunicorn smitci.wsgi:application
       --bind 0.0.0.0:8000
@@ -83,15 +78,12 @@ services:
       --capture-output
     env_file: [.env]
     environment:
-      RUN_MIGRATIONS: "0"        # (mets 1 si tu veux auto-migrate au boot)
-      RUN_COLLECTSTATIC: "0"     # collectstatic déjà fait à la build
+      RUN_MIGRATIONS: "0"
+      RUN_COLLECTSTATIC: "0"
       DJANGO_SETTINGS_MODULE: smitci.settings
       PYTHONUNBUFFERED: "1"
       WHITENOISE_MAX_AGE: "2592000"   # 30 jours
-      WHITENOISE_USE_FINDERS: "False" # en prod
-      # Facultatif : tu peux aussi les mettre dans .env uniquement
-      # DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
-      # CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
+      WHITENOISE_USE_FINDERS: "False"
     volumes:
       - static_volume:/smitci-app/static
       - media_volume:/smitci-app/media
@@ -102,60 +94,38 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks: [smitci_network, proxy]
-    # Améliore l’arrêt propre des process enfant Python
     init: true
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://127.0.0.1:8000/healthz || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 12
-      start_period: 40s
+    # ⚠️ PAS de healthcheck ici => plus de requêtes /healthz qui polluent les logs
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
 
-      # === Routers HTTP -> HTTPS (redirect) ===
-      - traefik.http.routers.smitci-redirect.rule=Host(`${SMITCI_HOST}`) || Host(`www.${SMITCI_HOST}`)
-      - traefik.http.routers.smitci-redirect.entrypoints=web
-      - traefik.http.routers.smitci-redirect.middlewares=redirect-https@docker
-      - traefik.http.middlewares.redirect-https.redirectscheme.scheme=https
-
-      # === Routers HTTPS (nu + www) ===
+      # Router public HTTPS
       - traefik.http.routers.smitci.rule=Host(`${SMITCI_HOST}`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls=true
       - traefik.http.routers.smitci.tls.certresolver=lets
       - traefik.http.routers.smitci.service=smitci-svc
 
-      - traefik.http.routers.smitci-www.rule=Host(`www.${SMITCI_HOST}`)
-      - traefik.http.routers.smitci-www.entrypoints=websecure
-      - traefik.http.routers.smitci-www.tls=true
-      - traefik.http.routers.smitci-www.tls.certresolver=lets
-      - traefik.http.routers.smitci-www.service=smitci-svc
-
-      # === Service amont HTTP:8000 ===
+      # Service amont HTTP:8000
       - traefik.http.services.smitci-svc.loadbalancer.server.port=8000
       - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
 
-      # === Healthcheck Traefik avec Host correct (sinon 400 DisallowedHost) ===
+      # Healthcheck Traefik (interne, silencieux pour Gunicorn)
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
       - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
 
-      # === Middlewares sécurité/compression/rate-limit ===
+      # Middlewares (headers, compression, rate-limit)
       - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
-      - traefik.http.routers.smitci-www.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
-
       - traefik.http.middlewares.smitci-sec-headers.headers.stsSeconds=31536000
       - traefik.http.middlewares.smitci-sec-headers.headers.stsIncludeSubdomains=true
       - traefik.http.middlewares.smitci-sec-headers.headers.stsPreload=true
       - traefik.http.middlewares.smitci-sec-headers.headers.contentTypeNosniff=true
       - traefik.http.middlewares.smitci-sec-headers.headers.frameDeny=true
       - traefik.http.middlewares.smitci-sec-headers.headers.referrerPolicy=strict-origin-when-cross-origin
-
       - traefik.http.middlewares.smitci-compress.compress=true
-
       - traefik.http.middlewares.smitci-rl.ratelimit.average=150
       - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
     logging: *logging_rotated
@@ -221,7 +191,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-
       - traefik.http.routers.smitadminer.rule=Host(`adminer.${SMITCI_HOST}`)
       - traefik.http.routers.smitadminer.entrypoints=websecure
       - traefik.http.routers.smitadminer.tls=true

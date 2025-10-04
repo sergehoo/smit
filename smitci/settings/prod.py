@@ -51,11 +51,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 ALLOWED_HOSTS = ["smitci.com", "www.smitci.com", "localhost", "127.0.0.1","smitweb"]
 
 CSRF_TRUSTED_ORIGINS = [
+    "http://smitci.com",
     "https://smitci.com",
     "https://www.smitci.com",
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://smitci.com",
     "https://smitci.com",
     "https://www.smitci.com",
 ]
