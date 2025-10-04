@@ -112,10 +112,10 @@ services:
       - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
 
       # Healthcheck Traefik (interne, silencieux pour Gunicorn)
-      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
-      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
-      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
-      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
+#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
+#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
+#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
+#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
 
       # Middlewares (headers, compression, rate-limit)
       - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
