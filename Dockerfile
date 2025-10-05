@@ -40,9 +40,6 @@ ENV DJANGO_SETTINGS_MODULE=smitci.settings \
 
 RUN mkdir -p "$STATIC_ROOT"
 
-# IMPORTANT : collectstatic dans le stage builder (GEOS dispo ici désormais)
-RUN python manage.py collectstatic --noinput
-
 # ========== Stage 2: runtime ==========
 FROM python:3.9-slim
 WORKDIR /smitci-app
