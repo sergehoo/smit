@@ -91,6 +91,7 @@ services:
     volumes:
       - static_volume:/smitci-app/static
       - media_volume:/smitci-app/media
+      - dbbackups:/smitci-app/dbbackup
     depends_on:
       smitDB:
         condition: service_healthy

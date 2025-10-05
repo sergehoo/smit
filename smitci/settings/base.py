@@ -42,28 +42,19 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),  # Adjusted path
-        },
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
     },
-
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'django.security': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+    "loggers": {
+        "django": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        # ajoute si besoin:
+        "celery": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "recipes": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
+    "root": {"handlers": ["console"], "level": "WARNING"},
 }
 
 # Application definition
@@ -238,7 +229,7 @@ TINYMCE_DEFAULT_CONFIG = {
                "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
                "a11ycheck ltr rtl | showcomments addcomment code",
     "custom_undo_redo_levels": 10,
-    "language": "es_ES",  # To force a specific language instead of the Django current language.
+    "language": "fr_FR",  # To force a specific language instead of the Django current language.
 }
 TINYMCE_SPELLCHECKER = True
 TINYMCE_EXTRA_MEDIA = {
@@ -315,11 +306,12 @@ broker_pool_limit = 5
 
 LANGUAGE_CODE = 'fr-FR'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Abidjan'
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
+
 
 SCHEDULER_ADMIN = True
 # Static files (CSS, JavaScript, Images)

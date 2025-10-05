@@ -6,12 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/management/commands/import_patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/import_patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/donnessmitpatients.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/static/donnessmitpatients.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/~$donnessmitpatients.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/~$usersmit.xlsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -283,7 +278,7 @@
       <workItem from="1756932574404" duration="39781000" />
       <workItem from="1757900861151" duration="598000" />
       <workItem from="1758293535079" duration="1254000" />
-      <workItem from="1759319496443" duration="71032000" />
+      <workItem from="1759319496443" duration="71985000" />
     </task>
     <servers />
   </component>
