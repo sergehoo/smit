@@ -271,6 +271,30 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Abidjan'
 CELERY_BEAT_SCHEDULE = {}
 
+# Concurrence modérée
+CELERY_WORKER_CONCURRENCY = 2
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # pas de tempête de re-queue
+CELERY_ACKS_LATE = True                # ack après exécution
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+
+# Timeouts durs/soft pour tuer les jobs bloqués
+CELERY_TASK_SOFT_TIME_LIMIT = 60       # sec
+CELERY_TASK_TIME_LIMIT = 75
+
+# Empêcher la fuite mémoire & les zombies
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
+CELERY_WORKER_MAX_MEMORY_PER_CHILD = 200000  # ~200MB
+
+# Retrys bornés + backoff
+CELERY_TASK_DEFAULT_RETRY_DELAY = 30   # sec
+CELERY_TASK_PUBLISH_RETRY = True
+CELERY_TASK_PUBLISH_RETRY_POLICY = {"max_retries": 3}
+
+# Broker visibility timeout (doit > time_limit)
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 120}
+
+# Résultats (optionnel, expire pour éviter gonflement)
+CELERY_RESULT_EXPIRES = 3600  # 1h
 # Beat: évite le polling agressif
 CELERY_BEAT_MAX_LOOP_INTERVAL = 60  # 30–120s selon ton besoin
 

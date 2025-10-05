@@ -14,7 +14,31 @@ from smit.models import Consultation
 DEFAULT_PASSWORD = "password2smit24"
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+def fit_field(model_cls, field_name, value, logger=None, who=""):
+    """
+    Tronque value selon max_length du champ (si CharField).
+    - model_cls: classe du modèle (ex: Patient)
+    - field_name: nom du champ (ex: 'nom')
+    - value: valeur à insérer
+    - logger: self.stdout.write (optionnel) pour log
+    - who: identifiant lisible (ex: nom complet du patient) pour logs
+    """
+    if value is None:
+        return None
+    s = str(value)
+    try:
+        f = model_cls._meta.get_field(field_name)
+    except Exception:
+        return s  # champ inconnu -> ne rien faire
 
+    if isinstance(f, models.CharField) and f.max_length:
+        max_len = f.max_length
+        if len(s) > max_len:
+            if logger:
+                logger(f"✂️  {who}: champ {model_cls.__name__}.{field_name} "
+                       f"trop long ({len(s)}>{max_len}), tronqué.")
+            return s[:max_len]
+    return s
 def is_nan(x):
     try:
         return pd.isna(x)
@@ -137,7 +161,7 @@ class Command(BaseCommand):
                     )
                     if email is not None:
                         patient_kwargs["adresse_mail"] = email
-
+                    who = f"{nom} {prenom}".strip()
                     patient = Patient.objects.create(**patient_kwargs)
 
                     username = unique_username(medecin_nom.replace(" ", "."))

@@ -8,7 +8,6 @@ volumes:
   pgdata:
   static_volume:
   media_volume:
-  # redis_data:   # décommente si tu veux persister Redis
 
 x-logging-rotated: &logging_rotated
   driver: "json-file"
@@ -16,24 +15,17 @@ x-logging-rotated: &logging_rotated
     max-size: "10m"
     max-file: "3"
 
-x-deploy-limits: &deploy_limits
-  resources:
-    limits:
-      cpus: "1.5"
-      memory: 1024M
-    reservations:
-      cpus: "0.5"
-      memory: 512M
-
 services:
   smitDB:
     image: postgis/postgis:16-3.4
     restart: unless-stopped
     environment:
+      TZ: Africa/Abidjan
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      # PGDATA: /var/lib/postgresql/data   # emplacement par défaut
+      # Optionnel: tuning léger via variables (sinon conf.d)
+      # PGDATA: /var/lib/postgresql/data
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks: [smitci_network]
@@ -43,11 +35,19 @@ services:
       timeout: 5s
       retries: 10
     logging: *logging_rotated
-    deploy: *deploy_limits
+    # Limites effectives (compose)
+    cpus: "1.5"
+    mem_limit: 1500m
+    mem_reservation: 512m
+    ulimits:
+      nofile: 65535
 
   redis:
     image: redis:7
     restart: unless-stopped
+    environment:
+      TZ: Africa/Abidjan
+    # AOF = plus sûr mais plus coûteux; commente pour RDB only si perfs prioritaires
     command: ["redis-server","--appendonly","yes","--appendfsync","everysec","--save","900 1"]
     networks: [smitci_network]
     # volumes:
@@ -58,31 +58,35 @@ services:
       timeout: 5s
       retries: 10
     logging: *logging_rotated
-    deploy: *deploy_limits
+    cpus: "0.7"
+    mem_limit: 512m
+    mem_reservation: 256m
+    ulimits:
+      nofile: 65535
 
   smitweb:
     build:
       context: .
       dockerfile: Dockerfile
-    # sobres en RAM : 1 worker / 4 threads, tmp en mémoire
     command: >
       gunicorn smitci.wsgi:application
       --bind 0.0.0.0:8000
-      --workers 1 --threads 4
+      --workers 2 --threads 1
       --worker-tmp-dir /dev/shm
       --max-requests 800 --max-requests-jitter 200
-      --timeout 180 --graceful-timeout 60
+      --timeout 120 --graceful-timeout 60
       --keep-alive 5
       --log-level info
       --error-logfile - --access-logfile -
       --capture-output
     env_file: [.env]
     environment:
+      TZ: Africa/Abidjan
       RUN_MIGRATIONS: "0"
       RUN_COLLECTSTATIC: "0"
       DJANGO_SETTINGS_MODULE: smitci.settings
       PYTHONUNBUFFERED: "1"
-      WHITENOISE_MAX_AGE: "2592000"   # 30 jours
+      WHITENOISE_MAX_AGE: "2592000"
       WHITENOISE_USE_FINDERS: "False"
     volumes:
       - static_volume:/smitci-app/static
@@ -95,29 +99,28 @@ services:
     restart: unless-stopped
     networks: [smitci_network, proxy]
     init: true
-    # ⚠️ PAS de healthcheck ici => plus de requêtes /healthz qui polluent les logs
+    # Sécurité & perf
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    shm_size: "256m"
+    security_opt:
+      - no-new-privileges:true
+    ulimits:
+      nofile: 65535
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
 
-      # Router public HTTPS
       - traefik.http.routers.smitci.rule=Host(`${SMITCI_HOST}`)
       - traefik.http.routers.smitci.entrypoints=websecure
       - traefik.http.routers.smitci.tls=true
       - traefik.http.routers.smitci.tls.certresolver=lets
       - traefik.http.routers.smitci.service=smitci-svc
 
-      # Service amont HTTP:8000
       - traefik.http.services.smitci-svc.loadbalancer.server.port=8000
       - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
 
-      # Healthcheck Traefik (interne, silencieux pour Gunicorn)
-#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
-#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
-#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
-#      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
-
-      # Middlewares (headers, compression, rate-limit)
       - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
       - traefik.http.middlewares.smitci-sec-headers.headers.stsSeconds=31536000
       - traefik.http.middlewares.smitci-sec-headers.headers.stsIncludeSubdomains=true
@@ -128,8 +131,11 @@ services:
       - traefik.http.middlewares.smitci-compress.compress=true
       - traefik.http.middlewares.smitci-rl.ratelimit.average=150
       - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
+      - traefik.http.routers.site.middlewares=site-rl@docker
     logging: *logging_rotated
-    deploy: *deploy_limits
+    cpus: "1.5"
+    mem_limit: 1024m
+    mem_reservation: 512m
 
   celeryworker:
     build:
@@ -143,6 +149,10 @@ services:
       --max-tasks-per-child=200
       --without-gossip --without-mingle
     env_file: [.env]
+    environment:
+      TZ: Africa/Abidjan
+      # Optionnel: protège contre les fuites mémoire
+      CELERY_WORKER_MAX_MEMORY_PER_CHILD: "200000"   # ~200 MB
     depends_on:
       smitDB:
         condition: service_healthy
@@ -151,12 +161,17 @@ services:
     restart: unless-stopped
     networks: [smitci_network]
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -h redis ping | grep PONG >/dev/null 2>&1 || exit 1"]
+      # Ping Redis + existence du process Celery
+      test: ["CMD-SHELL", "ps aux | grep 'celery worker' | grep -v grep >/dev/null && redis-cli -h redis ping | grep PONG >/dev/null 2>&1 || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 10
     logging: *logging_rotated
-    deploy: *deploy_limits
+    cpus: "1.0"
+    mem_limit: 768m
+    mem_reservation: 384m
+    ulimits:
+      nofile: 65535
 
   celerybeat:
     build:
@@ -168,6 +183,8 @@ services:
       --scheduler django_celery_beat.schedulers:DatabaseScheduler
       --pidfile=/tmp/celerybeat.pid
     env_file: [.env]
+    environment:
+      TZ: Africa/Abidjan
     depends_on:
       smitDB:
         condition: service_healthy
@@ -176,13 +193,16 @@ services:
     restart: unless-stopped
     networks: [smitci_network]
     logging: *logging_rotated
-    deploy: *deploy_limits
+    cpus: "0.3"
+    mem_limit: 256m
+    mem_reservation: 128m
 
   smitadminer:
     profiles: ["admin"]
     image: adminer
     restart: unless-stopped
     environment:
+      TZ: Africa/Abidjan
       ADMINER_DEFAULT_SERVER: smitDB
     depends_on:
       smitDB:
@@ -198,18 +218,36 @@ services:
       - traefik.http.services.smitadminer.loadbalancer.server.port=8080
       - traefik.http.services.smitadminer.loadbalancer.server.scheme=http
     logging: *logging_rotated
-    deploy: *deploy_limits
+    cpus: "0.3"
+    mem_limit: 256m
+    mem_reservation: 128m
+
 #networks:
 #  smitci_network:
 #    driver: bridge
 #  proxy:
-#    external: true   # réseau Traefik (uniquement pour smitweb/adminer)
+#    external: true
 #
 #volumes:
 #  pgdata:
 #  static_volume:
 #  media_volume:
-#  torch_cache:
+#  # redis_data:   # décommente si tu veux persister Redis
+#
+#x-logging-rotated: &logging_rotated
+#  driver: "json-file"
+#  options:
+#    max-size: "10m"
+#    max-file: "3"
+#
+#x-deploy-limits: &deploy_limits
+#  resources:
+#    limits:
+#      cpus: "1.5"
+#      memory: 1024M
+#    reservations:
+#      cpus: "0.5"
+#      memory: 512M
 #
 #services:
 #  smitDB:
@@ -219,46 +257,60 @@ services:
 #      POSTGRES_DB: ${DATABASE_NAME}
 #      POSTGRES_USER: ${DATABASE_USER}
 #      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-#      PG_DATA: /data
+#      # PGDATA: /var/lib/postgresql/data   # emplacement par défaut
 #    volumes:
 #      - pgdata:/var/lib/postgresql/data
 #    networks: [smitci_network]
 #    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
-#      interval: 10s
+#      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1 || exit 1"]
+#      interval: 30s
 #      timeout: 5s
 #      retries: 10
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
 #
 #  redis:
 #    image: redis:7
 #    restart: unless-stopped
-#    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", "900 1"]
+#    command: ["redis-server","--appendonly","yes","--appendfsync","everysec","--save","900 1"]
 #    networks: [smitci_network]
+#    # volumes:
+#    #   - redis_data:/data
 #    healthcheck:
 #      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG >/dev/null 2>&1 || exit 1"]
-#      interval: 10s
+#      interval: 30s
 #      timeout: 5s
 #      retries: 10
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
 #
 #  smitweb:
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
+#    # sobres en RAM : 1 worker / 4 threads, tmp en mémoire
 #    command: >
 #      gunicorn smitci.wsgi:application
 #      --bind 0.0.0.0:8000
-#      --workers 2 --threads 2
-#      --timeout 60
-#      --log-level warning
+#      --workers 1 --threads 4
+#      --worker-tmp-dir /dev/shm
+#      --max-requests 800 --max-requests-jitter 200
+#      --timeout 180 --graceful-timeout 60
+#      --keep-alive 5
+#      --log-level info
+#      --error-logfile - --access-logfile -
+#      --capture-output
 #    env_file: [.env]
 #    environment:
-#      RUN_MIGRATIONS: "1"
-#      RUN_COLLECTSTATIC: "1"
+#      RUN_MIGRATIONS: "0"
+#      RUN_COLLECTSTATIC: "0"
+#      DJANGO_SETTINGS_MODULE: smitci.settings
+#      PYTHONUNBUFFERED: "1"
+#      WHITENOISE_MAX_AGE: "2592000"   # 30 jours
+#      WHITENOISE_USE_FINDERS: "False"
 #    volumes:
-#      - .:/smitci-app
 #      - static_volume:/smitci-app/static
 #      - media_volume:/smitci-app/media
-#      - torch_cache:/root/.cache/torch
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
@@ -266,22 +318,13 @@ services:
 #        condition: service_healthy
 #    restart: unless-stopped
 #    networks: [smitci_network, proxy]
-#    # Healthcheck SANS curl (python inline)
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "python -c \"import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2).status==200 else sys.exit(1)\""
-#        ]
-#      interval: 10s
-#      timeout: 3s
-#      retries: 12
-#      start_period: 40s
+#    init: true
+#    # ⚠️ PAS de healthcheck ici => plus de requêtes /healthz qui polluent les logs
 #    labels:
 #      - traefik.enable=true
 #      - traefik.docker.network=proxy
 #
-#      # Router public HTTPS (host dans .env : SMITCI_HOST=smitci.com)
+#      # Router public HTTPS
 #      - traefik.http.routers.smitci.rule=Host(`${SMITCI_HOST}`)
 #      - traefik.http.routers.smitci.entrypoints=websecure
 #      - traefik.http.routers.smitci.tls=true
@@ -292,7 +335,13 @@ services:
 #      - traefik.http.services.smitci-svc.loadbalancer.server.port=8000
 #      - traefik.http.services.smitci-svc.loadbalancer.server.scheme=http
 #
-#      # Middlewares (optionnels si déjà globalement définis)
+#      # Healthcheck Traefik (interne, silencieux pour Gunicorn)
+##      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.path=/healthz
+##      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.interval=30s
+##      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.timeout=5s
+##      - traefik.http.services.smitci-svc.loadbalancer.healthcheck.headers.Host=${SMITCI_HOST}
+#
+#      # Middlewares (headers, compression, rate-limit)
 #      - traefik.http.routers.smitci.middlewares=smitci-sec-headers@docker,smitci-compress@docker,smitci-rl@docker
 #      - traefik.http.middlewares.smitci-sec-headers.headers.stsSeconds=31536000
 #      - traefik.http.middlewares.smitci-sec-headers.headers.stsIncludeSubdomains=true
@@ -303,6 +352,8 @@ services:
 #      - traefik.http.middlewares.smitci-compress.compress=true
 #      - traefik.http.middlewares.smitci-rl.ratelimit.average=150
 #      - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
 #
 #  celeryworker:
 #    build:
@@ -311,13 +362,11 @@ services:
 #    command: >
 #      celery -A smitci worker
 #      --loglevel=warning
-#      --concurrency=1 --autoscale=2,1
+#      --concurrency=2
 #      --prefetch-multiplier=1 -Ofair
-#      --max-tasks-per-child=100
+#      --max-tasks-per-child=200
 #      --without-gossip --without-mingle
 #    env_file: [.env]
-#    volumes:
-#      - .:/smitci-app
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
@@ -325,6 +374,13 @@ services:
 #        condition: service_healthy
 #    restart: unless-stopped
 #    networks: [smitci_network]
+#    healthcheck:
+#      test: ["CMD-SHELL", "redis-cli -h redis ping | grep PONG >/dev/null 2>&1 || exit 1"]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 10
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
 #
 #  celerybeat:
 #    build:
@@ -334,9 +390,8 @@ services:
 #      celery -A smitci beat
 #      --loglevel=warning
 #      --scheduler django_celery_beat.schedulers:DatabaseScheduler
+#      --pidfile=/tmp/celerybeat.pid
 #    env_file: [.env]
-#    volumes:
-#      - .:/smitci-app
 #    depends_on:
 #      smitDB:
 #        condition: service_healthy
@@ -344,6 +399,8 @@ services:
 #        condition: service_healthy
 #    restart: unless-stopped
 #    networks: [smitci_network]
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
 #
 #  smitadminer:
 #    profiles: ["admin"]
@@ -356,11 +413,13 @@ services:
 #        condition: service_healthy
 #    networks: [smitci_network, proxy]
 #    labels:
-#      - traefik.enable=false
+#      - traefik.enable=true
 #      - traefik.docker.network=proxy
-#      - traefik.http.routers.smitadminer.rule=Host(`adminer.smitci.com`)
+#      - traefik.http.routers.smitadminer.rule=Host(`adminer.${SMITCI_HOST}`)
 #      - traefik.http.routers.smitadminer.entrypoints=websecure
+#      - traefik.http.routers.smitadminer.tls=true
 #      - traefik.http.routers.smitadminer.tls.certresolver=lets
 #      - traefik.http.services.smitadminer.loadbalancer.server.port=8080
 #      - traefik.http.services.smitadminer.loadbalancer.server.scheme=http
-#      - traefik.http.routers.smitadminer.middlewares=traefik-auth@docker,sec-headers@docker,compress@docker,ratelimit@docker
+#    logging: *logging_rotated
+#    deploy: *deploy_limits
