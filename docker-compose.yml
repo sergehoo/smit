@@ -8,6 +8,7 @@ volumes:
   pgdata:
   static_volume:
   media_volume:
+  dbbackups:
 
 x-logging-rotated: &logging_rotated
   driver: "json-file"
@@ -132,7 +133,7 @@ services:
       - traefik.http.middlewares.smitci-compress.compress=true
       - traefik.http.middlewares.smitci-rl.ratelimit.average=150
       - traefik.http.middlewares.smitci-rl.ratelimit.burst=250
-      - traefik.http.routers.site.middlewares=site-rl@docker
+
     logging: *logging_rotated
     cpus: "1.5"
     mem_limit: 1024m
