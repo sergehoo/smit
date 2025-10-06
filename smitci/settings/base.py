@@ -265,11 +265,11 @@ CELERY_BEAT_SCHEDULE = {}
 # Concurrence modérée
 CELERY_WORKER_CONCURRENCY = 2
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # pas de tempête de re-queue
-CELERY_ACKS_LATE = True                # ack après exécution
+CELERY_ACKS_LATE = True  # ack après exécution
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 
 # Timeouts durs/soft pour tuer les jobs bloqués
-CELERY_TASK_SOFT_TIME_LIMIT = 60       # sec
+CELERY_TASK_SOFT_TIME_LIMIT = 60  # sec
 CELERY_TASK_TIME_LIMIT = 75
 
 # Empêcher la fuite mémoire & les zombies
@@ -277,7 +277,7 @@ CELERY_WORKER_MAX_TASKS_PER_CHILD = 200
 CELERY_WORKER_MAX_MEMORY_PER_CHILD = 200000  # ~200MB
 
 # Retrys bornés + backoff
-CELERY_TASK_DEFAULT_RETRY_DELAY = 30   # sec
+CELERY_TASK_DEFAULT_RETRY_DELAY = 30  # sec
 CELERY_TASK_PUBLISH_RETRY = True
 CELERY_TASK_PUBLISH_RETRY_POLICY = {"max_retries": 3}
 
@@ -311,8 +311,6 @@ USE_TZ = True
 
 USE_I18N = True
 
-
-
 SCHEDULER_ADMIN = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -324,7 +322,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = os.environ.get('DJANGO_MEDIA_ROOT', str(BASE_DIR / 'media'))
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_MAX_AGE = int(os.getenv("WHITENOISE_MAX_AGE", 60 * 60 * 24 * 30))  # 30j
