@@ -431,7 +431,6 @@
   .patient-summary-item{padding:8px 0;border-bottom:1px solid #f1f1f1}
   .patient-summary-item:last-child{border-bottom:none}
 </style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // éléments
@@ -484,7 +483,8 @@ document.addEventListener('DOMContentLoaded', function () {
       ${message}
       <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
     `;
-    document.querySelector('.nk-content-body').insertBefore(alertDiv, document.querySelector('.nk-block'));
+    (document.querySelector('.nk-content-body') || document.body)
+      .insertBefore(alertDiv, document.querySelector('.nk-block') || null);
     setTimeout(() => alertDiv.remove(), 6000);
   }
 
@@ -521,15 +521,17 @@ document.addEventListener('DOMContentLoaded', function () {
   function updatePatientSummary() {
     const fd = new FormData(patientForm);
     const bloc = `
-      <div class="col-12 col-md-6">
-        <div class="patient-summary-item"><strong>Nom complet:</strong><br>${fd.get('nom') || ''} ${fd.get('prenoms') || ''}</div>
-        <div class="patient-summary-item"><strong>Contact:</strong><br>${fd.get('contact') || ''}</div>
-        <div class="patient-summary-item"><strong>Genre:</strong><br>${fd.get('genre') || ''}</div>
-      </div>
-      <div class="col-12 col-md-6">
-        <div class="patient-summary-item"><strong>Date de naissance:</strong><br>${fd.get('date_naissance') || ''}</div>
-        <div class="patient-summary-item"><strong>Groupe sanguin:</strong><br>${fd.get('groupe_sanguin') || 'Non renseigné'}</div>
-        <div class="patient-summary-item"><strong>Nationalité:</strong><br>${fd.get('nationalite') || 'Non renseigné'}</div>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <div class="patient-summary-item"><strong>Nom complet:</strong><br>${fd.get('nom') || ''} ${fd.get('prenoms') || ''}</div>
+          <div class="patient-summary-item"><strong>Contact:</strong><br>${fd.get('contact') || ''}</div>
+          <div class="patient-summary-item"><strong>Genre:</strong><br>${fd.get('genre') || ''}</div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="patient-summary-item"><strong>Date de naissance:</strong><br>${fd.get('date_naissance') || ''}</div>
+          <div class="patient-summary-item"><strong>Groupe sanguin:</strong><br>${fd.get('groupe_sanguin') || 'Non renseigné'}</div>
+          <div class="patient-summary-item"><strong>Nationalité:</strong><br>${fd.get('nationalite') || 'Non renseigné'}</div>
+        </div>
       </div>
     `;
     patientSummary.innerHTML = bloc;
@@ -546,6 +548,48 @@ document.addEventListener('DOMContentLoaded', function () {
     communeSelect.addEventListener('change', toggleNewCommune);
   }
 
+  // -------- fetch JSON helper (anti-HTML) ----------
+  async function fetchJSON(url, { method='GET', body=null } = {}) {
+    const resp = await fetch(url, {
+      method,
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        ...(method !== 'GET' ? {'X-CSRFToken': CSRF} : {}),
+      },
+      body,
+      credentials: 'same-origin',
+      redirect: 'follow',
+    });
+
+    const ct = resp.headers.get('content-type') || '';
+    const isJSON = ct.includes('application/json');
+
+    if (resp.status === 401) {
+      showAlert("Votre session a expiré. Veuillez vous reconnecter.", 'warning');
+      return null;
+    }
+    if (resp.status === 403) {
+      showAlert("Requête refusée (CSRF ou autorisations). Rechargez la page et réessayez.", 'danger');
+      return null;
+    }
+
+    if (isJSON) {
+      try {
+        return await resp.json();
+      } catch (e) {
+        console.error("Parse JSON failed:", e);
+        showAlert("Réponse JSON invalide du serveur.", 'danger');
+        return null;
+      }
+    } else {
+      const text = await resp.text();
+      console.error("Réponse non-JSON:", resp.status, ct, text.slice(0, 800));
+      showAlert("Réponse inattendue du serveur. Contactez l’admin si le problème persiste.", 'danger');
+      return null;
+    }
+  }
+
   // Étape 1 → API
   async function submitStep1() {
     if (!validateRequired(patientForm)) {
@@ -556,13 +600,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const unlock = lock(nextStepBtn, 'Enregistrement du patient...');
     try {
       const formData = new FormData(patientForm);
-      const resp = await fetch("{% url 'urgence_patient_api' %}", {
+      const data = await fetchJSON("{% url 'urgence_patient_api' %}", {
         method: 'POST',
-        headers: {'X-CSRFToken': CSRF},
         body: formData,
       });
-      const data = await resp.json();
-      if (!resp.ok || !data.ok) {
+      if (!data) return null;
+      if (!data.ok) {
         applyFieldErrors(patientForm, data.errors);
         showAlert("Erreur lors de l’enregistrement du patient.", 'danger');
         return null;
@@ -588,13 +631,9 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const fd = new FormData(hospitalizationForm);
       const url = "{% url 'urgence_hosp_api' 999999 %}".replace('999999', String(pid));
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: {'X-CSRFToken': CSRF},
-        body: fd,
-      });
-      const data = await resp.json();
-      if (!resp.ok || !data.ok) {
+      const data = await fetchJSON(url, { method: 'POST', body: fd });
+      if (!data) return false;
+      if (!data.ok) {
         applyFieldErrors(hospitalizationForm, data.errors);
         showAlert("Erreur lors de la création de l’hospitalisation.", 'danger');
         return false;
@@ -670,6 +709,251 @@ document.addEventListener('DOMContentLoaded', function () {
     const minutes = String(now.getMinutes()).padStart(2,'0');
     admissionDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
   }
+
+  // Optionnel: catcher les promesses non gérées
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled promise rejection:', e.reason);
+  });
 });
 </script>
+{#<script>#}
+{#document.addEventListener('DOMContentLoaded', function () {#}
+{#  // éléments#}
+{#  const step1 = document.getElementById('step1');#}
+{#  const step2 = document.getElementById('step2');#}
+{#  const patientForm = document.getElementById('patient-form');#}
+{#  const hospitalizationForm = document.getElementById('hospitalization-form');#}
+{#  const savePatientBtn = document.getElementById('save-patient-btn');#}
+{#  const submitAllBtn = document.getElementById('submit-all-btn');#}
+{#  const nextStepBtn = document.getElementById('next-step-btn');#}
+{#  const prevStepBtn = document.getElementById('prev-step-btn');#}
+{#  const progressBar = document.getElementById('progress-bar');#}
+{#  const patientSummary = document.getElementById('patient-summary');#}
+{##}
+{#  let patientId = null;  // ID créé à l’étape 1#}
+{##}
+{#  // IDs sûrs depuis le form Django#}
+{#  const communeId = "{{ form.commune.auto_id|default_if_none:'' }}";#}
+{#  const nouvelleCommuneId = "{{ form.nouvelle_commune.auto_id|default_if_none:'' }}";#}
+{#  const communeSelect = communeId ? document.getElementById(communeId) : null;#}
+{#  const newCommuneGroup = document.getElementById('new_commune_group');#}
+{#  const newCommuneInput = nouvelleCommuneId ? document.getElementById(nouvelleCommuneId) : null;#}
+{##}
+{#  // CSRF#}
+{#  function getCSRFToken() {#}
+{#    const name = 'csrftoken';#}
+{#    const cookies = document.cookie.split(';');#}
+{#    for (let c of cookies) {#}
+{#      c = c.trim();#}
+{#      if (c.startsWith(name + '=')) return c.substring(name.length + 1);#}
+{#    }#}
+{#    const input = document.querySelector('input[name=csrfmiddlewaretoken]');#}
+{#    return input ? input.value : '';#}
+{#  }#}
+{#  const CSRF = getCSRFToken();#}
+{##}
+{#  // Helpers#}
+{#  function lock(btn, loadingText='Traitement...') {#}
+{#    if (!btn) return () => {};#}
+{#    const original = btn.innerHTML;#}
+{#    btn.disabled = true;#}
+{#    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>${loadingText}`;#}
+{#    return () => { btn.disabled = false; btn.innerHTML = original; };#}
+{#  }#}
+{##}
+{#  function showAlert(message, type='info') {#}
+{#    const alertDiv = document.createElement('div');#}
+{#    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;#}
+{#    alertDiv.innerHTML = `#}
+{#      ${message}#}
+{#      <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>#}
+{#    `;#}
+{#    document.querySelector('.nk-content-body').insertBefore(alertDiv, document.querySelector('.nk-block'));#}
+{#    setTimeout(() => alertDiv.remove(), 6000);#}
+{#  }#}
+{##}
+{#  function applyFieldErrors(formEl, errors) {#}
+{#    // nettoie#}
+{#    formEl.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));#}
+{#    formEl.querySelectorAll('.invalid-feedback.dynamic').forEach(e => e.remove());#}
+{#    // applique#}
+{#    Object.entries(errors || {}).forEach(([name, msgs]) => {#}
+{#      const field = formEl.querySelector(`[name="${name}"]`);#}
+{#      if (field) {#}
+{#        field.classList.add('is-invalid');#}
+{#        const fb = document.createElement('div');#}
+{#        fb.className = 'invalid-feedback dynamic d-block';#}
+{#        fb.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i>${(Array.isArray(msgs)?msgs.join('<br>'):msgs)}`;#}
+{#        field.closest('.form-group')?.appendChild(fb);#}
+{#      }#}
+{#    });#}
+{#  }#}
+{##}
+{#  function validateRequired(formEl) {#}
+{#    const required = formEl.querySelectorAll('[required]');#}
+{#    let ok = true;#}
+{#    required.forEach(f => {#}
+{#      if (!f.value || !f.value.trim()) {#}
+{#        f.classList.add('is-invalid'); ok = false;#}
+{#      } else {#}
+{#        f.classList.remove('is-invalid'); f.classList.add('is-valid');#}
+{#      }#}
+{#    });#}
+{#    return ok;#}
+{#  }#}
+{##}
+{#  function updatePatientSummary() {#}
+{#    const fd = new FormData(patientForm);#}
+{#    const bloc = `#}
+{#      <div class="col-12 col-md-6">#}
+{#        <div class="patient-summary-item"><strong>Nom complet:</strong><br>${fd.get('nom') || ''} ${fd.get('prenoms') || ''}</div>#}
+{#        <div class="patient-summary-item"><strong>Contact:</strong><br>${fd.get('contact') || ''}</div>#}
+{#        <div class="patient-summary-item"><strong>Genre:</strong><br>${fd.get('genre') || ''}</div>#}
+{#      </div>#}
+{#      <div class="col-12 col-md-6">#}
+{#        <div class="patient-summary-item"><strong>Date de naissance:</strong><br>${fd.get('date_naissance') || ''}</div>#}
+{#        <div class="patient-summary-item"><strong>Groupe sanguin:</strong><br>${fd.get('groupe_sanguin') || 'Non renseigné'}</div>#}
+{#        <div class="patient-summary-item"><strong>Nationalité:</strong><br>${fd.get('nationalite') || 'Non renseigné'}</div>#}
+{#      </div>#}
+{#    `;#}
+{#    patientSummary.innerHTML = bloc;#}
+{#  }#}
+{##}
+{#  function toggleNewCommune() {#}
+{#    if (!communeSelect || !newCommuneGroup) return;#}
+{#    const show = (communeSelect.value === '' || communeSelect.value === 'autre');#}
+{#    newCommuneGroup.style.display = show ? 'block' : 'none';#}
+{#    if (!show && newCommuneInput) newCommuneInput.value = '';#}
+{#  }#}
+{#  if (communeSelect) {#}
+{#    toggleNewCommune();#}
+{#    communeSelect.addEventListener('change', toggleNewCommune);#}
+{#  }#}
+{##}
+{#  // Étape 1 → API#}
+{#  async function submitStep1() {#}
+{#    if (!validateRequired(patientForm)) {#}
+{#      showAlert("Veuillez remplir tous les champs obligatoires du patient.", 'danger');#}
+{#      const firstInvalid = patientForm.querySelector('.is-invalid'); if (firstInvalid) firstInvalid.scrollIntoView({behavior:'smooth', block:'center'});#}
+{#      return null;#}
+{#    }#}
+{#    const unlock = lock(nextStepBtn, 'Enregistrement du patient...');#}
+{#    try {#}
+{#      const formData = new FormData(patientForm);#}
+{#      const resp = await fetch("{% url 'urgence_patient_api' %}", {#}
+{#        method: 'POST',#}
+{#        headers: {'X-CSRFToken': CSRF},#}
+{#        body: formData,#}
+{#      });#}
+{#      const data = await resp.json();#}
+{#      if (!resp.ok || !data.ok) {#}
+{#        applyFieldErrors(patientForm, data.errors);#}
+{#        showAlert("Erreur lors de l’enregistrement du patient.", 'danger');#}
+{#        return null;#}
+{#      }#}
+{#      showAlert(data.detail || "Patient enregistré.", 'success');#}
+{#      return data.patient_id;#}
+{#    } catch (e) {#}
+{#      console.error(e);#}
+{#      showAlert("Une erreur réseau est survenue.", 'danger');#}
+{#      return null;#}
+{#    } finally {#}
+{#      unlock();#}
+{#    }#}
+{#  }#}
+{##}
+{#  // Étape 2 → API#}
+{#  async function submitStep2(pid) {#}
+{#    if (!validateRequired(hospitalizationForm)) {#}
+{#      showAlert("Veuillez remplir tous les champs obligatoires de l’hospitalisation.", 'danger');#}
+{#      return false;#}
+{#    }#}
+{#    const unlock = lock(submitAllBtn, "Finalisation de l'admission...");#}
+{#    try {#}
+{#      const fd = new FormData(hospitalizationForm);#}
+{#      const url = "{% url 'urgence_hosp_api' 999999 %}".replace('999999', String(pid));#}
+{#      const resp = await fetch(url, {#}
+{#        method: 'POST',#}
+{#        headers: {'X-CSRFToken': CSRF},#}
+{#        body: fd,#}
+{#      });#}
+{#      const data = await resp.json();#}
+{#      if (!resp.ok || !data.ok) {#}
+{#        applyFieldErrors(hospitalizationForm, data.errors);#}
+{#        showAlert("Erreur lors de la création de l’hospitalisation.", 'danger');#}
+{#        return false;#}
+{#      }#}
+{#      showAlert(data.detail || "Admission créée.", 'success');#}
+{#      setTimeout(() => { window.location.href = data.redirect; }, 1200);#}
+{#      return true;#}
+{#    } catch (e) {#}
+{#      console.error(e);#}
+{#      showAlert("Une erreur réseau est survenue.", 'danger');#}
+{#      return false;#}
+{#    } finally {#}
+{#      unlock();#}
+{#    }#}
+{#  }#}
+{##}
+{#  // Bouton “Suivant”#}
+{#  nextStepBtn.addEventListener('click', async () => {#}
+{#    if (!patientId) {#}
+{#      const pid = await submitStep1();#}
+{#      if (!pid) return;#}
+{#      patientId = pid;#}
+{#    }#}
+{#    // bascule UI → étape 2#}
+{#    step1.style.display = 'none';#}
+{#    step2.style.display = 'block';#}
+{#    document.getElementById('step1-indicator').classList.remove('active');#}
+{#    document.getElementById('step1-indicator').classList.add('completed');#}
+{#    document.getElementById('step2-indicator').classList.add('active');#}
+{#    progressBar.style.width = '100%';#}
+{#    updatePatientSummary();#}
+{#  });#}
+{##}
+{#  // “Sauvegarder patient”#}
+{#  savePatientBtn.addEventListener('click', async () => {#}
+{#    if (!patientId) {#}
+{#      const pid = await submitStep1();#}
+{#      if (pid) patientId = pid;#}
+{#    } else {#}
+{#      showAlert("Patient déjà enregistré.", 'info');#}
+{#    }#}
+{#  });#}
+{##}
+{#  // “Finaliser l’admission”#}
+{#  submitAllBtn.addEventListener('click', async () => {#}
+{#    if (!patientId) {#}
+{#      const pid = await submitStep1();#}
+{#      if (!pid) return;#}
+{#      patientId = pid;#}
+{#    }#}
+{#    await submitStep2(patientId);#}
+{#  });#}
+{##}
+{#  // Retour étape 1#}
+{#  prevStepBtn.addEventListener('click', () => {#}
+{#    step2.style.display = 'none';#}
+{#    step1.style.display = 'block';#}
+{#    document.getElementById('step2-indicator').classList.remove('active');#}
+{#    const s1 = document.getElementById('step1-indicator');#}
+{#    s1.classList.add('active'); s1.classList.remove('completed');#}
+{#    progressBar.style.width = '0%';#}
+{#  });#}
+{##}
+{#  // Initialiser la date/heure courante sur le champ admission_date s'il existe#}
+{#  const admissionInputId = "{{ step2_form.admission_date.auto_id|default_if_none:'' }}";#}
+{#  const admissionDateInput = admissionInputId ? document.getElementById(admissionInputId) : null;#}
+{#  if (admissionDateInput && !admissionDateInput.value) {#}
+{#    const now = new Date();#}
+{#    const year = now.getFullYear();#}
+{#    const month = String(now.getMonth()+1).padStart(2,'0');#}
+{#    const day = String(now.getDate()).padStart(2,'0');#}
+{#    const hours = String(now.getHours()).padStart(2,'0');#}
+{#    const minutes = String(now.getMinutes()).padStart(2,'0');#}
+{#    admissionDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;#}
+{#  }#}
+{#});#}
+{#</script>#}
 {% endblock %}

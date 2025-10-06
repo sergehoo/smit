@@ -10,7 +10,7 @@ import qrcode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, AccessMixin
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Avg, Prefetch, Q
@@ -22,6 +22,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views import View
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
 
@@ -2112,6 +2113,17 @@ class UrgenceListView(LoginRequiredMixin, ListView):
 #         form.instance.urgence = True
 #         form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
 #         return super().form_valid(form)
+
+class JsonLoginRequiredMixin(AccessMixin):
+    """ Comme LoginRequiredMixin mais renvoie JSON 401 au lieu d'un redirect HTML. """
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"ok": False, "detail": "Non authentifié."}, status=401)
+        return super().dispatch(request, *args, **kwargs)
+
+
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class UrgenceCreateView(LoginRequiredMixin, TemplateView):
     template_name = "pages/urgence/urgence_create.html"
 
@@ -2123,7 +2135,8 @@ class UrgenceCreateView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-class UrgencePatientCreateAPI(LoginRequiredMixin, View):
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class UrgencePatientCreateAPI(JsonLoginRequiredMixin, View):
     """ Étape 1 (AJAX) — crée le patient en urgence. """
 
     def post(self, request):
@@ -2145,7 +2158,8 @@ class UrgencePatientCreateAPI(LoginRequiredMixin, View):
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
-class HospitalizationCreateAPI(LoginRequiredMixin, View):
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class HospitalizationCreateAPI(JsonLoginRequiredMixin, View):
     """ Étape 2 (AJAX) — crée l'hospitalisation pour un patient donné. """
 
     def post(self, request, patient_id):
@@ -2159,10 +2173,13 @@ class HospitalizationCreateAPI(LoginRequiredMixin, View):
                 hosp.save()
                 form.save_m2m()
             return JsonResponse({
+
                 "ok": True,
                 "detail": "Admission en urgence créée avec succès.",
                 "redirect": reverse('urgences_list')
             })
+
+
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 
 
