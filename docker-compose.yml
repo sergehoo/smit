@@ -89,10 +89,12 @@ services:
       PYTHONUNBUFFERED: "1"
       WHITENOISE_MAX_AGE: "2592000"
       WHITENOISE_USE_FINDERS: "False"
+      DJANGO_MEDIA_ROOT: /var/www/media
     volumes:
       - static_volume:/smitci-app/static
       - media_volume:/smitci-app/media
       - dbbackups:/smitci-app/dbbackup
+      - media_volume:/var/www/media:rw
     depends_on:
       smitDB:
         condition: service_healthy
