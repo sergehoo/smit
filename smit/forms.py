@@ -1533,16 +1533,7 @@ class UrgencePatientForm(forms.ModelForm):
                                    'data-search': 'on', })
     )
 
-    # … tes ChoiceField existants (lieu_naissance, genre, nationalite, etc.) …
 
-    commune = forms.ModelChoiceField(
-        queryset=Location.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={
-            'class': 'form-control form-control-lg form-control-outlined select2 form-select',
-            'data-search': 'on', 'id': 'commune'
-        })
-    )
     # ➕ “Autre commune”
     nouvelle_commune = forms.CharField(
         required=False,
@@ -1607,8 +1598,6 @@ class UrgenceHospitalizationStep2Form(forms.ModelForm):
         widgets = {
             'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'reason_for_admission': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            # 'activite': forms.Select(attrs={'class': 'form-control'}),
-            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
             'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
 
         }

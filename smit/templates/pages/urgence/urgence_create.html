@@ -309,29 +309,8 @@
                       </div>
                     </div>
 
-                    <div class="col-12 col-md-6">
-                      <div class="form-group">
-                        <label for="{{ step2_form.doctor.id_for_label }}" class="form-label required-label">
-                          {{ step2_form.doctor.label }} <span class="text-danger">*</span>
-                        </label>
-                        {{ step2_form.doctor }}
-                        {% for error in step2_form.doctor.errors %}
-                          <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                      </div>
-                    </div>
 
-                    <div class="col-12 col-md-6">
-                      <div class="form-group">
-                        <label for="{{ step2_form.room.id_for_label }}" class="form-label required-label">
-                          {{ step2_form.room.label }} <span class="text-danger">*</span>
-                        </label>
-                        {{ step2_form.room }}
-                        {% for error in step2_form.room.errors %}
-                          <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                      </div>
-                    </div>
+
 
                     <div class="col-12 col-md-6">
                       <div class="form-group">

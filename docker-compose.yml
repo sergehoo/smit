@@ -92,7 +92,7 @@ services:
       DJANGO_MEDIA_ROOT: /var/www/media
     volumes:
       - static_volume:/smitci-app/static
-      - media_volume:/smitci-app/media
+#      - media_volume:/smitci-app/media
       - dbbackups:/smitci-app/dbbackup
       - media_volume:/var/www/media:rw
     depends_on:
