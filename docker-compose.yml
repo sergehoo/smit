@@ -202,7 +202,7 @@ services:
     mem_reservation: 128m
 
   smitadminer:
-    profiles: ["admin"]
+#    profiles: ["admin"]
     image: adminer
     restart: unless-stopped
     environment:
