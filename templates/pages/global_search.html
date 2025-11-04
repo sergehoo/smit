@@ -1,242 +1,512 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title"> Liste des patients</h3>
-                                        <div class="nk-block-des text-soft">
-                                            <p> <span class="badge badge-gray"> {{ resultfiltre  }} </span> Patients retrouvés sur / {{ patient_nbr }} Patients enregistrés</p>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête avec statistiques -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Liste des patients</h3>
+                        <div class="nk-block-des text-soft">
+                            <div class="d-flex align-items-center">
+                                <span class="badge badge-dim bg-outline-primary rounded-pill">{{ resultfiltre }}</span>
+                                <span class="ms-2">patients trouvés sur {{ patient_nbr }} enregistrés</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <div class="toggle-wrap nk-block-tools-toggle">
+                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu">
+                                <em class="icon ni ni-menu-alt-r"></em>
+                            </a>
+                            <div class="toggle-expand-content" data-content="pageMenu">
+                                <ul class="nk-block-tools g-3">
+                                    <li>
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-white btn-outline-light dropdown-toggle" data-toggle="dropdown">
+                                                <em class="icon ni ni-download-cloud"></em>
+                                                <span>Export</span>
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#">Excel</a>
+                                                <a class="dropdown-item" href="#">PDF</a>
+                                                <a class="dropdown-item" href="#">CSV</a>
+                                            </div>
                                         </div>
-                                    </div><!-- .nk-block-head-content -->
-                                    <div class="nk-block-head-content">
-                                        <div class="toggle-wrap nk-block-tools-toggle">
-                                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em class="icon ni ni-menu-alt-r"></em></a>
-                                            <div class="toggle-expand-content" data-content="pageMenu">
-                                                <ul class="nk-block-tools g-3">
-                                                    <li><a href="#" class="btn btn-white btn-outline-light"><em class="icon ni ni-download-cloud"></em><span>Export</span></a></li>
-                                                    <li class="nk-block-tools-opt">
-                                                        <div class="drodown">
-                                                            <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-                                                                    <li><a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a></li>
-                                                                    <li><a href="{% url 'appointment_list' %}"><span>Rendez-vous</span></a></li>
-                                                                    <li><a href="{% url 'consultation_list' %}"><span>Consultation</span></a></li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </li>
+                                    </li>
+                                    <li class="nk-block-tools-opt">
+                                        <div class="drodown">
+                                            <a href="#" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown">
+                                                <em class="icon ni ni-plus"></em>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <ul class="link-list-opt no-bdr">
+                                                    <li><a href="{% url 'add_patient' %}"><em class="icon ni ni-user-add"></em><span>Nouveau Patient</span></a></li>
+                                                    <li><a href="{% url 'appointment_list' %}"><em class="icon ni ni-calendar"></em><span>Rendez-vous</span></a></li>
+                                                    <li><a href="{% url 'consultation_list' %}"><em class="icon ni ni-notes"></em><span>Consultation</span></a></li>
                                                 </ul>
                                             </div>
-                                        </div><!-- .toggle-wrap -->
-                                    </div><!-- .nk-block-head-content -->
-                                </div><!-- .nk-block-between -->
-                            </div><!-- .nk-block-head -->
-
-                            <div class="nk-block">
-                                <div class="card card-bordered card-stretch">
-                                    <div class="card-inner-group">
-                                        <form method="get" class="d-flex flex-wrap align-items-start">
-                                            {% for field in filter.form %}
-                                                <div class="col-4 col-md-4 mb-3 form-group me-3">
-                                                    <label for="{{ field.label }}"
-                                                           class="form-label">{{ field.label }}</label>
-                                                    {{ field }}
-
-                                                    {% if field.help_text %}
-                                                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                                                    {% endif %}
-                                                    {% for error in field.errors %}
-                                                        <div class="text-danger">{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endfor %}
-
-                                            <div class="col-12 col-md-12 mb-5 float-right ">
-                                                <button class="btn btn-primary btn-lg mr-5" type="submit"><em class="icon ni ni-search"></em>Filtrer</button>
-                                                <a class="btn btn-danger btn-lg" href="{% url 'global_search' %}">Réinitialiser</a>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="nk-block">
-                                <div class="card card-bordered card-stretch">
-                                    <div class="card-inner-group">
-                                        <div class="card-inner position-relative card-tools-toggle">
-                                            <div class="card-title-group">
-                                                <div class="card-tools row">
-
-
-                                                </div><!-- .card-tools -->
-
-                                            </div><!-- .card-title-group -->
-
-                                        </div><!-- .card-inner -->
-                                        <div class="card-inner p-0">
-                                            <div class="nk-tb-list nk-tb-ulist is-compact">
-                                                <div class="nk-tb-item nk-tb-head">
-
-
-                                                    <div class="nk-tb-col"><span class="sub-text">Code Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Nom</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Prenom</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Date Naissance</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Genre</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Adresse</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Age</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
-
-
-                                                    <div class="nk-tb-col nk-tb-col-tools text-right">
-                                                        <div class="dropdown">
-                                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                <ul class="link-tidy sm no-bdr">
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="bl">
-                                                                            <label class="custom-control-label" for="bl">Balance</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="ph">
-                                                                            <label class="custom-control-label" for="ph">Phone</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="vri">
-                                                                            <label class="custom-control-label" for="vri">Verified</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="st">
-                                                                            <label class="custom-control-label" for="st">Status</label>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div><!-- .nk-tb-item -->
-                                                {% for patient in patients %}
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span>{{ patient.code_patient }}</span>
-                                                    </div>
-
-                                                    <div class="nk-tb-col">
-                                                        <div class="user-card">
-                                                            <div class="user-avatar xs bg-white">
-                                                                <span><img src="{{ patient.avatar.url }}"/></span>
-                                                            </div>
-                                                            <div class="user-name">
-                                                                <span class="tb-lead">{{ patient.nom|upper }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="nk-tb-col tb-col-sm">
-                                                        <span>{{ patient.prenoms|upper }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-md">
-                                                        <span>{{ patient.date_naissance }}</span>
-                                                    </div>
-                                                <div class="nk-tb-col tb-col-md">
-                                                        <span>{{ patient.genre }}</span>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        {% if patient.localite.contry == 'Cote-d-Ivoire' %}
-                                                        <span>{{ patient.localite.contry }}</span>
-                                                            {% else %}
-                                                             <span>{{ patient.localite }}</span>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <ul class="list-status">
-                                                            <li><em class="icon text-success ni ni-check-circle"></em> <span>{{ patient.calculate_age }} ans</span></li>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="nk-tb-col tb-col-lg">
-                                                        <span>{{ patient.contact }}</span>
-                                                    </div>
-
-                                                    <div class="nk-tb-col nk-tb-col-tools">
-                                                        <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Wallet">
-                                                                    <em class="icon ni ni-wallet-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Send Email">
-                                                                    <em class="icon ni ni-mail-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Suspend">
-                                                                    <em class="icon ni ni-user-cross-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <div class="drodown">
-                                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                                                                    <div class="dropdown-menu dropdown-menu-right">
-                                                                        <ul class="link-list-opt no-bdr">
-                                                                            <li><a href="{% url 'detail_patient' patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
-                                                                            <li><a href="{% url 'update_patient' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Modifier</span></a></li>
-                                                                            <li class="divider"></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-star"></em><span>Reset Pass</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-shield-off"></em><span>Reset 2FA</span></a></li>
-                                                                            <li><a href="#"><em class="icon ni ni-na"></em><span>Suspend User</span></a></li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div><!-- .nk-tb-item -->
-                                                {% endfor %}
-
-                                            </div><!-- .nk-tb-list -->
-                                        </div><!-- .card-inner -->
-                                        <div class="card-inner">
-                                            <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link" href="listePatient/?page={{ page_obj.previous_page_number }}">Prev</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                                {% endif %}
-
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
-                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="listePatient/?page={{ num }}">{{ num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
-
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="listePatient/?page={{ page_obj.next_page_number }}">Next</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                                {% endif %}
-                                            </ul>
                                         </div>
-                                        <!-- .card-inner -->
-                                    </div><!-- .card-inner-group -->
-                                </div><!-- .card -->
-                            </div><!-- .nk-block -->
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Filtres améliorés -->
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="card-title-group">
+                            <div class="card-title">
+                                <h6 class="title">Filtres de recherche</h6>
+                            </div>
+                            <div class="card-tools">
+                                <a href="#" class="link fs-13" id="toggle-filters">
+                                    <em class="icon ni ni-menu-alt"></em>
+                                    <span>Masquer les filtres</span>
+                                </a>
+                            </div>
+                        </div>
+                        <form method="get" id="filter-form">
+                            <div class="row g-3" id="filters-container">
+                                {% for field in filter.form %}
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        <div class="form-control-wrap">
+                                            {{ field }}
+                                        </div>
+                                        {% if field.help_text %}
+                                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-end">
+                                        <button class="btn btn-primary btn-lg me-2" type="submit">
+                                            <em class="icon ni ni-search me-1"></em>Appliquer les filtres
+                                        </button>
+                                        <a class="btn btn-outline-light btn-lg" href="{% url 'global_search' %}">
+                                            <em class="icon ni ni-reload me-1"></em>Réinitialiser
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Liste des patients -->
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <div class="card-inner position-relative card-tools-toggle py-4">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-control-wrap">
+                                            <div class="form-icon form-icon-left">
+                                                <em class="icon ni ni-search"></em>
+                                            </div>
+                                            <input type="text" class="form-control" id="search-patients" placeholder="Rechercher un patient...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-tools ms-3">
+                                    <div class="dropdown">
+                                        <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                            <em class="icon ni ni-setting"></em>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                            <ul class="link-check">
+                                                <li><span>Colonnes affichées</span></li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-code">
+                                                        <label class="custom-control-label" for="col-code">Code Patient</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-nom">
+                                                        <label class="custom-control-label" for="col-nom">Nom</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-prenom">
+                                                        <label class="custom-control-label" for="col-prenom">Prénom</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-date-naissance">
+                                                        <label class="custom-control-label" for="col-date-naissance">Date Naissance</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-genre">
+                                                        <label class="custom-control-label" for="col-genre">Genre</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-adresse">
+                                                        <label class="custom-control-label" for="col-adresse">Adresse</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-age">
+                                                        <label class="custom-control-label" for="col-age">Âge</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-contact">
+                                                        <label class="custom-control-label" for="col-contact">Contact</label>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-inner p-0">
+                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                <!-- En-tête du tableau -->
+                                <div class="nk-tb-item nk-tb-head">
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <span class="sub-text">Code Patient</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-nom">
+                                        <span class="sub-text">Nom</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-prenom">
+                                        <span class="sub-text">Prénom</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-date-naissance">
+                                        <span class="sub-text">Date Naissance</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-genre">
+                                        <span class="sub-text">Genre</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-adresse">
+                                        <span class="sub-text">Adresse</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-age">
+                                        <span class="sub-text">Âge</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-contact">
+                                        <span class="sub-text">Contact</span>
+                                    </div>
+                                    <div class="nk-tb-col nk-tb-col-tools text-right">
+                                        <span class="sub-text">Actions</span>
+                                    </div>
+                                </div>
+
+                                <!-- Corps du tableau -->
+                                {% for patient in patients %}
+                                <div class="nk-tb-item patient-row" data-search="{{ patient.nom|lower }} {{ patient.prenoms|lower }} {{ patient.code_patient|lower }}">
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <span class="tb-status text-primary">{{ patient.code_patient }}</span>
+                                    </div>
+                                    <div class="nk-tb-col col-nom">
+                                        <div class="user-card">
+                                            <div class="user-avatar xs bg-primary-dim">
+                                                {% if patient.avatar %}
+                                                <img src="{{ patient.avatar.url }}" alt="{{ patient.nom }}">
+                                                {% else %}
+                                                <span>{{ patient.nom|first|upper }}{{ patient.prenoms|first|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user-name">
+                                                <span class="tb-lead">{{ patient.nom|upper }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-prenom">
+                                        <span>{{ patient.prenoms|upper }}</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-date-naissance">
+                                        <span>{{ patient.date_naissance|date:"d/m/Y" }}</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-genre">
+                                        <span class="badge badge-dim {% if patient.genre == 'M' %}bg-outline-primary{% else %}bg-outline-pink{% endif %}">
+                                            {{ patient.genre }}
+                                        </span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-adresse">
+                                        {% if patient.localite.contry == 'Cote-d-Ivoire' %}
+                                        <span class="text-soft">{{ patient.localite.contry }}</span>
+                                        {% else %}
+                                        <span class="text-soft">{{ patient.localite }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-age">
+                                        <span class="tb-status text-success">{{ patient.calculate_age }} ans</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-contact">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-call me-1"></em>
+                                            <span>{{ patient.contact }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="nk-tb-col nk-tb-col-tools">
+                                        <ul class="nk-tb-actions gx-1">
+                                            <li>
+                                                <div class="drodown">
+                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown">
+                                                        <em class="icon ni ni-more-h"></em>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <ul class="link-list-opt no-bdr">
+                                                            <li>
+                                                                <a href="{% url 'detail_patient' patient.pk %}">
+                                                                    <em class="icon ni ni-eye"></em>
+                                                                    <span>Voir Dossier</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="{% url 'update_patient' patient.pk %}">
+                                                                    <em class="icon ni ni-edit"></em>
+                                                                    <span>Modifier</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#">
+                                                                    <em class="icon ni ni-calendar"></em>
+                                                                    <span>Nouveau RDV</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#">
+                                                                    <em class="icon ni ni-notes"></em>
+                                                                    <span>Nouvelle Consultation</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a href="#" class="text-danger">
+                                                                    <em class="icon ni ni-user-cross"></em>
+                                                                    <span>Archiver</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="nk-tb-item">
+                                    <div class="nk-tb-col text-center py-5">
+                                        <div class="nk-block-content">
+                                            <em class="icon ni ni-users icon-3x text-light mb-3"></em>
+                                            <h5>Aucun patient trouvé</h5>
+                                            <p class="text-soft">Aucun patient ne correspond à vos critères de recherche.</p>
+                                            <a href="{% url 'add_patient' %}" class="btn btn-primary">
+                                                <em class="icon ni ni-plus"></em>
+                                                <span>Ajouter un patient</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Pagination améliorée -->
+                        {% if patients %}
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap g-3">
+                                <div class="fs-14 text-soft">
+                                    Affichage de <strong>{{ page_obj.start_index }}</strong> à <strong>{{ page_obj.end_index }}</strong> sur <strong>{{ page_obj.paginator.count }}</strong> patients
+                                </div>
+                                <ul class="pagination justify-content-center justify-content-md-start">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts pour améliorer l'UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche en temps réel
+    const searchInput = document.getElementById('search-patients');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const patientRows = document.querySelectorAll('.patient-row');
+            
+            patientRows.forEach(row => {
+                const searchData = row.getAttribute('data-search');
+                if (searchData.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Toggle des filtres
+    const toggleFilters = document.getElementById('toggle-filters');
+    const filtersContainer = document.getElementById('filters-container');
+    if (toggleFilters && filtersContainer) {
+        toggleFilters.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isVisible = filtersContainer.style.display !== 'none';
+            
+            if (isVisible) {
+                filtersContainer.style.display = 'none';
+                this.querySelector('span').textContent = 'Afficher les filtres';
+            } else {
+                filtersContainer.style.display = 'block';
+                this.querySelector('span').textContent = 'Masquer les filtres';
+            }
+        });
+    }
+
+    // Gestion des colonnes affichées
+    const columnCheckboxes = document.querySelectorAll('input[id^="col-"]');
+    columnCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const columnClass = this.id.replace('col-', 'col-');
+            const columns = document.querySelectorAll('.' + columnClass);
+            
+            columns.forEach(col => {
+                col.style.display = this.checked ? '' : 'none';
+            });
+        });
+    });
+});
+</script>
+
+<style>
+/* Améliorations CSS supplémentaires */
+.user-avatar.xs {
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.nk-tb-list .nk-tb-item:hover {
+    background-color: rgba(95, 99, 242, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+.badge.badge-dim {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+.card-tools-toggle .form-control-wrap {
+    min-width: 280px;
+}
+
+@media (max-width: 767px) {
+    .card-tools-toggle .form-control-wrap {
+        min-width: 100%;
+    }
+    
+    .nk-tb-col {
+        padding: 8px 12px;
+    }
+}
+
+/* Animation pour les lignes du tableau */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nk-tb-item {
+    animation: fadeIn 0.3s ease-out;
+}
+</style>
 {% endblock %}

@@ -20,117 +20,125 @@
                     </div><!-- .nk-block-between -->
                 </div><!-- .nk-block-head -->
                 <div class="nk-block">
-    <div class="card card-bordered card-stretch">
-        <div class="card-inner-group">
-        <form method="get" action="{% url 'examen_list' %}" class="mb-4">
-    <div class="row p-2">
-        <div class="col-md-3">{{ filter.form.type_examen.label_tag }} {{ filter.form.type_examen }}</div>
-        <div class="col-md-3">{{ filter.form.doctor.label_tag }} {{ filter.form.doctor }}</div>
-        <div class="col-md-3">{{ filter.form.patient.label_tag }} {{ filter.form.patient }}</div>
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
-            <a href="{% url 'examen_list' %}" class="btn btn-danger ml-3 w-100">Reset</a>
-        </div>
-    </div>
-</form>
-            <div class="accordion" id="examensAccordion">
-                {% for type_bilan, examens in examens_by_type.items %}
-                    <div class="accordion-item pl-3 pr-3">
-                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                            <button class="accordion-button collapsed btn btn-outline-secondary uniform-btn w-100"
-                                    type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapse{{ forloop.counter }}"
-                                    aria-expanded="false"
-                                    aria-controls="collapse{{ forloop.counter }}">
-                                {{ type_bilan }} <strong class="ml-2 float-right">({{ examens|length }})</strong>
-                            </button>
-                        </h2>
-                        <div id="collapse{{ forloop.counter }}"
-                             class="accordion-collapse collapse"
-                             aria-labelledby="heading{{ forloop.counter }}"
-                             data-bs-parent="#examensAccordion">
-                            <div class="accordion-body">
-                                <div class="card card-bordered">
-                                    <div class="card-inner">
-                                        <form id="examen-form">
-                                            {% csrf_token %}
-                                            <table class="table table-striped">
-                                                <thead class="thead-light">
-                                                <tr>
-                                                    <th>Code</th>
-                                                    <th>Patient</th>
-                                                    <th>Examen</th>
-                                                    <th>Médecin</th>
-                                                    <th>Résultat</th>
-                                                    <th>Date Résultat</th>
-                                                    <th>Commentaire</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for entry in examens %}
-                                                    <tr id="exam-{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
-                                                        <td>{{ entry.examen.id }}</td>  <!-- ✅ Corrigé -->
-                                                        <td>{{ entry.examen.patient.nom|upper }} {{ entry.examen.patient.prenoms|upper }}</td>
-                                                        <td><span class="text-primary">{{ entry.examen.examen }}</span>
-                                                        </td>
-                                                        <td>{{ entry.examen.doctor }}</td>
+                    <div class="card card-bordered card-stretch">
+                        <div class="card-inner-group">
+                            <form method="get" action="{% url 'examen_list' %}" class="mb-4">
+                                <div class="row p-2">
+                                    <div class="col-md-3">{{ filter.form.type_examen.label_tag }} {{ filter.form.type_examen }}</div>
+                                    <div class="col-md-3">{{ filter.form.doctor.label_tag }} {{ filter.form.doctor }}</div>
+                                    <div class="col-md-3">{{ filter.form.patient.label_tag }} {{ filter.form.patient }}</div>
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                                        <a href="{% url 'examen_list' %}" class="btn btn-danger ml-3 w-100">Reset</a>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="accordion" id="examensAccordion">
+                                {% for type_bilan, examens in examens_by_type.items %}
+                                    <div class="accordion-item pl-3 pr-3">
+                                        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                            <button class="accordion-button collapsed btn btn-outline-secondary uniform-btn w-100"
+                                                    type="button" data-toggle="collapse"
+                                                    data-target="#collapse{{ forloop.counter }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapse{{ forloop.counter }}">
+                                                {{ type_bilan }} <strong
+                                                    class="ml-2 float-right">({{ examens|length }})</strong>
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ forloop.counter }}"
+                                             class="accordion-collapse collapse"
+                                             aria-labelledby="heading{{ forloop.counter }}"
+                                             data-parent="#examensAccordion">
+                                            <div class="accordion-body">
+                                                <div class="card card-bordered">
+                                                    <div class="card-inner">
+                                                        <form id="examen-form">
+                                                            {% csrf_token %}
+                                                            <table class="table table-striped">
+                                                                <thead class="thead-light">
+                                                                <tr>
+                                                                    <th>Code</th>
+                                                                    <th>Patient</th>
+                                                                    <th>Examen</th>
+                                                                    <th>Médecin</th>
+                                                                    <th>Résultat</th>
+                                                                    <th>Date Résultat</th>
+                                                                    <th>Commentaire</th>
+                                                                    <th>Actions</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                {% for entry in examens %}
+                                                                    <tr id="exam-{{ entry.examen.id }}">
+                                                                        <!-- ✅ Corrigé -->
+                                                                        <td>{{ entry.examen.id }}</td>
+                                                                        <!-- ✅ Corrigé -->
+                                                                        <td>{{ entry.examen.patient.nom|upper }} {{ entry.examen.patient.prenoms|upper }}</td>
+                                                                        <td><span
+                                                                                class="text-primary">{{ entry.examen.examen }}</span>
+                                                                        </td>
+                                                                        <td>{{ entry.examen.doctor }}</td>
 
-                                                        <!-- ✅ Résultat -->
-                                                        <td>
-                                                            <input type="text" class="form-control result-input"
-                                                                   name="result"
-                                                                   value="{{ entry.examen.result|default_if_none:'' }}"
-                                                                   data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
-                                                        </td>
+                                                                        <!-- ✅ Résultat -->
+                                                                        <td>
+                                                                            <input type="text"
+                                                                                   class="form-control result-input"
+                                                                                   name="result"
+                                                                                   value="{{ entry.examen.result|default_if_none:'' }}"
+                                                                                   data-id="{{ entry.examen.id }}">
+                                                                            <!-- ✅ Corrigé -->
+                                                                        </td>
 
-                                                        <!-- ✅ Date Résultat -->
-                                                        <td>
-                                                            <input type="datetime-local"
-                                                                   class="form-control result-date"
-                                                                   name="result_date"
-                                                                   value="{{ entry.examen.result_date|date:'Y-m-d\TH:i' }}"
-                                                                   data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
-                                                        </td>
+                                                                        <!-- ✅ Date Résultat -->
+                                                                        <td>
+                                                                            <input type="datetime-local"
+                                                                                   class="form-control result-date"
+                                                                                   name="result_date"
+                                                                                   value="{{ entry.examen.result_date|date:'Y-m-d\TH:i' }}"
+                                                                                   data-id="{{ entry.examen.id }}">
+                                                                            <!-- ✅ Corrigé -->
+                                                                        </td>
 
-                                                        <!-- ✅ Commentaire -->
-                                                        <td>
+                                                                        <!-- ✅ Commentaire -->
+                                                                        <td>
             <textarea class="form-control result-comment"
                       name="comment"
                       rows="2"
                       data-id="{{ entry.examen.id }}">{{ entry.examen.comment|default_if_none:'' }}</textarea>
-                                                            <!-- ✅ Corrigé -->
-                                                        </td>
+                                                                            <!-- ✅ Corrigé -->
+                                                                        </td>
 
-                                                        <td>
-                                                            <button class="btn btn-primary btn-sm save-btn"
-                                                                    data-id="{{ entry.examen.id }}">  <!-- ✅ Corrigé -->
-                                                                Enregistrer
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                {% empty %}
-                                                    <tr>
-                                                        <td colspan="8" class="text-center">
-                                                            Aucun examen en attente de résultat.
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </form>
+                                                                        <td>
+                                                                            <button class="btn btn-primary btn-sm save-btn"
+                                                                                    data-id="{{ entry.examen.id }}">
+                                                                                <!-- ✅ Corrigé -->
+                                                                                Enregistrer
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                {% empty %}
+                                                                    <tr>
+                                                                        <td colspan="8" class="text-center">
+                                                                            Aucun examen en attente de résultat.
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                {% empty %}
+                                    <div class="alert alert-warning text-center">Aucun examen trouvé.</div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
-                {% empty %}
-                    <div class="alert alert-warning text-center">Aucun examen trouvé.</div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
             </div>
         </div>
     </div>
@@ -203,3 +211,4 @@
         });
     </script>
 {% endblock %}
+

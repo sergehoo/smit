@@ -187,7 +187,16 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_CHANGE_PASSWORD_REDIRECT_URL = "/accounts/password/change/"
 ACCOUNT_RESET_PASSWORD_REDIRECT_URL = "/accounts/password/reset/done/"
 #
+# Django derrière un proxy
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# axes + django-ipware : vraie IP via X-Forwarded-For
+AXES_IPWARE_PROXY_COUNT = 1  # Traefik seul devant l'app ; mets 2 si CDN/Cloudflare devant Traefik
+AXES_IPWARE_META_PRECEDENCE_ORDER = [
+    'HTTP_X_FORWARDED_FOR',  # chaîne d'IPs client,proxy1,proxy2...
+    'REMOTE_ADDR',
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {

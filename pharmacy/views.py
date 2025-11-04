@@ -145,20 +145,42 @@ class MedicamentDeleteView(DeleteView):
     success_url = reverse_lazy('medicament_list')
 
 
-
-
 class MouvementStockListView(ListView):
     model = MouvementStock
     template_name = 'pharmacy/mouvementstock_list.html'
     context_object_name = 'mouvements'
     paginate_by = 25
 
+    def _can_view_all(self):
+        user = self.request.user
+        return user.is_superuser or user.has_perm('pharmacy.view_all_mouvements')
+
+    def _get_employee(self):
+        # Récupère l'employé lié à l'utilisateur connecté, sinon None
+        user = self.request.user
+        try:
+            return user.employee
+        except Exception:
+            return None
+
     def get_queryset(self):
-        queryset = super().get_queryset().select_related(
-            'medicament', 'patient', 'fournisseur', 'commande', 'employee', 'pharmacie'
+        qs = (
+            super()
+            .get_queryset()
+            .select_related('medicament', 'patient', 'fournisseur', 'commande', 'employee', 'pharmacie')
+            .order_by('-date_mouvement')
         )
 
-        # Filtres
+        # 1) Filtre "propriété" : restreindre aux mouvements de l'employé connecté
+        if not self._can_view_all():
+            employee = self._get_employee()
+            # S'il n'y a pas d'employé pour l'utilisateur, renvoyer un queryset vide
+            if employee is None:
+                qs = qs.none()
+            else:
+                qs = qs.filter(employee=employee)
+
+        # 2) Filtres UI (GET)
         self.filters = {
             'type': self.request.GET.get('type'),
             'medicament': self.request.GET.get('medicament'),
@@ -167,69 +189,65 @@ class MouvementStockListView(ListView):
         }
 
         if self.filters['type']:
-            queryset = queryset.filter(type_mouvement=self.filters['type'])
+            qs = qs.filter(type_mouvement=self.filters['type'])
 
         if self.filters['medicament']:
-            queryset = queryset.filter(medicament_id=self.filters['medicament'])
+            qs = qs.filter(medicament_id=self.filters['medicament'])
 
         if self.filters['pharmacie']:
-            queryset = queryset.filter(pharmacie_id=self.filters['pharmacie'])
+            qs = qs.filter(pharmacie_id=self.filters['pharmacie'])
 
         if self.filters['date_range']:
+            now = timezone.now()
             if self.filters['date_range'] == 'today':
-                today = timezone.now().date()
-                queryset = queryset.filter(date_mouvement__date=today)
+                qs = qs.filter(date_mouvement__date=now.date())
             elif self.filters['date_range'] == 'week':
-                week_ago = timezone.now() - timedelta(days=7)
-                queryset = queryset.filter(date_mouvement__gte=week_ago)
+                qs = qs.filter(date_mouvement__gte=now - timedelta(days=7))
             elif self.filters['date_range'] == 'month':
-                month_ago = timezone.now() - timedelta(days=30)
-                queryset = queryset.filter(date_mouvement__gte=month_ago)
+                qs = qs.filter(date_mouvement__gte=now - timedelta(days=30))
             elif self.filters['date_range'] == 'year':
-                year_ago = timezone.now() - timedelta(days=365)
-                queryset = queryset.filter(date_mouvement__gte=year_ago)
+                qs = qs.filter(date_mouvement__gte=now - timedelta(days=365))
 
-        return queryset.order_by('-date_mouvement')
+        # Mémorise le queryset pour réutilisation dans get_context_data (évite des requêtes doublons)
+        self._qs = qs
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        qs = getattr(self, '_qs', self.get_queryset())  # sécurité
 
-        # Statistiques globales
-        total_mouvements = self.get_queryset().count()
-        total_sorties = self.get_queryset().filter(type_mouvement='Sortie').aggregate(Sum('quantite'))[
-                            'quantite__sum'] or 0
-        total_entrees = self.get_queryset().filter(type_mouvement='Entrée').aggregate(Sum('quantite'))[
-                            'quantite__sum'] or 0
+        # Statistiques basées sur le queryset **filtré**
+        total_mouvements = qs.count()
+        total_sorties = qs.filter(type_mouvement='Sortie').aggregate(Sum('quantite'))['quantite__sum'] or 0
+        total_entrees = qs.filter(type_mouvement='Entrée').aggregate(Sum('quantite'))['quantite__sum'] or 0
 
-        # Statistiques temporelles
-        today = timezone.now().date()
-        week_ago = timezone.now() - timedelta(days=7)
-        month_ago = timezone.now() - timedelta(days=30)
-        year_ago = timezone.now() - timedelta(days=365)
+        now = timezone.now()
+        today = now.date()
+        week_ago = now - timedelta(days=7)
+        month_ago = now - timedelta(days=30)
+        year_ago = now - timedelta(days=365)
 
-        mouvements_today = self.model.objects.filter(date_mouvement__date=today).count()
-        mouvements_week = self.model.objects.filter(date_mouvement__gte=week_ago).count()
-        mouvements_month = self.model.objects.filter(date_mouvement__gte=month_ago).count()
-        mouvements_year = self.model.objects.filter(date_mouvement__gte=year_ago).count()
+        mouvements_today = qs.filter(date_mouvement__date=today).count()
+        mouvements_week = qs.filter(date_mouvement__gte=week_ago).count()
+        mouvements_month = qs.filter(date_mouvement__gte=month_ago).count()
+        mouvements_year = qs.filter(date_mouvement__gte=year_ago).count()
 
-        # Top médicaments (sorties)
+        # Top médicaments (sur le périmètre filtré)
         top_medicaments_sorties = (
-            self.model.objects.filter(type_mouvement='Sortie')
-            .values('medicament__nom', 'medicament_id')
-            .annotate(total=Sum('quantite'), count=Count('id'))
-            .order_by('-total')[:5]
+            qs.filter(type_mouvement='Sortie')
+              .values('medicament__nom', 'medicament_id')
+              .annotate(total=Sum('quantite'), count=Count('id'))
+              .order_by('-total')[:5]
         )
 
-        # Top médicaments (entrées)
         top_medicaments_entrees = (
-            self.model.objects.filter(type_mouvement='Entrée')
-            .values('medicament__nom', 'medicament_id')
-            .annotate(total=Sum('quantite'), count=Count('id'))
-            .order_by('-total')[:5]
+            qs.filter(type_mouvement='Entrée')
+              .values('medicament__nom', 'medicament_id')
+              .annotate(total=Sum('quantite'), count=Count('id'))
+              .order_by('-total')[:5]
         )
 
-        # Mouvements récents pour le dashboard
-        recent_mouvements = self.model.objects.all().order_by('-date_mouvement')[:5]
+        recent_mouvements = qs[:5]
 
         context.update({
             'stats': {
@@ -244,11 +262,11 @@ class MouvementStockListView(ListView):
                 'top_medicaments_sorties': top_medicaments_sorties,
                 'top_medicaments_entrees': top_medicaments_entrees,
             },
-            'filters': self.filters,
+            'filters': getattr(self, 'filters', {}),
             'recent_mouvements': recent_mouvements,
             'today': today,
+            'can_view_all': self._can_view_all(),
         })
-
         return context
 
 
@@ -426,7 +444,6 @@ class CommandeCreateView(CreateView):
             return redirect(self.success_url)
         else:
             return self.form_invalid(form)
-
 
 
 class CommandeUpdateView(UpdateView):

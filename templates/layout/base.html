@@ -3,415 +3,1064 @@
 
 <!DOCTYPE html>
 <html lang="fr-FR" class="js">
-
 <head>
-    <base href="../">
     <meta charset="utf-8">
-    <meta name="author" content="Afriq Consulting">
+    <meta name="author" content="SMIT-CI">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="KENEYA, système de gestion des hôpitaux pour une gestion efficace des ressources hospitalières.">
-    <meta name="keywords" content="KENEYA, SMIT, gestion des hôpitaux, santé, Afriq Consulting, hospital management, ressources hospitalières, consultations, hospitalisations, gestion médicale">
+    <meta name="description"
+          content="KENEYA, système de gestion des hôpitaux pour une gestion efficace des ressources hospitalières.">
+    <meta name="keywords"
+          content="KENEYA, SIH, gestion des hôpitaux, santé, Afriq Consulting, hospital management, ressources hospitalières">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#3b5d92">
-    <meta property="og:title" content="KENEYA - SMIT | Hospital Resources Management">
-    <meta property="og:description" content="Système complet pour la gestion des ressources hospitalières, conçu pour simplifier les opérations de santé.">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta property="og:title" content="KENEYA - SIH | Systeme d'Information Hospitalier">
+    <meta property="og:description"
+          content="Système complet pour la gestion des ressources hospitalières, conçu pour simplifier les opérations de santé.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://smitci.com"> <!-- Remplacez par votre URL -->
+    <meta property="og:url" content="https://sihci.com">
     <meta property="og:image" content="{% static 'images/keneya_preview.png' %}">
     <meta property="og:locale" content="fr_FR">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="KENEYA - SMIT | Hospital Resources Management">
-    <meta name="twitter:description" content="Optimisez la gestion des ressources hospitalières avec KENEYA, développé par Afriq Consulting.">
+    <meta name="twitter:title" content="KENEYA - SIH | Hospital Resources Management">
+    <meta name="twitter:description"
+          content="Optimisez la gestion des ressources hospitalières avec KENEYA, développé par Afriq Consulting.">
     <meta name="twitter:image" content="{% static 'images/keneya_preview.png' %}">
-    
-    <!-- Fav Icon  -->
+
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
-    <!-- Page Title  -->
-    <title>SMIT | KENEYA- Hospital Ressources Management</title>
-    <!-- StyleSheets  -->
-    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css">
+    <title>SMIT | KENEYA - Hospital Management System</title>
+
+    <!-- Tailwind CSS -->
+{#    <script src="https://cdn.tailwindcss.com"></script>#}
+{#    <script>#}
+{#        tailwind.config = {#}
+{#            theme: {#}
+{#                extend: {#}
+{#                    colors: {#}
+{#                        'hospital': {#}
+{#                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd',#}
+{#                            300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9',#}
+{#                            600: '#0284c7', 700: '#0369a1', 800: '#075985',#}
+{#                            900: '#0c4a6e',#}
+{#                        },#}
+{#                        'medical': {#}
+{#                            teal: '#14b8a6', success: '#10b981', warning: '#f59e0b',#}
+{#                            error: '#ef4444', purple: '#8b5cf6'#}
+{#                        }#}
+{#                    },#}
+{#                    fontFamily: {#}
+{#                        'sans': ['Inter', 'system-ui', 'sans-serif'],#}
+{#                        'display': ['Inter', 'system-ui', 'sans-serif']#}
+{#                    },#}
+{#                    animation: {#}
+{#                        'pulse-slow': 'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite',#}
+{#                        'bounce-gentle': 'bounce 1.5s ease-in-out infinite',#}
+{#                        'float': 'float 3s ease-in-out infinite',#}
+{#                        'slide-in-right': 'slideInRight 0.5s ease-out',#}
+{#                        'fade-in-up': 'fadeInUp 0.6s ease-out'#}
+{#                    },#}
+{#                    boxShadow: {#}
+{#                        'medical': '0 4px 20px rgba(14, 165, 233, 0.15)',#}
+{#                        'medical-lg': '0 10px 40px rgba(14, 165, 233, 0.2)',#}
+{#                        'card': '0 2px 12px rgba(0, 0, 0, 0.08)',#}
+{#                        'card-hover': '0 8px 30px rgba(14, 165, 233, 0.15)'#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        }#}
+{#    </script>#}
+
+    <!-- Styles de base -->
+    <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet">
+    <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet">
+    <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+
+    <!-- Bibliothèques JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-{#    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />#}
 
-<!-- Bootstrap 5 CSS -->
-{#    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">#}
+    <style>
+        /* === Variables CSS Modernisées === */
+        :root {
+            --hospital-primary: #0ea5e9;
+            --hospital-primary-dark: #0369a1;
+            --hospital-primary-light: #e0f2fe;
+            --medical-teal: #14b8a6;
+            --medical-success: #10b981;
+            --medical-warning: #f59e0b;
+            --medical-error: #ef4444;
+            --medical-purple: #8b5cf6;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-800: #1e293b;
+            --shadow-soft: 0 4px 20px rgba(14, 165, 233, 0.15);
+            --shadow-medium: 0 10px 40px rgba(14, 165, 233, 0.2);
+        }
 
-<!-- Bootstrap 5 JS -->
-<style>
-    /* Header Animation Styles */
-    .nk-header {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-    }
-    
-    .nk-header.scrolled {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-        background: rgba(255, 255, 255, 0.98);
-    }
-    
-    .logo-container {
-        position: relative;
-        display: inline-block;
-        padding: 5px;
-    }
-    
-    .logo-img {
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        position: relative;
-        z-index: 2;
-        height: 40px;
-        width: auto;
-    }
-    
-    .logo-link:hover .logo-img {
-        transform: scale(1.05);
-    }
-    
-    .logo-pulse {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(74, 108, 247, 0.1);
-        border-radius: 50%;
-        z-index: 1;
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    
-    .logo-link:hover .logo-pulse {
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% {
-            transform: scale(0.8);
-            opacity: 0.5;
+        /* === Styles Globaux Améliorés === */
+        .nk-body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        70% {
-            transform: scale(1.2);
-            opacity: 0;
-        }
-        100% {
-            transform: scale(0.8);
-            opacity: 0;
-        }
-    }
-    
-    .header-notif-animate {
-        animation: slideInRight 0.5s ease-out forwards;
-    }
-    
-    .header-user-animate {
-        animation: fadeIn 0.6s ease-out 0.2s forwards;
-        opacity: 0;
-    }
-    
-    @keyframes slideInRight {
-        from {
-            transform: translateX(20px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    /* Notification Bell Animation */
-    .notification-bell {
-        position: relative;
-    }
-    
-    .notification-bell .icon {
-        transition: transform 0.3s ease;
-    }
-    
-    .notification-bell:hover .icon {
-        transform: rotate(15deg);
-        animation: bellRing 0.5s ease-in-out infinite alternate;
-    }
-    
-    @keyframes bellRing {
-        0%, 100% {
-            transform: rotate(0);
-        }
-        25% {
-            transform: rotate(10deg);
-        }
-        50% {
-            transform: rotate(-10deg);
-        }
-        75% {
-            transform: rotate(5deg);
-        }
-    }
-    
-    .notification-badge {
-        animation: pulseBadge 2s infinite;
-    }
-    
-    @keyframes pulseBadge {
-        0% {
-            box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
-        }
-        70% {
-            box-shadow: 0 0 0 8px rgba(255, 59, 48, 0);
-        }
-        100% {
-            box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
-        }
-    }
-</style>
-    
-    
 
+        .hospital-info {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .hospital-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #006eff;
+            margin-bottom: 0.25rem;
+        }
+
+        .department-name {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.3;
+        }
+
+
+        /* === Header Redesign === */
+        .nk-header {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            box-shadow: var(--shadow-soft);
+            border: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nk-header.scrolled {
+            box-shadow: var(--shadow-medium);
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+        }
+
+        .logo-container {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-container:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-img {
+            transition: all 0.3s ease;
+            height: 42px;
+        {#filter: brightness(0) invert(1);#}
+        }
+
+        .hospital-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #e60808 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* === Sidebar Redesign === */
+        .nk-sidebar {
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .nk-sidebar-head {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 1.5rem 1rem;
+        }
+
+        .nk-menu-item {
+            margin: 4px 12px;
+        }
+
+        .nk-menu-link {
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+            padding: 12px 16px;
+            margin: 4px 0;
+        }
+
+        .nk-menu-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .nk-menu-link:hover::before {
+            left: 100%;
+        }
+
+        .nk-menu-link:hover {
+            background: var(--hospital-primary-light);
+            transform: translateX(8px);
+            border-left-color: var(--hospital-primary);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+        }
+
+        .nk-menu-link.active {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            color: #090808;
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+            border-left-color: #fff;
+            transform: translateX(4px);
+        }
+
+        .nk-menu-link.active .medical-icon {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .medical-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            background: var(--hospital-primary-light);
+            color: var(--hospital-primary);
+        }
+
+        .nk-menu-link:hover .medical-icon {
+            background: var(--hospital-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* === Cards Modernisées === */
+        .card-modern {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1f5f9;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--medical-teal) 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card-modern:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-modern:hover {
+            box-shadow: 0 12px 40px rgba(14, 165, 233, 0.18);
+            transform: translateY(-6px);
+        }
+
+        .card-header-modern {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            color: #fff;
+            border-radius: 16px 16px 0 0;
+            padding: 1.25rem 1.5rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header-modern::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: skewX(-20deg) translateX(100px);
+            animation: shimmer 3s infinite;
+        }
+
+        /* === Boutons Redesign === */
+        .btn-modern {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-modern:active {
+            transform: translateY(-1px);
+        }
+
+        /* === Badges Améliorés === */
+        .badge-modern {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-primary-modern {
+            background: linear-gradient(135deg, var(--hospital-primary-light) 0%, #bae6fd 100%);
+            color: var(--hospital-primary-dark);
+            border: 1px solid var(--hospital-primary);
+        }
+
+        .badge-success-modern {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+
+        .badge-warning-modern {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .badge-error-modern {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+
+        /* === Animations Avancées === */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: skewX(-20deg) translateX(-100px);
+            }
+            100% {
+                transform: skewX(-20deg) translateX(300px);
+            }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* === Tableaux Modernisées === */
+        .table-modern {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            background: #fff;
+        }
+
+        .table-modern thead th {
+            background: linear-gradient(135deg, var(--hospital-primary-light) 0%, #e0f2fe 100%);
+            color: var(--hospital-primary-dark);
+            font-weight: 600;
+            border-bottom: 2px solid var(--hospital-primary);
+            padding: 16px 20px;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-modern tbody tr:hover {
+            background: var(--hospital-primary-light);
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+        }
+
+        .table-modern tbody td {
+            padding: 14px 20px;
+            vertical-align: middle;
+        }
+
+        /* === Formulaires Améliorés === */
+        .form-control-modern {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+            font-size: 0.95rem;
+        }
+
+        .form-control-modern:focus {
+            border-color: var(--hospital-primary);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        /* === Footer Redesign === */
+        .nk-footer {
+            background: linear-gradient(135deg, var(--gray-800) 0%, #0f172a 100%);
+            color: #cbd5e1;
+            border-top: 1px solid #334155;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+
+        /* === Responsive Design Amélioré === */
+        @media (max-width: 768px) {
+            .nk-header {
+                padding: 0.75rem 0;
+            }
+
+            .logo-img {
+                height: 36px;
+            }
+
+            .hospital-title {
+                font-size: 1.1rem;
+            }
+
+            .card-modern {
+                margin-bottom: 1rem;
+            }
+
+            .nk-menu-link {
+                padding: 10px 14px;
+                margin: 2px 0;
+            }
+
+            .medical-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        /* === États de Chargement === */
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        /* === Scrollbar Personnalisée === */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--hospital-primary-dark) 0%, #075985 100%);
+        }
+
+        /* === Corrections Modal === */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            border: none;
+            padding: 1.5rem;
+        }
+
+        /* === Utilitaires Additionnels === */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--medical-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .border-gradient {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+            linear-gradient(135deg, var(--hospital-primary) 0%, var(--medical-teal) 100%) border-box;
+        }
+    </style>
+
+    <!-- Configuration TinyMCE -->
     <script>
         tinymce.init({
             selector: 'textarea',
-            height: auto,
-            width: auto,
+            height: 400,
             plugins: [
                 'advlist autolink lists link image charmap print preview anchor',
                 'searchreplace visualblocks code fullscreen',
                 'insertdatetime media table paste code help wordcount'
             ],
-            toolbar: 'undo redo | formatselect | bold italic backcolor | \
-                      alignleft aligncenter alignright alignjustify | \
-                      bullist numlist outdent indent | removeformat | help'
+            toolbar: 'undo redo | formatselect | bold italic backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | help',
+            menubar: false,
+            statusbar: false,
+            content_style: `
+                body {
+                    font-family: 'Inter', system-ui, sans-serif;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    color: #334155;
+                }
+            `
         });
     </script>
+
     {% unicorn_scripts %}
 </head>
 
-<body class="nk-body bg-white has-sidebar ">
+<body class="nk-body">
+<!-- Overlay de Chargement -->
+<div id="globalLoader" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+    <div class="text-center">
+        <div class="w-16 h-16 border-4 border-hospital-200 border-t-hospital-500 rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-hospital-700 font-semibold">Chargement de l'application KENEYA...</p>
+    </div>
+</div>
+
 <div class="nk-app-root">
-    <!-- main @s -->
-    <div class="nk-main ">
-        <!-- sidebar @s -->
-        {% include 'layout/aside.html' %}
-        <!-- sidebar @e -->
-        <!-- wrap @s -->
-        <div class="nk-wrap ">
-            <!-- main header @s -->
-            <div class="nk-header nk-header-fixed is-light">
-                <div class="container-fluid">
-                    <div class="nk-header-wrap">
+    <div class="nk-main">
+        <!-- Sidebar -->
+        {% include "layout/aside.html" %}
 
-                        <div class="nk-header-brand d-xl-none">
-                            <a href="#" class="logo-link">
-                                <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}"
-                                     srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
-                                <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}"
-                                     srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
-                            </a>
-                        </div><!-- .nk-header-brand -->
-                        {% include 'layout/notif_header.html' %}
-                        {#                           {% include 'layout/user_log.html' %}#}
-                    </div><!-- .nk-header-wrap -->
-                </div><!-- .container-fliud -->
-            </div>
-            <!-- main header @e -->
-            <!-- content @s -->
-            {% block content %}
+        <!-- Contenu Principal -->
+        <div class="nk-wrap">
+            <!-- Header -->
 
-            {% endblock %}
-            <!-- content @e -->
-            <!-- footer @s -->
+
+            {% include 'layout/notif_header.html' %}
+
+
+            <!-- Contenu Principal avec Animation -->
+            <main class="animate-fade-in-up mt-5">
+                {% block content %}
+                    <!-- Le contenu spécifique à chaque page sera inséré ici -->
+                {% endblock %}
+            </main>
+
+            <!-- Footer Amélioré -->
             <div class="nk-footer">
                 <div class="container-fluid">
-                    <div class="nk-footer-wrap">
-                        <div class="nk-footer-copyright"> &copy; 2022 KENEYA by <a href="https://afriqconsulting.com" target="_blank">AFRIQCONSULTING</a>
+                    <div class="footer-content">
+                        <div class="row align-items-center">
+                            <div class="col-lg-12 text-center text-lg-start mb-3 mb-lg-0">
+                                <div class="nk-footer-copyright">
+                                    <span class="text-hospital-300">© 2024 KENEYA Hospital Management System</span>
+                                    <span class="mx-2 text-gray-500">•</span>
+                                    <span>Développé par</span>
+                                    <a href="https://afriqconsulting.com" target="_blank"
+                                       class="text-hospital-100 hover:text-white transition-colors font-semibold">
+                                        AFRIQ CONSULTING
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
                 </div>
             </div>
-            <!-- footer @e -->
-        </div>
-        <!-- wrap @e -->
+        </div><!-- .nk-wrap -->
     </div>
-    <!-- main @e -->
+    <!-- .nk-main -->
 </div>
-<!-- app-root @e -->
-<!-- JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- .nk-app-root -->
+
+<!-- Scripts -->
 <script src="{% static 'assets/js/bundle.js' %}"></script>
 <script src="{% static 'assets/js/scripts.js' %}"></script>
 <script src="{% static 'assets/js/charts/gd-default.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
 {% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Prépare la pile de toasts à partir des messages Django
+  const toasts = [
     {% for message in messages %}
-        {% if message.tags == 'success' %}
-            <script type="text/javascript">
-                $(document).ready(function () {
-                    Swal.fire({
-                        title: "Félicitation ! ",
-                        text: " {{ message }}",
-                        icon: "success",
+    (function () {
+      // Mappe le tag Django -> icône SweetAlert2
+      const icon =
+        {% if "success" in message.tags %}'success'
+        {% elif "warning" in message.tags %}'warning'
+        {% elif "error" in message.tags %}'error'
+        {% elif "info" in message.tags %}'info'
+        {% else %}'info'{% endif %};
 
-                    })
-                });
-            </script>
-        {% elif message.tags == 'warning' %}
-            <script type="text/javascript">
-                $(document).ready(function () {
-                    Swal.fire({
-                        title: "Attention alert",
-                        text: " {{ message }}",
-                        icon: "warning",
+      // Couleur de l’icône selon le tag principal
+      const iconColor =
+        {% if "success" in message.tags %}'#10b981'
+        {% elif "warning" in message.tags %}'#f59e0b'
+        {% elif "error" in message.tags %}'#ef4444'
+        {% else %}'#0ea5e9'{% endif %};
 
-                    })
-                });
-            </script>
-        
-        {% elif message.tags == 'info' %}
-            <script type="text/javascript">
-                $(document).ready(function () {
-                    Swal.fire({
-                        title: "Information",
-                        text: " {{ message }}",
-                        icon: "info",
-
-                    })
-                });
-            </script>
-            
-        {% elif message.tags == 'error' %}
-            <script type="text/javascript">
-
-                $(document).ready(function () {
-                    Swal.fire({
-                        title: "Attention Erreur",
-                        text: " {{ message }}",
-                        icon: "error",
-
-                    })
-
-                });
-            </script>
-        {% endif %}
+      return {
+        icon: icon,
+        iconColor: iconColor,
+        title: '{{ message|escapejs }}'
+      };
+    })(),
     {% endfor %}
+  ];
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 5000,
+    timerProgressBar: true,
+    background: '#ffffff',
+    color: '#1e293b',
+    customClass: {
+      popup: 'shadow-medical-lg border border-gray-200 rounded-xl'
+    },
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer);
+      toast.addEventListener('mouseleave', Swal.resumeTimer);
+    },
+    showClass: { popup: 'animate__animated animate__fadeInRight animate__faster' },
+    hideClass: { popup: 'animate__animated animate__fadeOutRight animate__faster' }
+  });
+
+  // Affiche chaque toast dans l’ordre
+  toasts.forEach(t => Toast.fire({
+    icon: t.icon,
+    iconColor: t.iconColor,
+    title: t.title
+  }));
+});
+</script>
 {% endif %}
 
+
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
+    document.addEventListener('DOMContentLoaded', function () {
+        // Masquer le loader
+        setTimeout(() => {
+            const loader = document.getElementById('globalLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 500);
+            }
+        }, 1000);
+
+        // Gestion du mode sombre
         const darkSwitch = document.querySelector('.dark-switch');
         const body = document.body;
 
-        // Check if the dark mode is enabled in localStorage
         if (localStorage.getItem('dark-mode') === 'enabled') {
             body.classList.add('dark-mode');
         }
 
-        // Toggle dark mode
-        darkSwitch.addEventListener('click', () => {
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                localStorage.setItem('dark-mode', 'disabled');
-            } else {
-                body.classList.add('dark-mode');
-                localStorage.setItem('dark-mode', 'enabled');
-            }
-        });
-    });
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-<script src="https://unpkg.com/htmx.org@1.9.2"></script>
-<script>
-    var input = document.querySelector("#phone");
-    var iti = window.intlTelInput(input, {
-        nationalMode: true,
-        initialCountry: "ci", // Set default to Côte d'Ivoire
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const communeSelect = document.getElementById('id_commune');
-        const newCommuneGroup = document.getElementById('new_commune_group');
+        if (darkSwitch) {
+            darkSwitch.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                localStorage.setItem('dark-mode', body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
 
-        communeSelect.addEventListener('change', function () {
-            if (this.value === 'Autre') {
-                newCommuneGroup.style.display = 'block';  // Show the new commune field
-            } else {
-                newCommuneGroup.style.display = 'none';  // Hide the new commune field
-            }
-        });
-
-        // Optional: Reset the form and hide new_commune when resetting
-        document.querySelector('button[type="reset"]').addEventListener('click', function () {
-            newCommuneGroup.style.display = 'none';
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Header scroll effect
-        const header = document.querySelector('.nk-header');
-        
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 10) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-        
-        // Initialize GSAP animations
-        gsap.from(".logo-container", {
-            duration: 0.8,
-            y: -20,
-            opacity: 0,
-            ease: "back.out(1.7)"
-        });
-        
-        // Add animation to notification items (assuming they exist)
-        gsap.from(".notification-item", {
-            duration: 0.5,
-            x: 20,
-            opacity: 0,
-            stagger: 0.1,
-            delay: 0.3
-        });
-        
-        // Hover effect for logo
-        const logoLink = document.querySelector('.logo-link');
-        if (logoLink) {
-            logoLink.addEventListener('mouseenter', function() {
-                gsap.to(this.querySelector('.logo-img'), {
-                    duration: 0.3,
-                    scale: 1.05,
-                    ease: "power2.out"
-                });
-            });
-            
-            logoLink.addEventListener('mouseleave', function() {
-                gsap.to(this.querySelector('.logo-img'), {
-                    duration: 0.3,
-                    scale: 1,
+                // Animation de transition
+                gsap.to(body, {
+                    duration: 0.5,
+                    backgroundColor: body.classList.contains('dark-mode') ? '#0f172a' : '#f8fafc',
                     ease: "power2.out"
                 });
             });
         }
-    });
-</script>
-</body>
 
+        // Effet de scroll sur le header amélioré
+        const header = document.querySelector('.nk-header');
+        if (header) {
+            let lastScrollY = window.scrollY;
+
+            window.addEventListener('scroll', () => {
+                const scrolled = window.scrollY > 10;
+                header.classList.toggle('scrolled', scrolled);
+
+                // Effet parallaxe subtil
+                if (scrolled) {
+                    header.style.transform = `translateY(${Math.min(window.scrollY * 0.1, 20)}px)`;
+                } else {
+                    header.style.transform = 'translateY(0)';
+                }
+
+                lastScrollY = window.scrollY;
+            });
+        }
+
+        // Animation des éléments au scroll
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.card-modern, .table-modern');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.style.opacity = "1";
+                    element.style.transform = "translateY(0)";
+                }
+            });
+        };
+
+        // Initialiser l'animation au scroll
+        window.addEventListener('scroll', animateOnScroll);
+
+        // Préparer les éléments pour l'animation
+        document.querySelectorAll('.card-modern, .table-modern').forEach(el => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(20px)";
+            el.style.transition = "all 0.6s ease-out";
+        });
+
+        // Déclencher une première animation
+        setTimeout(animateOnScroll, 100);
+
+        // Gestion améliorée des sous-menus
+        document.querySelectorAll('.nk-menu-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                const parent = this.closest('.nk-menu-item.has-sub');
+                if (!parent) return;
+
+                parent.classList.toggle('open');
+                const icon = this.querySelector('.icon');
+                if (icon) {
+                    gsap.to(icon, {
+                        duration: 0.3,
+                        rotation: parent.classList.contains('open') ? 90 : 0,
+                        ease: "back.out(1.7)"
+                    });
+                }
+            });
+        });
+
+        // Highlight automatique du menu actif avec animation
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nk-menu-link[href]').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                gsap.from(link, {
+                    duration: 0.6,
+                    x: -20,
+                    opacity: 0,
+                    ease: "back.out(1.7)"
+                });
+            }
+        });
+
+        // International Telephone Input avec style amélioré
+        const phoneInput = document.querySelector("#phone");
+        if (phoneInput && window.intlTelInput) {
+            window.intlTelInput(phoneInput, {
+                nationalMode: true,
+                initialCountry: "ci",
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+                preferredCountries: ['ci', 'fr', 'sn', 'ml', 'bf', 'ne', 'gn'],
+                customContainer: "w-100",
+                dropdownContainer: document.body
+            });
+
+            // Appliquer le style moderne
+            phoneInput.classList.add('form-control-modern');
+        }
+
+        // Gestion des formulaires dynamiques avec animation
+        const communeSelect = document.getElementById('id_commune');
+        const newCommuneGroup = document.getElementById('new_commune_group');
+
+        if (communeSelect && newCommuneGroup) {
+            communeSelect.addEventListener('change', function () {
+                if (this.value === 'Autre') {
+                    gsap.to(newCommuneGroup, {
+                        duration: 0.4,
+                        height: 'auto',
+                        opacity: 1,
+                        display: 'block',
+                        ease: "power2.out"
+                    });
+                } else {
+                    gsap.to(newCommuneGroup, {
+                        duration: 0.3,
+                        height: 0,
+                        opacity: 0,
+                        display: 'none',
+                        ease: "power2.out"
+                    });
+                }
+            });
+        }
+
+        // Effet de ripple sur les boutons
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-modern');
+            if (btn) {
+                const ripple = document.createElement('span');
+                const rect = btn.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
+
+                btn.style.position = 'relative';
+                btn.style.overflow = 'hidden';
+                btn.appendChild(ripple);
+
+                setTimeout(() => ripple.remove(), 600);
+            }
+        });
+
+        // Ajouter le CSS pour l'effet ripple
+        const rippleStyle = document.createElement('style');
+        rippleStyle.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+        document.head.appendChild(rippleStyle);
+    });
+
+    // Gestion des erreurs de chargement d'images
+    document.addEventListener('error', function (e) {
+        if (e.target.tagName === 'IMG') {
+            e.target.style.opacity = '0.5';
+            e.target.alt = 'Image non disponible';
+        }
+    }, true);
+</script>
+
+<style>
+    /* === Layout fixes pour sidebar + header === */
+    :root {
+        --sidebar-w: 280px; /* largeur sidebar desktop */
+        --header-h: 72px; /* hauteur header fixed */
+    }
+
+    /* Sidebar fixe qui réserve sa largeur sur desktop */
+    .nk-sidebar.nk-sidebar-fixed {
+        position: fixed;
+        inset: 0 auto 0 0; /* top:0; right:auto; bottom:0; left:0 */
+        width: var(--sidebar-w);
+        z-index: 1030;
+        transform: translateX(0);
+        transition: transform .3s ease;
+        will-change: transform;
+    }
+
+    /* Décale le bloc principal */
+    .nk-main {
+        margin-left: var(--sidebar-w);
+    }
+
+    /* Le header est déjà fixed via DashLite; assure l’espace en haut du contenu */
+    .nk-wrap {
+        padding-top: var(--header-h);
+    }
+
+    /* Si ton header empiète, on peut aussi “repousser” son left */
+    .nk-header.nk-header-fixed {
+        left: var(--sidebar-w);
+        right: 0;
+        width: auto; /* évite dépassement */
+    }
+
+    /* Mobile / tablette : sidebar cachée, contenu pleine largeur, header aligné à gauche */
+    @media (max-width: 1199.98px) {
+        .nk-sidebar.nk-sidebar-fixed {
+            transform: translateX(-100%);
+            box-shadow: none;
+        }
+
+        .nk-sidebar.nk-sidebar-fixed.show {
+            transform: translateX(0);
+            box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .35); /* backdrop cliquable */
+        }
+
+        .nk-main {
+            margin-left: 0;
+        }
+
+        .nk-header.nk-header-fixed {
+            left: 0;
+        }
+    }
+
+    /* Optionnel : assure un bon scroll à l’intérieur de la sidebar */
+    .nk-sidebar-body[data-simplebar] {
+        height: 100vh;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* évite la barre de scroll horizontale */
+</style>
+<script>
+    // Toggle mobile pour la sidebar (utilise ton bouton data-target="sidebarMenu")
+    (function () {
+        const sidebar = document.querySelector('.nk-sidebar.nk-sidebar-fixed');
+        const toggles = document.querySelectorAll('[data-target="sidebarMenu"]');
+
+        toggles.forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                if (!sidebar) return;
+                sidebar.classList.toggle('show');
+            });
+        });
+
+        // Fermer si clic hors sidebar en mobile
+        document.addEventListener('click', e => {
+            if (!sidebar) return;
+            const isDesktop = matchMedia('(min-width: 1200px)').matches;
+            const insideSidebar = e.target.closest('.nk-sidebar');
+            const onToggle = e.target.closest('[data-target="sidebarMenu"]');
+            if (!isDesktop && sidebar.classList.contains('show') && !insideSidebar && !onToggle) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // ESC pour fermer en mobile
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && sidebar?.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    })();
+</script>
+<!-- Styles additionnels pour intl-tel-input -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+</body>
 </html>

@@ -7,6 +7,12 @@
     <div class="container-xl wide-lg">
         <div class="nk-content-body">
             <div class="nk-block">
+
+
+            <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title mb-5">Liste des mouvements de stocks</h3>
+
+                    </div>
                 <!-- Section des statistiques -->
                 <div class="row g-gs mb-4">
                     <div class="col-sm-6 col-lg-3">
@@ -103,7 +109,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary">Filtrer</button>
+                                <button type="submit" class="btn btn-primary mr-2">Filtrer</button>
                                 <a href="{% url 'mouvement-stock' %}" class="btn btn-light ms-2">Réinitialiser</a>
                             </div>
                         </form>
@@ -148,12 +154,15 @@
                                         <td>{{ mouvement.quantite }}</td>
                                         <td>
                                             {% if mouvement.type_mouvement == 'Entrée' %}
+                                                <em class="icon ni ni-arrow-down text-success"></em>
                                                 {{ mouvement.fournisseur.nom|default:"-" }}
+
                                             {% else %}
-                                                {{ mouvement.patient.nom_complet|default:"-" }}
+                                                <em class="icon ni ni-arrow-up text-danger"></em>
+                                                {{ mouvement.patient|default:"-" }}
                                             {% endif %}
                                         </td>
-                                        <td>{{ mouvement.pharmacie.nom|default:"-" }}</td>
+                                        <td>{{ mouvement.pharmacie|default:"-" }}</td>
                                         <td>{{ mouvement.date_mouvement|date:"d/m/Y H:i" }}</td>
                                         <td>
                                             <a href="{% url 'mouvement-detail' mouvement.pk %}" class="btn btn-sm btn-primary" title="Voir">

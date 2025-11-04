@@ -4,7 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/templates/pharmacy/mouvementstock_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pharmacy/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/pharmacy/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/consultations/consultation_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/lab/examen_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/lab/examen_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/layout/notif_header.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/layout/notif_header.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/suivi/suivi_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/pages/urgence/urgence_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/appointments/appointment_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/appointments/appointment_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/global_search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/global_search.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/patient_list_view.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/patient_list_view.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -276,6 +296,10 @@
       <workItem from="1757900861151" duration="598000" />
       <workItem from="1758293535079" duration="1254000" />
       <workItem from="1759319496443" duration="81679000" />
+      <workItem from="1759769523589" duration="9310000" />
+      <workItem from="1760014970544" duration="5793000" />
+      <workItem from="1761312444297" duration="595000" />
+      <workItem from="1762019966181" duration="1001000" />
     </task>
     <servers />
   </component>
@@ -308,17 +332,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/smitci/urls.py</url>
-          <line>139</line>
+          <line>140</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pharmacy/views.py</url>
-          <line>364</line>
+          <line>382</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/pharmacy/views.py</url>
-          <line>389</line>
+          <line>407</line>
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -333,12 +357,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2446</line>
+          <line>2474</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1531</line>
+          <line>1559</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -358,7 +382,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>879</line>
+          <line>880</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -398,7 +422,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>2177</line>
+          <line>2204</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -413,12 +437,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>848</line>
+          <line>849</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/hospitalisation/views.py</url>
-          <line>1842</line>
+          <line>1870</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

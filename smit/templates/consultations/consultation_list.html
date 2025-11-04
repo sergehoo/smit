@@ -1,552 +1,789 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-        <div class="container-xl wide-lg">
-            <div class="nk-content-body">
-                <div class="nk-block-head nk-block-head-sm">
-                    <div class="nk-block-between">
-                        <div class="nk-block-head-content">
-                            <h3 class="nk-block-title page-title"> Liste des Consultations </h3>
-                            <div class="nk-block-des text-soft">
-                                <p><span class="badge badge-gray"> {{ resultfiltre }} </span> Patients retrouvés sur
-                                    / {{ patient_nbr }} Patients enregistrés</p>
-                            </div>
-                        </div><!-- .nk-block-head-content -->
-                        <div class="nk-block-head-content">
-                            <div class="toggle-wrap nk-block-tools-toggle">
-                                <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em
-                                        class="icon ni ni-menu-alt-r"></em></a>
-                                <div class="toggle-expand-content" data-content="pageMenu">
-                                    <ul class="nk-block-tools g-3">
-                                        <li><a href="#" class="btn btn-white btn-outline-light"><em
-                                                class="icon ni ni-download-cloud"></em><span>Export</span></a></li>
-                                        <li class="nk-block-tools-opt">
-                                            <div class="drodown">
-                                                <a href="" class="dropdown-toggle btn btn-icon btn-primary"
-                                                   data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <ul class="link-list-opt no-bdr">
-                                                        <li>
-                                                            <a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a>
-                                                        </li>
-                                                        <li><a href="#"><span>Rendez-vous</span></a></li>
-                                                        <li><a href="#"><span>Consultation</span></a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête avec statistiques -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Liste des Consultations</h3>
+                        <div class="nk-block-des text-soft">
+                            <div class="d-flex align-items-center flex-wrap gx-3">
+                                <div class="d-flex align-items-center me-3">
+                                    <span class="badge badge-dim bg-outline-primary">{{ resultfiltre }}</span>
+                                    <span class="ms-2">consultations trouvées</span>
                                 </div>
-                            </div><!-- .toggle-wrap -->
-                        </div><!-- .nk-block-head-content -->
-                    </div><!-- .nk-block-between -->
-                </div><!-- .nk-block-head -->
-
-                <div class="nk-block">
-                    <div class="card card-bordered card-stretch">
-                        <div class="card-inner-group">
-                            <div class="card-inner position-relative card-tools-toggle">
-                                <div class="card-title-group">
-                                    <div class="card-tools row">
-
-
-                                    </div><!-- .card-tools -->
-
-                                </div><!-- .card-title-group -->
-
-                            </div><!-- .card-inner -->
-                            <div class="card-inner p-0">
-                                <div class="nk-tb-list nk-tb-ulist is-compact">
-                                    <div class="nk-tb-item nk-tb-head">
-
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">ID</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Date</span></div>
-                                        <div class="nk-tb-col"><span class="sub-text">Code Patient</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Nom & Prenom</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-dim bg-outline-dark">{{ patient_nbr }}</span>
+                                    <span class="ms-2">patients enregistrés</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <div class="toggle-wrap nk-block-tools-toggle">
+                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu">
+                                <em class="icon ni ni-menu-alt-r"></em>
+                            </a>
+                            <div class="toggle-expand-content" data-content="pageMenu">
+                                <ul class="nk-block-tools g-3">
+                                    <li>
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-white btn-outline-light dropdown-toggle" data-toggle="dropdown">
+                                                <em class="icon ni ni-download-cloud me-1"></em>
+                                                <span>Export</span>
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-xls me-1"></em>Excel</a>
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-pdf me-1"></em>PDF</a>
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-text me-1"></em>CSV</a>
+                                            </div>
                                         </div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Genre</span></div>
-                                        <div class="nk-tb-col tb-col-md"><span class="sub-text">Adresse</span></div>
-                                        <div class="nk-tb-col tb-col-lg"><span class="sub-text">Age</span></div>
-                                        <div class="nk-tb-col tb-col-lg"><span class="sub-text">Contact</span></div>
-                                        <div class="nk-tb-col tb-col-lg"><span class="sub-text">Action</span></div>
+                                    </li>
+                                    <li class="nk-block-tools-opt">
+                                        <div class="drodown">
+                                            <a href="#" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown">
+                                                <em class="icon ni ni-plus"></em>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <ul class="link-list-opt no-bdr">
+                                                    <li>
+                                                        <a href="{% url 'add_patient' %}">
+                                                            <em class="icon ni ni-user-add me-1"></em>
+                                                            <span>Nouveau Patient</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#">
+                                                            <em class="icon ni ni-calendar me-1"></em>
+                                                            <span>Rendez-vous</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#">
+                                                            <em class="icon ni ni-notes me-1"></em>
+                                                            <span>Consultation</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Filtres rapides -->
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Date de consultation</label>
+                                    <select class="form-select" id="date-filter">
+                                        <option value="all">Toutes les dates</option>
+                                        <option value="today">Aujourd'hui</option>
+                                        <option value="yesterday">Hier</option>
+                                        <option value="week">Cette semaine</option>
+                                        <option value="month">Ce mois</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Statut des constantes</label>
+                                    <select class="form-select" id="constantes-filter">
+                                        <option value="all">Tous les statuts</option>
+                                        <option value="alert">Avec alertes</option>
+                                        <option value="normal">Normales</option>
+                                        <option value="none">Sans constantes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Genre</label>
+                                    <select class="form-select" id="gender-filter">
+                                        <option value="all">Tous</option>
+                                        <option value="M">Masculin</option>
+                                        <option value="F">Féminin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label">Âge</label>
+                                    <select class="form-select" id="age-filter">
+                                        <option value="all">Tous les âges</option>
+                                        <option value="child">Enfants (0-12)</option>
+                                        <option value="teen">Adolescents (13-19)</option>
+                                        <option value="adult">Adultes (20-59)</option>
+                                        <option value="senior">Seniors (60+)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des consultations -->
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <!-- Barre d'outils -->
+                        <div class="card-inner position-relative card-tools-toggle py-3">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-control-wrap">
+                                            <div class="form-icon form-icon-left">
+                                                <em class="icon ni ni-search"></em>
+                                            </div>
+                                            <input type="text" class="form-control" id="search-consultations" placeholder="Rechercher un patient...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-tools ms-3">
+                                    <div class="dropdown">
+                                        <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                            <em class="icon ni ni-setting"></em>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                            <ul class="link-check">
+                                                <li><span>Colonnes affichées</span></li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-id">
+                                                        <label class="custom-control-label" for="col-id">ID</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-date">
+                                                        <label class="custom-control-label" for="col-date">Date</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-code">
+                                                        <label class="custom-control-label" for="col-code">Code Patient</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-name">
+                                                        <label class="custom-control-label" for="col-name">Nom & Prénom</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-gender">
+                                                        <label class="custom-control-label" for="col-gender">Genre</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-location">
+                                                        <label class="custom-control-label" for="col-location">Localité</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-age">
+                                                        <label class="custom-control-label" for="col-age">Âge</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-contact">
+                                                        <label class="custom-control-label" for="col-contact">Contact</label>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tableau des consultations -->
+                        <div class="card-inner p-0">
+                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                <!-- En-tête du tableau -->
+                                <div class="nk-tb-item nk-tb-head">
+                                    <div class="nk-tb-col tb-col-sm col-id">
+                                        <span class="sub-text">ID</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-date">
+                                        <span class="sub-text">Date Consultation</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <span class="sub-text">Code Patient</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-lg col-name">
+                                        <span class="sub-text">Patient</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-gender">
+                                        <span class="sub-text">Genre</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-location">
+                                        <span class="sub-text">Localité</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-age">
+                                        <span class="sub-text">Âge</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-contact">
+                                        <span class="sub-text">Contact</span>
+                                    </div>
+                                    <div class="nk-tb-col nk-tb-col-tools text-right">
+                                        <span class="sub-text">Actions</span>
+                                    </div>
+                                </div>
+
+                                <!-- Corps du tableau -->
+                                {% for consultation in consultations %}
+                                <div class="nk-tb-item consultation-row"
+                                     data-date="{{ consultation.created_at|date:'Y-m-d' }}"
+                                     data-gender="{{ consultation.patient.genre }}"
+                                     data-age="{{ consultation.patient.calculate_age }}"
+                                     data-constantes-status="{% if consultation.patient.latest_constante %}{% if consultation.patient.latest_constante.alerte %}alert{% else %}normal{% endif %}{% else %}none{% endif %}"
+                                     data-search="{{ consultation.patient.code_patient|lower }} {{ consultation.patient.nom|lower }} {{ consultation.patient.prenoms|lower }}">
+
+                                    <div class="nk-tb-col tb-col-sm col-id">
+                                        <span class="fw-medium text-primary" data-toggle="tooltip" data-placement="top" title="{{ consultation.reason }}">
+                                            #{{ consultation.id }}
+                                        </span>
                                     </div>
 
-                                    {% for consultation in consultations %}
-                                        <div class="nk-tb-item">
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span data-toggle="tooltip" data-placement="top" title="{{ consultation.reason }}">{{ consultation.id }}</span>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span>{{ consultation.created_at }}</span>
-                                            </div>
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span>{{ consultation.patient.code_patient }}</span>
-                                            </div>
+                                    <div class="nk-tb-col tb-col-md col-date">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-medium">{{ consultation.created_at|date:"d/m/Y" }}</span>
+                                            <small class="text-soft">{{ consultation.created_at|date:"H:i" }}</small>
+                                        </div>
+                                    </div>
 
-                                            <div class="nk-tb-col">
-                                                <div class="user-card">
-                                                    <div class="user-avatar xs bg-white">
-                                                        <span><img src="{{ consultation.patient.avatar.url }}" alt="Avatar"/></span>
-                                                    </div>
-                                                    <div class="user-name">
-    <span>
-        <i class="fa-solid fa-user-alt"></i>
-        <span class="masked-name"
-              id="masked-name-{{ consultation.patient.id }}-{{ forloop.counter }}">************</span>
-        <span class="full-name d-none" id="full-name-{{ consultation.patient.id }}-{{ forloop.counter }}"></span>
-        {% if perms.core.view_patient_name %}
-            <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
-                    data-patient-id="{{ consultation.patient.id }}"
-                    data-counter="{{ forloop.counter }}">
-            <i class="fa-solid fa-eye"></i>
-        </button>
-        {% else %}
-            <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top"
-                  title="Vous n'avez pas accès à ce contenu">
-            <i class="fa-solid fa-cancel"></i>
-        </span>
-        {% endif %}
-    </span>
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-id-card me-1 text-primary"></em>
+                                            <span class="fw-medium">{{ consultation.patient.code_patient }}</span>
+                                        </div>
+                                    </div>
 
-
-                                                        <a class="tb-status" href="" data-toggle="modal"
-                                                           data-target="#constanteover{{ consultation.patient.id }}">
-                                                            {% with constante=consultation.patient.latest_constante %}
-                                                                {% if constante %}
-                                                                    {% if constante.alerte %}
-                                                                        <span> <img
-                                                                                src="{% static 'images/gift/alert.gif' %}"
-                                                                                width="20"/></span>
-                                                                        <!-- Affiche les anomalies -->
-                                                                    {% else %}
-                                                                        <span><img data-toggle="tooltip"
-                                                                                   data-placement="top"
-                                                                                   title="Constantes du : {{ consultation.patient.latest_constante.created_at }} par {{ consultation.patient.latest_constante.created_by }}"
-                                                                                   src="{% static 'images/gift/livre-medical.gif' %}"
-                                                                                   width="20"/></span>
-                                                                        <!-- Tout est normal -->
-                                                                    {% endif %}
-                                                                {% endif %}
-                                                            {% endwith %}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="nk-tb-col tb-col-md">
-                                                <span>{{ consultation.patient.genre }}</span>
-                                            </div>
-
-                                            <div class="nk-tb-col tb-col-lg">
-                                                {% if consultation.patient.localite.contry == 'Cote-d-Ivoire' %}
-                                                    <span>{{ consultation.patient.localite.ville }}</span>
+                                    <div class="nk-tb-col tb-col-lg col-name">
+                                        <div class="user-card">
+                                            <div class="user-avatar xs bg-primary-dim me-2">
+                                                {% if consultation.patient.avatar %}
+                                                <img src="{{ consultation.patient.avatar.url }}" alt="{{ consultation.patient.nom }}">
                                                 {% else %}
-                                                    <span>{{ consultation.patient.localite }}</span>
+                                                <span>{{ consultation.patient.nom|first|upper }}</span>
                                                 {% endif %}
                                             </div>
-
-
-                                            <div class="nk-tb-col tb-col-lg">
-                                                <ul class="list-status">
-                                                    <li>
-
-                                                        <em class="icon text-success ni ni-calender-date"></em>
-                                                        <span data-toggle="tooltip" data-placement="top"
-                                                              title="{{ consultation.patient.date_naissance }}">{{ consultation.patient.calculate_age }} ans</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-
-                                            <div class="nk-tb-col tb-col-lg">
-                                                <span>{{ consultation.patient.contact }}</span>
-                                            </div>
-
-
-                                            <div class="nk-tb-col nk-tb-col-tools">
-                                                <ul class="nk-tb-actions gx-2">
-
-                                                    <li>
-                                                        <div class="drodown">
-                                                            <a href="#"
-                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
-                                                               data-toggle="dropdown"><em
-                                                                    class="icon ni ni-more-h"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-
-
-                                                                    <li class="divider"></li>
-                                                                    {% if consultation.patient.latest_constante %}
-                                                                        <li>
-                                                                            <a href="{% url 'constantesupdate' consultation.patient.latest_constante.id %}"><em
-                                                                                    class="fa fa-edit mr-1"></em><span>Reprendre les constantes</span></a>
-                                                                        </li>
-                                                                    {% endif %}
-                                                                    <li>
-                                                                        <a href="{% url 'consultation_detail' consultation.pk %}"><em
-                                                                                class="fa fa-edit mr-1"></em><span>Consulter</span></a>
-                                                                    </li>
-
-                                                                    <li>
-                                                                        {#                                                                                    <a href="{% url 'delete_consult' consultation_id=consultation.id %}"><em#}
-                                                                        {#                                                                                            class="fa fa-delete-left mr-1"></em><span>Retirer de la liste</span></a>#}
-                                                                        <form method="post"
-                                                                              action="{% url 'delete_consult' consultation_id=consultation.id %}">
-                                                                            {% csrf_token %}
-                                                                            <button type="submit"
-                                                                                    class="btn-icon form-control ">
-                                                                                <em class="fa fa-delete-left mr-1"></em>
-                                                                                <span>Retirer de la liste</span>
-                                                                            </button>
-
-                                                                        </form>
-                                                                    </li>
-                                                                    <hr>
-                                                                    <li>
-                                                                        <a href="{% url 'detail_patient' consultation.patient.pk %}"><em
-                                                                                class="fa fa-eye mr-1"></em><span>Voir Dossier </span></a>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                        </div>
-                                        <div class="modal fade" tabindex="-1"
-                                             id="constanteover{{ consultation.patient.id }}">
-                                            <div class="modal-dialog modal-lg" role="document">
-                                                <div class="modal-content">
-                                                    <a href="#" class="close" data-dismiss="modal"
-                                                       aria-label="Close">
-                                                        <em class="icon ni ni-cross"></em>
-                                                    </a>
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Overview des constante du
-                                                            Patient : <span
-                                                                    class="text-primary">{{ consultation.patient }}</span>
-                                                        </h5>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="nk-block card card-bordered">
-
-                                                            {% if consultation.patient.latest_constante %}
-                                                                <h4>Deniere constante enregistrée le
-                                                                    : {{ consultation.patient.latest_constante.created_at }} </h4>
-                                                                <table class="table table-ulogs">
-                                                                    <thead class="thead-light">
-                                                                    <tr>
-                                                                        <th class="tb-col-os"><span
-                                                                                class="overline-title">Libélé <span
-                                                                                class="d-sm-none">/ IP</span></span>
-                                                                        </th>
-                                                                        <th class="tb-col-ip"><span
-                                                                                class="overline-title">Valeure</span>
-                                                                        </th>
-                                                                        <th class="tb-col-time"><span
-                                                                                class="overline-title">Observation</span>
-                                                                        </th>
-
-                                                                    </tr>
-                                                                    </thead>
-                                                                    <tbody>
-
-
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Tension
-                                                                            systolique
-                                                                        </td>
-                                                                        <td class="tb-col-ip">
-                                                                            <span class="sub-text">{{ consultation.patient.latest_constante.tension_systolique }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-                                                                            {% if consultation.patient.latest_constante.tension_systolique < 90 or patient.patient.latest_constante.tension_systolique > 140 %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle systolique anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Tension
-                                                                            diastolique
-                                                                        </td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.tension_diastolique }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.tension_diastolique < 60 or consultation.patient.latest_constante.tension_diastolique > 90 %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Tension artérielle diastolique est anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle diastolique est dans le seuil normale</span>
-                                                                            {% endif %}</td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Frequence
-                                                                            cardiaque
-                                                                        </td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.frequence_cardiaque }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.frequence_cardiaque < 60 or consultation.patient.latest_constante.frequence_cardiaque > 100 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence cardiaque anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence cardiaque est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Frequence
-                                                                            respiratoire
-                                                                        </td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.frequence_respiratoire }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-                                                                            {% if consultation.patient.latest_constante.frequence_respiratoire < 12 or consultation.patient.latest_constante.frequence_respiratoire  > 20 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Fréquence respiratoire anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Fréquence respiratoire est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Temperature
-                                                                        </td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.temperature }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.temperature < 36 or consultation.patient.latest_constante.temperature > 37.5 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Température anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La température est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Saturation
-                                                                            oxygene
-                                                                        </td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.saturation_oxygene }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.saturation_oxygene < 95 or consultation.patient.latest_constante.saturation_oxygene > 100 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Saturation oxygene anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Saturation oxygene est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">Glycemie</td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.glycemie }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.glycemie < 70 or consultation.patient.latest_constante.glycemie > 140 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation text-danger"></i>Glycemie anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Glycemie est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">poids</td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.poids }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">taille</td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.taille }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">pouls</td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.pouls }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa fa-warning"></i>Tension artérielle systolique anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td class="tb-col-os">IMC</td>
-                                                                        <td class="tb-col-ip"><span
-                                                                                class="sub-text">{{ consultation.patient.latest_constante.imc }}</span>
-                                                                        </td>
-                                                                        <td class="tb-col-time">
-
-                                                                            {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}
-                                                                                <span class="sub-text"><i
-                                                                                        class="fa-solid fa-circle-exclamation"></i>Tension artérielle systolique anormale</span>
-                                                                            {% else %}
-                                                                                <span class="sub-text font-italic"><i
-                                                                                        class="fa-solid fa-thumbs-up text-primary"></i> La Tension artérielle systolique est dans le seuil normale</span>
-                                                                            {% endif %}
-                                                                        </td>
-
-                                                                    </tr>
-                                                                    </tbody>
-                                                                </table>
-
+                                            <div class="user-info">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="masked-name" id="masked-name-{{ consultation.patient.id }}-{{ forloop.counter }}">************</span>
+                                                    <span class="full-name d-none" id="full-name-{{ consultation.patient.id }}-{{ forloop.counter }}"></span>
+                                                    {% if perms.core.view_patient_name %}
+                                                    <button class="btn btn-xs btn-outline-secondary ms-2 toggle-name-btn"
+                                                            data-patient-id="{{ consultation.patient.id }}"
+                                                            data-counter="{{ forloop.counter }}">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </button>
+                                                    {% else %}
+                                                    <span class="btn btn-xs btn-outline-light ms-2" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+                                                        <em class="icon ni ni-lock"></em>
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                                <!-- Indicateur de constantes -->
+                                                <div class="constantes-indicator">
+                                                    {% with constante=consultation.patient.latest_constante %}
+                                                        {% if constante %}
+                                                            {% if constante.alerte %}
+                                                            <span class="badge badge-xs badge-danger" data-toggle="modal" data-target="#constanteover{{ consultation.patient.id }}">
+                                                                <em class="icon ni ni-alert-fill me-1"></em>
+                                                                Alertes constantes
+                                                            </span>
                                                             {% else %}
-                                                                Pas de constantes enregistrées
+                                                            <span class="badge badge-xs badge-success" data-toggle="modal" data-target="#constanteover{{ consultation.patient.id }}">
+                                                                <em class="icon ni ni-check-circle-fill me-1"></em>
+                                                                Constantes normales
+                                                            </span>
                                                             {% endif %}
-                                                        </div>
-
-
-                                                    </div>
-                                                    <div class="modal-footer bg-light">
-                                                        <span class="sub-text">Enregistres par  {{ patient.patient.latest_constante.created_by }}  | Prise de tension {{ patient.patient }} {{ patient.patient.code_patient }}</span>
-                                                    </div>
+                                                        {% else %}
+                                                            <span class="badge badge-xs badge-warning">
+                                                                <em class="icon ni ni-info-fill me-1"></em>
+                                                                Constantes manquantes
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endwith %}
                                                 </div>
                                             </div>
                                         </div>
-                                    {% endfor %}
+                                    </div>
 
+                                    <div class="nk-tb-col tb-col-sm col-gender">
+                                        <span class="badge badge-dim {% if consultation.patient.genre == 'M' %}bg-outline-primary{% else %}bg-outline-pink{% endif %}">
+                                            {{ consultation.patient.genre }}
+                                        </span>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-md col-location">
+                                        {% if consultation.patient.localite.contry == 'Cote-d-Ivoire' %}
+                                        <span class="text-soft">{{ consultation.patient.localite.ville }}</span>
+                                        {% else %}
+                                        <span class="text-soft">{{ consultation.patient.localite }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-sm col-age">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-calendar-date me-1 text-primary"></em>
+                                            <span>{{ consultation.patient.calculate_age }} ans</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-md col-contact">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-call me-1 text-primary"></em>
+                                            <span>{{ consultation.patient.contact }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col nk-tb-col-tools ">
+                                        <ul class="nk-tb-actions gx-1">
+                                            <li>
+                                                <div class="drodown">
+                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown">
+                                                        <em class="icon ni ni-more-h"></em>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <ul class="link-list-opt no-bdr">
+                                                            <li>
+                                                                <a href="{% url 'consultation_detail' consultation.pk %}">
+                                                                    <em class="icon ni ni-eye me-1"></em>
+                                                                    <span>Détails consultation</span>
+                                                                </a>
+                                                            </li>
+                                                            {% if consultation.patient.latest_constante %}
+                                                            <li>
+                                                                <a href="{% url 'constantesupdate' consultation.patient.latest_constante.id %}">
+                                                                    <em class="icon ni ni-refresh me-1"></em>
+                                                                    <span>Reprendre les constantes</span>
+                                                                </a>
+                                                            </li>
+                                                            {% endif %}
+                                                            <li>
+                                                                <a href="{% url 'detail_patient' consultation.patient.pk %}">
+                                                                    <em class="icon ni ni-user me-1"></em>
+                                                                    <span>Dossier patient</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <form method="post" action="{% url 'delete_consult' consultation_id=consultation.id %}" class="d-inline">
+                                                                    {% csrf_token %}
+                                                                    <button type="submit" class="btn-link text-danger dropdown-item" onclick="return confirm('Êtes-vous sûr de vouloir retirer cette consultation de la liste ?')">
+                                                                        <em class="icon ni ni-trash me-1"></em>
+                                                                        <span>Retirer de la liste</span>
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div><!-- .card-inner -->
-                            <div class="card-inner">
+
+                                <!-- Modal des constantes (version améliorée) -->
+                                <div class="modal fade" tabindex="-1" id="constanteover{{ consultation.patient.id }}">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <em class="icon ni ni-heart-fill text-primary me-2"></em>
+                                                    Constantes médicales - Patient :
+                                                    <span class="text-primary">{{ consultation.patient.nom }} {{ consultation.patient.prenoms }}</span>
+                                                </h5>
+                                                <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <em class="icon ni ni-cross"></em>
+                                                </a>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if consultation.patient.latest_constante %}
+                                                <div class="card card-bordered">
+                                                    <div class="card-header">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <h6 class="card-title">Dernière mise à jour : {{ consultation.patient.latest_constante.created_at|date:"d/m/Y à H:i" }}</h6>
+                                                            <span class="badge {% if consultation.patient.latest_constante.alerte %}badge-danger{% else %}badge-success{% endif %}">
+                                                                {% if consultation.patient.latest_constante.alerte %}Alerte{% else %}Normal{% endif %}
+                                                            </span>
+                                                        </div>
+                                                        <p class="text-soft mb-0">Enregistré par : {{ consultation.patient.latest_constante.created_by }}</p>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <!-- Colonne 1 -->
+                                                            <div class="col-md-6">
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}border-danger{% endif %}">
+                                                                    <label>Tension systolique</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.tension_systolique }} mmHg</div>
+                                                                    {% if consultation.patient.latest_constante.tension_systolique < 90 or consultation.patient.latest_constante.tension_systolique > 140 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.frequence_cardiaque < 60 or consultation.patient.latest_constante.frequence_cardiaque > 100 %}border-danger{% endif %}">
+                                                                    <label>Fréquence cardiaque</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.frequence_cardiaque }} bpm</div>
+                                                                    {% if consultation.patient.latest_constante.frequence_cardiaque < 60 or consultation.patient.latest_constante.frequence_cardiaque > 100 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.temperature < 36 or consultation.patient.latest_constante.temperature > 37.5 %}border-danger{% endif %}">
+                                                                    <label>Température</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.temperature }} °C</div>
+                                                                    {% if consultation.patient.latest_constante.temperature < 36 or consultation.patient.latest_constante.temperature > 37.5 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item">
+                                                                    <label>Poids</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.poids }} kg</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Colonne 2 -->
+                                                            <div class="col-md-6">
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.tension_diastolique < 60 or consultation.patient.latest_constante.tension_diastolique > 90 %}border-danger{% endif %}">
+                                                                    <label>Tension diastolique</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.tension_diastolique }} mmHg</div>
+                                                                    {% if consultation.patient.latest_constante.tension_diastolique < 60 or consultation.patient.latest_constante.tension_diastolique > 90 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.frequence_respiratoire < 12 or consultation.patient.latest_constante.frequence_respiratoire > 20 %}border-danger{% endif %}">
+                                                                    <label>Fréquence respiratoire</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.frequence_respiratoire }} rpm</div>
+                                                                    {% if consultation.patient.latest_constante.frequence_respiratoire < 12 or consultation.patient.latest_constante.frequence_respiratoire > 20 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item {% if consultation.patient.latest_constante.saturation_oxygene < 95 or consultation.patient.latest_constante.saturation_oxygene > 100 %}border-danger{% endif %}">
+                                                                    <label>Saturation O₂</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.saturation_oxygene }} %</div>
+                                                                    {% if consultation.patient.latest_constante.saturation_oxygene < 95 or consultation.patient.latest_constante.saturation_oxygene > 100 %}
+                                                                    <div class="alert-text text-danger">
+                                                                        <em class="icon ni ni-alert-fill"></em>
+                                                                        Valeur anormale
+                                                                    </div>
+                                                                    {% endif %}
+                                                                </div>
+
+                                                                <div class="constante-item">
+                                                                    <label>Taille</label>
+                                                                    <div class="value">{{ consultation.patient.latest_constante.taille }} cm</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <div class="text-center py-4">
+                                                    <em class="icon ni ni-info-fill icon-2x text-light mb-3"></em>
+                                                    <h6>Aucune constante enregistrée</h6>
+                                                    <p class="text-soft">Aucune donnée de constante n'est disponible pour ce patient.</p>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                                {% if consultation.patient.latest_constante %}
+                                                <a href="{% url 'constantesupdate' consultation.patient.latest_constante.id %}" class="btn btn-primary">
+                                                    <em class="icon ni ni-edit me-1"></em>
+                                                    Modifier les constantes
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="nk-tb-item">
+                                    <div class="nk-tb-col text-center py-5">
+                                        <div class="nk-block-content">
+                                            <em class="icon ni ni-notes icon-3x text-light mb-3"></em>
+                                            <h5>Aucune consultation trouvée</h5>
+                                            <p class="text-soft">Aucune consultation ne correspond à vos critères de recherche.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Pagination améliorée -->
+                        {% if consultations %}
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap g-3">
+                                <div class="fs-14 text-soft">
+                                    Affichage de <strong>{{ page_obj.start_index }}</strong> à <strong>{{ page_obj.end_index }}</strong> sur <strong>{{ page_obj.paginator.count }}</strong> consultations
+                                </div>
                                 <ul class="pagination justify-content-center justify-content-md-start">
                                     {% if page_obj.has_previous %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="consultations/?page={{ page_obj.previous_page_number }}">Prev</a>
-                                        </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
                                     {% else %}
-                                        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
                                     {% endif %}
 
                                     {% for num in page_obj.paginator.page_range %}
                                         {% if page_obj.number == num %}
-                                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
                                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                            <li class="page-item"><a class="page-link"
-                                                                     href="consultations/?page={{ num }}">{{ num }}</a>
-                                            </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
                                         {% endif %}
                                     {% endfor %}
 
                                     {% if page_obj.has_next %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="consultations/?page={{ page_obj.next_page_number }}">Next</a>
-                                        </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
                                     {% else %}
-                                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
                                     {% endif %}
                                 </ul>
                             </div>
-                            <!-- .card-inner -->
-                        </div><!-- .card-inner-group -->
-                    </div><!-- .card -->
-                </div><!-- .nk-block -->
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <script>
-        document.querySelectorAll('.toggle-name-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const patientId = this.dataset.patientId; // ID du patient
-                const counter = this.dataset.counter; // Numéro unique pour cet élément
-                const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
-                const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
-                const icon = this.querySelector('i');
+</div>
 
-                if (maskedName.classList.contains('d-none')) {
-                    // Revenir à l'affichage masqué
-                    maskedName.classList.remove('d-none');
-                    fullName.classList.add('d-none');
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                } else if (!fullName.textContent) {
-                    // Charger le nom complet via AJAX
-                    fetch(`/api/get-patient-all-name/${patientId}/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.full_name) {
-                                fullName.textContent = data.full_name; // Ajouter le nom complet
-                                maskedName.classList.add('d-none');
-                                fullName.classList.remove('d-none');
-                                icon.classList.remove('fa-eye');
-                                icon.classList.add('fa-eye-slash');
-                            } else {
-                                alert('Erreur : Impossible de charger le nom.');
-                            }
-                        })
-                        .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+<!-- Scripts pour améliorer l'UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche en temps réel
+    const searchInput = document.getElementById('search-consultations');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const consultationRows = document.querySelectorAll('.consultation-row');
+
+            consultationRows.forEach(row => {
+                const searchData = row.getAttribute('data-search');
+                if (searchData.includes(searchTerm)) {
+                    row.style.display = '';
                 } else {
-                    // Afficher le nom complet déjà chargé
-                    maskedName.classList.add('d-none');
-                    fullName.classList.remove('d-none');
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
+                    row.style.display = 'none';
                 }
             });
         });
-    </script>
+    }
+
+    // Filtres combinés
+    const dateFilter = document.getElementById('date-filter');
+    const constantesFilter = document.getElementById('constantes-filter');
+    const genderFilter = document.getElementById('gender-filter');
+    const ageFilter = document.getElementById('age-filter');
+
+    function applyFilters() {
+        const dateValue = dateFilter.value;
+        const constantesValue = constantesFilter.value;
+        const genderValue = genderFilter.value;
+        const ageValue = ageFilter.value;
+        const today = new Date().toISOString().split('T')[0];
+
+        document.querySelectorAll('.consultation-row').forEach(row => {
+            const rowDate = row.getAttribute('data-date');
+            const rowGender = row.getAttribute('data-gender');
+            const rowAge = parseInt(row.getAttribute('data-age'));
+            const rowConstantes = row.getAttribute('data-constantes-status');
+
+            let showRow = true;
+
+            // Filtre par date
+            if (dateValue !== 'all') {
+                const consultationDate = new Date(rowDate);
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+
+                switch(dateValue) {
+                    case 'today':
+                        if (rowDate !== today) showRow = false;
+                        break;
+                    case 'yesterday':
+                        const yesterday = new Date(todayObj);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        if (rowDate !== yesterday.toISOString().split('T')[0]) showRow = false;
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(todayObj);
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        if (new Date(rowDate) < weekAgo) showRow = false;
+                        break;
+                }
+            }
+
+            // Filtre par constantes
+            if (constantesValue !== 'all' && rowConstantes !== constantesValue) {
+                showRow = false;
+            }
+
+            // Filtre par genre
+            if (genderValue !== 'all' && rowGender !== genderValue) {
+                showRow = false;
+            }
+
+            // Filtre par âge
+            if (ageValue !== 'all') {
+                switch(ageValue) {
+                    case 'child':
+                        if (rowAge > 12) showRow = false;
+                        break;
+                    case 'teen':
+                        if (rowAge < 13 || rowAge > 19) showRow = false;
+                        break;
+                    case 'adult':
+                        if (rowAge < 20 || rowAge > 59) showRow = false;
+                        break;
+                    case 'senior':
+                        if (rowAge < 60) showRow = false;
+                        break;
+                }
+            }
+
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+
+    if (dateFilter) dateFilter.addEventListener('change', applyFilters);
+    if (constantesFilter) constantesFilter.addEventListener('change', applyFilters);
+    if (genderFilter) genderFilter.addEventListener('change', applyFilters);
+    if (ageFilter) ageFilter.addEventListener('change', applyFilters);
+
+    // Gestion des colonnes affichées
+    const columnCheckboxes = document.querySelectorAll('input[id^="col-"]');
+    columnCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const columnClass = this.id.replace('col-', 'col-');
+            const columns = document.querySelectorAll('.' + columnClass);
+
+            columns.forEach(col => {
+                col.style.display = this.checked ? '' : 'none';
+            });
+        });
+    });
+
+    // Fonctionnalité d'affichage du nom du patient
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId;
+            const counter = this.dataset.counter;
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('em');
+
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('ni-eye-off');
+                icon.classList.add('ni-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name;
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('ni-eye');
+                            icon.classList.add('ni-eye-off');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('ni-eye');
+                icon.classList.add('ni-eye-off');
+            }
+        });
+    });
+});
+</script>
+
 
 {% endblock %}

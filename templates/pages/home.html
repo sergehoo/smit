@@ -1,355 +1,1030 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 
-
 {% block content %}
+<style>
+  /* Design system amélioré */
+  :root {
+    --primary: #4f46e5;
+    --secondary: #06b6d4;
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --dark: #0f172a;
+    --light: #f8fafc;
+    --gray: #64748b;
+    --border: #e2e8f0;
+  }
 
-     <!-- content @s -->
+  .dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
 
-<div class="nk-content nk-content-fluid">
-    <div class="container-xl wide-lg">
-        <div class="nk-content-body">
+  .kpi-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+  }
 
-            <!-- Page Header -->
-            <div class="nk-block-head nk-block-head-lg text-center">
-                <h3 class="nk-block-title page-title">SMIT Dashboard</h3>
-                <p class="nk-block-des text-soft">Bienvenue sur le tableau de bord KENEYA.</p>
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  }
+
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .kpi-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .kpi-label {
+    font-size: 0.875rem;
+    color: var(--gray);
+    font-weight: 500;
+  }
+
+  .kpi-detail {
+    font-size: 0.75rem;
+    color: var(--gray);
+    margin-top: 0.5rem;
+  }
+
+  .card-modern {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-modern .card-header {
+    padding: 1.25rem;
+    background: var(--light);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-modern .card-header h4 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  .card-modern .card-body {
+    padding: 1.25rem;
+  }
+
+  .table-modern th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-modern td {
+    font-weight: 500;
+    color: var(--dark);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .badge-modern {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .filter-bar {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 100%;
+    min-height: 300px;
+  }
+
+  .list-clean {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .list-clean li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-clean li:last-child {
+    border-bottom: none;
+  }
+
+  .trend-indicator {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+  }
+
+  .trend-up {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .trend-down {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+</style>
+
+<div class="nk-content nk-content-fluid ">
+  <div class="container-xl wide-lg mt-5">
+    <div class="nk-content-body mt-5">
+
+      <!-- En-tête du dashboard -->
+      <div class="dashboard-header mt-5">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+          <div>
+            <h1 class="h2 mb-1 text-white">SMIT — Tableau de bord</h1>
+            <p class="mb-0 opacity-75">Bienvenue sur le tableau de bord KENEYA · <span class="badge-modern" style="background:rgba(255,255,255,0.2); color:white">National</span></p>
+          </div>
+          <div class="mt-2 mt-md-0">
+            <div class="d-flex align-items-center text-white">
+              <span class="me-2">Mise à jour:</span>
+              <span id="current-time">{{ current_time|default:"Chargement..." }}</span>
             </div>
-
-            <div class="row g-gs">
-                <!-- Monthly Trends Section -->
-                <div class="col-lg-8">
-                    <div class="card card-bordered h-100">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">Tendances Mensuelles</h4>
-                            <canvas id="monthlyTrendsChart"></canvas>
-                            <p class="sub-text mt-2">Consultations et Rendez-vous par Mois</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-
-                        <div class="card card-bordered h-100">
-                        <div class="card-header">
-                            <ul class="d-flex flex-row justify-content-between align-items-center gap-3 list-unstyled">
-    <li class="d-flex flex-column text-center">
-        <span>Total Patients</span>
-        <span class="text-primary">{{ total_patients }}</span>
-    </li>
-    <li class=" d-flex flex-column text-center">
-        <span>Hommes</span>
-        <span class="text-success">{{ total_patients_homme }}</span>
-    </li>
-    <li class="d-flex flex-column text-center">
-        <span>Femmes</span>
-        <span class="text-danger">{{ total_patients_femme }}</span>
-    </li>
-</ul></div>
-    <div class="card-inner">
-{#        <h4 class="nk-block-title">Répartition des Patients par Tranche d'Âge et Sexe</h4>#}
-
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>âge</th>
-                    <th>Hommes</th>
-                    <th>Femmes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for age_group, data in patient_age_distribution.items %}
-                <tr>
-                    <td>{{ age_group }}</td>
-                    <td>{{ data.Hommes }}</td>
-                    <td>{{ data.Femmes }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-                    </div>
-                </div>
-            </div>
-
-        <div class="row g-gs mt-4">
-                <div class="col-lg-4">
-                    <div class="card card-bordered text-center bg-primary-dim">
-                        <div class="card-inner">
-                            <h3 class="text-info">{{ total_scheduled_appointments }}</h3>
-                            <p class="sub-text">Rendez-vous Planifiés</p>
-                        </div>
-                    </div>
-                </div>
-                 <div class="col-lg-4">
-                    <div class="card card-bordered text-center bg-primary-dim">
-                        <div class="card-inner">
-                            <h3 class="text-primary">{{ average_age|floatformat:0|default:"-" }} ans</h3>
-                            <p class="sub-text">Âge Moyen</p>
-                        </div>
-                    </div>
-                </div>
-                  <div class="col-lg-4">
-                    <div class="card card-bordered text-center bg-primary-dim">
-                        <div class="card-inner">
-                            <h3 class="text-warning">{{ current_hospitalizations }}</h3>
-                            <p class="sub-text">Hospitalisations en cours</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-    <div class="row g-gs mt-4">
-         <div class="col-lg-12">
-             <div class="card card-bordered h-100">
-                 <div class="card-header"> <h4 class="nk-block-title">Statistiques des Hospitalisations</h4></div>
-                 <div class="card-inner">
-                         <div id="hospitalization_chart"></div>
-
-
-
-                 </div>
-             </div>
-         </div>
-
-
-    </div>
-            <div class="row g-gs mt-4">
-                <div class="col-lg-6">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">Répartition par Statut</h4>
-                            <canvas id="patientStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                 <div class="col-lg-6">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">État des Rendez-vous</h4>
-                            <canvas id="appointmentStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row g-gs mt-4">
-                <div class="col-lg-4">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">Consultations par Service</h4>
-                            <canvas id="consultationsByServiceChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-
-             <div class="col-lg-4">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">Raisons des Hospitalisations</h4>
-                            <canvas id="hospitalizationReasonChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                   <div class="col-lg-4">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <h4 class="nk-block-title">Top Services Utilisés</h4>
-                            <ul class="list-group">
-                                {% for service in top_services %}
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>{{ service.nom }}</span>
-                                    <span class="text-muted">{{ service.total_use }} utilisations</span>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-
-
-            <div class="row g-gs mt-4">
-
-
-            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Barre de filtres -->
+      <div class="filter-bar">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Période</label>
+            <select class="form-select" id="period-filter">
+              <option>2025 (YTD)</option>
+              <option>2024</option>
+              <option>2023</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Niveau</label>
+            <select class="form-select" id="level-filter">
+              <option>CHU</option>
+              <option>Région</option>
+              <option>District</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Spécialité</label>
+            <select class="form-select" id="specialty-filter">
+              <option>Toutes</option>
+              <option>Médecine</option>
+              <option>Chirurgie</option>
+              <option>Pédiatrie</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-bold">Date</label>
+            <input type="text" class="form-control" id="date-range" placeholder="Sélectionner une plage">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section KPIs -->
+      <div class="stats-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:linear-gradient(135deg, #6366f1, #4338ca); color:white;">
+            <i class="fas fa-users-line text-lg"></i>
+          </div>
+          <div class="kpi-value text-primary">{{ total_patients|default:0 }}</div>
+          <div class="kpi-label">Total Patients</div>
+          <div class="kpi-detail">
+            Hommes: {{ total_patients_homme|default:0 }} · Femmes: {{ total_patients_femme|default:0 }}
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:linear-gradient(135deg, #06b6d4, #0891b2); color:white;">
+            <i class="fas fa-calendar text-lg"></i>
+          </div>
+          <div class="kpi-value text-info">{{ total_scheduled_appointments|default:0 }}</div>
+          <div class="kpi-label">Rendez-vous planifiés</div>
+          <div class="kpi-detail">
+            <span class="trend-indicator trend-up">+12% vs semaine dernière</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:linear-gradient(135deg, #f59e0b, #f97316); color:white;">
+           <i class="fas fa-hospital-symbol text-lg"></i>
+          </div>
+          <div class="kpi-value text-warning">{{ current_hospitalizations|default:0 }}</div>
+          <div class="kpi-label">Hospitalisations en cours</div>
+          <div class="kpi-detail">
+            Taux d'occupation: {{ occupancy_rate|default:"0" }}%
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:linear-gradient(135deg, #16a34a, #22c55e); color:white;">
+            <i class="fas fa-cake-candles text-lg"></i>
+          </div>
+          <div class="kpi-value text-success">{{ average_age|floatformat:0|default:"-" }}</div>
+          <div class="kpi-label">Âge moyen</div>
+          <div class="kpi-detail">
+            Population suivie
+          </div>
+        </div>
+      </div>
+
+      <!-- Tendances et répartition -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Tendances mensuelles</h4>
+              <span class="text-muted small">Consultations & rendez-vous</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="monthlyTrendsChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Répartition par âge & sexe</h4>
+              <span class="badge-modern" style="background:#ecfeff;color:#155e75">Dernier mois</span>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-modern">
+                  <thead>
+                    <tr>
+                      <th>Âge</th>
+                      <th class="text-center">Hommes</th>
+                      <th class="text-center">Femmes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for age_group, data in patient_age_distribution.items %}
+                    <tr>
+                      <td>{{ age_group }}</td>
+                      <td class="text-center text-primary fw-bold">{{ data.Hommes|default:0 }}</td>
+                      <td class="text-center text-danger fw-bold">{{ data.Femmes|default:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="3" class="text-center text-muted py-3">Aucune donnée disponible</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques des hospitalisations -->
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Statistiques des hospitalisations</h4>
+              <span class="text-muted small">Par période</span>
+            </div>
+            <div class="card-body">
+              <div id="hospitalization_chart" class="chart-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statuts patients et rendez-vous -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Répartition des patients par statut</h4>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="patientStatusChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>État des rendez-vous</h4>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="appointmentStatusChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services et raisons -->
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Consultations par service</h4>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="consultationsByServiceChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Raisons d'hospitalisation</h4>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="hospitalizationReasonChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card-modern">
+            <div class="card-header">
+              <h4>Top services utilisés</h4>
+            </div>
+            <div class="card-body">
+              <ul class="list-clean">
+                {% for service in top_services %}
+                <li>
+                  <span>{{ service.nom|default:"Service inconnu" }}</span>
+                  <span class="text-muted">{{ service.total_use|default:0 }} utilisations</span>
+                </li>
+                {% empty %}
+                <li class="text-center text-muted py-2">Aucun service disponible</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>
-                <!-- content @e -->
 
+<!-- Scripts pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Mise à jour de l'heure actuelle
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('current-time').textContent = now.toLocaleString('fr-FR');
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
 
+    // Graphique des hospitalisations (ApexCharts)
+    fetch("{% url 'hospitalization_chart_data' %}")
+      .then(response => response.json())
+      .then(data => {
+        const periods = data.map(item => item.periode);
+        const hospitalized = data.map(item => item.total_hospitalized || 0);
+        const deaths = data.map(item => item.total_deaths || 0);
+        const recovered = data.map(item => item.total_recovered || 0);
+        const transferred = data.map(item => item.total_transferred || 0);
+        const scam = data.map(item => item.total_scam || 0);
+        const evaded = data.map(item => item.total_evade || 0);
 
-
-
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch("{% url 'hospitalization_chart_data' %}")  // Récupération des données JSON depuis Django
-            .then(response => response.json())
-            .then(data => {
-                let periods = data.map(item => item.periode);
-                let hospitalized = data.map(item => item.total_hospitalized);
-                let deaths = data.map(item => item.total_deaths);
-                let recovered = data.map(item => item.total_recovered);
-                let transferred = data.map(item => item.total_transferred);
-                let scam = data.map(item => item.total_scam);
-                let evaded = data.map(item => item.total_evade);
-
-                var options = {
-                    series: [
-                        { name: "Hospitalisés", data: hospitalized },
-                        { name: "Décès", data: deaths },
-                        { name: "Guéris", data: recovered },
-                        { name: "Transférés", data: transferred },
-                        { name: "SCAM", data: scam },
-                        { name: "Évadés", data: evaded }
-                    ],
-                    chart: {
-                        type: "bar",
-                        height: 400
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: "50%"
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: periods
-                    },
-                    colors: ["#00E396", "#FF4560", "#008FFB", "#775DD0", "#FEB019", "#FF66B2"],
-                    title: {
-                        text: "Statistiques des Hospitalisations par Période"
-                    }
-                };
-
-                var chart = new ApexCharts(document.querySelector("#hospitalization_chart"), options);
-                chart.render();
-            });
-    });
-</script>
-
-    <script>
-        new Chart(document.getElementById('consultationsByServiceChart'), {
-            type: 'bar',
-            data: {
-                labels: [{% for service in consultation_by_service %}'{{ service.services__nom }}',{% endfor %}],
-                datasets: [{
-                    label: 'Nombre de Consultations',
-                    data: [{% for service in consultation_by_service %}{{ service.count }}, {% endfor %}],
-                    backgroundColor: '#36b9cc'
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+        const options = {
+          series: [
+            { name: "Hospitalisés", data: hospitalized },
+            { name: "Décès", data: deaths },
+            { name: "Guéris", data: recovered },
+            { name: "Transférés", data: transferred },
+            { name: "SCAM", data: scam },
+            { name: "Évadés", data: evaded }
+          ],
+          chart: {
+            type: "bar",
+            height: 380,
+            toolbar: { show: true },
+            zoom: { enabled: false }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: "55%",
+              borderRadius: 6,
+              dataLabels: { position: "top" }
             }
-        });
-    </script>
+          },
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            show: true,
+            width: 2,
+            colors: ["transparent"]
+          },
+          xaxis: {
+            categories: periods
+          },
+          yaxis: {
+            title: { text: "Nombre de patients" }
+          },
+          fill: {
+            opacity: 1
+          },
+          colors: ["#22c55e", "#ef4444", "#3b82f6", "#7c3aed", "#f59e0b", "#ec4899"],
+          legend: {
+            position: "top",
+            horizontalAlign: "center"
+          },
+          tooltip: {
+            y: {
+              formatter: function (val) {
+                return val + " patients";
+              }
+            }
+          }
+        };
 
-    <script>
-        new Chart(document.getElementById('hospitalizationReasonChart'), {
-            type: 'bar',
-            data: {
-                labels: [{% for reason in hospitalizations_by_reason %}'{{ reason.reason_for_admission }}',{% endfor %}],
-                datasets: [{
-                    label: 'Raisons d\'Admission',
-                    data: [{% for reason in hospitalizations_by_reason %}{{ reason.count }}, {% endfor %}],
-                    backgroundColor: '#f6c23e'
-                    }]
+        const chart = new ApexCharts(document.querySelector("#hospitalization_chart"), options);
+        chart.render();
+      })
+      .catch(error => {
+        console.error("Erreur lors du chargement des données d'hospitalisation:", error);
+        document.querySelector("#hospitalization_chart").innerHTML =
+          '<div class="text-center text-muted py-5">Erreur de chargement des données</div>';
+      });
+
+    // Graphique des consultations par service
+    const consultationsCtx = document.getElementById('consultationsByServiceChart');
+    if (consultationsCtx) {
+      new Chart(consultationsCtx, {
+        type: 'bar',
+        data: {
+          labels: [{% for service in consultation_by_service %}'{{ service.services__nom|default:"Inconnu" }}',{% endfor %}],
+          datasets: [{
+            label: 'Consultations',
+            data: [{% for service in consultation_by_service %}{{ service.count|default:0 }}, {% endfor %}],
+            backgroundColor: '#60a5fa',
+            borderRadius: 8
+          }]
         },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
-
-    <script>
-        new Chart(document.getElementById('appointmentStatusChart'), {
-            type: 'doughnut',
-            data: {
-                labels: [{% for status in appointment_status_counts %}'{{ status.status }}',{% endfor %}],
-                datasets: [{
-                    data: [{% for status in appointment_status_counts %}{{ status.count }}, {% endfor %}],
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']
-                }]
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { precision: 0 }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                }
+            x: {
+              grid: { display: false }
             }
-        });
-    </script>
+          }
+        }
+      });
+    }
 
-    <script>
-        new Chart(document.getElementById('patientStatusChart'), {
-            type: 'pie',
-            data: {
-                labels: [{% for status in patient_status_counts %}'{{ status.status }}',{% endfor %}],
-                datasets: [{
-                    data: [{% for status in patient_status_counts %}{{ status.count }}, {% endfor %}],
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']
-                }]
+    // Graphique des raisons d'hospitalisation
+    const hospitalizationReasonCtx = document.getElementById('hospitalizationReasonChart');
+    if (hospitalizationReasonCtx) {
+      new Chart(hospitalizationReasonCtx, {
+        type: 'bar',
+        data: {
+          labels: [{% for reason in hospitalizations_by_reason %}'{{ reason.reason_for_admission|default:"Inconnue" }}',{% endfor %}],
+          datasets: [{
+            label: "Admissions",
+            data: [{% for reason in hospitalizations_by_reason %}{{ reason.count|default:0 }}, {% endfor %}],
+            backgroundColor: '#fbbf24',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { precision: 0 }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                }
+            x: {
+              grid: { display: false }
             }
-        });
-    </script>
+          }
+        }
+      });
+    }
 
-    <script>
-        new Chart(document.getElementById('monthlyTrendsChart'), {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-                datasets: [
-                    {
-                        label: 'Consultations',
-                        data: {{ consultation_counts|safe }},
-                        borderColor: '#4e73df',
-                        fill: false
-                    },
-                    {
-                        label: 'Rendez-vous',
-                        data: {{ appointment_counts|safe }},
-                        borderColor: '#1cc88a',
-                        fill: false
-                    }
-                ]
+    // Graphique des statuts de rendez-vous
+    const appointmentStatusCtx = document.getElementById('appointmentStatusChart');
+    if (appointmentStatusCtx) {
+      new Chart(appointmentStatusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: [{% for status in appointment_status_counts %}'{{ status.status|default:"Inconnu" }}',{% endfor %}],
+          datasets: [{
+            data: [{% for status in appointment_status_counts %}{{ status.count|default:0 }}, {% endfor %}],
+            backgroundColor: ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#ef4444']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' }
+          }
+        }
+      });
+    }
+
+    // Graphique des statuts des patients
+    const patientStatusCtx = document.getElementById('patientStatusChart');
+    if (patientStatusCtx) {
+      new Chart(patientStatusCtx, {
+        type: 'pie',
+        data: {
+          labels: [{% for status in patient_status_counts %}'{{ status.status|default:"Inconnu" }}',{% endfor %}],
+          datasets: [{
+            data: [{% for status in patient_status_counts %}{{ status.count|default:0 }}, {% endfor %}],
+            backgroundColor: ['#4f46e5', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' }
+          }
+        }
+      });
+    }
+
+    // Graphique des tendances mensuelles
+    const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart');
+    if (monthlyTrendsCtx) {
+      new Chart(monthlyTrendsCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'],
+          datasets: [
+            {
+              label: 'Consultations',
+              data: {{ consultation_counts|default:"[]"|safe }},
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.1)',
+              tension: 0.4,
+              fill: true
             },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                }
+            {
+              label: 'Rendez-vous',
+              data: {{ appointment_counts|default:"[]"|safe }},
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              tension: 0.4,
+              fill: true
             }
-        });
-    </script>
-
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}
+
+{#{% extends 'layout/base.html' %}#}
+{#{% load static %}#}
+{##}
+{##}
+{#{% block content %}#}
+{##}
+{#     <!-- content @s -->#}
+{##}
+{#<div class="nk-content nk-content-fluid">#}
+{#    <div class="container-xl wide-lg">#}
+{#        <div class="nk-content-body">#}
+{##}
+{#            <!-- Page Header -->#}
+{#            <div class="nk-block-head nk-block-head-lg text-center">#}
+{#                <h3 class="nk-block-title page-title">SMIT Dashboard</h3>#}
+{#                <p class="nk-block-des text-soft">Bienvenue sur le tableau de bord KENEYA.</p>#}
+{#            </div>#}
+{##}
+{#            <div class="row g-gs">#}
+{#                <!-- Monthly Trends Section -->#}
+{#                <div class="col-lg-8">#}
+{#                    <div class="card card-bordered h-100">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">Tendances Mensuelles</h4>#}
+{#                            <canvas id="monthlyTrendsChart"></canvas>#}
+{#                            <p class="sub-text mt-2">Consultations et Rendez-vous par Mois</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col-lg-4">#}
+{##}
+{#                        <div class="card card-bordered h-100">#}
+{#                        <div class="card-header">#}
+{#                            <ul class="d-flex flex-row justify-content-between align-items-center gap-3 list-unstyled">#}
+{#    <li class="d-flex flex-column text-center">#}
+{#        <span>Total Patients</span>#}
+{#        <span class="text-primary">{{ total_patients }}</span>#}
+{#    </li>#}
+{#    <li class=" d-flex flex-column text-center">#}
+{#        <span>Hommes</span>#}
+{#        <span class="text-success">{{ total_patients_homme }}</span>#}
+{#    </li>#}
+{#    <li class="d-flex flex-column text-center">#}
+{#        <span>Femmes</span>#}
+{#        <span class="text-danger">{{ total_patients_femme }}</span>#}
+{#    </li>#}
+{#</ul></div>#}
+{#    <div class="card-inner">#}
+{#        <h4 class="nk-block-title">Répartition des Patients par Tranche d'Âge et Sexe</h4>#}
+{##}
+{#        <table class="table table-bordered">#}
+{#            <thead>#}
+{#                <tr>#}
+{#                    <th>âge</th>#}
+{#                    <th>Hommes</th>#}
+{#                    <th>Femmes</th>#}
+{#                </tr>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#                {% for age_group, data in patient_age_distribution.items %}#}
+{#                <tr>#}
+{#                    <td>{{ age_group }}</td>#}
+{#                    <td>{{ data.Hommes }}</td>#}
+{#                    <td>{{ data.Femmes }}</td>#}
+{#                </tr>#}
+{#                {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
+{#    </div>#}
+{#</div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#        <div class="row g-gs mt-4">#}
+{#                <div class="col-lg-4">#}
+{#                    <div class="card card-bordered text-center bg-primary-dim">#}
+{#                        <div class="card-inner">#}
+{#                            <h3 class="text-info">{{ total_scheduled_appointments }}</h3>#}
+{#                            <p class="sub-text">Rendez-vous Planifiés</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                 <div class="col-lg-4">#}
+{#                    <div class="card card-bordered text-center bg-primary-dim">#}
+{#                        <div class="card-inner">#}
+{#                            <h3 class="text-primary">{{ average_age|floatformat:0|default:"-" }} ans</h3>#}
+{#                            <p class="sub-text">Âge Moyen</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                  <div class="col-lg-4">#}
+{#                    <div class="card card-bordered text-center bg-primary-dim">#}
+{#                        <div class="card-inner">#}
+{#                            <h3 class="text-warning">{{ current_hospitalizations }}</h3>#}
+{#                            <p class="sub-text">Hospitalisations en cours</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{##}
+{#    <div class="row g-gs mt-4">#}
+{#         <div class="col-lg-12">#}
+{#             <div class="card card-bordered h-100">#}
+{#                 <div class="card-header"> <h4 class="nk-block-title">Statistiques des Hospitalisations</h4></div>#}
+{#                 <div class="card-inner">#}
+{#                         <div id="hospitalization_chart"></div>#}
+{##}
+{##}
+{##}
+{#                 </div>#}
+{#             </div>#}
+{#         </div>#}
+{##}
+{##}
+{#    </div>#}
+{#            <div class="row g-gs mt-4">#}
+{#                <div class="col-lg-6">#}
+{#                    <div class="card card-bordered">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">Répartition par Statut</h4>#}
+{#                            <canvas id="patientStatusChart"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                 <div class="col-lg-6">#}
+{#                    <div class="card card-bordered">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">État des Rendez-vous</h4>#}
+{#                            <canvas id="appointmentStatusChart"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#            </div>#}
+{##}
+{#            <div class="row g-gs mt-4">#}
+{#                <div class="col-lg-4">#}
+{#                    <div class="card card-bordered">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">Consultations par Service</h4>#}
+{#                            <canvas id="consultationsByServiceChart"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{##}
+{#             <div class="col-lg-4">#}
+{#                    <div class="card card-bordered">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">Raisons des Hospitalisations</h4>#}
+{#                            <canvas id="hospitalizationReasonChart"></canvas>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                   <div class="col-lg-4">#}
+{#                    <div class="card card-bordered">#}
+{#                        <div class="card-inner">#}
+{#                            <h4 class="nk-block-title">Top Services Utilisés</h4>#}
+{#                            <ul class="list-group">#}
+{#                                {% for service in top_services %}#}
+{#                                <li class="list-group-item d-flex justify-content-between">#}
+{#                                    <span>{{ service.nom }}</span>#}
+{#                                    <span class="text-muted">{{ service.total_use }} utilisations</span>#}
+{#                                </li>#}
+{#                                {% endfor %}#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{##}
+{#            </div>#}
+{##}
+{##}
+{##}
+{#            <div class="row g-gs mt-4">#}
+{##}
+{##}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#                <!-- content @e -->#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#    <script>#}
+{#    document.addEventListener("DOMContentLoaded", function () {#}
+{#        fetch("{% url 'hospitalization_chart_data' %}")  // Récupération des données JSON depuis Django#}
+{#            .then(response => response.json())#}
+{#            .then(data => {#}
+{#                let periods = data.map(item => item.periode);#}
+{#                let hospitalized = data.map(item => item.total_hospitalized);#}
+{#                let deaths = data.map(item => item.total_deaths);#}
+{#                let recovered = data.map(item => item.total_recovered);#}
+{#                let transferred = data.map(item => item.total_transferred);#}
+{#                let scam = data.map(item => item.total_scam);#}
+{#                let evaded = data.map(item => item.total_evade);#}
+{##}
+{#                var options = {#}
+{#                    series: [#}
+{#                        { name: "Hospitalisés", data: hospitalized },#}
+{#                        { name: "Décès", data: deaths },#}
+{#                        { name: "Guéris", data: recovered },#}
+{#                        { name: "Transférés", data: transferred },#}
+{#                        { name: "SCAM", data: scam },#}
+{#                        { name: "Évadés", data: evaded }#}
+{#                    ],#}
+{#                    chart: {#}
+{#                        type: "bar",#}
+{#                        height: 400#}
+{#                    },#}
+{#                    plotOptions: {#}
+{#                        bar: {#}
+{#                            horizontal: false,#}
+{#                            columnWidth: "50%"#}
+{#                        }#}
+{#                    },#}
+{#                    dataLabels: {#}
+{#                        enabled: false#}
+{#                    },#}
+{#                    xaxis: {#}
+{#                        categories: periods#}
+{#                    },#}
+{#                    colors: ["#00E396", "#FF4560", "#008FFB", "#775DD0", "#FEB019", "#FF66B2"],#}
+{#                    title: {#}
+{#                        text: "Statistiques des Hospitalisations par Période"#}
+{#                    }#}
+{#                };#}
+{##}
+{#                var chart = new ApexCharts(document.querySelector("#hospitalization_chart"), options);#}
+{#                chart.render();#}
+{#            });#}
+{#    });#}
+{#</script>#}
+{##}
+{#    <script>#}
+{#        new Chart(document.getElementById('consultationsByServiceChart'), {#}
+{#            type: 'bar',#}
+{#            data: {#}
+{#                labels: [{% for service in consultation_by_service %}'{{ service.services__nom }}',{% endfor %}],#}
+{#                datasets: [{#}
+{#                    label: 'Nombre de Consultations',#}
+{#                    data: [{% for service in consultation_by_service %}{{ service.count }}, {% endfor %}],#}
+{#                    backgroundColor: '#36b9cc'#}
+{#                }]#}
+{#            },#}
+{#            options: {#}
+{#                scales: {#}
+{#                    y: {#}
+{#                        beginAtZero: true#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{##}
+{#    <script>#}
+{#        new Chart(document.getElementById('hospitalizationReasonChart'), {#}
+{#            type: 'bar',#}
+{#            data: {#}
+{#                labels: [{% for reason in hospitalizations_by_reason %}'{{ reason.reason_for_admission }}',{% endfor %}],#}
+{#                datasets: [{#}
+{#                    label: 'Raisons d\'Admission',#}
+{#                    data: [{% for reason in hospitalizations_by_reason %}{{ reason.count }}, {% endfor %}],#}
+{#                    backgroundColor: '#f6c23e'#}
+{#                    }]#}
+{#        },#}
+{#            options: {#}
+{#                scales: {#}
+{#                    y: {#}
+{#                        beginAtZero: true#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{##}
+{#    <script>#}
+{#        new Chart(document.getElementById('appointmentStatusChart'), {#}
+{#            type: 'doughnut',#}
+{#            data: {#}
+{#                labels: [{% for status in appointment_status_counts %}'{{ status.status }}',{% endfor %}],#}
+{#                datasets: [{#}
+{#                    data: [{% for status in appointment_status_counts %}{{ status.count }}, {% endfor %}],#}
+{#                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']#}
+{#                }]#}
+{#            },#}
+{#            options: {#}
+{#                responsive: true,#}
+{#                plugins: {#}
+{#                    legend: {#}
+{#                        position: 'top'#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{##}
+{#    <script>#}
+{#        new Chart(document.getElementById('patientStatusChart'), {#}
+{#            type: 'pie',#}
+{#            data: {#}
+{#                labels: [{% for status in patient_status_counts %}'{{ status.status }}',{% endfor %}],#}
+{#                datasets: [{#}
+{#                    data: [{% for status in patient_status_counts %}{{ status.count }}, {% endfor %}],#}
+{#                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']#}
+{#                }]#}
+{#            },#}
+{#            options: {#}
+{#                responsive: true,#}
+{#                plugins: {#}
+{#                    legend: {#}
+{#                        position: 'top'#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{##}
+{#    <script>#}
+{#        new Chart(document.getElementById('monthlyTrendsChart'), {#}
+{#            type: 'line',#}
+{#            data: {#}
+{#                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],#}
+{#                datasets: [#}
+{#                    {#}
+{#                        label: 'Consultations',#}
+{#                        data: {{ consultation_counts|safe }},#}
+{#                        borderColor: '#4e73df',#}
+{#                        fill: false#}
+{#                    },#}
+{#                    {#}
+{#                        label: 'Rendez-vous',#}
+{#                        data: {{ appointment_counts|safe }},#}
+{#                        borderColor: '#1cc88a',#}
+{#                        fill: false#}
+{#                    }#}
+{#                ]#}
+{#            },#}
+{#            options: {#}
+{#                scales: {#}
+{#                    yAxes: [{#}
+{#                        ticks: {#}
+{#                            beginAtZero: true#}
+{#                        }#}
+{#                    }]#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+{##}
+{#{% endblock %}#}

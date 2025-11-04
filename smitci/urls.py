@@ -24,7 +24,7 @@ from django.urls import path, include
 from core.views import RoleListView, RoleCreateView, RoleDeleteView, AssignRoleView, EmployeeListView, \
     EmployeeCreateView, EmployeeDeleteView, EmployeeUpdateView, send_sms_view, employee_profile, AdminPasswordResetView
 from hospitalisation.views import HospitalizationUrgenceCreateView, SuivieSoinsListView, SuivieSoinsDetailView, \
-    search_medications, add_prescription
+    search_medications, add_prescription, medication_detail
 from smit import views
 from smit.views import HomePageView, PatientListView, PatientCreateView, RendezVousListView, RendezVousDetailView, \
     PatientDetailView, SalleAttenteListView, ServiceContentDetailView, consultation_send_create, \
@@ -65,8 +65,9 @@ urlpatterns = [
                        name='hospitalization_chart_data'),
                   path('', include('django_prometheus.urls')),
 
-                  path('api/medicaments/', search_medications, name='search_medications'),
-                  path('api/prescription/add/', add_prescription, name='add_prescription'),
+                  path('apis/medicaments/', search_medications, name='search_medications'),
+                  path('apis/medicaments/<int:pk>/', medication_detail, name='medicament_detail'),
+                  path('apis/prescription/add/', add_prescription, name='add_prescription'),
 
                   path('user_role/', RoleListView.as_view(), name='user_role'),
                   path("roles/create/", RoleCreateView.as_view(), name="role_create"),

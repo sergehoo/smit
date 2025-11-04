@@ -4,351 +4,577 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-                    <div class="container-xl wide-lg">
-                        <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between">
-                                    <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title"> Liste des Rendez-vous </h3>
-                                        <div class="nk-block-des text-soft">
-                                            <p><span class="badge badge-outline-danger">{{ rdvpending }}</span> en attente sur <span class="badge badge-outline-dark"> {{ rdvnumber }}</span>   Rendez-vous</p>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête avec statistiques -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="nk-block-between">
+                    <div class="nk-block-head-content">
+                        <h3 class="nk-block-title page-title">Liste des Rendez-vous</h3>
+                        <div class="nk-block-des text-soft">
+                            <div class="d-flex align-items-center flex-wrap gx-3">
+                                <div class="d-flex align-items-center me-3">
+                                    <span class="badge badge-dim bg-outline-danger">{{ rdvpending }}</span>
+                                    <span class="ms-2">en attente</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-dim bg-outline-dark">{{ rdvnumber }}</span>
+                                    <span class="ms-2">rendez-vous au total</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nk-block-head-content">
+                        <div class="toggle-wrap nk-block-tools-toggle">
+                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu">
+                                <em class="icon ni ni-menu-alt-r"></em>
+                            </a>
+                            <div class="toggle-expand-content" data-content="pageMenu">
+                                <ul class="nk-block-tools g-3">
+                                    <li>
+                                        <div class="dropdown">
+                                            <a href="#" class="btn btn-white btn-outline-light dropdown-toggle" data-toggle="dropdown">
+                                                <em class="icon ni ni-download-cloud me-1"></em>
+                                                <span>Export</span>
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-xls me-1"></em>Excel</a>
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-pdf me-1"></em>PDF</a>
+                                                <a class="dropdown-item" href="#"><em class="icon ni ni-file-text me-1"></em>CSV</a>
+                                            </div>
                                         </div>
-                                    </div><!-- .nk-block-head-content -->
-                                    <div class="nk-block-head-content">
-                                        <div class="toggle-wrap nk-block-tools-toggle">
-                                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em class="icon ni ni-menu-alt-r"></em></a>
-                                            <div class="toggle-expand-content" data-content="pageMenu">
-                                                <ul class="nk-block-tools g-3">
-                                                    <li><a href="#" class="btn btn-white btn-outline-light"><em class="icon ni ni-download-cloud"></em><span>Export</span></a></li>
-                                                    <li class="nk-block-tools-opt">
-                                                        <div class="drodown">
-                                                            <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-right">
-                                                                <ul class="link-list-opt no-bdr">
-
-                                                                    <li><a href="{% url 'appointment_create' %}"><span>Rendez-vous</span></a></li>
-                                                                    <li><a href="{% url 'add_patient' %}"><span>Nouveau Patient</span></a></li>
-
-                                                                </ul>
-                                                            </div>
-                                                        </div>
+                                    </li>
+                                    <li class="nk-block-tools-opt">
+                                        <div class="drodown">
+                                            <a href="#" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown">
+                                                <em class="icon ni ni-plus"></em>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <ul class="link-list-opt no-bdr">
+                                                    <li>
+                                                        <a href="{% url 'appointment_create' %}">
+                                                            <em class="icon ni ni-calendar-plus me-1"></em>
+                                                            <span>Nouveau Rendez-vous</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="{% url 'add_patient' %}">
+                                                            <em class="icon ni ni-user-add me-1"></em>
+                                                            <span>Nouveau Patient</span>
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
-                                        </div><!-- .toggle-wrap -->
-                                    </div><!-- .nk-block-head-content -->
-                                </div><!-- .nk-block-between -->
-                            </div><!-- .nk-block-head -->
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <div class="nk-block">
-                                <div class="card card-bordered card-stretch">
-                                    <div class="card-inner-group">
+            <!-- Filtres rapides -->
+            <div class="nk-block">
+                <div class="card card-bordered">
+                    <div class="card-inner">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Filtrer par statut</label>
+                                    <select class="form-select" id="status-filter">
+                                        <option value="all">Tous les statuts</option>
+                                        <option value="Scheduled">En attente</option>
+                                        <option value="Completed">Reçus</option>
+                                        <option value="Cancelled">Annulés</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Filtrer par date</label>
+                                    <select class="form-select" id="date-filter">
+                                        <option value="all">Toutes les dates</option>
+                                        <option value="today">Aujourd'hui</option>
+                                        <option value="tomorrow">Demain</option>
+                                        <option value="week">Cette semaine</option>
+                                        <option value="past">Passés</option>
+                                        <option value="future">À venir</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Filtrer par service</label>
+                                    <select class="form-select" id="service-filter">
+                                        <option value="all">Tous les services</option>
+                                        {% for service in services %}
+                                        <option value="{{ service.id }}">{{ service.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                        <div class="card-inner position-relative card-tools-toggle">
-                                            <div class="card-title-group">
-                                                <div class="card-tools">
-                                                    <div class="form-inline flex-nowrap gx-3">
-                                                        <div class="form-wrap w-150px">
-                                                            <select class="form-select form-select-sm" data-search="off" data-placeholder="Filtrer">
+            <!-- Liste des rendez-vous -->
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch">
+                    <div class="card-inner-group">
+                        <!-- Barre d'outils -->
+                        <div class="card-inner position-relative card-tools-toggle py-3">
+                            <div class="card-title-group">
+                                <div class="card-tools">
+                                    <div class="form-inline flex-nowrap gx-3">
+                                        <div class="form-control-wrap">
+                                            <div class="form-icon form-icon-left">
+                                                <em class="icon ni ni-search"></em>
+                                            </div>
+                                            <input type="text" class="form-control" id="search-appointments" placeholder="Rechercher un patient...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-tools ms-3">
+                                    <div class="dropdown">
+                                        <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
+                                            <em class="icon ni ni-setting"></em>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+                                            <ul class="link-check">
+                                                <li><span>Colonnes affichées</span></li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-code">
+                                                        <label class="custom-control-label" for="col-code">Code Patient</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-patient">
+                                                        <label class="custom-control-label" for="col-patient">Patient</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-contact">
+                                                        <label class="custom-control-label" for="col-contact">Contact</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-date">
+                                                        <label class="custom-control-label" for="col-date">Date & Heure</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-service">
+                                                        <label class="custom-control-label" for="col-service">Service</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-doctor">
+                                                        <label class="custom-control-label" for="col-doctor">Médecin</label>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="custom-control custom-control-sm custom-checkbox">
+                                                        <input type="checkbox" class="custom-control-input" checked id="col-status">
+                                                        <label class="custom-control-label" for="col-status">Statut</label>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                                                <option value="group">EN ATTENTE</option>
-                                                                <option value="email">ANNULER</option>
-                                                                <option value="group">RECU</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="btn-wrap">
-                                                            <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light ">Filtrer</button></span>
-                                                            <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
-                                                        </div>
-                                                    </div><!-- .form-inline -->
-                                                </div><!-- .card-tools -->
-                                                <div class="card-tools mr-n1">
-                                                    <ul class="btn-toolbar gx-1">
-                                                        <li>
-                                                            <a href="#" class="btn btn-icon search-toggle toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
-                                                        </li><!-- li -->
-                                                        <li class="btn-toolbar-sep"></li><!-- li -->
-                                                        <li>
-                                                            <div class="toggle-wrap">
-                                                                <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
-                                                                <div class="toggle-content" data-content="cardTools">
-                                                                    <ul class="btn-toolbar gx-1">
-                                                                        <li class="toggle-close">
-                                                                            <a href="#" class="btn btn-icon btn-trigger toggle" data-target="cardTools"><em class="icon ni ni-arrow-left"></em></a>
-                                                                        </li><!-- li -->
-                                                                        <li>
-                                                                            <div class="dropdown">
-                                                                                <a href="#" class="btn btn-trigger btn-icon dropdown-toggle" data-toggle="dropdown">
-                                                                                    <div class="dot dot-primary"></div>
-                                                                                    <em class="icon ni ni-filter-alt"></em>
-                                                                                </a>
-                                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
-                                                                                    <div class="dropdown-head">
-                                                                                        <span class="sub-title dropdown-title">Filter</span>
-                                                                                        <div class="dropdown">
-                                                                                            <a href="#" class="btn btn-sm btn-icon">
-                                                                                                <em class="icon ni ni-more-h"></em>
-                                                                                            </a>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-body dropdown-body-rg">
-                                                                                        <div class="row gx-6 gy-3">
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasBalance">
-                                                                                                    <label class="custom-control-label" for="hasBalance">Service</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                                    <input type="checkbox" class="custom-control-input" id="hasKYC">
-                                                                                                    <label class="custom-control-label" for="hasKYC"> KYC Verified</label>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Service</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">1</option>
-                                                                                                        <option value="investor">2</option>
-                                                                                                        <option value="seller">3</option>
-                                                                                                        <option value="buyer">4</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label class="overline-title overline-title-alt">Date</label>
-                                                                                                    <select class="form-select form-select-sm">
-                                                                                                        <option value="any">Passé</option>
-                                                                                                        <option value="active">Aujourdhui</option>
-                                                                                                        <option value="pending">a venir</option>
-                                                                                                     
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-12">
-                                                                                                <div class="form-group">
-                                                                                                    <button type="button" class="btn btn-secondary">Filter</button>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                    <div class="dropdown-foot between">
-                                                                                        <a class="clickable" href="#">Reset Filter</a>
-                                                                                        <a href="#">Save Filter</a>
-                                                                                    </div>
-                                                                                </div><!-- .filter-wg -->
-                                                                            </div><!-- .dropdown -->
-                                                                        </li><!-- li -->
+                        <!-- Tableau des rendez-vous -->
+                        <div class="card-inner p-0">
+                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                <!-- En-tête du tableau -->
+                                <div class="nk-tb-item nk-tb-head">
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <span class="sub-text">Code Patient</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-lg col-patient">
+                                        <span class="sub-text">Patient</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-contact">
+                                        <span class="sub-text">Contact</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-lg col-date">
+                                        <span class="sub-text">Date & Heure</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-service">
+                                        <span class="sub-text">Service</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-md col-doctor">
+                                        <span class="sub-text">Médecin</span>
+                                    </div>
+                                    <div class="nk-tb-col tb-col-sm col-status">
+                                        <span class="sub-text">Statut</span>
+                                    </div>
+                                    <div class="nk-tb-col nk-tb-col-tools text-right">
+                                        <span class="sub-text">Actions</span>
+                                    </div>
+                                </div>
 
-                                                                    </ul><!-- .btn-toolbar -->
-                                                                </div><!-- .toggle-content -->
-                                                            </div><!-- .toggle-wrap -->
-                                                        </li><!-- li -->
-                                                    </ul><!-- .btn-toolbar -->
-                                                </div><!-- .card-tools -->
-                                            </div><!-- .card-title-group -->
-                                            <div class="card-search search-wrap" data-search="search">
-                                                <div class="card-body">
-                                                    <div class="search-content">
-                                                        <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
-                                                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Recherche par nom">
-                                                        <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+                                <!-- Corps du tableau -->
+                                {% for appointment in rendezvous %}
+                                <div class="nk-tb-item appointment-row" 
+                                     data-status="{{ appointment.status }}"
+                                     data-date="{{ appointment.date|date:'Y-m-d' }}"
+                                     data-service="{{ appointment.service.id }}"
+                                     data-search="{{ appointment.patient.code_patient|lower }} {{ appointment.patient.nom|lower }} {{ appointment.patient.prenoms|lower }}">
+                                    
+                                    <div class="nk-tb-col tb-col-sm col-code">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-id-card me-1 text-primary"></em>
+                                            <span class="fw-medium">{{ appointment.patient.code_patient }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-lg col-patient">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar xs bg-primary-dim me-2">
+                                                {% if appointment.patient.avatar %}
+                                                <img src="{{ appointment.patient.avatar.url }}" alt="{{ appointment.patient.nom }}">
+                                                {% else %}
+                                                <span>{{ appointment.patient.nom|first|upper }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="masked-name" id="masked-name-{{ appointment.patient.id }}-{{ forloop.counter }}">************</span>
+                                                    <span class="full-name d-none" id="full-name-{{ appointment.patient.id }}-{{ forloop.counter }}"></span>
+                                                    {% if perms.core.view_patient_name %}
+                                                    <button class="btn btn-xs btn-outline-secondary ms-2 toggle-name-btn"
+                                                            data-patient-id="{{ appointment.patient.id }}"
+                                                            data-counter="{{ forloop.counter }}">
+                                                        <em class="icon ni ni-eye"></em>
+                                                    </button>
+                                                    {% else %}
+                                                    <span class="btn btn-xs btn-outline-light ms-2" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+                                                        <em class="icon ni ni-lock"></em>
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-soft">{{ appointment.patient.calculate_age }} ans • {{ appointment.patient.genre }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-sm col-contact">
+                                        <div class="d-flex align-items-center">
+                                            <em class="icon ni ni-call me-1 text-primary"></em>
+                                            <span>{{ appointment.patient.contact }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-lg col-date">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-medium">
+                                                <em class="icon ni ni-calendar me-1 text-primary"></em>
+                                                {{ appointment.date|naturalday|capfirst }}
+                                            </span>
+                                            <small class="text-soft">
+                                                <em class="icon ni ni-clock me-1"></em>
+                                                {{ appointment.time|time:"H:i" }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-md col-service">
+                                        <span class="badge badge-dim bg-outline-primary">
+                                            <em class="icon ni ni-briefcase me-1"></em>
+                                            {{ appointment.service }}
+                                        </span>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-md col-doctor">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar xs bg-light me-2">
+                                                <span class="text-primary">{{ appointment.doctor.user.get_full_name|first|upper }}</span>
+                                            </div>
+                                            <span class="fw-medium">{{ appointment.doctor.user.get_full_name }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="nk-tb-col tb-col-sm col-status">
+                                        {% if appointment.status == 'Scheduled' %}
+                                        <span class="badge badge-dim bg-warning">En attente</span>
+                                        {% elif appointment.status == 'Completed' %}
+                                        <span class="badge badge-dim bg-success">Reçu</span>
+                                        {% elif appointment.status == 'Cancelled' %}
+                                        <span class="badge badge-dim bg-danger">Annulé</span>
+                                        {% else %}
+                                        <span class="badge badge-dim bg-secondary">{{ appointment.status }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="nk-tb-col nk-tb-col-tools">
+                                        <ul class="nk-tb-actions gx-1">
+                                            <li>
+                                                <div class="drodown">
+                                                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown">
+                                                        <em class="icon ni ni-more-h"></em>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <ul class="link-list-opt no-bdr">
+                                                            <li>
+                                                                <a href="{% url 'appointment_detail' appointment.pk %}">
+                                                                    <em class="icon ni ni-eye me-1"></em>
+                                                                    <span>Détails</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="{% url 'appointment_update' appointment.pk %}">
+                                                                    <em class="icon ni ni-edit me-1"></em>
+                                                                    <span>Modifier</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="{% url 'detail_patient' appointment.patient.pk %}">
+                                                                    <em class="icon ni ni-user me-1"></em>
+                                                                    <span>Dossier Patient</span>
+                                                                </a>
+                                                            </li>
+                                                            <li class="divider"></li>
+                                                            <li>
+                                                                <a href="{% url 'appointment_delete' appointment.pk %}" class="text-danger">
+                                                                    <em class="icon ni ni-trash me-1"></em>
+                                                                    <span>Supprimer</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
-                                            </div><!-- .card-search -->
-                                        </div><!-- .card-inner -->
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="nk-tb-item">
+                                    <div class="nk-tb-col text-center py-5">
+                                        <div class="nk-block-content">
+                                            <em class="icon ni ni-calendar-check icon-3x text-light mb-3"></em>
+                                            <h5>Aucun rendez-vous trouvé</h5>
+                                            <p class="text-soft">Aucun rendez-vous ne correspond à vos critères de recherche.</p>
+                                            <a href="{% url 'appointment_create' %}" class="btn btn-primary">
+                                                <em class="icon ni ni-plus me-1"></em>
+                                                <span>Planifier un rendez-vous</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
 
+                        <!-- Pagination améliorée -->
+                        {% if rendezvous %}
+                        <div class="card-inner">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap g-3">
+                                <div class="fs-14 text-soft">
+                                    Affichage de <strong>{{ page_obj.start_index }}</strong> à <strong>{{ page_obj.end_index }}</strong> sur <strong>{{ page_obj.paginator.count }}</strong> rendez-vous
+                                </div>
+                                <ul class="pagination justify-content-center justify-content-md-start">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-left"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-left"></em>
+                                        </a>
+                                    </li>
+                                    {% endif %}
 
-                                        <div class="card-inner p-0">
-                                            <div class="nk-tb-list nk-tb-ulist is-compact">
-                                                <div class="nk-tb-item nk-tb-head">
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                        {% endif %}
+                                    {% endfor %}
 
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Code Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-lg"><span class="sub-text">Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Contact</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Date</span></div>
-{#                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Heure</span></div>#}
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Service</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Medecin</span></div>
-                                                    <div class="nk-tb-col"><span class="sub-text">Status</span></div>
-
-                                                    <div class="nk-tb-col nk-tb-col-tools text-right">
-                                                        <div class="dropdown">
-                                                            <a href="#" class="btn btn-xs btn-outline-light btn-icon dropdown-toggle" data-toggle="dropdown" data-offset="0,5"><em class="icon ni ni-plus"></em></a>
-                                                            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                <ul class="link-tidy sm no-bdr">
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="bl">
-                                                                            <label class="custom-control-label" for="bl">Balance</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" checked="" id="ph">
-                                                                            <label class="custom-control-label" for="ph">Phone</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="vri">
-                                                                            <label class="custom-control-label" for="vri">Verified</label>
-                                                                        </div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="custom-control custom-control-sm custom-checkbox">
-                                                                            <input type="checkbox" class="custom-control-input" id="st">
-                                                                            <label class="custom-control-label" for="st">Status</label>
-                                                                        </div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div><!-- .nk-tb-item -->
-                                                {% for patient in rendezvous %}
-<div class="nk-tb-item">
-   <div class="nk-tb-col tb-col-sm">
-        <span><i class="fa-solid fa-id-card-clip"></i> {{ patient.patient.code_patient }}</span>
-    </div>
-    <div class="nk-tb-col tb-col-lg">
-        <span>
-        <i class="fa-solid fa-user-alt"></i>
-        <span class="masked-name" id="masked-name-{{ patient.patient.id }}-{{ forloop.counter }}">************</span>
-        <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
-        {% if perms.core.view_patient_name %}
-        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
-                data-patient-id="{{ patient.patient.id }}"
-                data-counter="{{ forloop.counter }}">
-            <i class="fa-solid fa-eye"></i>
-        </button>
-        {% else %}
-        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
-            <i class="fa-solid fa-cancel"></i>
-        </span>
-        {% endif %}
-    </span>
-    </div>
-
-    <div class="nk-tb-col tb-col-sm">
-        <ul class="list-status">
-            <li>
-                <span><i class="fa-solid fa-phone"></i> {{ patient.patient.contact }}</span>
-            </li>
-        </ul>
-    </div>
-    <div class="nk-tb-col">
-        <div class="user-card">
-            <div class="user-name">
-                <span class="tb-lead"><i class="fa-solid fa-calendar-check"></i> {{ patient.date|naturalday }}</span> <span><i class="fa-solid fa-clock"></i> {{ patient.time|naturaltime }}</span>
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevron-right"></em>
+                                        </a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">
+                                            <em class="icon ni ni-chevrons-right"></em>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="nk-tb-col tb-col-sm">
-        <span><i class="fa-solid fa-virus"></i>{{ patient.service }}</span>
-    </div>
-    <div class="nk-tb-col tb-col-sm">
-        <span><i class="fa-solid fa-user-doctor"></i> {{ patient.doctor.user.get_full_name }}</span>
-    </div>
-
-    <div class="nk-tb-col">
-        {% if patient.status == 'Scheduled' %}
-        <span class="tb-status badge badge-dark">En attente</span>
-        {% elif patient.status == 'Completed' %}
-        <span class="tb-status badge badge-success">Reçu</span>
-        {% elif patient.status == 'Cancelled' %}
-        <span class="tb-status badge badge-danger">Annulé</span>
-        {% else %}
-        Annulé
-        {% endif %}
-    </div>
-    <div class="nk-tb-col nk-tb-col-tools">
-        <ul class="nk-tb-actions gx-2">
-            <li>
-                <div class="drodown">
-                    <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <ul class="link-list-opt no-bdr">
-                            <li><a href="{% url 'appointment_detail' patient.pk %}"><em class="icon ni ni-repeat"></em><span>Detail</span></a></li>
-                            <li><a href="{% url 'appointment_update' patient.pk %}"><em class="icon ni ni-shield-star"></em><span>Modifier</span></a></li>
-                            <li><a href="{% url 'appointment_delete' patient.pk %}"><em class="icon ni ni-shield-star"></em><span>Supprimer</span></a></li>
-                            <li class="divider"></li>
-                            <li><a href="{% url 'detail_patient' patient.patient.pk %}"><em class="icon ni ni-eye"></em><span>Voir Dossier</span></a></li>
-                        </ul>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </div>
 </div>
-{% endfor %}
 
+<!-- Scripts pour améliorer l'UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche en temps réel
+    const searchInput = document.getElementById('search-appointments');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const appointmentRows = document.querySelectorAll('.appointment-row');
+            
+            appointmentRows.forEach(row => {
+                const searchData = row.getAttribute('data-search');
+                if (searchData.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
 
+    // Filtres combinés
+    const statusFilter = document.getElementById('status-filter');
+    const dateFilter = document.getElementById('date-filter');
+    const serviceFilter = document.getElementById('service-filter');
+    
+    function applyFilters() {
+        const statusValue = statusFilter.value;
+        const dateValue = dateFilter.value;
+        const serviceValue = serviceFilter.value;
+        const today = new Date().toISOString().split('T')[0];
+        
+        document.querySelectorAll('.appointment-row').forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            const rowDate = row.getAttribute('data-date');
+            const rowService = row.getAttribute('data-service');
+            
+            let showRow = true;
+            
+            // Filtre par statut
+            if (statusValue !== 'all' && rowStatus !== statusValue) {
+                showRow = false;
+            }
+            
+            // Filtre par date
+            if (dateValue !== 'all') {
+                const appointmentDate = new Date(rowDate);
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                
+                switch(dateValue) {
+                    case 'today':
+                        if (rowDate !== today) showRow = false;
+                        break;
+                    case 'tomorrow':
+                        const tomorrow = new Date(todayObj);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        if (rowDate !== tomorrow.toISOString().split('T')[0]) showRow = false;
+                        break;
+                    case 'past':
+                        if (appointmentDate >= todayObj) showRow = false;
+                        break;
+                    case 'future':
+                        if (appointmentDate <= todayObj) showRow = false;
+                        break;
+                }
+            }
+            
+            // Filtre par service
+            if (serviceValue !== 'all' && rowService !== serviceValue) {
+                showRow = false;
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+    
+    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    if (dateFilter) dateFilter.addEventListener('change', applyFilters);
+    if (serviceFilter) serviceFilter.addEventListener('change', applyFilters);
 
+    // Gestion des colonnes affichées
+    const columnCheckboxes = document.querySelectorAll('input[id^="col-"]');
+    columnCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const columnClass = this.id.replace('col-', 'col-');
+            const columns = document.querySelectorAll('.' + columnClass);
+            
+            columns.forEach(col => {
+                col.style.display = this.checked ? '' : 'none';
+            });
+        });
+    });
 
-                                            </div><!-- .nk-tb-list -->
-                                        </div><!-- .card-inner -->
-                                         <div class="card-inner">
-                                            <ul class="pagination justify-content-center justify-content-md-start">
-                                                {% if page_obj.has_previous %}
-                                                    <li class="page-item"><a class="page-link" href="rendez-vous/?page={{ page_obj.previous_page_number }}">Prev</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                                {% endif %}
-
-                                                {% for num in page_obj.paginator.page_range %}
-                                                    {% if page_obj.number == num %}
-                                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                                        <li class="page-item"><a class="page-link" href="rendez-vous/?page={{ num }}">{{ num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
-
-                                                {% if page_obj.has_next %}
-                                                    <li class="page-item"><a class="page-link" href="rendez-vous/?page={{ page_obj.next_page_number }}">Next</a></li>
-                                                {% else %}
-                                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                                {% endif %}
-                                            </ul>
-                                        </div><!-- .card-inner -->
-                                    </div><!-- .card-inner-group -->
-                                </div><!-- .card -->
-                            </div>
-
-                            <!-- .nk-block -->
-                        </div>
-                    </div>
-    </div>
-    <script>
+    // Fonctionnalité d'affichage du nom du patient
     document.querySelectorAll('.toggle-name-btn').forEach(button => {
         button.addEventListener('click', function () {
-            const patientId = this.dataset.patientId; // ID du patient
-            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const patientId = this.dataset.patientId;
+            const counter = this.dataset.counter;
             const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
             const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
-            const icon = this.querySelector('i');
+            const icon = this.querySelector('em');
 
             if (maskedName.classList.contains('d-none')) {
                 // Revenir à l'affichage masqué
                 maskedName.classList.remove('d-none');
                 fullName.classList.add('d-none');
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.classList.remove('ni-eye-off');
+                icon.classList.add('ni-eye');
             } else if (!fullName.textContent) {
                 // Charger le nom complet via AJAX
                 fetch(`/api/get-patient-all-name/${patientId}/`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.full_name) {
-                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            fullName.textContent = data.full_name;
                             maskedName.classList.add('d-none');
                             fullName.classList.remove('d-none');
-                            icon.classList.remove('fa-eye');
-                            icon.classList.add('fa-eye-slash');
+                            icon.classList.remove('ni-eye');
+                            icon.classList.add('ni-eye-off');
                         } else {
                             alert('Erreur : Impossible de charger le nom.');
                         }
@@ -358,10 +584,101 @@
                 // Afficher le nom complet déjà chargé
                 maskedName.classList.add('d-none');
                 fullName.classList.remove('d-none');
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.classList.remove('ni-eye');
+                icon.classList.add('ni-eye-off');
             }
         });
     });
+});
 </script>
+
+<style>
+/* Améliorations CSS supplémentaires */
+.user-avatar.xs {
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.nk-tb-list .nk-tb-item:hover {
+    background-color: rgba(95, 99, 242, 0.03);
+    transition: background-color 0.2s ease;
+}
+
+.badge.badge-dim {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    border: 1px solid;
+}
+
+.appointment-row {
+    transition: all 0.3s ease;
+}
+
+.appointment-row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Animation pour les lignes du tableau */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nk-tb-item {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 991px) {
+    .nk-tb-col {
+        padding: 12px 8px;
+    }
+    
+    .card-tools .form-control-wrap {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 767px) {
+    .card-tools .form-control-wrap {
+        min-width: 100%;
+    }
+    
+    .nk-tb-item.nk-tb-head {
+        display: none;
+    }
+    
+    .nk-tb-item {
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        border-bottom: 1px solid #e5e9f2;
+    }
+    
+    .nk-tb-col {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border: none;
+    }
+    
+    .nk-tb-col::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: #526484;
+    }
+    
+    .nk-tb-col-tools {
+        justify-content: flex-end !important;
+        margin-top: 12px;
+    }
+}
+</style>
 {% endblock %}

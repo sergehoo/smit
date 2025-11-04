@@ -26,7 +26,7 @@ from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now, make_naive, is_aware
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -758,7 +758,7 @@ class HospitalizationUrgenceCreateView(CreateView):
             f"hospitalisé en urgence : {lit}, {chambre}, le {formatted_date}."
         )
         sms_message = optimize_sms_text(raw_message)  # garde ta logique (longueur, accents, etc.)
-        recipients = get_employees_to_notify()        # -> liste de numéros E.164 : +22507...
+        recipients = get_employees_to_notify()  # -> liste de numéros E.164 : +22507...
 
         sms_ok, wa_ok = False, False
         sms_err, wa_err = None, None
@@ -804,6 +804,7 @@ class HospitalizationUrgenceCreateView(CreateView):
             )
 
         return response
+
 
 # Constante PDF Export View
 @login_required
@@ -883,7 +884,6 @@ def export_indicateur_subjectif_pdf(request, hospitalisation_id):
     return pdf
 
 
-
 @login_required
 def update_hospitalisation_discharge(request, hospitalisation_id):
     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
@@ -910,6 +910,8 @@ def update_hospitalisation_discharge(request, hospitalisation_id):
         return redirect('hospitalisationdetails', pk=hospitalization.id)
 
     return redirect('hospitalisationdetails', pk=hospitalization.id)
+
+
 # def update_hospitalisation_discharge(request, hospitalisation_id):
 #     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
 #
@@ -1153,14 +1155,40 @@ logger = logging.getLogger(__name__)
 
 
 #noouveau code pour alpine
+@require_GET
 def search_medications(request):
     query = request.GET.get('q', '')
-    if query:
-        medications = Medicament.objects.filter(nom__icontains=query).values('id', 'nom', 'dosage_form', 'dosage',
-                                                                             'unitdosage')
+    if not query:
+        return JsonResponse([], safe=False)
+    medications = Medicament.objects.filter(nom__icontains=query).values(
+        'id', 'nom', 'dosage_form', 'dosage', 'unitdosage'
+    )[:20]
+    return JsonResponse(list(medications), safe=False)
 
-        return JsonResponse(list(medications), safe=False)
-    return JsonResponse([], safe=False)
+
+# def search_medications(request):
+#     query = request.GET.get('q', '')
+#     if query:
+#         medications = Medicament.objects.filter(nom__icontains=query).values('id', 'nom', 'dosage_form', 'dosage',
+#                                                                              'unitdosage')
+#
+#         return JsonResponse(list(medications), safe=False)
+#     return JsonResponse([], safe=False)
+
+@require_GET
+def medication_detail(request, pk):
+    m = get_object_or_404(Medicament.objects.select_related('pharmacie', 'fournisseur'), pk=pk)
+    data = {
+        'id': m.id,
+        'nom': m.nom,
+        'stock': m.stock,
+        'dosage': m.dosage,
+        'unitdosage': m.unitdosage,
+        'dosage_form': m.dosage_form,
+        'date_expiration': m.date_expiration.isoformat() if m.date_expiration else None,
+        'pharmacie': m.pharmacie_id,
+    }
+    return JsonResponse(data)
 
 
 # def parse_medication_data(medication_str):
@@ -1993,7 +2021,6 @@ def transferer_patient(request, hospitalisation_id):
         safe_message = optimize_sms_text(message)
         send_sms(get_employees_to_notify(), safe_message)
 
-
         messages.success(request, f"Le patient {patient.nom} a été transféré dans le lit {new_lit.nom}.")
         return redirect("hospitalisationdetails", pk=hospitalisation_id)
 
@@ -2343,6 +2370,7 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
             })
 
         return calendar_days
+
     def post(self, request, *args, **kwargs):
         form_type = request.POST.get("form_type")  # Get the form type
         hospitalisation = self.get_object()

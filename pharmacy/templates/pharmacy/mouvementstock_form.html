@@ -45,7 +45,7 @@
                                         {{ form.quantite }}
                                         <small class="text-muted" id="stockInfo"></small>
                                         {% if form.quantite.errors %}
-                                            <div class="invalid-feedback d-block">
+                                            <div class="invalid-feedback d-block text-danger">
                                                 {{ form.quantite.errors.as_text }}
                                             </div>
                                         {% endif %}
@@ -101,56 +101,116 @@
         </div>
     </div>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Afficher/masquer les champs selon le type de mouvement
-    const typeMouvement = document.getElementById('id_type_mouvement');
-    const patientField = document.getElementById('patientField');
-    const fournisseurField = document.getElementById('fournisseurField');
-    const commandeField = document.getElementById('commandeField');
-    const medicamentSelect = document.getElementById('id_medicament');
-    const stockInfo = document.getElementById('stockInfo');
+  const typeMouvement = document.getElementById('id_type_mouvement');
+  const patientField = document.getElementById('patientField');
+  const fournisseurField = document.getElementById('fournisseurField');
+  const commandeField = document.getElementById('commandeField');
+  const medicamentSelect = document.getElementById('id_medicament');
+  const stockInfo = document.getElementById('stockInfo');
 
-    function toggleFields() {
-        if (typeMouvement.value === 'Sortie') {
-            patientField.style.display = 'block';
-            fournisseurField.style.display = 'none';
-            commandeField.style.display = 'none';
-        } else if (typeMouvement.value === 'Entrée') {
-            patientField.style.display = 'none';
-            fournisseurField.style.display = 'block';
-            commandeField.style.display = 'block';
-        } else {
-            patientField.style.display = 'none';
-            fournisseurField.style.display = 'none';
-            commandeField.style.display = 'none';
-        }
+  function toggleFields() {
+    if (!typeMouvement) return;
+    const v = typeMouvement.value;
+    if (v === 'Sortie') {
+      patientField?.style && (patientField.style.display = 'block');
+      fournisseurField?.style && (fournisseurField.style.display = 'none');
+      commandeField?.style && (commandeField.style.display = 'none');
+    } else if (v === 'Entrée') {
+      patientField?.style && (patientField.style.display = 'none');
+      fournisseurField?.style && (fournisseurField.style.display = 'block');
+      commandeField?.style && (commandeField.style.display = 'block');
+    } else {
+      patientField?.style && (patientField.style.display = 'none');
+      fournisseurField?.style && (fournisseurField.style.display = 'none');
+      commandeField?.style && (commandeField.style.display = 'none');
     }
+  }
 
-    // Afficher le stock disponible quand on sélectionne un médicament
-    function updateStockInfo() {
-        const medicamentId = medicamentSelect.value;
-        if (medicamentId) {
-            fetch(`/api/medicaments/${medicamentId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    stockInfo.textContent = `Stock disponible: ${data.stock}`;
-                });
-        } else {
-            stockInfo.textContent = '';
-        }
+  async function updateStockInfo() {
+    const medicamentId = medicamentSelect?.value;
+    if (!medicamentId) { if (stockInfo) stockInfo.textContent = ''; return; }
+
+    // URL générée par Django puis remplacée côté JS
+    const detailUrlTemplate = "{% url 'medicament_detail' 0 %}";
+    const url = detailUrlTemplate.replace('0', encodeURIComponent(medicamentId));
+
+    try {
+      if (stockInfo) stockInfo.textContent = 'Chargement du stock…';
+      const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        throw new Error('Réponse non-JSON reçue (vérifie la route et les middlewares).');
+      }
+
+      const data = await res.json();
+      stockInfo.textContent = `Stock disponible : ${data.stock ?? '—'}`;
+    } catch (err) {
+      console.error('Erreur fetch medicament_detail:', err);
+      if (stockInfo) stockInfo.textContent = 'Impossible de récupérer le stock.';
     }
+  }
 
-    // Initialisation
-    toggleFields();
-    typeMouvement.addEventListener('change', toggleFields);
-    medicamentSelect.addEventListener('change', updateStockInfo);
-
-    // Mettre à jour au chargement si un médicament est déjà sélectionné
-    if (medicamentSelect.value) {
-        updateStockInfo();
-    }
+  toggleFields();
+  typeMouvement?.addEventListener('change', toggleFields);
+  medicamentSelect?.addEventListener('change', updateStockInfo);
+  if (medicamentSelect?.value) updateStockInfo();
 });
 </script>
+{#<script>#}
+{#document.addEventListener('DOMContentLoaded', function() {#}
+{#    // Afficher/masquer les champs selon le type de mouvement#}
+{#    const typeMouvement = document.getElementById('id_type_mouvement');#}
+{#    const patientField = document.getElementById('patientField');#}
+{#    const fournisseurField = document.getElementById('fournisseurField');#}
+{#    const commandeField = document.getElementById('commandeField');#}
+{#    const medicamentSelect = document.getElementById('id_medicament');#}
+{#    const stockInfo = document.getElementById('stockInfo');#}
+{##}
+{#    function toggleFields() {#}
+{#        if (typeMouvement.value === 'Sortie') {#}
+{#            patientField.style.display = 'block';#}
+{#            fournisseurField.style.display = 'none';#}
+{#            commandeField.style.display = 'none';#}
+{#        } else if (typeMouvement.value === 'Entrée') {#}
+{#            patientField.style.display = 'none';#}
+{#            fournisseurField.style.display = 'block';#}
+{#            commandeField.style.display = 'block';#}
+{#        } else {#}
+{#            patientField.style.display = 'none';#}
+{#            fournisseurField.style.display = 'none';#}
+{#            commandeField.style.display = 'none';#}
+{#        }#}
+{#    }#}
+{##}
+{#    // Afficher le stock disponible quand on sélectionne un médicament#}
+{#    function updateStockInfo() {#}
+{#        const medicamentId = medicamentSelect.value;#}
+{#        if (medicamentId) {#}
+{#            fetch(`/apis/medicaments/${medicamentId}/`)#}
+{#                .then(response => response.json())#}
+{#                .then(data => {#}
+{#                    stockInfo.textContent = `Stock disponible: ${data.stock}`;#}
+{#                });#}
+{#        } else {#}
+{#            stockInfo.textContent = '';#}
+{#        }#}
+{#    }#}
+{##}
+{#    // Initialisation#}
+{#    toggleFields();#}
+{#    typeMouvement.addEventListener('change', toggleFields);#}
+{#    medicamentSelect.addEventListener('change', updateStockInfo);#}
+{##}
+{#    // Mettre à jour au chargement si un médicament est déjà sélectionné#}
+{#    if (medicamentSelect.value) {#}
+{#        updateStockInfo();#}
+{#    }#}
+{#});#}
+{#</script>#}
 {% endblock %}

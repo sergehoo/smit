@@ -94,8 +94,8 @@
                                                     <span class="detail-label">Patient</span>
                                                     <span class="detail-value">
                                                         {% if mouvement.patient %}
-                                                            <a href="{% url 'patient_detail' mouvement.patient.id %}">
-                                                                {{ mouvement.patient.nom_complet }}
+                                                            <a href="{% url 'detail_patient' mouvement.patient.pk %}">
+                                                                {{ mouvement.patient }}
                                                             </a>
                                                         {% else %}
                                                             -
@@ -110,7 +110,7 @@
                                                     <span class="detail-label">Employé</span>
                                                     <span class="detail-value">
                                                         {% if mouvement.employee %}
-                                                            {{ mouvement.employee.nom_complet }}
+                                                            {{ mouvement.employee }}
                                                         {% else %}
                                                             -
                                                         {% endif %}
@@ -123,7 +123,7 @@
                                                     <span class="detail-label">Pharmacie</span>
                                                     <span class="detail-value">
                                                         {% if mouvement.pharmacie %}
-                                                            {{ mouvement.pharmacie.nom }}
+                                                            {{ mouvement.pharmacie }}
                                                         {% else %}
                                                             -
                                                         {% endif %}
@@ -196,7 +196,7 @@
                                                 </div>
                                                 {% if mvt.id != mouvement.id %}
                                                 <div class="movement-action">
-                                                    <a href="{% url 'mouvementstock_detail' mvt.id %}" class="btn btn-sm btn-dim">
+                                                    <a href="" class="btn btn-sm btn-dim">
                                                         <em class="icon ni ni-eye"></em>
                                                     </a>
                                                 </div>
