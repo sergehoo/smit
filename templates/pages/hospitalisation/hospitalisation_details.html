@@ -36,7 +36,7 @@
                 <div class="nk-block-head nk-block-head-sm ">
 
                     <div class="row rounded card-bordered mt-5 p-3 d-flex align-items-center"
-                         style="background-color: white; background-image: url('{% static 'images/hospitalizadtion.png' %}'); background-size: cover; background-position: center;">
+                         style="background-color: white; background-image: url('{% static 'images/hospitwalization.png' %}'); background-size: cover; background-position: center;">
 
                         <!-- Colonne : Informations du patient -->
                         <div class="col-lg-6 col-md-6 col-sm-6 d-flex flex-column justify-content-center">
@@ -560,8 +560,8 @@
                                                                     id="heading{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#collapseAppareil{{ forloop.counter }}"
+                                                                            data-toggle="collapse"
+                                                                            data-target="#collapseAppareil{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseAppareil{{ forloop.counter }}">
                                                                         {{ categorie }} ({{ appareils|length }})
@@ -570,7 +570,7 @@
                                                                 <div id="collapseAppareil{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="heading{{ forloop.counter }}"
-                                                                     data-bs-parent="#accordionAppareils">
+                                                                     data-parent="#accordionAppareils">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for appareil in appareils %}
@@ -582,9 +582,8 @@
                                                                                                 -
                                                                                                 <span class="badge bg-info text-dark">{{ appareil.get_etat_display }}</span>
                                                                                             </h6>
-                                                                                            <p class="mb-1"><strong>Observation
-                                                                                                :</strong>
-                                                                                                {{ appareil.observation|default:"Aucune observation" }}
+                                                                                            <p class="mb-1"><strong>Observation :</strong>
+                                                                                                {{ appareil.observation|safe|default:"Aucune observation" }}
                                                                                             </p>
                                                                                             <p class="mb-1"><strong>Ajouté
                                                                                                 par :</strong>
@@ -1684,178 +1683,224 @@
                                         </div>
                                         <div class="col-lg-3 text-end">
                                             <ul class="m-0 p-0 list-unstyled text-end">
-                                                <!-- Examen Physique  -->
-                                                <li class="d-flex justify-content-between align-items-center">
-                                                    <button type="button" class="btn btn-success  uniform-btn mt-2"
-                                                            data-toggle="modal" data-target="#examensphysiqueModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em> Examens Physiques
-                                                    </button>
-                                                    <div class="modal fade" id="examensphysiqueModal" tabindex="-1"
-                                                         aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Examens des Apareils</h5>
-                                                                    <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form method="post" id="examenAppareil"
-                                                                          action="{% url 'add_examen_apareil' hospitalisation_id=hospitalisationdetail.id %}">
-                                                                        {% csrf_token %}
+                                              <!-- Examen Physique -->
+<!-- Examen Physique -->
+<li class="d-flex justify-content-between align-items-center">
 
-                                                                        <div x-data="appareilForm(JSON.parse('{{ types_appareils_json|safe|escapejs }}'))">
-                                                                            <template x-for="(group, index) in groups"
-                                                                                      :key="index">
-                                                                                <div class="mb-4 p-3 border rounded">
-                                                                                    <h5 x-text="group.label"
-                                                                                        class="mb-3"></h5>
+  <!-- Bouton d’ouverture du modal (Bootstrap 4) -->
+  <button
+    type="button"
+    class="btn btn-success uniform-btn mt-2"
+    data-toggle="modal"
+    data-target="#examensphysiqueModal"
+  >
+    <em class="icon ni ni-plus-circle-fill"></em> Examens Physiques
+  </button>
 
-                                                                                    <template
-                                                                                            x-for="(sousType, idx) in group.sous_types"
-                                                                                            :key="sousType.id">
-                                                                                        <div class="mb-3 p-2 border rounded bg-light">
-                                                                                            <h6 x-text="sousType.nom"
-                                                                                                class="mb-2 text-primary"></h6>
+  <!-- Modal Bootstrap 4 -->
+  <div class="modal fade" id="examensphysiqueModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+      <div class="modal-content">
 
-                                                                                            <input type="hidden"
-                                                                                                   :name="'type_appareil_' + index + '_' + idx"
-                                                                                                   x-model="sousType.id">
+        <div class="modal-header">
+          <h5 class="modal-title">Examens des Appareils</h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
 
-                                                                                            <input type="text"
-                                                                                                   class="form-control mb-2"
-                                                                                                   placeholder="Nom de l'Appareil"
-                                                                                                   :name="'nom_' + index + '_' + idx"
-                                                                                                   x-model="sousType.nom"
-                                                                                                   required>
+        <div class="modal-body">
+          <form
+            method="post"
+            id="examenAppareil"
+            action="{% url 'add_examen_apareil' hospitalisation_id=hospitalisationdetail.id %}"
+            autocomplete="off"
+            novalidate
+          >
+            {% csrf_token %}
 
-                                                                                            <select class="form-control mb-2"
-                                                                                                    :name="'etat_' + index + '_' + idx"
-                                                                                                    x-model="sousType.etat"
-                                                                                                    required>
-                                                                                                <option value="normal">
-                                                                                                    Normal
-                                                                                                </option>
-                                                                                                <option value="altéré">
-                                                                                                    Altéré
-                                                                                                </option>
-                                                                                                <option value="anormal">
-                                                                                                    Anormal
-                                                                                                </option>
-                                                                                                <option value="non-applicable">
-                                                                                                    Non-applicable
-                                                                                                </option>
-                                                                                            </select>
+            <div x-data="appareilForm(JSON.parse('{{ types_appareils_json|safe|escapejs }}'))">
 
-                                                                                            <textarea
-                                                                                                    class="form-control mb-2"
-                                                                                                    placeholder="Détails de l'examen"
-                                                                                                    :name="'observation_' + index + '_' + idx"
-                                                                                                    x-model="sousType.observation"
-                                                                                                    required></textarea>
+              <template x-for="(group, i) in groups" :key="i">
+                <fieldset class="border rounded p-3 mb-4">
+                  <legend class="h6" x-text="group.label"></legend>
 
-                                                                                            <button type="button"
-                                                                                                    class="btn btn-danger btn-sm"
-                                                                                                    @click="removeAppareil(index, idx)">
-                                                                                                Supprimer
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </template>
+                  <!-- 🔒 Transmet l'ID du type parent de ce groupe -->
+                  <input type="hidden" :name="`parent_type_${i}`" :value="group.parent_id">
 
-                                                                                    <button type="button"
-                                                                                            class="btn btn-success btn-sm"
-                                                                                            @click="addAppareil(index)">
-                                                                                        Ajouter
-                                                                                        un champ
-                                                                                    </button>
-                                                                                </div>
-                                                                            </template>
-                                                                        </div>
+                  <template x-for="(row, j) in group.sous_types" :key="row.key">
+                    <div class="border rounded bg-light p-3 mb-3">
+                      <!-- NOM (obligatoire si ligne active) -->
+                      <label class="form-label">Nom</label>
+                      <input
+                        type="text"
+                        class="form-control mb-2"
+                        :name="`nom_${i}_${j}`"
+                        x-model="row.nom"
+                        maxlength="150"
+                        placeholder="Ex. Aire cardio-respiratoire"
+                      >
 
-                                                                        <button type="submit"
-                                                                                class="btn btn-primary mt-3">
-                                                                            Enregistrer
-                                                                        </button>
-                                                                    </form>
+                      <!-- ÉTAT (facultatif; ne rend pas une ligne “active”) -->
+                      <label class="form-label">État</label>
+                      <select
+                        class="form-control mb-2"
+                        :name="`etat_${i}_${j}`"
+                        x-model="row.etat"
+                      >
+                        <option value="">— Sélectionner —</option>
+                        <option value="normal">Normal</option>
+                        <option value="altéré">Altéré</option>
+                        <option value="anormal">Anormal</option>
+                        <option value="non-applicable">Non-applicable</option>
+                      </select>
 
-                                                                    <!-- Alpine.js Script -->
-                                                                    <script>
-                                                                        function appareilForm(typesAppareils) {
-                                                                            return {
-                                                                                groups: typesAppareils.map(type => ({
-                                                                                    label: type.nom,  // Nom du type parent
-                                                                                    id: type.id,  // ID du type parent
-                                                                                    sous_types: type.sous_types.map(sous_type => ({
-                                                                                        id: sous_type.id,
-                                                                                        nom: sous_type.nom,
-                                                                                        etat: "normal",
-                                                                                        observation: ""
-                                                                                    }))
-                                                                                })),
-                                                                                addAppareil(index) {
-                                                                                    let newAppareil = {
-                                                                                        id: null,
-                                                                                        nom: "",
-                                                                                        etat: "normal",
-                                                                                        observation: ""
-                                                                                    };
-                                                                                    this.groups[index].sous_types.push(newAppareil);
+                      <!-- OBSERVATION (facultatif) -->
+                      <label class="form-label">Observation</label>
+                      <textarea
+                        class="form-control mb-2"
+                        :name="`observation_${i}_${j}`"
+                        x-model="row.obs"
+                        maxlength="1000"
+                        placeholder="Détails (facultatif)"
+                      ></textarea>
 
-                                                                                    // Focus automatique sur le nouveau champ
-                                                                                    setTimeout(() => {
-                                                                                        let inputs = document.querySelectorAll("input[required]");
-                                                                                        inputs[inputs.length - 1]?.focus();
-                                                                                    }, 50);
-                                                                                },
-                                                                                removeAppareil(index, idx) {
-                                                                                    if (this.groups[index].sous_types.length > 1) {
-                                                                                        this.groups[index].sous_types.splice(idx, 1);
-                                                                                    } else {
-                                                                                        alert("Impossible de supprimer le dernier appareil de cette catégorie.");
-                                                                                    }
-                                                                                }
-                                                                            };
-                                                                        }
+                      <button type="button" class="btn btn-outline-danger btn-sm"
+                              @click="removeAppareil(i,j)">
+                        Supprimer
+                      </button>
+                    </div>
+                  </template>
 
-                                                                        document.querySelector("#examenAppareil")?.addEventListener("submit", function (event) {
-                                                                            let isValid = true;
+                  <button type="button" class="btn btn-success btn-sm" @click="addAppareil(i)">
+                    Ajouter un champ
+                  </button>
+                </fieldset>
+              </template>
 
-                                                                            // Vérification des inputs, selects et textareas
-                                                                            document.querySelectorAll("input[required], select[required], textarea[required]").forEach(field => {
-                                                                                if (!field.value.trim()) {
-                                                                                    field.classList.add("is-invalid");
-                                                                                    isValid = false;
-                                                                                } else {
-                                                                                    field.classList.remove("is-invalid");
-                                                                                }
-                                                                            });
+            </div>
 
-                                                                            if (!isValid) {
-                                                                                event.preventDefault();
-                                                                                alert("Veuillez remplir tous les champs obligatoires.");
-                                                                            }
-                                                                        });
-                                                                    </script>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <script>
-                                                        document.addEventListener('DOMContentLoaded', function () {
-                                                            // Reinitialiser TinyMCE quand le modal est affiché
-                                                            $('#addeffetindesirableModal').on('shown.bs.modal', function () {
-                                                                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                                                                tinymce.init({
-                                                                    selector: '.tinymce-effet',
-                                                                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                                                                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                                                                    menubar: false,
-                                                                    height: 300,
-                                                                });
-                                                            });
-                                                        });
-                                                    </script>
-                                                </li>
+            <div class="text-right mt-3">
+              <button type="submit" id="exaSubmit" class="btn btn-primary">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</li>
+
+<script>
+/* ---------- Alpine.js component (groupes avec parent_id + lignes vides par défaut) ---------- */
+function appareilForm(data) {
+  const safe = Array.isArray(data) ? data : [];
+  // On attend que chaque item contienne au moins { id, nom } pour le parent (type)
+  return {
+    groups: (safe.length ? safe : [{ id: null, nom: 'Appareils' }]).map((g, i) => ({
+      parent_id: g?.id ?? null,                 // 👈 ID du type parent
+      label: g?.nom ?? `Groupe ${i+1}`,
+      // Au moins une ligne vide
+      sous_types: [ { key: `${i}-0-${Date.now()}`, nom: "", etat: "", obs: "" } ]
+    })),
+
+    addAppareil(i) {
+      this.groups[i].sous_types.push({
+        key: `${i}-${this.groups[i].sous_types.length}-${Date.now()}`,
+        nom: "",
+        etat: "",
+        obs: ""
+      });
+    },
+
+    removeAppareil(i, j) {
+      const arr = this.groups[i].sous_types;
+      if (arr.length > 1) arr.splice(j, 1);
+      else alert("Impossible de supprimer le dernier champ.");
+    }
+  };
+}
+
+/* ---------- VALIDATION Bootstrap 4 (sans champ type ; parent transmis caché) ---------- */
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("examenAppareil");
+
+  form.addEventListener("submit", function (event) {
+    const container = document.getElementById("examensphysiqueModal"); // scope strict
+    const nomFields = Array.from(container.querySelectorAll('input[name^="nom_"]'));
+    const getIdx = (name) => {
+      const m = name.match(/^nom_(\d+)_(\d+)$/);
+      return m ? [m[1], m[2]] : null;
+    };
+
+    let activeRows = 0;
+    let firstInvalidEl = null;
+    let invalid = false;
+
+    container.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+
+    nomFields.forEach(nomEl => {
+      const ids = getIdx(nomEl.name);
+      if (!ids) return;
+      const [i, j] = ids;
+
+      const etatEl = container.querySelector(`[name="etat_${i}_${j}"]`);
+      const obsEl  = container.querySelector(`[name="observation_${i}_${j}"]`);
+      const parentEl = container.querySelector(`[name="parent_type_${i}"]`);
+
+      const nom  = (nomEl?.value  || "").trim();
+      const obs  = (obsEl?.value  || "").trim();
+      const etat = (etatEl?.value || "").trim();
+      const parentVal = (parentEl?.value || "").trim(); // 👈 ID parent envoyé
+
+      // ligne active si NOM ou OBS
+      const isActive = !!(nom || obs);
+
+      if (!isActive) {
+        if (etatEl && etat) etatEl.value = "";
+        return;
+      }
+
+      activeRows += 1;
+
+      // parent doit exister si on a une ligne active (sinon on ne sait pas où ranger)
+      if (!parentVal) {
+        // On met un indicateur doux mais on n'empêche pas : on laissera le serveur ignorer proprement si besoin
+        console.warn(`Parent manquant pour la ligne ${i}-${j}`);
+      }
+
+      // Pour une ligne active : NOM requis
+      if (!nom) {
+        nomEl.classList.add("is-invalid");
+        if (!firstInvalidEl) firstInvalidEl = nomEl;
+        invalid = true;
+      }
+
+      // État par défaut
+      if (etatEl && !etat) etatEl.value = "normal";
+    });
+
+    if (activeRows === 0) {
+      event.preventDefault();
+      $('#examensphysiqueModal').modal('hide');
+      return;
+    }
+
+    if (invalid) {
+      event.preventDefault();
+      alert("Pour les lignes remplies, 'Nom' est obligatoire.");
+      if (firstInvalidEl) {
+        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => firstInvalidEl.focus(), 200);
+      }
+    }
+  });
+});
+</script>
+
+
+
 
                                                 <!-- Resume Syndromique  -->
                                                 <li class="d-flex justify-content-between align-items-center">
@@ -2482,12 +2527,13 @@
                                             </div>
                                         {% endif %}
                                     </div>
+                                
                                     <div class="col-lg-6 mx-auto">
+                                    
                                         {% if next_execution %}
                                             <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
                                                 <div class="card-body text-center">
-                                                    <h5 class="text-primary font-weight-bold">Prochaine Prise de
-                                                        Médicament</h5>
+                                                    <h5 class="text-primary font-weight-bold">Prochaine Prise de Médicament</h5>
                                                     <h4 class="text-dark mt-3">{{ next_execution.prescription.medication }}</h4>
                                                     <p class="text-muted">Date et heure prévue :
                                                         <strong>{{ next_execution.scheduled_time|date:"d/m/Y H:i" }}</strong>
@@ -2592,15 +2638,17 @@
 
                                     <div class="row col-12">
 
-                                        {#                                    <canvas id="constantesChart" width="400" height="200"></canvas>#}
+                                       
                                         <div class="col-xl-12" id="constantesChart"></div>
 
 
                                     </div>
 
                                     <div class="row col-12">
+                                    
                                         <!-- Constantes Card -->
                                         <!-- Tableau des constantes -->
+                                    
                                         <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
@@ -2624,6 +2672,7 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
+                                                        
                                                         {% if constantes %}
                                                             {% for constante in constantes %}
                                                                 <tr class="{% if forloop.counter > 3 %}constante-data d-none{% endif %}">
@@ -2823,7 +2872,7 @@
                                                                                 <i class="fas fa-pills text-primary me-2"></i>
                                                                             </div>
                                                                             <div class="flex-grow-1">
-                                                                                <strong>{{ prescription.medication.nom }}</strong>
+                                                                                <strong>{{ prescription.medication.nom }}</strong
                                                                                 <div class="small text-muted">
                                                                                     {{ prescription.posology }}
                                                                                     • {{ prescription.quantity }} unités
@@ -2840,32 +2889,32 @@
                                                                                             {% if execution %}
                                                                                                 {% if execution.status == 'Taken' %}
                                                                                                     <span class="badge badge-dot badge-lg badge-success"
-                                                                                                          data-bs-toggle="tooltip"
+                                                                                                          data-toggle="tooltip"
                                                                                                           title="Pris à {{ execution.executed_at|time }}">
                                                                     <i class="fas fa-check"></i>
                                                                 </span>
                                                                                                 {% elif execution.status == 'Missed' %}
                                                                                                     <span class="badge badge-dot badge-lg badge-danger"
-                                                                                                          data-bs-toggle="tooltip"
+                                                                                                          data-toggle="tooltip"
                                                                                                           title="Prise manquée">
                                                                     <i class="fas fa-times-circle"></i>
                                                                 </span>
                                                                                                 {% elif execution.status == 'Pending' and day.is_past %}
                                                                                                     <span class="badge badge-dot badge-lg badge-warning"
-                                                                                                          data-bs-toggle="tooltip"
+                                                                                                          data-toggle="tooltip"
                                                                                                           title="En retard">
                                                                     <i class="fas fa-clock"></i>
                                                                 </span>
                                                                                                 {% else %}
                                                                                                     <span class="badge badge-dot badge-lg badge-secondary"
-                                                                                                          data-bs-toggle="tooltip"
-                                                                                                          title="À prendre">
+                                                                                                          data-toggle="tooltip"
+                                                                                                          title="À prendre {% if execution.scheduled_time %} le {{ execution.scheduled_time|date:'d/m/Y' }} à {{ execution.scheduled_time|time:'H:i' }}{% endif %} ">
                                                                     <i class="fas fa-clock"></i>
                                                                 </span>
                                                                                                 {% endif %}
                                                                                             {% else %}
                                                                                                 <span class="badge badge-dot badge-lg badge-light"
-                                                                                                      data-bs-toggle="tooltip"
+                                                                                                      data-toggle="tooltip"
                                                                                                       title="Non programmé">
                                                                 <i class="fas fa-minus"></i>
                                                             </span>
@@ -2928,6 +2977,7 @@
                                         </div>
 
                                         <!-- Styles CSS pour le calendrier -->
+                                    
                                         <style>
                                             .table-calendar {
                                                 font-size: 0.875rem;
@@ -3110,6 +3160,7 @@
                                             });
                                         </script>
                                         <!-- Executes prescriptions -->
+                                    
                                         <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header d-flex justify-content-between">
@@ -3808,7 +3859,7 @@
                             return;
                         }
 
-                        fetch(`/api/medicaments/?q=${this.search}`)
+                        fetch(`/apis/medicaments/?q=${this.search}`)
                             .then(response => response.json())
                             .then(data => {
                                 this.results = data;
@@ -3835,7 +3886,7 @@
                         formData.append('medication', this.search);
                         formData.append('is_new_medication', this.isNewMedication);
 
-                        fetch('/api/prescription/add/', {
+                        fetch('/apis/prescription/add/', {
                             method: 'POST',
                             body: formData,
                             headers: {

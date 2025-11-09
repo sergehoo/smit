@@ -205,15 +205,15 @@
                                     <div class="nk-tb-col tb-col-lg col-patient">
                                         <span class="sub-text">Patient</span>
                                     </div>
-                                    <div class="nk-tb-col tb-col-sm col-contact">
-                                        <span class="sub-text">Contact</span>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-sm col-contact">#}
+{#                                        <span class="sub-text">Contact</span>#}
+{#                                    </div>#}
                                     <div class="nk-tb-col tb-col-lg col-date">
                                         <span class="sub-text">Date & Heure</span>
                                     </div>
-                                    <div class="nk-tb-col tb-col-md col-service">
-                                        <span class="sub-text">Service</span>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-md col-service">#}
+{#                                        <span class="sub-text">Service</span>#}
+{#                                    </div>#}
                                     <div class="nk-tb-col tb-col-md col-doctor">
                                         <span class="sub-text">Médecin</span>
                                     </div>
@@ -243,8 +243,8 @@
                                     <div class="nk-tb-col tb-col-lg col-patient">
                                         <div class="d-flex align-items-center">
                                             <div class="user-avatar xs bg-primary-dim me-2">
-                                                {% if appointment.patient.avatar %}
-                                                <img src="{{ appointment.patient.avatar.url }}" alt="{{ appointment.patient.nom }}">
+                                                {% if appointment.patient.nom %}
+                                                <span>{{ appointment.patient.nom|first|upper }}{{ appointment.patient.prenoms|first|upper }}</span>
                                                 {% else %}
                                                 <span>{{ appointment.patient.nom|first|upper }}</span>
                                                 {% endif %}
@@ -270,12 +270,12 @@
                                         </div>
                                     </div>
 
-                                    <div class="nk-tb-col tb-col-sm col-contact">
-                                        <div class="d-flex align-items-center">
-                                            <em class="icon ni ni-call me-1 text-primary"></em>
-                                            <span>{{ appointment.patient.contact }}</span>
-                                        </div>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-sm col-contact">#}
+{#                                        <div class="d-flex align-items-center">#}
+{#                                            <em class="icon ni ni-call me-1 text-primary"></em>#}
+{#                                            <span>{{ appointment.patient.contact }}</span>#}
+{#                                        </div>#}
+{#                                    </div>#}
 
                                     <div class="nk-tb-col tb-col-lg col-date">
                                         <div class="d-flex flex-column">
@@ -290,17 +290,17 @@
                                         </div>
                                     </div>
 
-                                    <div class="nk-tb-col tb-col-md col-service">
-                                        <span class="badge badge-dim bg-outline-primary">
-                                            <em class="icon ni ni-briefcase me-1"></em>
-                                            {{ appointment.service }}
-                                        </span>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-md col-service">#}
+{#                                        <span class="badge badge-dim bg-outline-primary">#}
+{#                                            <em class="icon ni ni-briefcase me-1"></em>#}
+{#                                            {{ appointment.service }}#}
+{#                                        </span>#}
+{#                                    </div>#}
 
                                     <div class="nk-tb-col tb-col-md col-doctor">
                                         <div class="d-flex align-items-center">
                                             <div class="user-avatar xs bg-light me-2">
-                                                <span class="text-primary">{{ appointment.doctor.user.get_full_name|first|upper }}</span>
+                                                <span class="text-primary">{{ appointment.doctor.user.get_full_name|slice:":2"  }}</span>
                                             </div>
                                             <span class="fw-medium">{{ appointment.doctor.user.get_full_name }}</span>
                                         </div>

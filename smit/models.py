@@ -20,7 +20,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.timezone import now
+from django.utils.timezone import now, make_aware
 from schedule.models import Calendar, Event
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
@@ -913,7 +913,37 @@ class Constante(models.Model):
         verbose_name = "Constante"
         verbose_name_plural = "Constantes"
 
+def _normalize(s: str) -> str:
+    if not s:
+        return ""
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    return " ".join(s.lower().split())
 
+# Heures canoniques pour les créneaux « Matin / Midi / Soir / Nuit »
+CANONICAL_SLOTS = {
+    "MORNING": 8,    # 08:00
+    "NOON":    13,   # 13:00
+    "EVENING": 20,   # 20:00
+    "NIGHT":   22,   # 22:00 (utile pour 4/j)
+}
+
+# Mappage posologie → liste d'heures canoniques
+# ⚠️ On mappe par version normalisée (sans accents, minuscule)
+POSOLOGY_TO_SLOTS = {
+    _normalize("Une fois par jour"):        [CANONICAL_SLOTS["MORNING"]],                 # 08:00
+    _normalize("Deux fois par jour"):       [CANONICAL_SLOTS["MORNING"], CANONICAL_SLOTS["EVENING"]],  # 08:00 & 20:00
+    _normalize("Trois fois par jour"):      [CANONICAL_SLOTS["MORNING"], CANONICAL_SLOTS["NOON"], CANONICAL_SLOTS["EVENING"]],  # 08:00, 13:00, 20:00
+    _normalize("Quatre fois par jour"):     [6, 12, 18, 22],                              # 06:00, 12:00, 18:00, 22:00
+    _normalize("Au coucher"):               [CANONICAL_SLOTS["NIGHT"]],
+    # Les schémas « Toutes les X heures » seront traités à part (grille 0/8/16 par ex.)
+}
+
+# Intervalles horaires pour « Toutes les X heures »
+POSOLOGY_EVERY_X_HOURS = {
+    _normalize("Toutes les 4 heures"): 4,
+    _normalize("Toutes les 6 heures"): 6,
+    _normalize("Toutes les 8 heures"): 8,
+}
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, db_index=True)
     doctor = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='prescriptions',
@@ -945,98 +975,130 @@ class Prescription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    @staticmethod
-    def normalize_string(value):
+
+
+    def _parsed_duration_days(self) -> int:
+        """Convertit self.pendant (string choisie) en nb de jours."""
+        try:
+            return max(1, int(self.pendant))
+        except (TypeError, ValueError):
+            return 1
+
+    def _parsed_delay_hours(self) -> int:
+        """Convertit self.a_partir_de (string choisie) en nb d'heures de délai initial."""
+        try:
+            return max(0, int(self.a_partir_de))
+        except (TypeError, ValueError):
+            return 0
+
+    def _start_and_end(self):
+        """Calcule start_dt (prescribed_at + délai) et end_dt (prescribed_at + duration_days)."""
+        base = timezone.localtime(self.prescribed_at) if timezone.is_aware(self.prescribed_at) else self.prescribed_at
+        start_dt = base + datetime.timedelta(hours=self._parsed_delay_hours())
+        end_dt = base + datetime.timedelta(days=self._parsed_duration_days())
+        # toujours aware (si settings.USE_TZ = True)
+        if not timezone.is_aware(start_dt):
+            start_dt = make_aware(start_dt)
+        if not timezone.is_aware(end_dt):
+            end_dt = make_aware(end_dt)
+        return start_dt, end_dt
+
+    def _existing_exec_set(self):
+        return PrescriptionExecution.objects.filter(prescription=self).only("id", "scheduled_time", "status")
+
+    def _create_if_missing(self, when_dt, existing_by_dt, pending_list):
+        """Ajoute une exécution Pending si elle n’existe pas déjà."""
+        # Normalise seconde/microseconde pour comparer juste à la minute
+        when_dt = when_dt.replace(second=0, microsecond=0)
+        if when_dt not in existing_by_dt:
+            pending_list.append(PrescriptionExecution(
+                prescription=self,
+                scheduled_time=when_dt,
+                status="Pending",
+            ))
+
+    def _generate_daily_slots(self, start_dt, end_dt, slot_hours):
         """
-        Normalise une chaîne en minuscule, sans accents, et supprime les espaces inutiles.
+        Génère des exécutions chaque jour aux heures canoniques `slot_hours` (liste d'int),
+        en respectant la fenêtre [start_dt, end_dt).
         """
-        if not value:
-            return None
-        # Supprime les accents
-        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
-        # Convertit en minuscule et supprime les espaces superflus
-        return ' '.join(value.lower().split())
+        existing = self._existing_exec_set()
+        existing_by_dt = {timezone.localtime(e.scheduled_time).replace(second=0, microsecond=0): e for e in existing}
+
+        to_create = []
+        day_cursor = timezone.localdate(start_dt)
+        last_day = timezone.localdate(end_dt)
+
+        while day_cursor < last_day:
+            for h in slot_hours:
+                candidate = datetime.datetime.combine(day_cursor, datetime.time(hour=h, minute=0))
+                candidate = make_aware(candidate) if not timezone.is_aware(candidate) else candidate
+                # ignore avant le début effectif
+                if candidate < start_dt:
+                    continue
+                if candidate >= end_dt:
+                    continue
+                self._create_if_missing(candidate, existing_by_dt, to_create)
+            day_cursor += datetime.timedelta(days=1)
+
+        if to_create:
+            PrescriptionExecution.objects.bulk_create(to_create)
+
+    def _generate_every_x_hours(self, start_dt, end_dt, step_h):
+        """
+        Génère une prise toutes les `step_h` heures.
+        Pour caler sur une grille « lisible », on aligne sur 00:00, 08:00, 16:00 si step_h=8, etc.
+        """
+        existing = self._existing_exec_set()
+        existing_by_dt = {timezone.localtime(e.scheduled_time).replace(second=0, microsecond=0): e for e in existing}
+
+        # base grid: 00:00 + k*step_h
+        grid_base = timezone.localtime(start_dt).replace(hour=0, minute=0, second=0, microsecond=0)
+        # trouve le premier créneau >= start_dt
+        k0 = int(( (timezone.localtime(start_dt) - grid_base).total_seconds() + 3599 ) // 3600)  # arrondi heure sup
+        k0 = (k0 + (step_h - (k0 % step_h)) ) if (k0 % step_h) != 0 else k0
+        first = grid_base + datetime.timedelta(hours=k0)
+
+        to_create = []
+        t = first
+        while t < end_dt:
+            self._create_if_missing(t, existing_by_dt, to_create)
+            t += datetime.timedelta(hours=step_h)
+
+        if to_create:
+            PrescriptionExecution.objects.bulk_create(to_create)
 
     def generate_executions(self):
         """
-        Génère ou ajuste les prises de médicament en fonction de la posologie,
-        de la durée du traitement et du délai avant la première prise.
+        Génère/alimente les exécutions **alignées sur les créneaux du calendrier**.
+        - 1/j → 08:00
+        - 2/j → 08:00 & 20:00
+        - 3/j → 08:00, 13:00, 20:00
+        - 4/j → 06:00, 12:00, 18:00, 22:00
+        - Toutes les X heures → grille 00:00 + k*Xh (ex: 0/8/16h)
+        - Respecte la fenêtre [prescribed_at + délai ; prescribed_at + durée].
+        - Corrige le bug de statut: on ne cherche plus 'Done' mais 'Taken'.
         """
+        poso_key = _normalize(self.posology or "")
+        start_dt, end_dt = self._start_and_end()
 
-        # 🔄 Mappage des posologies avec leurs intervalles en heures
-        POSOLOGY_MAPPING = {
-            'Une fois par jour': 24,
-            'Deux fois par jour': 12,
-            'Trois fois par jour': 8,
-            'Quatre fois par jour': 6,
-            'Toutes les 4 heures': 4,
-            'Toutes les 6 heures': 6,
-            'Toutes les 8 heures': 8,
-            'Si besoin': None,
-            'Avant les repas': None,
-            'Après les repas': None,
-            'Au coucher': None,
-            'Une fois par semaine': 168,  # 7 jours
-            'Deux fois par semaine': 84,  # 3,5 jours
-            'Un jour sur deux': 48,  # 2 jours
-        }
+        # Si on a déjà une exécution « prise », on repart après la dernière prise
+        last_taken = self._existing_exec_set().filter(status="Taken").order_by("-scheduled_time").first()
+        if last_taken and last_taken.scheduled_time >= start_dt:
+            start_dt = last_taken.scheduled_time + datetime.timedelta(minutes=1)  # on évite de régénérer ce slot
 
-        # 🔍 Vérification de la posologie
-        normalized_posology = self.posology.strip()
-        interval = POSOLOGY_MAPPING.get(normalized_posology)
+        # Cas slots journaliers
+        if poso_key in POSOLOGY_TO_SLOTS:
+            slot_hours = POSOLOGY_TO_SLOTS[poso_key]
+            return self._generate_daily_slots(start_dt, end_dt, slot_hours)
 
-        if interval is None:
-            # Si la posologie ne suit pas un intervalle fixe, on ne génère pas d'exécutions
-            return
+        # Cas toutes les X heures
+        if poso_key in POSOLOGY_EVERY_X_HOURS:
+            step_h = POSOLOGY_EVERY_X_HOURS[poso_key]
+            return self._generate_every_x_hours(start_dt, end_dt, step_h)
 
-        # 🔍 Vérification et conversion de `pendant` en jours
-        try:
-            duration_days = int(self.pendant)
-        except (TypeError, ValueError):
-            duration_days = 1  # Si la valeur est invalide, par défaut 1 jour
-
-        # 🔍 Vérification et conversion de `a_partir_de` en heures
-        try:
-            delay_hours = int(self.a_partir_de)
-        except (TypeError, ValueError):
-            delay_hours = 0  # Par défaut, aucune attente
-
-        # ✅ Si `a_partir_de = 0` (Maintenant), accorder un délai de 10 minutes
-        if delay_hours == 0:
-            start_time = self.prescribed_at + datetime.timedelta(minutes=10)
-        else:
-            start_time = self.prescribed_at + datetime.timedelta(hours=delay_hours)
-
-        # 🔄 Définition de la fin du traitement
-        end_time = self.prescribed_at + datetime.timedelta(days=duration_days)
-
-        # 🔍 Récupération des exécutions existantes
-        existing_executions = PrescriptionExecution.objects.filter(prescription=self).order_by('scheduled_time')
-
-        # 🔄 Ajustement si une exécution a déjà été effectuée
-        last_execution_done = existing_executions.filter(status='Done').order_by('-scheduled_time').first()
-
-        if last_execution_done:
-            start_time = last_execution_done.scheduled_time + datetime.timedelta(hours=interval)
-
-        # 🔄 Génération des nouvelles exécutions
-        new_executions = []
-        while start_time < end_time:
-            # Vérifie si l'exécution pour cet horaire existe déjà
-            if not existing_executions.filter(scheduled_time=start_time).exists():
-                new_executions.append(
-                    PrescriptionExecution(
-                        prescription=self,
-                        scheduled_time=start_time,
-                        status='Pending',
-                    )
-                )
-            start_time += datetime.timedelta(hours=interval)
-
-        # 🔄 Insérer les nouvelles exécutions en une seule transaction
-        if new_executions:
-            with transaction.atomic():
-                PrescriptionExecution.objects.bulk_create(new_executions)
+        # Cas non déterministe (si besoin, « Si besoin », « Avant/Après repas ») → ne génère rien.
+        return
 
     def __str__(self):
         return f"{self.patient.nom} - {self.medication.nom}"
@@ -1056,21 +1118,21 @@ class PrescriptionExecution(models.Model):
     ], default='Pending')
     observations = models.TextField(null=True, blank=True)
 
+    class Meta:
+        unique_together = (("prescription", "scheduled_time"),)
+        ordering = ["scheduled_time"]
     def __str__(self):
         return f"{self.prescription.medication.nom} - {self.scheduled_time} - {self.status}"
 
     @classmethod
     def update_missed_executions(cls):
-        """
-        Met à jour toutes les exécutions en attente ("Pending") dont l'heure prévue est dépassée.
-        """
+        """Passe en 'Missed' toutes les exécutions Pending dont l'heure est dépassée."""
         with transaction.atomic():
             nb_updated = cls.objects.filter(
-                scheduled_time__lt=now(),
-                status="Pending"
-            ).update(status="Missed")
-
-        print(f"📌 {nb_updated} exécutions de prescription mises à jour en 'Missed'.")
+                scheduled_time__lt=timezone.now(),
+                status='Pending'
+            ).update(status='Missed')
+        return nb_updated
 
 
 class WaitingRoom(models.Model):

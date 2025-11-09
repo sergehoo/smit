@@ -1,7 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -14,7 +15,7 @@ from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Suivi, Prescription, SigneFonctionnel, IndicateurBiologique, IndicateurFonctionnel, IndicateurSubjectif, \
     ComplicationsIndicators, EffetIndesirable, AvisMedical, Diagnostic, Observation, HistoriqueMaladie, Vaccination, \
     Comorbidite, InfectionOpportuniste, TraitementARV, TypeProtocole, SuiviProtocole, BoxHospitalisation, Echantillon, \
-    BilanInitial, ResultatAnalyse
+    BilanInitial, ResultatAnalyse, LitHospitalisation
 
 # Register your models here.
 admin.site.site_header = 'SERVICE DES MALADIES INFESTIEUSE ET TROPICALES | BACK-END CONTROLER'
@@ -35,12 +36,13 @@ class EchantillonAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Informations générales", {
             "fields": (
-            "code_echantillon", "patient", "examen_demande", 'suivi', "consultation", "date_collect", "site_collect",
-            "agent_collect")
+                "code_echantillon", "patient", "examen_demande", 'suivi', "consultation", "date_collect",
+                "site_collect",
+                "agent_collect")
         }),
         ("Stockage et état", {
             "fields": (
-            "status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume")
+                "status_echantillons", "storage_information", "storage_location", "storage_temperature", "volume")
         }),
         ("État de l'échantillon", {
             "fields": ("linked", "used")
@@ -108,7 +110,6 @@ class ResultatAnalyseAdmin(ImportExportModelAdmin):
     ordering = ('-date_resultat',)
     list_per_page = 20
     actions = ['valider_resultats', 'rejeter_resultats']
-
 
     def get_fichier_link(self, obj):
         if obj.fichier_resultat:
@@ -330,7 +331,230 @@ class AnalyseAdmin(admin.ModelAdmin):
 
 @admin.register(Hospitalization)
 class HospitalizationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'patient', 'bed']
+    list_display = (
+        'patient_info',
+        'admission_date',
+        'discharge_date',
+        'room_bed_info',
+        'doctor_info',
+        'status_badge',
+        'duration_days',
+        'row_actions',
+    )
+
+    list_filter = (
+        'status',
+        'admission_date',
+        'discharge_date',
+        'doctor',
+        'room',
+        'activite__service',
+    )
+
+    search_fields = (
+        'patient__nom',
+        'patient__prenoms',
+        'patient__code_patient',
+        'room__name',  # si Room est un FK avec un champ name (ou adapte)
+        'doctor__username',
+        'doctor__first_name',
+        'doctor__last_name',
+        'reason_for_admission',
+    )
+
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+        'duration_days_display',
+        'patient_link',
+        'doctor_link',
+    )
+
+    fieldsets = (
+        ('Informations Patient', {
+            'fields': ('patient_link', 'activite', 'doctor_link'),
+        }),
+        ('Dates et Statut', {
+            'fields': ('admission_date', 'discharge_date', 'discharge_reason', 'status', 'duration_days_display'),
+        }),
+        ('Localisation', {
+            'fields': ('room', 'bed'),
+        }),
+        ('Informations Médicales', {
+            'fields': ('reason_for_admission',),
+        }),
+        ('Métadonnées', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    raw_id_fields = ['patient', 'doctor', 'bed', 'activite']
+    autocomplete_fields = ['patient', 'doctor']
+    date_hierarchy = 'admission_date'
+    list_per_page = 25
+    actions = ['mark_as_discharged', 'mark_as_in_progress']
+    list_select_related = ('patient', 'doctor', 'bed', 'activite')
+
+    # ========== Colonnes ==========
+    def patient_info(self, obj):
+        if obj.patient_id:
+            url = reverse('admin:core_patient_change', args=[obj.patient_id])
+            return format_html(
+                '<a href="{}">{} {}</a><br><small>{}</small>',
+                url, obj.patient.nom, obj.patient.prenoms, obj.patient.code_patient or ''
+            )
+        return "-"
+
+    patient_info.short_description = "Patient"
+    patient_info.admin_order_field = 'patient__nom'
+
+    def doctor_info(self, obj):
+        if obj.doctor_id:
+            url = reverse('admin:auth_user_change', args=[obj.doctor_id])
+            return format_html('<a href="{}">Dr. {} {}</a>', url, obj.doctor.first_name, obj.doctor.last_name)
+        return "-"
+
+    doctor_info.short_description = "Médecin"
+    doctor_info.admin_order_field = 'doctor__last_name'
+
+    def room_bed_info(self, obj):
+        bed_info = f" - Lit {obj.bed.nom}" if getattr(obj.bed, 'nom', None) else ""
+        # si room est un FK, str(obj.room) doit être ok via __str__
+        return f"{obj.room}{bed_info}" if obj.room else ("Lit " + obj.bed.nom if obj.bed else "-")
+
+    room_bed_info.short_description = "Chambre/Lit"
+
+    def status_badge(self, obj):
+        # Utilise les classes CSS du fichier plutôt que le style inline
+        css_map = {
+            'En cours': 'status-en-cours',
+            'Sorti': 'status-sorti',
+            'Transféré': 'status-transfere',
+            'Décédé': 'status-decede',
+        }
+        css = css_map.get(obj.status, 'status-en-cours')
+        return format_html('<span class="status-badge {}">{}</span>', css, obj.status or '-')
+
+    status_badge.short_description = "Statut"
+    status_badge.admin_order_field = 'status'
+
+    def duration_days(self, obj):
+        start = obj.admission_date
+        end = obj.discharge_date or timezone.now()
+        if not start:
+            return "-"
+        delta = end - start
+        return f"{delta.days} jours" + ("" if obj.discharge_date else " (en cours)")
+
+    duration_days.short_description = "Durée"
+
+    def duration_days_display(self, obj):
+        return self.duration_days(obj)
+
+    duration_days_display.short_description = "Durée d'hospitalisation"
+
+    def patient_link(self, obj):
+        if obj.patient_id:
+            url = reverse('admin:core_patient_change', args=[obj.patient_id])
+            return format_html('<a href="{}">{} {} ({})</a>',
+                               url, obj.patient.nom, obj.patient.prenom, obj.patient.code_patient or '')
+        return "-"
+
+    patient_link.short_description = "Patient"
+
+    def doctor_link(self, obj):
+        if obj.doctor_id:
+            url = reverse('admin:auth_user_change', args=[obj.doctor_id])
+            return format_html('<a href="{}">Dr. {} {}</a>', url, obj.doctor.first_name, obj.doctor.last_name)
+        return "-"
+
+    doctor_link.short_description = "Médecin traitant"
+
+    def row_actions(self, obj):
+        # Boutons d’actions rapides (vue détail + diagnostics si dispo)
+        parts = []
+
+        # Détail
+        detail_url = reverse('admin:smit_hospitalization_change', args=[obj.pk])
+        parts.append(format_html(
+            '<a href="{}" class="button" style="padding:5px 10px; background:#417690; color:white; text-decoration:none; border-radius:3px; margin-right:5px;">👁️</a>',
+            detail_url
+        ))
+
+        # Diagnostics (si related_name="diagnostics")
+        has_diags = getattr(obj, 'diagnostics', None)
+        if has_diags and has_diags.exists():
+            diags_url = f"{reverse('admin:smit_diagnostic_changelist')}?hospitalisation__id__exact={obj.pk}"
+            parts.append(format_html(
+                '<a href="{}" class="button" style="padding:5px 10px; background:#ffc107; color:black; text-decoration:none; border-radius:3px;">📋</a>',
+                diags_url
+            ))
+
+        return format_html_join('', '{}', ((p,) for p in parts)) if parts else "-"
+
+    row_actions.short_description = "Actions"
+
+    # ========== Actions ==========
+    def mark_as_discharged(self, request, queryset):
+        now = timezone.now()
+        updated = queryset.exclude(status='Décédé').update(
+            status='Sorti',
+            discharge_date=now,
+            discharge_reason='Sortie via admin'
+        )
+        self.message_user(request, f"{updated} hospitalisation(s) marquée(s) comme sortie(s)", level=messages.SUCCESS)
+
+    mark_as_discharged.short_description = "Marquer comme « Sorti »"
+
+    def mark_as_in_progress(self, request, queryset):
+        updated = queryset.update(status='En cours')
+        self.message_user(request, f"{updated} hospitalisation(s) marquée(s) comme en cours", level=messages.SUCCESS)
+
+    mark_as_in_progress.short_description = "Marquer comme « En cours »"
+
+    # ========== Queryset / Perf ==========
+    def get_queryset(self, request):
+        qs = super().get_queryset(request).select_related('patient', 'doctor', 'bed', 'activite')
+        # Préfetch diagnostics uniquement pour la liste (évite un coût sur les formulaires)
+        if request.resolver_match.url_name == 'smit_hospitalization_changelist':
+            qs = qs.prefetch_related('diagnostics')
+        return qs
+
+    # ========== Readonly dynamiques ==========
+    def get_readonly_fields(self, request, obj=None):
+        ro = list(self.readonly_fields)
+        if obj and obj.status in ('Sorti', 'Décédé', 'Transféré'):
+            # On fige les champs critiques après clôture
+            ro += ['patient', 'admission_date', 'bed', 'activite', 'doctor']
+        return ro
+
+    # ========== Lits disponibles (inclure le lit courant) ==========
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "bed":
+            # On tente de récupérer l'ID de l'objet en édition pour inclure son lit même s'il est indisponible
+            obj_id = None
+            try:
+                obj_id = request.resolver_match.kwargs.get("object_id")
+            except Exception:
+                pass
+
+            base_qs = LitHospitalisation.objects.all()
+            if obj_id:
+                try:
+                    current = Hospitalization.objects.only('bed_id').get(pk=obj_id).bed_id
+                except Hospitalization.DoesNotExist:
+                    current = None
+                # lits dispo OU le lit déjà assigné à cette hospit
+                kwargs["queryset"] = base_qs.filter(occuper=False) | base_qs.filter(pk=current)
+            else:
+                kwargs["queryset"] = base_qs.filter(occuper=False)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    class Media:
+        css = {
+            'all': ('admin/css/hospitalization.css',),
+        }
 
 
 @admin.register(Prescription)

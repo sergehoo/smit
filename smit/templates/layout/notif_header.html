@@ -1,31 +1,213 @@
-
 {% load static %}
 <!-- main header @s -->
 <div class="nk-header nk-header-fixed is-light">
     <div class="container-fluid">
         <div class="nk-header-wrap">
+            <!-- Menu mobile -->
             <div class="nk-menu-trigger d-xl-none ml-n1">
                 <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu">
                     <em class="icon ni ni-menu"></em>
                 </a>
             </div>
-            <div class="nk-header-brand d-xl-none ">
+            
+            <!-- Logo mobile -->
+            <div class="nk-header-brand d-xl-none">
                 <a href="{% url 'home' %}" class="logo-link">
-                    <img class="logo-light logo-img" src="{% static 'images/logokeneya260.png' %}" alt="logo">
-                    <img class="logo-dark logo-img" src="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
-                    SMIT
+                    <img class="logo-img" src="{% static 'images/logokeneya260.png' %}" alt="logo" style="height: 40px;">
+                    <span class="logo-text fw-bold text-primary">SMIT</span>
                 </a>
             </div>
+
+            <!-- Barre de recherche (Desktop) -->
+            <div class="nk-header-search d-none d-lg-block">
+                <div class="search-wrap">
+                    <div class="search-form">
+                        <em class="search-icon ni ni-search"></em>
+                        <input type="text" class="form-control border-transparent form-focus-none" placeholder="Rechercher un patient, un service..." id="global-search">
+                        <button class="search-submit btn btn-icon btn-primary"><em class="icon ni ni-arrow-right"></em></button>
+                    </div>
+                </div>
+            </div>
+
+         <a href="{% url 'home' %}" class="logo-link">
+                    <img class="logo-img" src="{% static 'images/armoirie.png' %}" alt="logo" style="height: 60px;">
+
+                </a>
+         <a href="{% url 'home' %}" class="logo-link ml-2">
+                    <img class="logo-img" src="{% static 'images/logoMSHPCMU.svg' %}" alt="logo" style="height: 50px;">
+
+                </a>
+            <!-- Outils de l'en-tête -->
             <div class="nk-header-tools">
                 <ul class="nk-quick-nav">
+                    
+                    <!-- Indicateurs rapides -->
+                    <li class="d-none d-md-block">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-toggle="dropdown">
+                                <div class="icon-status icon-status-info">
+                                    <em class="icon ni ni-dashboard"></em>
+                                </div>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+                                <div class="dropdown-head">
+                                    <span class="sub-title nk-dropdown-title">Aperçu rapide</span>
+                                </div>
+                                <div class="dropdown-body">
+                                    <div class="quick-stats">
+                                        <div class="quick-stat-item">
+                                            <div class="quick-stat-icon bg-primary">
+                                                <em class="icon ni ni-users"></em>
+                                            </div>
+                                            <div class="quick-stat-info">
+                                                <span class="quick-stat-number">24</span>
+                                                <span class="quick-stat-text">Patients aujourd'hui</span>
+                                            </div>
+                                        </div>
+                                        <div class="quick-stat-item">
+                                            <div class="quick-stat-icon bg-success">
+                                                <em class="icon ni ni-calendar"></em>
+                                            </div>
+                                            <div class="quick-stat-info">
+                                                <span class="quick-stat-number">8</span>
+                                                <span class="quick-stat-text">Rendez-vous</span>
+                                            </div>
+                                        </div>
+                                        <div class="quick-stat-item">
+                                            <div class="quick-stat-icon bg-warning">
+                                                <em class="icon ni ni-alert"></em>
+                                            </div>
+                                            <div class="quick-stat-info">
+                                                <span class="quick-stat-number">3</span>
+                                                <span class="quick-stat-text">Urgences</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-foot center">
+                                    <a href="{% url 'home' %}" class="link link-sm">Voir le tableau de bord</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Mode sombre/clair -->
+                    <li class="d-none d-md-block">
+                        <a href="#" class="nk-quick-nav-icon theme-toggle" data-theme="dark">
+                            <em class="icon ni ni-moon"></em>
+                        </a>
+                    </li>
+
+                    <!-- Notifications -->
+                    <li class="dropdown notification-dropdown">
+                        <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-toggle="dropdown">
+                            <div class="icon-status icon-status-info">
+                                <em class="icon ni ni-bell"></em>
+                                <span class="badge badge-pill badge-danger badge-dot"></span>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right dropdown-menu-s1">
+                            <div class="dropdown-head">
+                                <span class="sub-title nk-dropdown-title">Notifications récentes</span>
+                                <a href="#" class="mark-all-read">Tout marquer comme lu</a>
+                            </div>
+                            <div class="dropdown-body">
+                                <div class="nk-notification">
+                                    {% if notifications %}
+                                        {% for notification in notifications|slice:":5" %}
+                                        <div class="nk-notification-item dropdown-inner">
+                                            <div class="nk-notification-icon">
+                                                {% if notification.type == 'urgence' %}
+                                                <em class="icon icon-circle bg-danger-dim ni ni-alert"></em>
+                                                {% elif notification.type == 'rendezvous' %}
+                                                <em class="icon icon-circle bg-primary-dim ni ni-calendar"></em>
+                                                {% else %}
+                                                <em class="icon icon-circle bg-info-dim ni ni-info"></em>
+                                                {% endif %}
+                                            </div>
+                                            <div class="nk-notification-content">
+                                                <div class="nk-notification-text">{{ notification.message }}</div>
+                                                <div class="nk-notification-time">{{ notification.timestamp|timesince }}</div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="nk-notification-item dropdown-inner text-center py-3">
+                                            <em class="icon ni ni-info text-muted" style="font-size: 2rem;"></em>
+                                            <div class="nk-notification-text text-muted mt-2">Aucune notification</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="dropdown-foot center">
+                                <a href="{#% url 'notifications' %#}">Voir toutes les notifications</a>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Messages -->
+                    <li class="dropdown notification-dropdown d-none d-md-block">
+                        <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-toggle="dropdown">
+                            <div class="icon-status icon-status-info">
+                                <em class="icon ni ni-chat"></em>
+                                <span class="badge badge-pill badge-success badge-dot"></span>
+                            </div>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                            <div class="dropdown-head">
+                                <span class="sub-title nk-dropdown-title">Messages</span>
+                                <a href="#">Nouveau message</a>
+                            </div>
+                            <div class="dropdown-body">
+                                <div class="message-list">
+                                    <div class="message-item">
+                                        <div class="user-avatar">
+                                            <span>DR</span>
+                                        </div>
+                                        <div class="message-content">
+                                            <div class="message-from">Dr. Diallo</div>
+                                            <div class="message-preview">Résultats d'analyse disponibles...</div>
+                                            <div class="message-time">10 min</div>
+                                        </div>
+                                    </div>
+                                    <div class="message-item">
+                                        <div class="user-avatar bg-warning">
+                                            <span>IN</span>
+                                        </div>
+                                        <div class="message-content">
+                                            <div class="message-from">Infirmier</div>
+                                            <div class="message-preview">Patient en salle d'attente...</div>
+                                            <div class="message-time">1h</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-foot center">
+                                <a href="{#% url 'messages' %#}">Voir tous les messages</a>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Profil utilisateur -->
                     <li class="dropdown user-dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <div class="user-toggle">
                                 <div class="user-avatar sm">
-                                    <em class="icon ni ni-user-alt"></em>
+                                  {% if request.user.employee %}
+                                        <span class="avatar-text bg-primary">{{ request.user.first_name|first|default:request.user.username|first }}{{ request.user.last_name|first|default:request.user.last_name|first }}</span>
+                                        {% else %}
+                                        <span class="avatar-text bg-primary">{{ request.user.get_full_name|first|default:request.user.username|first }}</span>
+                                        {% endif %}
                                 </div>
-                                <div class="user-info d-none d-md-block">
-                                    <div class="user-name dropdown-indicator">{{ request.user.username }}</div>
+                                <div class="user-info d-none d-xl-block">
+                                    <div class="user-name dropdown-indicator text-dark">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                    <div class="user-role text-secondary">
+                                        {% if request.user.groups.first %}
+                                            {{ request.user.groups.first.name }}
+                                        {% else %}
+                                            Médecin
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </a>
@@ -33,11 +215,20 @@
                             <div class="dropdown-inner user-card-wrap bg-lighter d-none d-md-block">
                                 <div class="user-card">
                                     <div class="user-avatar">
-                                        <span>{{ request.user.username|first }}</span>
+                                        {% if request.user.employee %}
+                                        <span class="avatar-text bg-primary">{{ request.user.first_name|first|default:request.user.username|first }}{{ request.user.last_name|first|default:request.user.last_name|first }}</span>
+                                        {% else %}
+                                        <span class="avatar-text bg-primary">{{ request.user.get_full_name|first|default:request.user.username|first }}</span>
+                                        {% endif %}
                                     </div>
                                     <div class="user-info">
-                                        <span class="lead-text">{{ request.user.get_full_name }}</span>
+                                        <span class="lead-text">{{ request.user.get_full_name|default:request.user.username }}</span>
                                         <span class="sub-text">{{ request.user.email }}</span>
+                                        <span class="user-badge badge badge-outline badge-primary">
+                                            {% if request.user.groups.first %}
+                                                {{ request.user.groups.first.name }}
+                                            {% endif %}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -45,12 +236,41 @@
                                 <ul class="link-list">
                                     <li>
                                         <a href="{% url 'employee_profile' %}">
-                                            <em class="icon ni ni-users-fill"></em>
-                                            <span>Mon Profile</span>
+                                            <em class="icon ni ni-user-alt"></em>
+                                            <span>Mon Profil</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'account_logout' %}">
+                                        <a href="{#% url 'account_settings' %#}">
+                                            <em class="icon ni ni-setting"></em>
+                                            <span>Paramètres</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{#% url 'change_password' %#}">
+                                            <em class="icon ni ni-lock-alt"></em>
+                                            <span>Changer le mot de passe</span>
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="{#% url 'help_center' %#}">
+                                            <em class="icon ni ni-help"></em>
+                                            <span>Aide & Support</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{#% url 'feedback' %#}">
+                                            <em class="icon ni ni-feedback"></em>
+                                            <span>Donner mon avis</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="dropdown-inner">
+                                <ul class="link-list">
+                                    <li>
+                                        <a href="{% url 'account_logout' %}" class="text-danger">
                                             <em class="icon ni ni-signout"></em>
                                             <span>Déconnexion</span>
                                         </a>
@@ -59,39 +279,221 @@
                             </div>
                         </div>
                     </li>
-                    <li class="dropdown notification-dropdown mr-n1">
-                        <a href="#" class="dropdown-toggle nk-quick-nav-icon" data-toggle="dropdown">
-                            <div class="icon-status icon-status-info"><em class="icon ni ni-bell"></em></div>
+
+                    <!-- Menu mobile supplémentaire -->
+                    <li class="d-lg-none">
+                        <a href="#" class="nk-quick-nav-icon" data-toggle="dropdown">
+                            <em class="icon ni ni-more-h"></em>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right dropdown-menu-s1">
-                            <div class="dropdown-head">
-                                <span class="sub-title nk-dropdown-title">Notifications</span>
-                                <a href="#">Marquer tout comme lu</a>
-                            </div>
-                            <div class="dropdown-body">
-                                <div class="nk-notification">
-                                    {% comment %} Example notification {% endcomment %}
-                                    <div class="nk-notification-item dropdown-inner">
-                                        <div class="nk-notification-icon">
-                                            <em class="icon icon-circle bg-warning-dim ni ni-info"></em>
-                                        </div>
-                                        <div class="nk-notification-content">
-                                            <div class="nk-notification-text">Vous avez <span>1 nouvelle notification</span></div>
-                                            <div class="nk-notification-time">il y a 2 heures</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="dropdown-foot center">
-                                <a href="#">Voir tout</a>
-                            </div>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
+                            <ul class="link-list-plain">
+                                <li><a href="{% url 'home' %}"><em class="icon ni ni-dashboard"></em> Tableau de bord</a></li>
+                                <li><a href="{#% url 'notifications' %#}"><em class="icon ni ni-bell"></em> Notifications</a></li>
+                                <li><a href="{#% url 'messages' %#}"><em class="icon ni ni-chat"></em> Messages</a></li>
+                                <li><a href="{#% url 'help_center' %#}"><em class="icon ni ni-help"></em> Aide</a></li>
+                            </ul>
                         </div>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-
-
 </div>
 <!-- main header @e -->
+
+<style>
+/* Styles personnalisés pour l'en-tête */
+.nk-header {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-bottom: 1px solid #e5e9f2;
+}
+
+.user-avatar .avatar-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    border-radius: 50%;
+}
+
+.quick-stats {
+    padding: 10px 0;
+}
+
+.quick-stat-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f5f6fa;
+}
+
+.quick-stat-item:last-child {
+    border-bottom: none;
+}
+
+.quick-stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: white;
+}
+
+.quick-stat-info {
+    flex: 1;
+}
+
+.quick-stat-number {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e1e2d;
+}
+
+.quick-stat-text {
+    display: block;
+    font-size: 12px;
+    color: #8f9bb3;
+}
+
+.message-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f5f6fa;
+}
+
+.message-item:last-child {
+    border-bottom: none;
+}
+
+.message-content {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.message-from {
+    font-weight: 500;
+    font-size: 13px;
+    color: #1e1e2d;
+}
+
+.message-preview {
+    font-size: 12px;
+    color: #8f9bb3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.message-time {
+    font-size: 11px;
+    color: #c5cee0;
+}
+
+.user-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    margin-top: 4px;
+}
+
+.theme-toggle:hover {
+    color: #4680ff;
+}
+
+/* Animation pour les badges de notification */
+.badge-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(0.95); }
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .nk-header-brand .logo-text {
+        display: none;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle du mode sombre/clair
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Changer l'icône
+            const icon = this.querySelector('em');
+            if (newTheme === 'dark') {
+                icon.className = 'icon ni ni-sun';
+            } else {
+                icon.className = 'icon ni ni-moon';
+            }
+        });
+    }
+
+    // Recherche globale
+    const globalSearch = document.getElementById('global-search');
+    if (globalSearch) {
+        globalSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch(this.value);
+            }
+        });
+    }
+
+    // Marquer toutes les notifications comme lues
+    const markAllRead = document.querySelector('.mark-all-read');
+    if (markAllRead) {
+        markAllRead.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Implémentez la logique pour marquer comme lu
+            document.querySelectorAll('.badge-dot').forEach(badge => {
+                badge.style.display = 'none';
+            });
+            // Ajouter un appel AJAX ici pour mettre à jour en base de données
+        });
+    }
+
+    function performSearch(query) {
+        if (query.trim()) {
+            // Rediriger vers la page de recherche ou effectuer une recherche AJAX
+            window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+        }
+    }
+
+    // Restaurer le thème sauvegardé
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        if (savedTheme === 'dark' && themeToggle) {
+            const icon = themeToggle.querySelector('em');
+            icon.className = 'icon ni ni-sun';
+        }
+    }
+});
+</script>

@@ -4,6 +4,16 @@ register = template.Library()
 
 
 @register.filter
+def get_etat_count(appareils_by_categories, etat):
+    count = 0
+    for categorie, appareils in appareils_by_categories.items():
+        for appareil in appareils:
+            if appareil.etat == etat:
+                count += 1
+    return count
+
+
+@register.filter
 def get_execution_for_day(prescription, date):
     """Récupère les exécutions d'une prescription pour une date donnée"""
     return prescription.executions.filter(

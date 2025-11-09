@@ -26,3 +26,5 @@ def calculate_weight_change(current_weight, patient):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+

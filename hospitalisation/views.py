@@ -1638,83 +1638,118 @@ def delete_appareil(request, appareil_id):
     return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
 
 
+ETATS_VALIDES = {"normal", "altéré", "anormal", "non-applicable"}
+
+
 @login_required
+@require_POST
+@transaction.atomic
 def add_examen_apareil(request, hospitalisation_id):
-    """Ajoute un examen d'appareil pour une hospitalisation ou met à jour s'il existe déjà."""
-    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    """
+    Saisie d'examens d'appareils SANS sélection de type en UI.
+    Le type utilisé est le PARENT (id transmis par 'parent_type_{i}') pour chaque groupe.
+    Upsert par (hospitalisation, type_parent, nom).
+    """
+    hospitalisation = get_object_or_404(Hospitalization, pk=hospitalisation_id)
 
-    if request.method == "POST":
-        appareils_a_creer = []
-        appareils_mis_a_jour = 0
-        erreurs_detectees = []
-        pattern = re.compile(r"type_appareil_(\d+)_(\d+)")
-
-        for key, value in request.POST.items():
-            match = pattern.match(key)
-            if match:
-                try:
-                    index, idx = match.groups()
-                    type_id = request.POST.get(f"type_appareil_{index}_{idx}", "").strip()
-                    nom = request.POST.get(f"nom_{index}_{idx}", "").strip()
-                    etat = request.POST.get(f"etat_{index}_{idx}", "normal").strip()
-                    observation = request.POST.get(f"observation_{index}_{idx}", "").strip()
-
-                    if not type_id or not nom:
-                        erreurs_detectees.append(f"⚠️ Données incomplètes pour '{key}' - Ignoré.")
-                        continue
-
-                    type_obj = get_object_or_404(AppareilType, pk=int(type_id))
-
-                    # Vérifier si l’appareil existe déjà pour cette hospitalisation
-                    appareil_existant = Appareil.objects.filter(hospitalisation=hospitalisation, nom=nom).first()
-
-                    if appareil_existant:
-                        # Vérifier si les données ont changé
-                        if appareil_existant.etat != etat or appareil_existant.observation != observation:
-                            # Mise à jour de l'appareil existant
-                            appareil_existant.etat = etat
-                            appareil_existant.observation = observation
-                            appareil_existant.save()
-                            appareils_mis_a_jour += 1  # Compter les mises à jour
-                        else:
-                            erreurs_detectees.append(f"⚠️ L'appareil '{nom}' existe déjà sans changement.")
-                        continue
-
-                    # ✅ Création d'un nouvel appareil si inexistant
-                    appareils_a_creer.append(Appareil(
-                        type_appareil=type_obj,
-                        hospitalisation=hospitalisation,
-                        nom=nom,
-                        etat=etat,
-                        observation=observation,
-                        created_by=request.user.employee
-                    ))
-
-                except ValueError as e:
-                    erreurs_detectees.append(f"❌ Erreur ValueError : {str(e)}")
-                except Exception as e:
-                    erreurs_detectees.append(f"❌ Erreur inattendue : {str(e)}")
-
-        # Insérer tous les nouveaux appareils en une seule requête (optimisation)
-        if appareils_a_creer:
-            Appareil.objects.bulk_create(appareils_a_creer)
-            messages.success(request, f"✅ {len(appareils_a_creer)} nouvel(s) appareil(s) ajouté(s) avec succès.")
-
-        # Afficher un message si des appareils ont été mis à jour
-        if appareils_mis_a_jour > 0:
-            messages.info(request, f"ℹ️ {appareils_mis_a_jour} appareil(s) mis à jour avec succès.")
-
-        # Gérer les erreurs
-        if erreurs_detectees:
-            for err in erreurs_detectees:
-                messages.error(request, err)
-
+    if len(request.POST) > 5000:
+        messages.error(request, "Requête trop volumineuse.")
         return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
-    messages.error(request, "❌ Erreur lors de l'ajout de l'examen.")
+    pattern_nom = re.compile(r"^nom_(\d+)_(\d+)$")
+
+    a_creer, a_mettre_a_jour, warnings = [], [], []
+
+    # Pré-cache des existants par (nom, type_parent_id)
+    existants_cache = {}
+    for app in Appareil.objects.filter(hospitalisation=hospitalisation).only('id', 'nom', 'etat', 'observation', 'type_appareil_id'):
+        key = (app.nom.strip().lower(), app.type_appareil_id or 0)
+        existants_cache[key] = app
+
+    created_by = getattr(getattr(request.user, 'employee', None), 'pk', None)
+
+    for key in request.POST:
+        m = pattern_nom.match(key)
+        if not m:
+            continue
+
+        i, j = m.groups()
+        nom = (request.POST.get(f"nom_{i}_{j}", "") or "").strip()
+        etat = (request.POST.get(f"etat_{i}_{j}", "") or "").strip().lower()
+        observation = (request.POST.get(f"observation_{i}_{j}", "") or "").strip()
+
+        # Parent (type) du groupe i
+        parent_type_raw = (request.POST.get(f"parent_type_{i}", "") or "").strip()
+
+        # Ignore lignes totalement vides (nom+obs)
+        if not nom and not observation:
+            continue
+
+        # etat par défaut
+        if not etat:
+            etat = "normal"
+        if etat not in ETATS_VALIDES:
+            warnings.append(f"⚠️ Valeur d'état invalide « {etat} » pour '{nom or '—'}'.")
+            continue
+
+        # Nom requis si ligne active
+        if not nom:
+            warnings.append(f"⚠️ Nom requis pour l'élément {i}-{j}.")
+            continue
+
+        # Parent requis (par ta règle métier) — si absent, on peut ignorer proprement
+        type_parent = None
+        if parent_type_raw:
+            try:
+                type_parent = AppareilType.objects.only('id').get(pk=int(parent_type_raw))
+            except (ValueError, AppareilType.DoesNotExist):
+                warnings.append(f"⚠️ Type parent introuvable (id={parent_type_raw}) pour '{nom}'. Ligne ignorée.")
+                continue
+        else:
+            warnings.append(f"⚠️ Type parent manquant pour le groupe {i}. Ligne '{nom}' ignorée.")
+            continue
+
+        # Troncatures
+        if len(nom) > 150:
+            nom = nom[:150]
+        if len(observation) > 1000:
+            observation = observation[:1000]
+
+        key_exist = (nom.lower(), type_parent.id)
+        app_existant = existants_cache.get(key_exist)
+
+        if app_existant:
+            if (app_existant.etat or '').lower() != etat or (app_existant.observation or '') != observation:
+                app_existant.etat = etat
+                app_existant.observation = observation
+                a_mettre_a_jour.append(app_existant)
+        else:
+            a_creer.append(Appareil(
+                type_appareil=type_parent,              # 👈 parent par défaut
+                hospitalisation=hospitalisation,
+                nom=nom,
+                etat=etat,
+                observation=observation,
+                created_by_id=created_by
+            ))
+
+    if a_creer:
+        Appareil.objects.bulk_create(a_creer)
+        messages.success(request, f"✅ {len(a_creer)} appareil(s) ajouté(s).")
+
+    if a_mettre_a_jour:
+        Appareil.objects.bulk_update(a_mettre_a_jour, fields=['etat', 'observation'])
+        messages.info(request, f"ℹ️ {len(a_mettre_a_jour)} appareil(s) mis à jour.")
+
+    for w in warnings[:20]:
+        messages.warning(request, w)
+    if len(warnings) > 20:
+        messages.warning(request, f"… et {len(warnings)-20} avertissement(s) supplémentaire(s).")
+
+    if not a_creer and not a_mettre_a_jour and not warnings:
+        messages.info(request, "Aucun changement détecté.")
+
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
-
-
 def delete_resume(request, resume_id):
     resume = get_object_or_404(ResumeSyndromique, id=resume_id)
 

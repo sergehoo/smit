@@ -228,9 +228,9 @@
                                     </div>
                                     <div class="nk-tb-col col-nom">
                                         <div class="user-card">
-                                            <div class="user-avatar xs bg-primary-dim">
-                                                {% if patient.avatar %}
-                                                <img src="{{ patient.avatar.url }}" alt="{{ patient.nom }}">
+                                            <div class="user-avatar bg-primary-dim">
+                                                {% if patient.nom %}
+                                                <span>{{ patient.nom|first|upper }}{{ patient.prenoms|first|upper }}</span>
                                                 {% else %}
                                                 <span>{{ patient.nom|first|upper }}{{ patient.prenoms|first|upper }}</span>
                                                 {% endif %}

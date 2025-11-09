@@ -239,9 +239,9 @@
                                     <div class="nk-tb-col tb-col-sm col-age">
                                         <span class="sub-text">Âge</span>
                                     </div>
-                                    <div class="nk-tb-col tb-col-md col-contact">
-                                        <span class="sub-text">Contact</span>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-md col-contact">#}
+{#                                        <span class="sub-text">Contact</span>#}
+{#                                    </div>#}
                                     <div class="nk-tb-col nk-tb-col-tools text-right">
                                         <span class="sub-text">Actions</span>
                                     </div>
@@ -279,11 +279,8 @@
                                     <div class="nk-tb-col tb-col-lg col-name">
                                         <div class="user-card">
                                             <div class="user-avatar xs bg-primary-dim me-2">
-                                                {% if consultation.patient.avatar %}
-                                                <img src="{{ consultation.patient.avatar.url }}" alt="{{ consultation.patient.nom }}">
-                                                {% else %}
-                                                <span>{{ consultation.patient.nom|first|upper }}</span>
-                                                {% endif %}
+                                              <span>{{ consultation.patient.nom|first|upper }}{{ consultation.patient.prenoms|first|upper }}</span>
+
                                             </div>
                                             <div class="user-info">
                                                 <div class="d-flex align-items-center mb-1">
@@ -349,12 +346,12 @@
                                         </div>
                                     </div>
 
-                                    <div class="nk-tb-col tb-col-md col-contact">
-                                        <div class="d-flex align-items-center">
-                                            <em class="icon ni ni-call me-1 text-primary"></em>
-                                            <span>{{ consultation.patient.contact }}</span>
-                                        </div>
-                                    </div>
+{#                                    <div class="nk-tb-col tb-col-md col-contact">#}
+{#                                        <div class="d-flex align-items-center">#}
+{#                                            <em class="icon ni ni-call me-1 text-primary"></em>#}
+{#                                            <span>{{ consultation.patient.contact }}</span>#}
+{#                                        </div>#}
+{#                                    </div>#}
 
                                     <div class="nk-tb-col nk-tb-col-tools ">
                                         <ul class="nk-tb-actions gx-1">
