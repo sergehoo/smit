@@ -112,21 +112,36 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const csrfToken = (document.querySelector("[name=csrfmiddlewaretoken]") || {}).value;
+  console.log("✅ DOM prêt");
 
-  function notify(type, message, subtitle='') {
+  // ---- CSRF helpers
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  }
+  function getCSRFToken() {
+    // 1) input caché si présent (form actuel)
+    const fromInput = document.querySelector("[name=csrfmiddlewaretoken]");
+    if (fromInput && fromInput.value) return fromInput.value;
+    // 2) cookie (pour fetch JSON/bulk)
+    return getCookie("csrftoken");
+  }
+
+  // ---- Toast (reprend ta fonction)
+  function notify(type, message, subtitle = '') {
     const $stack = document.getElementById('toast-stack');
     if (!$stack) { alert(message); return; }
-
     const id = 't_' + Date.now() + '_' + Math.floor(Math.random()*9999);
     const cls = 'toast-' + (type || 'info');
     const title = {success:'Succès', error:'Erreur', info:'Information', warning:'Attention'}[type] || 'Information';
-
-    const toastEl = document.createElement('div');
-    toastEl.id = id;
-    toastEl.className = `toast ${cls}`;
-    toastEl.setAttribute('role','alert'); toastEl.setAttribute('aria-live','assertive'); toastEl.setAttribute('aria-atomic','true');
-    toastEl.innerHTML = `
+    const el = document.createElement('div');
+    el.id = id;
+    el.className = `toast ${cls}`;
+    el.setAttribute('role', 'alert');
+    el.setAttribute('aria-live', 'assertive');
+    el.setAttribute('aria-atomic', 'true');
+    el.innerHTML = `
       <div class="toast-header">
         <span class="badge-dot"></span>
         <strong class="me-auto">${title}</strong>
@@ -135,73 +150,102 @@ document.addEventListener("DOMContentLoaded", function () {
       </div>
       <div class="toast-body">${message}</div>
     `;
-    $stack.appendChild(toastEl);
-    const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+    $stack.appendChild(el);
+    const toast = new bootstrap.Toast(el, { delay: 5000 });
     toast.show();
-    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    el.addEventListener('hidden.bs.toast', () => el.remove());
   }
 
-  // Sélection "tout le type" (déléguée, car contenu chargé en HTMX)
-  document.addEventListener('change', function(e){
-    if (e.target.classList.contains('select-all-type')) {
-      const type = e.target.getAttribute('data-type');
-      const isChecked = e.target.checked;
-      document.querySelectorAll(`.row-check[data-type="${type}"]`).forEach(cb => {
-        cb.checked = isChecked;
-        const row = cb.closest('tr');
-        if (row) row.classList.toggle('table-primary', isChecked);
-      });
-    }
-    if (e.target.classList.contains('row-check')) {
-      const row = e.target.closest('tr');
-      if (row) row.classList.toggle('table-primary', e.target.checked);
-    }
+  // ---- Sélection par type (checkbox master)
+  document.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('select-all-type')) return;
+    const type = e.target.getAttribute('data-type');
+    const checked = e.target.checked;
+    document.querySelectorAll(`.row-check[data-type="${type}"]`).forEach(cb => {
+      cb.checked = checked;
+      const row = cb.closest('tr');
+      if (row) row.classList.toggle('table-primary', checked);
+    });
   });
 
-  // Click "Enregistrer" (délégué)
-  document.addEventListener("click", function(e){
-    const btn = e.target.closest(".save-btn");
+  // ---- Coloration lignes (row-check)
+  document.addEventListener('change', function (e) {
+    if (!e.target.classList.contains('row-check')) return;
+    const row = e.target.closest('tr');
+    if (row) row.classList.toggle('table-primary', e.target.checked);
+  });
+
+  // ---- Enregistrement unitaire (délégation)
+  document.addEventListener('click', async function (e) {
+    const btn = e.target.closest('.save-btn');
     if (!btn) return;
-
     e.preventDefault();
-    const id = btn.getAttribute("data-id"); // ID du BilanParaclinique
-    if (!id) { notify('error', "ID manquant"); return; }
 
-    const resultInput = document.querySelector(`.result-input[data-id="${id}"]`);
-    const resultDateInput = document.querySelector(`.result-date[data-id="${id}"]`);
-    const commentInput = document.querySelector(`.result-comment[data-id="${id}"]`);
+    // Empêche double-clic
+    if (btn.disabled) return;
 
-    if (!resultInput || !resultDateInput || !commentInput) {
-      notify('error', "Champs introuvables"); return;
+    const examenId = btn.getAttribute('data-id');
+    const postUrl  = btn.getAttribute('data-url');   // URL déjà rendue côté serveur
+
+    if (!examenId || !postUrl) {
+      notify('error', "Paramètres manquants pour l'enregistrement.");
+      return;
     }
+
+    const resultInput     = document.querySelector(`.result-input[data-id="${examenId}"]`);
+    const resultDateInput = document.querySelector(`.result-date[data-id="${examenId}"]`);
+    const commentInput    = document.querySelector(`.result-comment[data-id="${examenId}"]`);
+
+    if (!resultInput)  { notify('error', "Champ 'résultat' introuvable."); return; }
     if (!resultInput.value.trim()) {
-      notify('error', "Le résultat est requis."); resultInput.focus(); return;
+      notify('error', 'Le résultat est requis.');
+      resultInput.focus();
+      return;
     }
 
-    const updateUrl = "{% url 'update_examen_result' 0 %}".replace("0", id);
     const formData = new FormData();
-    if (csrfToken) formData.append("csrfmiddlewaretoken", csrfToken);
-    formData.append("result", resultInput.value);
-    formData.append("result_date", resultDateInput.value);
-    formData.append("comment", commentInput.value);
+    formData.append("csrfmiddlewaretoken", getCSRFToken() || '');
+    formData.append("result", resultInput.value.trim());
+    formData.append("result_date", (resultDateInput?.value || '').trim());
+    formData.append("comment", (commentInput?.value || '').trim());
 
-    fetch(updateUrl, { method: "POST", body: formData })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(data => {
-        if (data.success) {
-          notify('success', "Résultat enregistré");
-          resultInput.classList.add('is-valid');
-        } else {
-          notify('error', "Erreur : " + (data.message || JSON.stringify(data.errors || {})));
-        }
-      })
-      .catch(() => notify('error', "Erreur réseau"));
+    try {
+      btn.disabled = true;
+      btn.dataset.prevText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Enregistrement...';
+
+      const resp = await fetch(postUrl, {
+        method: "POST",
+        body: formData,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`HTTP ${resp.status} — ${txt.slice(0, 200)}`);
+      }
+      const data = await resp.json();
+      if (data.success) {
+        notify('success', 'Résultat enregistré avec succès !');
+        resultInput.classList.add('is-valid');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        notify('error', data.errors || 'Erreur inconnue.');
+      }
+    } catch (err) {
+      console.error('❌ Unitaire:', err);
+      notify('error', "Erreur lors de l'enregistrement.");
+    } finally {
+      btn.disabled = false;
+      if (btn.dataset.prevText) btn.innerHTML = btn.dataset.prevText;
+    }
   });
 
-  // Enregistrement en masse (délégué sur tout le document)
-  const bulkSaveBtn = document.getElementById('bulkSaveBtn');
-  if (bulkSaveBtn) {
-    bulkSaveBtn.addEventListener('click', function(){
+  // ---- Enregistrement en masse
+  const bulkBtn = document.getElementById('bulkSaveBtn');
+  if (bulkBtn) {
+    bulkBtn.setAttribute('type', 'button'); // sécurité
+    bulkBtn.addEventListener('click', async function () {
       const selected = Array.from(document.querySelectorAll('.row-check:checked'));
       if (!selected.length) { notify('warning', 'Sélectionnez au moins une ligne.'); return; }
 
@@ -209,59 +253,76 @@ document.addEventListener("DOMContentLoaded", function () {
         const id = cb.getAttribute('data-id');
         return {
           id: parseInt(id, 10),
-          result: (document.querySelector(`.result-input[data-id="${id}"]`)?.value || "").trim(),
-          result_date: (document.querySelector(`.result-date[data-id="${id}"]`)?.value || "").trim(),
-          comment: (document.querySelector(`.result-comment[data-id="${id}"]`)?.value || "").trim(),
+          result: (document.querySelector(`.result-input[data-id="${id}"]`)?.value || '').trim(),
+          result_date: (document.querySelector(`.result-date[data-id="${id}"]`)?.value || '').trim(),
+          comment: (document.querySelector(`.result-comment[data-id="${id}"]`)?.value || '').trim(),
         };
       });
 
-      const invalid = items.filter(it => !it.result);
-      if (invalid.length) { notify('error', `${invalid.length} ligne(s) sans résultat.`); return; }
+      // validation
+      const invalid = items.filter(x => !x.result);
+      if (invalid.length) {
+        notify('error', `${invalid.length} ligne(s) sans résultat.`);
+        return;
+      }
 
-      bulkSaveBtn.disabled = true;
-      bulkSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Traitement...';
+      try {
+        bulkBtn.disabled = true;
+        const prev = bulkBtn.innerHTML;
+        bulkBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Traitement...';
 
-      fetch("{% url 'update_examen_results_bulk' %}", {
-        method: "POST",
-        headers: { "X-CSRFToken": csrfToken, "Content-Type": "application/json" },
-        body: JSON.stringify({ items })
-      })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(data => {
+        const resp = await fetch("{% url 'update_examen_results_bulk' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken() || '',
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify({ items }),
+        });
+
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`HTTP ${resp.status} — ${txt.slice(0, 200)}`);
+        }
+        const data = await resp.json();
         if (data.success) {
-          notify('success', `${data.updated} résultat(s) enregistré(s).`);
-          // petit feedback visuel
+          notify('success', `${data.updated} résultat(s) enregistré(s)`);
+          // feedback
           selected.forEach(cb => {
             const id = cb.getAttribute('data-id');
             const row = document.getElementById(`exam-${id}`);
-            const input = document.querySelector(`.result-input[data-id="${id}"]`);
+            const res = document.querySelector(`.result-input[data-id="${id}"]`);
             if (row) row.classList.add('table-success');
-            if (input) input.classList.add('is-valid');
+            if (res) res.classList.add('is-valid');
             cb.checked = false;
             if (row) row.classList.remove('table-primary');
           });
-          // On peut recharger la/les sections si nécessaire
-          setTimeout(() => location.reload(), 1500);
+          setTimeout(() => window.location.reload(), 1200);
         } else {
-          notify('error', data.message || "Erreur lors de l'enregistrement multiple");
+          notify('error', data.message || "Erreur bulk");
+          if (data.errors?.length) console.warn('Détails:', data.errors);
         }
-      })
-      .catch(() => notify('error', "Erreur réseau"))
-      .finally(() => {
-        bulkSaveBtn.disabled = false;
-        bulkSaveBtn.innerHTML = '<i class="fas fa-save mr-1"></i> Enregistrer la sélection';
-      });
+
+        bulkBtn.innerHTML = prev;
+      } catch (err) {
+        console.error('❌ Bulk:', err);
+        notify('error', "Erreur réseau lors de l'enregistrement multiple.");
+      } finally {
+        bulkBtn.disabled = false;
+      }
     });
   }
 
-  // Auto-save sur Enter
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Enter' && e.target.classList.contains('result-input')) {
-      e.preventDefault();
-      const id = e.target.getAttribute('data-id');
-      const saveBtn = document.querySelector(`.save-btn[data-id="${id}"]`);
-      if (saveBtn) saveBtn.click();
-    }
+  // ---- Enter = save unitaire sur le champ résultat
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    if (!t.classList.contains('result-input')) return;
+    e.preventDefault();
+    const id = t.getAttribute('data-id');
+    const btn = document.querySelector(`.save-btn[data-id="${id}"]`);
+    if (btn) btn.click();
   });
 });
 </script>

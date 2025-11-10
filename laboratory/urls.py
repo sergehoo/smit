@@ -44,6 +44,9 @@ urlpatterns = [
                   # URLS pour Examen
                   path('examens/', ExamenResultatsListView.as_view(), name='resultatsexam'),
                   path('examens/resultats', ExamenListView.as_view(), name='examen_list'),
+
+                  path("examens/bulk-update/", update_examen_results_bulk, name="update_examen_results_bulk"),
+
                   path(
                       "laboratoire/examens/resultats/type/<slug:type_slug>/",
                       ExamenTypePartialView.as_view(),
@@ -80,11 +83,11 @@ urlpatterns = [
                   ),
 
                   # Création
-                  path('nouveau/resultatanalyse_create',login_required(ResultatAnalyseCreateView.as_view()),
-                      name='resultatanalyse_create'
-                  ),
+                  path('nouveau/resultatanalyse_create', login_required(ResultatAnalyseCreateView.as_view()),
+                       name='resultatanalyse_create'
+                       ),
                   path(
-                      'echantillon/<int:echantillon_id>/nouveau/',login_required(ResultatAnalyseCreateView.as_view()),
+                      'echantillon/<int:echantillon_id>/nouveau/', login_required(ResultatAnalyseCreateView.as_view()),
                       name='resultatanalyse_create_for_echantillon'
                   ),
 
@@ -129,7 +132,7 @@ urlpatterns = [
                       login_required(validate_resultat_ajax),
                       name='resultatanalyse_validate_ajax'
                   ),
-                  path("examens/bulk-update/",update_examen_results_bulk, name="update_examen_results_bulk"),
+
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

@@ -131,7 +131,7 @@ class ExamenTypePartialView(LoginRequiredMixin, TemplateView):
         # Résoudre le slug -> nom DISTINCT côté DB (léger)
         distinct_noms = (
             qs.values_list('examen__type_examen__nom', flat=True)
-              .distinct()
+            .distinct()
         )
         resolved_name = None
         for nom in distinct_noms:
@@ -166,6 +166,7 @@ class ExamenTypePartialView(LoginRequiredMixin, TemplateView):
             "query_prefix": query_prefix,
         })
         return ctx
+
 
 class ExamenListView(LoginRequiredMixin, ListView):
     model = BilanParaclinique
@@ -208,48 +209,88 @@ class ExamenListView(LoginRequiredMixin, ListView):
 
         ctx.update({
             "filter": self.filterset,
-            "types_meta": types_meta,                 # [{name, slug, count}]
+            "types_meta": types_meta,  # [{name, slug, count}]
             "base_url": reverse('examen_list'),
             "query_prefix": query_prefix,
         })
         return ctx
+
+
+def _parse_result_datetime(value: str):
+    """
+    Parse une date venant d'un <input type="datetime-local"> ou ISO 8601.
+    - Accepte "YYYY-MM-DDTHH:MM" (sans secondes/offset)
+    - Accepte ISO avec ou sans 'Z' (offset UTC)
+    Retourne un datetime aware (dans la timezone projet) ou None si vide/invalid.
+    """
+    if not value:
+        return None
+
+    v = value.strip()
+    if not v:
+        return None
+
+    # 1) ISO 8601 (avec 'Z' / offset ou pas)
+    iso = v.replace('Z', '+00:00')  # facilite les "Z" (UTC)
+    dt = parse_datetime(iso)
+    if dt is not None:
+        # Si naïf => on l'attache à la TZ courante
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        return dt
+
+    # 2) Format HTML datetime-local sans secondes, ex: "2025-11-10T14:30"
+    try:
+        dt = datetime.strptime(v, "%Y-%m-%dT%H:%M")
+        # Naïf -> on assume TZ du projet
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        return dt
+    except ValueError:
+        pass
+
+    # 3) Avec secondes ? "YYYY-MM-DDTHH:MM:SS"
+    try:
+        dt = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S")
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        return dt
+    except ValueError:
+        pass
+
+    return None
+
+
 @login_required
 @require_POST
 def update_examen_result(request, examen_id):
     """
-    Met à jour un résultat d'examen individuel
+    Met à jour un résultat d'examen individuel (BilanParaclinique.id = examen_id)
+    Attend: result (str), result_date (datetime-local ou ISO), comment (str)
     """
     examen = get_object_or_404(BilanParaclinique, id=examen_id)
 
-    result = request.POST.get("result", "").strip()
-    result_date = request.POST.get("result_date", "").strip()
-    comment = request.POST.get("comment", "").strip()
+    result = (request.POST.get("result") or "").strip()
+    result_date_raw = (request.POST.get("result_date") or "").strip()
+    comment = (request.POST.get("comment") or "").strip()
 
     if not result:
         return JsonResponse({"success": False, "errors": "Le résultat est requis."}, status=400)
 
-    try:
-        # Traitement de la date
-        if result_date:
-            # Conversion de la date depuis le format datetime-local
-            dt = datetime.fromisoformat(result_date.replace('Z', '+00:00'))
-            if timezone.is_naive(dt):
-                dt = timezone.make_aware(dt, timezone.get_current_timezone())
-            examen.result_date = dt
-        else:
-            examen.result_date = timezone.now()
+    # Parse date (fallback = now)
+    dt = _parse_result_datetime(result_date_raw) or timezone.now()
 
+    try:
         examen.result = result
+        examen.result_date = dt
         examen.comment = comment
         examen.status = "completed"
-        examen.save()
+        examen.save(update_fields=["result", "result_date", "comment", "status"])
 
         return JsonResponse({
             "success": True,
             "message": "Résultat enregistré avec succès",
-            "examen_id": examen.id
+            "examen_id": examen.id,
+            "result_date": examen.result_date.isoformat(),
         })
-
     except Exception as e:
         return JsonResponse({"success": False, "errors": str(e)}, status=500)
 
@@ -258,92 +299,93 @@ def update_examen_result(request, examen_id):
 @require_POST
 def update_examen_results_bulk(request):
     """
-    Met à jour plusieurs résultats d'examens en une seule requête
+    Met à jour plusieurs résultats d'examens en une fois.
+    Body JSON:
+    {
+      "items": [
+        {"id": 123, "result": "xxx", "result_date": "YYYY-MM-DDTHH:MM", "comment": "..." },
+        ...
+      ]
+    }
     """
     try:
         payload = json.loads(request.body.decode("utf-8"))
         items = payload.get("items", [])
-    except (json.JSONDecodeError, KeyError, TypeError):
+    except (json.JSONDecodeError, AttributeError, TypeError):
         return JsonResponse({"success": False, "message": "Payload JSON invalide."}, status=400)
 
     if not isinstance(items, list) or not items:
         return JsonResponse({"success": False, "message": "Aucun élément fourni."}, status=400)
 
-    # Extraction et validation des IDs
-    try:
-        ids = [int(item.get("id")) for item in items if item.get("id")]
-    except (ValueError, TypeError):
-        return JsonResponse({"success": False, "message": "IDs invalides."}, status=400)
+    # IDs valides
+    ids = []
+    for it in items:
+        try:
+            if it and it.get("id") is not None:
+                ids.append(int(it.get("id")))
+        except (ValueError, TypeError):
+            return JsonResponse({"success": False, "message": "IDs invalides."}, status=400)
 
     if not ids:
         return JsonResponse({"success": False, "message": "Aucun ID valide fourni."}, status=400)
 
-    # Récupération des objets
+    # Map des objets existants
     examens = BilanParaclinique.objects.filter(id__in=ids)
     by_id = {e.id: e for e in examens}
 
-    updated_objects = []
+    updated_objs = []
     errors = []
     now = timezone.now()
 
-    for item in items:
+    for it in items:
+        ex_id = it.get("id")
         try:
-            ex_id = int(item.get("id"))
-            result = (item.get("result") or "").strip()
-            result_date_raw = (item.get("result_date") or "").strip()
-            comment = (item.get("comment") or "").strip()
+            ex_id = int(ex_id)
+        except (ValueError, TypeError):
+            errors.append({"id": ex_id, "error": "ID invalide"})
+            continue
 
-            # Vérification de l'existence
-            obj = by_id.get(ex_id)
-            if not obj:
-                errors.append({"id": ex_id, "error": "Examen introuvable"})
-                continue
+        obj = by_id.get(ex_id)
+        if not obj:
+            errors.append({"id": ex_id, "error": "Examen introuvable"})
+            continue
 
-            # Validation du résultat
-            if not result:
-                errors.append({"id": ex_id, "error": "Le résultat est requis"})
-                continue
+        result = (it.get("result") or "").strip()
+        if not result:
+            errors.append({"id": ex_id, "error": "Le résultat est requis"})
+            continue
 
-            # Traitement de la date
-            if result_date_raw:
-                try:
-                    dt = datetime.fromisoformat(result_date_raw.replace('Z', '+00:00'))
-                    if timezone.is_naive(dt):
-                        dt = timezone.make_aware(dt, timezone.get_current_timezone())
-                except (ValueError, TypeError):
-                    dt = now
-            else:
-                dt = now
+        result_date_raw = (it.get("result_date") or "").strip()
+        comment = (it.get("comment") or "").strip()
 
-            # Mise à jour de l'objet
-            obj.result = result
-            obj.result_date = dt
-            obj.comment = comment
-            obj.status = "completed"
-            updated_objects.append(obj)
+        dt = _parse_result_datetime(result_date_raw) or now
 
-        except Exception as e:
-            errors.append({"id": item.get("id"), "error": str(e)})
+        # Prépare l’objet pour bulk_update
+        obj.result = result
+        obj.result_date = dt
+        obj.comment = comment
+        obj.status = "completed"
+        updated_objs.append(obj)
 
-    # Sauvegarde en base
-    if updated_objects:
+    # Sauvegarde transactionnelle
+    if updated_objs:
         try:
             with transaction.atomic():
                 BilanParaclinique.objects.bulk_update(
-                    updated_objects,
-                    ['result', 'result_date', 'comment', 'status']
+                    updated_objs,
+                    ["result", "result_date", "comment", "status"]
                 )
         except Exception as e:
-            return JsonResponse({
-                "success": False,
-                "message": f"Erreur lors de la sauvegarde: {str(e)}"
-            }, status=500)
+            return JsonResponse(
+                {"success": False, "message": f"Erreur lors de la sauvegarde: {str(e)}"},
+                status=500
+            )
 
     return JsonResponse({
         "success": True,
-        "message": f"{len(updated_objects)} examen(s) mis à jour",
-        "updated": len(updated_objects),
-        "errors": errors
+        "message": f"{len(updated_objs)} examen(s) mis à jour",
+        "updated": len(updated_objs),
+        "errors": errors  # garde les détails des lignes non traitées
     })
 
 
