@@ -63,18 +63,42 @@ class Landing(TemplateView):
     template_name = "pages/landing.html"
 
 
+# views.py
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.db.models import Count, Avg
+from django.db.models.functions import ExtractMonth, ExtractYear
+
+import json
+from datetime import timedelta
+
+# Importe tes modèles
+# from .models import Patient, Consultation, Appointment, Hospitalization, Service
+
 class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
-    # form_class = LoginForm
     template_name = "pages/home.html"
 
+    # --------- Helpers ---------
+    @staticmethod
+    def _qs_to_list(qs):
+        """Assure une liste de dicts sérialisable JSON."""
+        return list(qs)
+
+    @staticmethod
+    def _json(data):
+        """json.dumps avec accents conservés."""
+        return json.dumps(data, ensure_ascii=False)
+
+    # --------- Données auxiliaires ---------
     def get_patient_age_distribution(self):
         """
         Retourne le nombre de patients par tranche d'âge et sexe.
         """
-        current_year = datetime.now().year
+        now = timezone.now()
+        current_year = now.year
 
-        # Définition des tranches d'âge avec leurs limites inférieures et supérieures
         age_groups = [
             ("0-18 ans", 0, 18),
             ("19-25 ans", 19, 25),
@@ -84,52 +108,43 @@ class HomePageView(LoginRequiredMixin, TemplateView):
             ("61-75 ans", 61, 75),
             ("75 ans et plus", 76, 120),
         ]
+        age_distribution = {g[0]: {"Hommes": 0, "Femmes": 0} for g in age_groups}
 
-        # Initialisation des compteurs
-        age_distribution = {group[0]: {"Hommes": 0, "Femmes": 0} for group in age_groups}
-
-        # Récupération des patients avec leur âge et genre
         patients = Patient.objects.values('date_naissance', 'genre')
-
-        for patient in patients:
-            if patient['date_naissance']:
-                age = current_year - patient['date_naissance'].year
-                genre = "Hommes" if patient['genre'] == "Homme" else "Femmes"
-
-                for group_name, min_age, max_age in age_groups:
-                    if min_age <= age <= max_age:
-                        age_distribution[group_name][genre] += 1
-                        break
-
+        for p in patients:
+            dob = p.get('date_naissance')
+            if not dob:
+                continue
+            age = current_year - dob.year
+            genre = "Hommes" if p.get('genre') == "Homme" else "Femmes"
+            for label, amin, amax in age_groups:
+                if amin <= age <= amax:
+                    age_distribution[label][genre] += 1
+                    break
         return age_distribution
 
     def get_hospitalization_statistics(self):
         """
-        Retourne les statistiques des hospitalisations par période et détaille les statuts spécifiques.
+        Stats hospitalisations par période + global.
         """
-        current_year = datetime.now().year
+        now = timezone.now()
+        current_year = now.year
 
-        # Définition des périodes
         periods = [
-            ("Cette semaine", datetime.now() - timedelta(days=7)),
-            ("Ce mois", datetime.now().replace(day=1)),
-            ("Cette année", datetime(current_year, 1, 1))
+            ("Cette semaine", now - timedelta(days=7)),
+            ("Ce mois", now.replace(day=1)),
+            ("Cette année", timezone.datetime(current_year, 1, 1, tzinfo=now.tzinfo)),
         ]
 
         stats = []
-
         for label, start_date in periods:
-            total_hospitalized = Hospitalization.objects.filter(admission_date__gte=start_date).count()
-
-            # Comptage des cas spécifiques
-            total_deaths = Hospitalization.objects.filter(admission_date__gte=start_date, status="DCD").count()
-            total_recovered = Hospitalization.objects.filter(admission_date__gte=start_date,
-                                                             status="Gueris-EXEA").count()
-            total_transferred = Hospitalization.objects.filter(admission_date__gte=start_date,
-                                                               status="Transféré-TRANSF").count()
-            total_scam = Hospitalization.objects.filter(admission_date__gte=start_date, status="SCAM").count()
-            total_evade = Hospitalization.objects.filter(admission_date__gte=start_date, status="EVADE").count()
-
+            base = Hospitalization.objects.filter(admission_date__gte=start_date)
+            total_hospitalized = base.count()
+            total_deaths = base.filter(status="DCD").count()
+            total_recovered = base.filter(status="Gueris-EXEA").count()
+            total_transferred = base.filter(status="Transféré-TRANSF").count()
+            total_scam = base.filter(status="SCAM").count()
+            total_evade = base.filter(status="EVADE").count()
             death_rate = (total_deaths / total_hospitalized * 100) if total_hospitalized else 0
 
             stats.append({
@@ -140,17 +155,15 @@ class HomePageView(LoginRequiredMixin, TemplateView):
                 "total_transferred": total_transferred,
                 "total_scam": total_scam,
                 "total_evade": total_evade,
-                "death_rate": round(death_rate, 2)
+                "death_rate": round(death_rate, 2),
             })
 
-        # Taux global
         total_hospitalized_all = Hospitalization.objects.count()
         total_deaths_all = Hospitalization.objects.filter(status="DCD").count()
         total_recovered_all = Hospitalization.objects.filter(status="Gueris-EXEA").count()
         total_transferred_all = Hospitalization.objects.filter(status="Transféré-TRANSF").count()
         total_scam_all = Hospitalization.objects.filter(status="SCAM").count()
         total_evade_all = Hospitalization.objects.filter(status="EVADE").count()
-
         global_death_rate = (total_deaths_all / total_hospitalized_all * 100) if total_hospitalized_all else 0
 
         stats.append({
@@ -161,16 +174,17 @@ class HomePageView(LoginRequiredMixin, TemplateView):
             "total_transferred": total_transferred_all,
             "total_scam": total_scam_all,
             "total_evade": total_evade_all,
-            "death_rate": round(global_death_rate, 2)
+            "death_rate": round(global_death_rate, 2),
         })
-
         return stats
 
+    # --------- Contexte principal ---------
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_year = datetime.now().year
+        now = timezone.now()
+        current_year = now.year
 
-        # Monthly patient count for trend graph
+        # Tendances patients (si utilisé ailleurs)
         monthly_patient_counts = (
             Patient.objects.filter(created_at__year=current_year)
             .annotate(month=ExtractMonth('created_at'))
@@ -182,32 +196,36 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         for entry in monthly_patient_counts:
             monthly_counts[entry['month'] - 1] = entry['count']
 
-        # Patient Statistics
+        # Statistiques Patients
         total_patients = Patient.objects.count()
         total_patients_femme = Patient.objects.filter(genre='Femme').count()
         total_patients_homme = Patient.objects.filter(genre='Homme').count()
-        patient_status_counts = Patient.objects.values('status').annotate(count=Count('status'))
-        average_age = Patient.objects.annotate(age=(datetime.now().year - ExtractYear('date_naissance'))).aggregate(
-            Avg('age'))
+        patient_status_counts_qs = Patient.objects.values('status').annotate(count=Count('status'))
+        avg_age = (
+            Patient.objects
+            .annotate(age=(ExtractYear(timezone.now()) - ExtractYear('date_naissance')))
+            .aggregate(Avg('age'))
+        )
+        average_age = avg_age.get('age__avg') or 0
 
-        # Service Utilization
-        consultation_by_service = Consultation.objects.values('services__nom').annotate(count=Count('id'))
+        # Services
+        consultation_by_service_qs = Consultation.objects.values('services__nom').annotate(count=Count('id'))
         top_services = Service.objects.annotate(total_use=Count('consultations')).order_by('-total_use')[:5]
         recent_consultations = Consultation.objects.select_related('patient', 'services', 'doctor').order_by(
             '-consultation_date')[:10]
 
-        # Appointments Summary
+        # Rendez-vous
         total_scheduled_appointments = Appointment.objects.filter(status='Scheduled').count()
-        appointment_status_counts = Appointment.objects.values('status').annotate(count=Count('status'))
-        upcoming_appointments = Appointment.objects.filter(date__gte=datetime.now()).order_by('date')[:10]
+        appointment_status_counts_qs = Appointment.objects.values('status').annotate(count=Count('status'))
+        upcoming_appointments = Appointment.objects.filter(date__gte=now.date()).order_by('date')[:10]
 
-        # Hospitalizations Overview
+        # Hospitalisations
         current_hospitalizations = Hospitalization.objects.filter(discharge_date__isnull=True).count()
-        hospitalizations_by_reason = Hospitalization.objects.values('reason_for_admission').annotate(count=Count('id'))
+        hospitalizations_by_reason_qs = Hospitalization.objects.values('reason_for_admission').annotate(count=Count('id'))
         recent_hospitalizations = Hospitalization.objects.select_related('patient', 'doctor').order_by(
             '-admission_date')[:10]
 
-        # Monthly Trends
+        # Tendances mensuelles (consultations / rendez-vous)
         monthly_consultations = (
             Consultation.objects.filter(consultation_date__year=current_year)
             .annotate(month=ExtractMonth('consultation_date'))
@@ -229,29 +247,65 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         for entry in monthly_appointments:
             appointment_counts[entry['month'] - 1] = entry['count']
 
+        # ---------- Sérialisations JSON sûres pour le template ----------
+        # Noms cohérents avec le template fourni
+        consultations_by_service_json = self._json([
+            {"services__nom": row.get("services__nom") or "Inconnu", "count": row.get("count", 0)}
+            for row in self._qs_to_list(consultation_by_service_qs)
+        ])
+
+        hospitalizations_by_reason_json = self._json([
+            {"reason_for_admission": row.get("reason_for_admission") or "Inconnue", "count": row.get("count", 0)}
+            for row in self._qs_to_list(hospitalizations_by_reason_qs)
+        ])
+
+        appointment_status_counts_json = self._json([
+            {"status": row.get("status") or "Inconnu", "count": row.get("count", 0)}
+            for row in self._qs_to_list(appointment_status_counts_qs)
+        ])
+
+        patient_status_counts_json = self._json([
+            {"status": row.get("status") or "Inconnu", "count": row.get("count", 0)}
+            for row in self._qs_to_list(patient_status_counts_qs)
+        ])
+
+        consultation_counts_json = self._json(consultation_counts or [])
+        appointment_counts_json = self._json(appointment_counts or [])
+
         context.update({
+            "current_time": now.strftime("%d/%m/%Y %H:%M"),
             "hospitalization_statistics": self.get_hospitalization_statistics(),
             "patient_age_distribution": self.get_patient_age_distribution(),
             "monthly_counts": monthly_counts,
+
             "total_patients": total_patients,
             "total_patients_femme": total_patients_femme,
             "total_patients_homme": total_patients_homme,
-            "patient_status_counts": patient_status_counts,
-            "average_age": average_age['age__avg'],
-            "consultation_by_service": consultation_by_service,
+            "average_age": average_age,
+
+            "consultation_by_service": consultation_by_service_qs,
             "top_services": top_services,
             "recent_consultations": recent_consultations,
+
             "total_scheduled_appointments": total_scheduled_appointments,
-            "appointment_status_counts": appointment_status_counts,
             "upcoming_appointments": upcoming_appointments,
+
             "current_hospitalizations": current_hospitalizations,
-            "hospitalizations_by_reason": hospitalizations_by_reason,
+            "hospitalizations_by_reason": hospitalizations_by_reason_qs,
             "recent_hospitalizations": recent_hospitalizations,
-            "consultation_counts": consultation_counts,
-            "appointment_counts": appointment_counts,
+
+            "consultation_counts": consultation_counts,   # encore dispo si ailleurs
+            "appointment_counts": appointment_counts,     # idem
+
+            # Blobs JSON pour le template (charts)
+            "consultations_by_service_json": consultations_by_service_json,
+            "hospitalizations_by_reason_json": hospitalizations_by_reason_json,
+            "appointment_status_counts_json": appointment_status_counts_json,
+            "patient_status_counts_json": patient_status_counts_json,
+            "consultation_counts_json": consultation_counts_json,
+            "appointment_counts_json": appointment_counts_json,
         })
         return context
-
 
 @login_required
 def appointment_create(request):
