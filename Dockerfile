@@ -37,7 +37,7 @@ COPY . /smitci-app/
 ENV DJANGO_SETTINGS_MODULE=smitci.settings \
     PYTHONUNBUFFERED=1 \
     STATIC_ROOT=/smitci-app/smitci/staticfiles
-RUN python manage.py collectstatic --noinput
+#RUN #python manage.py collectstatic --noinput
 RUN mkdir -p "$STATIC_ROOT"
 #
 ## ========== Stage 2: runtime ==========
