@@ -15,9 +15,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView, TemplateView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin, RequestConfig, LazyPaginator, SingleTableView
 
@@ -104,50 +105,114 @@ def delete_echantillon_consultation_generale(request, echantillon_id, consultati
 
 # 📌 Vue pour soumettre les résultats dynamiquement via AJAX
 
+class ExamenTypePartialView(LoginRequiredMixin, TemplateView):
+    """
+    Partiel HTMX qui rend le tableau d'un type donné, paginé.
+    """
+    template_name = 'lab/_examen_table_partial.html'
+    page_size = 20
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        type_slug = self.kwargs['type_slug']
+
+        # Base QS (avec relations nécessaires pour le rendu du tableau)
+        base_qs = (
+            BilanParaclinique.objects
+            .select_related('examen__type_examen', 'patient', 'doctor')
+            .filter(result__isnull=True)
+            .order_by('created_at')
+        )
+
+        # Appliquer les filtres GET comme dans la vue principale
+        filterset = ExamenFilter(self.request.GET, queryset=base_qs)
+        qs = filterset.qs
+
+        # Résoudre le slug -> nom DISTINCT côté DB (léger)
+        distinct_noms = (
+            qs.values_list('examen__type_examen__nom', flat=True)
+              .distinct()
+        )
+        resolved_name = None
+        for nom in distinct_noms:
+            candidate = (nom or "Autres")
+            if slugify(candidate) == type_slug:
+                resolved_name = nom  # peut être None -> "Autres"
+                break
+
+        if resolved_name is None:
+            # si pas trouvé, on interprète "autres"
+            qs = qs.filter(examen__type_examen__isnull=True)
+        else:
+            if resolved_name is None:
+                qs = qs.filter(examen__type_examen__isnull=True)
+            else:
+                qs = qs.filter(examen__type_examen__nom=resolved_name)
+
+        paginator = Paginator(qs, self.page_size)
+        page_number = self.request.GET.get('page') or 1
+        page_obj = paginator.get_page(page_number)
+
+        # QS prefix pour pagination HTMX
+        params = self.request.GET.copy()
+        params.pop('page', True)
+        qs_str = params.urlencode()
+        query_prefix = '?' + (qs_str + '&' if qs_str else '')
+
+        ctx.update({
+            "type_slug": type_slug,
+            "page_obj": page_obj,
+            "object_list": page_obj.object_list,
+            "query_prefix": query_prefix,
+        })
+        return ctx
 
 class ExamenListView(LoginRequiredMixin, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
-    paginate_by = 50
+    paginate_by = 0  # pagination déléguée aux partiels
 
     def get_queryset(self):
-        self.filterset = ExamenFilter(
-            self.request.GET,
-            queryset=BilanParaclinique.objects.select_related(
-                'examen__type_examen', 'patient', 'doctor'
-            ).filter(result__isnull=True).order_by("created_at")
-        )
+        base_qs = BilanParaclinique.objects.filter(result__isnull=True)
+        self.filterset = ExamenFilter(self.request.GET, queryset=base_qs)
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
 
-        # Regroupe par type
-        examens_par_type = defaultdict(list)
-        for examen in self.object_list:
-            type_bilan = examen.examen.type_examen.nom if getattr(examen.examen, "type_examen", None) else "Autres"
-            examens_par_type[type_bilan].append({
-                "examen": examen,
-                "form": BilanParacliniqueResultForm(instance=examen),
+        # Comptage par type 100% DB
+        counts = (
+            self.filterset.qs
+            .values('examen__type_examen__nom')
+            .annotate(total=Count('id'))
+            .order_by()
+        )
+
+        # Liste (nom, slug, total) triée par nom
+        types_meta = []
+        for row in counts:
+            nom = row['examen__type_examen__nom'] or "Autres"
+            types_meta.append({
+                "name": nom,
+                "slug": slugify(nom),
+                "count": row['total'],
             })
+        types_meta.sort(key=lambda x: x["name"].lower())
 
-        # QS sans 'page' pour ne pas dupliquer &page=
-        qs = self.request.GET.copy()
-        qs.pop('page', True)
-        qs_str = qs.urlencode()
-
-        # Préfixe unique à réutiliser: '?' ou '?<qs>&'
+        # QS sans 'page' → conserver les filtres dans les liens
+        params = self.request.GET.copy()
+        params.pop('page', True)
+        qs_str = params.urlencode()
         query_prefix = '?' + (qs_str + '&' if qs_str else '')
 
         ctx.update({
-            "examens_by_type": dict(examens_par_type),
             "filter": self.filterset,
+            "types_meta": types_meta,                 # [{name, slug, count}]
             "base_url": reverse('examen_list'),
             "query_prefix": query_prefix,
         })
         return ctx
-
 @login_required
 @require_POST
 def update_examen_result(request, examen_id):
@@ -408,8 +473,6 @@ class ExamenResultatsListView(LoginRequiredMixin, ListView):
     template_name = 'lab/examen_result_list.html'  # Nom du template à créer
     context_object_name = 'resultats'
     paginate_by = 10
-
-
 
 
 class ExamenDetailView(DetailView):

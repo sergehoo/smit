@@ -1,0 +1,92 @@
+{# templates/lab/_examen_table_partial.html #}
+{% load humanize %}
+<form id="examen-form-partial-{{ type_slug }}">
+  {% csrf_token %}
+  <table class="table table-striped">
+    <thead class="thead-light">
+      <tr>
+        <th style="width:38px;">
+          <input type="checkbox" class="select-all-type" data-type="{{ type_slug }}"/>
+        </th>
+        <th>Code</th>
+        <th>Patient</th>
+        <th>Examen</th>
+        <th>Médecin</th>
+        <th>Résultat</th>
+        <th>Date Résultat</th>
+        <th>Commentaire</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for examen in object_list %}
+      {# 'examen' ici est un objet BilanParaclinique #}
+      <tr id="exam-{{ examen.id }}">
+        <td>
+          <input type="checkbox" class="row-check" data-id="{{ examen.id }}" data-type="{{ type_slug }}"/>
+        </td>
+        <td>{{ examen.id }}</td>
+        <td>{{ examen.patient.nom|upper }} {{ examen.patient.prenoms|upper }}</td>
+        <td><span class="text-primary">{{ examen.examen }}</span></td>
+        <td>{{ examen.doctor }}</td>
+        <td>
+          <input type="text" class="form-control result-input"
+                 name="result" value="{{ examen.result|default_if_none:'' }}"
+                 data-id="{{ examen.id }}">
+        </td>
+        <td>
+          <input type="datetime-local" class="form-control result-date"
+                 name="result_date"
+                 value="{{ examen.result_date|date:'Y-m-d\\TH:i' }}"
+                 data-id="{{ examen.id }}">
+        </td>
+        <td>
+          <textarea class="form-control result-comment" name="comment" rows="2"
+                    data-id="{{ examen.id }}">{{ examen.comment|default_if_none:'' }}</textarea>
+        </td>
+        <td>
+          <button class="btn btn-primary btn-sm save-btn" data-id="{{ examen.id }}">Enregistrer</button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center">Aucun examen pour ce type.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</form>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<ul class="pagination justify-content-center justify-content-md-start">
+  {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link"
+         hx-get="{{ request.path }}{{ query_prefix }}page={{ page_obj.previous_page_number }}"
+         hx-target="#panel-{{ type_slug }}" hx-swap="innerHTML">Prev</a>
+    </li>
+  {% else %}
+    <li class="page-item disabled"><span class="page-link">Prev</span></li>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+    {% if num == page_obj.number %}
+      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+    {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+      <li class="page-item">
+        <a class="page-link"
+           hx-get="{{ request.path }}{{ query_prefix }}page={{ num }}"
+           hx-target="#panel-{{ type_slug }}" hx-swap="innerHTML">{{ num }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+
+  {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link"
+         hx-get="{{ request.path }}{{ query_prefix }}page={{ page_obj.next_page_number }}"
+         hx-target="#panel-{{ type_slug }}" hx-swap="innerHTML">Next</a>
+    </li>
+  {% else %}
+    <li class="page-item disabled"><span class="page-link">Next</span></li>
+  {% endif %}
+</ul>
+{% endif %}

@@ -93,7 +93,7 @@
                                     <strong class="text-primary">{{ hospitalisationdetail.discharge_date }}</strong>
                                     <footer class="blockquote-footer">
                                         <span class="badge badge-secondary">{{ hospitalisationdetail.status }}</span><br>
-                                        {{ hospitalisationdetail.discharge_reason }}
+                                        {{ hospitalisationdetail.discharge_reason|safe }}
                                     </footer>
                                 {% endif %}
                             </blockquote>

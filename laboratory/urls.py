@@ -10,7 +10,7 @@ from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateVi
     validate_serologie_vih_request, EchantillonDetailView, update_echantillon_result, ResultatAnalyseListView, \
     ResultatAnalyseCreateView, ResultatAnalyseDetailView, ResultatAnalyseUpdateView, ResultatAnalyseDeleteView, \
     ResultatAnalyseValidateView, ResultatAnalyseCorrigerView, validate_resultat_ajax, ExamenDoneDetailView, \
-    update_examen_results_bulk
+    update_examen_results_bulk, ExamenTypePartialView
 from smitci import settings
 
 urlpatterns = [
@@ -44,6 +44,11 @@ urlpatterns = [
                   # URLS pour Examen
                   path('examens/', ExamenResultatsListView.as_view(), name='resultatsexam'),
                   path('examens/resultats', ExamenListView.as_view(), name='examen_list'),
+                  path(
+                      "laboratoire/examens/resultats/type/<slug:type_slug>/",
+                      ExamenTypePartialView.as_view(),
+                      name="examen_type_partial",
+                  ),
 
                   path('examens_effectues/', ExamenDoneListView.as_view(), name='examen_done_list'),
                   path('examens_effectues/<int:pk>', ExamenDoneDetailView.as_view(), name='examen_done_detail'),
