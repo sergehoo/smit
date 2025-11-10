@@ -1133,27 +1133,21 @@ class PatientRecuListView(LoginRequiredMixin, ListView):
     ordering = ['-time']
 
     def get_queryset(self):
-        # Rendez-vous passés
         today = now().date()
         current_time = now().time()
-        qs_past = Appointment.objects.filter(date__lt=today, status='Completed')
-        qs_today = Appointment.objects.filter(date=today, time__lt=current_time)
-        return (qs_past | qs_today).order_by('-date', '-time')
+        # Rendez-vous passés (y compris aujourd'hui < heure courante)
+        return Appointment.objects.filter(
+            Q(date__lt=today, status='Completed') | Q(date=today, time__lt=current_time)
+        ).order_by('-date', '-time')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
-        # Compteur
-        today = now().date()
-        appointments_past_nbr = self.get_queryset().count()
-        ctx['salleattente_nbr'] = appointments_past_nbr
-        ctx['salleattente'] = ctx['object_list']  # évite de recalculer la requête
+        ctx['salleattente_nbr'] = self.get_queryset().count()
+        ctx['salleattente'] = ctx['object_list']
         ctx['constanteform'] = ConstantesForm()
         ctx['ConsultationSendForm'] = ConsultationSendForm()
-
-        # Querystring sans "page"
         qs = self.request.GET.copy()
-        qs.pop('page', True)
+        qs.pop('page', True)  # retire la page courante
         ctx['qs'] = qs.urlencode()  # ex: "status=Completed&doctor=12"
         return ctx
 
