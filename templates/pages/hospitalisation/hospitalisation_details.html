@@ -135,7 +135,7 @@
                                                 <h5 class="modal-title" id="observationsModalLabel">Observations pour
                                                     l'Hospitalisation</h5>
                                                 <button type="button" class="btn btn-outline-secondary"
-                                                        data-bs-dismiss="modal" aria-label="Close"><em
+                                                        data-dismiss="modal" aria-label="Close"><em
                                                         class="icon ni ni-close"></em></button>
                                             </div>
                                             <div class="modal-body">
@@ -180,7 +180,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -207,7 +207,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="historiqueModalLabel">Historique de la
                                                     Maladie</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -255,7 +255,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -281,7 +281,7 @@
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="diagnosticModalLabel">Diagnostics
                                                     Associés</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -334,7 +334,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -429,7 +429,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -455,7 +455,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Modes de Vie du Patient</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -467,8 +467,8 @@
                                                                     id="heading{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn "
                                                                             type="button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#collapse{{ forloop.counter }}"
+                                                                            data-toggle="collapse"
+                                                                            data-target="#collapse{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapse{{ forloop.counter }}">
                                                                         {{ categorie }} ({{ modedevies|length }})
@@ -477,7 +477,7 @@
                                                                 <div id="collapse{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="heading{{ forloop.counter }}"
-                                                                     data-bs-parent="#accordionModeDeVie">
+                                                                     data-parent="#accordionModeDeVie">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for mode in modedevies %}
@@ -524,7 +524,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -548,7 +548,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Appareils examinés</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -622,7 +622,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -646,7 +646,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Résumés syndromiques</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -658,8 +658,8 @@
                                                                     id="headingResume{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#collapseResume{{ forloop.counter }}"
+                                                                            data-toggle="collapse"
+                                                                            data-target="#collapseResume{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseResume{{ forloop.counter }}">
                                                                         {{ hospitalisation }} ({{ resumes|length }})
@@ -668,7 +668,7 @@
                                                                 <div id="collapseResume{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingResume{{ forloop.counter }}"
-                                                                     data-bs-parent="#accordionResumes">
+                                                                     data-parent="#accordionResumes">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for resume in resumes %}
@@ -717,7 +717,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -741,7 +741,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Problèmes posés</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -753,8 +753,8 @@
                                                                     id="headingProbleme{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#collapseProbleme{{ forloop.counter }}"
+                                                                            data-toggle="collapse"
+                                                                            data-target="#collapseProbleme{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseProbleme{{ forloop.counter }}">
                                                                         {{ hospitalisation }} ({{ problemes|length }})
@@ -763,7 +763,7 @@
                                                                 <div id="collapseProbleme{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingProbleme{{ forloop.counter }}"
-                                                                     data-bs-parent="#accordionProblemes">
+                                                                     data-parent="#accordionProblemes">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for probleme in problemes %}
@@ -812,7 +812,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -837,7 +837,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Bilans Paracliniques</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -849,8 +849,8 @@
                                                                     id="headingBilan{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-bs-toggle="collapse"
-                                                                            data-bs-target="#collapseBilan{{ forloop.counter }}"
+                                                                            data-toggle="collapse"
+                                                                            data-target="#collapseBilan{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseBilan{{ forloop.counter }}">
                                                                         {{ type_bilan }} ({{ bilans|length }})
@@ -859,7 +859,7 @@
                                                                 <div id="collapseBilan{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingBilan{{ forloop.counter }}"
-                                                                     data-bs-parent="#accordionBilans">
+                                                                     data-parent="#accordionBilans">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for bilan in bilans %}
@@ -944,7 +944,7 @@
                                                 {% endif %}
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                                     Fermer
                                                 </button>
                                             </div>
@@ -966,7 +966,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Imagerie Medicale</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -981,8 +981,8 @@
                                                                         id="headingImagerie{{ forloop.counter }}">
                                                                         <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                                 type="button"
-                                                                                data-bs-toggle="collapse"
-                                                                                data-bs-target="#collapseImagerie{{ forloop.counter }}"
+                                                                                data-toggle="collapse"
+                                                                                data-target="#collapseImagerie{{ forloop.counter }}"
                                                                                 aria-expanded="false"
                                                                                 aria-controls="collapseImagerie{{ forloop.counter }}">
                                                                             {{ type_imagerie }} ({{ imageries|length }})
@@ -991,7 +991,7 @@
                                                                     <div id="collapseImagerie{{ forloop.counter }}"
                                                                          class="accordion-collapse collapse"
                                                                          aria-labelledby="headingImagerie{{ forloop.counter }}"
-                                                                         data-bs-parent="#accordionImagerie">
+                                                                         data-parent="#accordionImagerie">
                                                                         <div class="accordion-body">
                                                                             <ul class="list-group">
                                                                                 {% for imagerie in imageries %}
@@ -1112,7 +1112,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Avis Médicaux</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -1172,7 +1172,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Effets Indésirables</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -1238,7 +1238,7 @@
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Commentaires des medecins </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                <button type="button" class="btn-close" data-dismiss="modal"
                                                         aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
@@ -1541,7 +1541,7 @@
                                                 <!-- Mode de vie  -->
                                                 <li class="d-flex justify-content-between align-items-center">
                                                     <button type="button" class="btn btn-primary uniform-btn mt-2"
-                                                            data-bs-toggle="modal" data-bs-target="#modeDeVieModal">
+                                                            data-toggle="modal" data-target="#modeDeVieModal">
                                                         <em class="icon ni ni-plus-circle-fill"></em> Mode de Vie
                                                     </button>
 
@@ -1553,7 +1553,7 @@
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Mode de Vie du Patient</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
 
@@ -1916,7 +1916,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Ajouter un résumé</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -1961,7 +1961,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Rediger le Problèmes</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -2013,7 +2013,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                     <h5 class="modal-title">Ajouter des Examens
                                                                         Paracliniques</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form @submit.prevent="submitForm">
@@ -2115,7 +2115,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                     <h5 class="modal-title">Ajouter une Imagerie
                                                                         Médicale</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form @submit.prevent="submitForm"
@@ -2339,7 +2339,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Ajouter un Diagnostic</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -2377,7 +2377,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Ajouter un Avi medical</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -2423,7 +2423,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                     <h5 class="modal-title">Ajouter un effet
                                                                         indesirable</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -2468,7 +2468,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 <div class="modal-header">
                                                                     <h5 class="modal-title">Ajouter un commentaire</h5>
                                                                     <button type="button" class="btn-close"
-                                                                            data-bs-dismiss="modal"></button>
+                                                                            data-dismiss="modal"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <form method="post"
@@ -2755,7 +2755,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                         <h5 class="modal-title" id="constanteModalLabel">Nouvelles
                                                             Constante</h5>
                                                         <button type="button" class="btn btn-close"
-                                                                data-bs-dismiss="modal"
+                                                                data-dismiss="modal"
                                                                 aria-label="Close">X
                                                         </button>
                                                     </div>
@@ -3093,7 +3093,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                 });
 
                                                 // Initialisation des tooltips Bootstrap
-                                                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                                                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-toggle="tooltip"]'));
                                                 const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                                                     return new bootstrap.Tooltip(tooltipTriggerEl);
                                                 });
@@ -3129,7 +3129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                 const badge = element.querySelector('.badge');
                                                                 badge.className = 'badge badge-dot badge-lg badge-success';
                                                                 badge.innerHTML = '<i class="fas fa-check"></i>';
-                                                                badge.setAttribute('data-bs-original-title', `Pris à ${new Date().toLocaleTimeString()}`);
+                                                                badge.setAttribute('data-original-title', `Pris à ${new Date().toLocaleTimeString()}`);
 
                                                                 // Mettre à jour le tooltip
                                                                 const tooltip = bootstrap.Tooltip.getInstance(element);
@@ -3375,7 +3375,7 @@ document.addEventListener("DOMContentLoaded", function () {
     {% if prescription.status == 'Cancelled' %}
 
         <span data-toggle="tooltip" data-placement="top"
-              data-bs-original-title="Annuler le {{ prescription.cancellation_date }} pour motif : {{ prescription.cancellation_reason }} par : {{ prescription.cancellation_by }} ">{{ prescription.get_status_display }}</span>
+              data-original-title="Annuler le {{ prescription.cancellation_date }} pour motif : {{ prescription.cancellation_reason }} par : {{ prescription.cancellation_by }} ">{{ prescription.get_status_display }}</span>
 
     {% else %}
         {{ prescription.get_status_display }}
@@ -3482,7 +3482,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         {#                                            <div class="modal-content">#}
                                         {#                                                <div class="modal-header">#}
                                         {#                                                    <h5 class="modal-title" id="prescriptionModalLabel">Nouvelles Prescription</h5>#}
-                                        {#                                                    <button type="button" class="btn btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>#}
+                                        {#                                                    <button type="button" class="btn btn-close" data-dismiss="modal" aria-label="Close">X</button>#}
                                         {#                                                </div>#}
                                         {#                                                <div class="modal-body">#}
                                         {#                                                    <div class="row">#}
@@ -3517,7 +3517,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                         <h5 class="modal-title" id="prescriptionModalLabel">Nouvelle
                                                             Prescription</h5>
                                                         <button type="button" class="btn btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close">X
+                                                                data-dismiss="modal" aria-label="Close">X
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
@@ -3802,7 +3802,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         <div class="modal-header">
                                             <h5 class="modal-title" id="indicateurautresModalLabel">Indicateurs
                                                 autres</h5>
-                                            <button type="button" class="btn btn-close" data-bs-dismiss="modal"
+                                            <button type="button" class="btn btn-close" data-dismiss="modal"
                                                     aria-label="Close">X
                                             </button>
                                         </div>
