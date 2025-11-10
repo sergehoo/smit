@@ -90,8 +90,10 @@ services:
       WHITENOISE_MAX_AGE: "2592000"
       WHITENOISE_USE_FINDERS: "False"
       DJANGO_MEDIA_ROOT: /var/www/media
+      MPLCONFIGDIR: /tmp/matplotlib
     volumes:
-      - static_volume:/smitci-app/static
+#      - static_volume:/smitci-app/static
+      - static_volume:/smitci-app/smitci/staticfiles
 #      - media_volume:/smitci-app/media
       - dbbackups:/smitci-app/dbbackup
       - media_volume:/var/www/media:rw
