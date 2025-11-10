@@ -104,10 +104,12 @@ def delete_echantillon_consultation_generale(request, echantillon_id, consultati
 
 # 📌 Vue pour soumettre les résultats dynamiquement via AJAX
 
+
 class ExamenListView(LoginRequiredMixin, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
+    paginate_by = 50
 
     def get_queryset(self):
         self.filterset = ExamenFilter(
@@ -119,20 +121,32 @@ class ExamenListView(LoginRequiredMixin, ListView):
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)
 
+        # Regroupe par type
         examens_par_type = defaultdict(list)
         for examen in self.object_list:
-            type_bilan = examen.examen.type_examen.nom if examen.examen.type_examen else "Autres"
+            type_bilan = examen.examen.type_examen.nom if getattr(examen.examen, "type_examen", None) else "Autres"
             examens_par_type[type_bilan].append({
                 "examen": examen,
-                "form": BilanParacliniqueResultForm(instance=examen)
+                "form": BilanParacliniqueResultForm(instance=examen),
             })
 
-        context["examens_by_type"] = dict(examens_par_type)
-        context["filter"] = self.filterset
-        return context
+        # QS sans 'page' pour ne pas dupliquer &page=
+        qs = self.request.GET.copy()
+        qs.pop('page', True)
+        qs_str = qs.urlencode()
 
+        # Préfixe unique à réutiliser: '?' ou '?<qs>&'
+        query_prefix = '?' + (qs_str + '&' if qs_str else '')
+
+        ctx.update({
+            "examens_by_type": dict(examens_par_type),
+            "filter": self.filterset,
+            "base_url": reverse('examen_list'),
+            "query_prefix": query_prefix,
+        })
+        return ctx
 
 @login_required
 @require_POST
@@ -393,6 +407,9 @@ class ExamenResultatsListView(LoginRequiredMixin, ListView):
     model = Examen
     template_name = 'lab/examen_result_list.html'  # Nom du template à créer
     context_object_name = 'resultats'
+    paginate_by = 10
+
+
 
 
 class ExamenDetailView(DetailView):

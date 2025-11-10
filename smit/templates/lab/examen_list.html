@@ -149,6 +149,61 @@
                 </div>
             </div>
         </div>
+
+<div class="card-inner">
+  <ul class="pagination justify-content-center justify-content-md-start">
+    {% with qp=query_prefix bu=base_url %}
+
+      {# Précédent #}
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="{{ bu }}{{ qp }}page={{ page_obj.previous_page_number }}">Prev</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Prev</span></li>
+      {% endif %}
+
+      {# Première page + ellipse #}
+      {% if page_obj.number > 3 %}
+        <li class="page-item"><a class="page-link" href="{{ bu }}{{ qp }}page=1">1</a></li>
+        {% if page_obj.number > 4 %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endif %}
+
+      {# Fenêtre [-2, +2] autour de la page courante #}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+          {% if num == page_obj.number %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="{{ bu }}{{ qp }}page={{ num }}">{{ num }}</a></li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {# Ellipse + dernière page #}
+      {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+        {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        <li class="page-item">
+          <a class="page-link" href="{{ bu }}{{ qp }}page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+        </li>
+      {% endif %}
+
+      {# Suivant #}
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{{ bu }}{{ qp }}page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+
+    {% endwith %}
+  </ul>
+</div>
     </div>
 
     <!-- Toast container -->
