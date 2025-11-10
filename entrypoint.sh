@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+
 set -euo pipefail
 
 DB_HOST="${DATABASE_HOST:-smitDB}"
