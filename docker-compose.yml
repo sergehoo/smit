@@ -100,7 +100,7 @@ services:
     depends_on:
       smitDB:
         condition: service_healthy
-      redis:
+      smitredis:
         condition: service_healthy
     restart: unless-stopped
     networks: [smitci_network, proxy]
@@ -162,7 +162,7 @@ services:
     depends_on:
       smitDB:
         condition: service_healthy
-      redis:
+      smitredis:
         condition: service_healthy
     restart: unless-stopped
     networks: [smitci_network]
@@ -194,7 +194,7 @@ services:
     depends_on:
       smitDB:
         condition: service_healthy
-      redis:
+      smitredis:
         condition: service_healthy
     restart: unless-stopped
     networks: [smitci_network]
