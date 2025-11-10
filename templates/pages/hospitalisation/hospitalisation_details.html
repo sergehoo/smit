@@ -634,7 +634,7 @@
                                     <li class="d-flex justify-content-between align-items-center mt-3">
                                         <button class="btn btn-outline-primary ml-2 uniform-btn" data-toggle="modal"
                                                 data-target="#resumesViewModal">
-                                            <em class="icon ni ni-list"></e synd.
+                                            <em class="icon ni ni-list"></em> Résumés synd.
                                             <span class="badge badge-info ml-1">{{ resumes_count }}</span>
                                         </button>
                                     </li>
@@ -658,8 +658,8 @@
                                                                     id="headingResume{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-toggle="collapse"
-                                                                            data-target="#collapseResume{{ forloop.counter }}"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#collapseResume{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseResume{{ forloop.counter }}">
                                                                         {{ hospitalisation }} ({{ resumes|length }})
@@ -668,7 +668,7 @@
                                                                 <div id="collapseResume{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingResume{{ forloop.counter }}"
-                                                                     data-parent="#accordionResumes">
+                                                                     data-bs-parent="#accordionResumes">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for resume in resumes %}
@@ -753,8 +753,8 @@
                                                                     id="headingProbleme{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-toggle="collapse"
-                                                                            data-target="#collapseProbleme{{ forloop.counter }}"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#collapseProbleme{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseProbleme{{ forloop.counter }}">
                                                                         {{ hospitalisation }} ({{ problemes|length }})
@@ -763,7 +763,7 @@
                                                                 <div id="collapseProbleme{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingProbleme{{ forloop.counter }}"
-                                                                     data-parent="#accordionProblemes">
+                                                                     data-bs-parent="#accordionProblemes">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for probleme in problemes %}
@@ -849,8 +849,8 @@
                                                                     id="headingBilan{{ forloop.counter }}">
                                                                     <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                             type="button"
-                                                                            data-toggle="collapse"
-                                                                            data-target="#collapseBilan{{ forloop.counter }}"
+                                                                            data-bs-toggle="collapse"
+                                                                            data-bs-target="#collapseBilan{{ forloop.counter }}"
                                                                             aria-expanded="false"
                                                                             aria-controls="collapseBilan{{ forloop.counter }}">
                                                                         {{ type_bilan }} ({{ bilans|length }})
@@ -859,7 +859,7 @@
                                                                 <div id="collapseBilan{{ forloop.counter }}"
                                                                      class="accordion-collapse collapse"
                                                                      aria-labelledby="headingBilan{{ forloop.counter }}"
-                                                                     data-parent="#accordionBilans">
+                                                                     data-bs-parent="#accordionBilans">
                                                                     <div class="accordion-body">
                                                                         <ul class="list-group">
                                                                             {% for bilan in bilans %}
@@ -981,8 +981,8 @@
                                                                         id="headingImagerie{{ forloop.counter }}">
                                                                         <button class="accordion-button collapsed btn btn-outline-primary uniform-btn"
                                                                                 type="button"
-                                                                                data-toggle="collapse"
-                                                                                data-target="#collapseImagerie{{ forloop.counter }}"
+                                                                                data-bs-toggle="collapse"
+                                                                                data-bs-target="#collapseImagerie{{ forloop.counter }}"
                                                                                 aria-expanded="false"
                                                                                 aria-controls="collapseImagerie{{ forloop.counter }}">
                                                                             {{ type_imagerie }} ({{ imageries|length }})
@@ -991,7 +991,7 @@
                                                                     <div id="collapseImagerie{{ forloop.counter }}"
                                                                          class="accordion-collapse collapse"
                                                                          aria-labelledby="headingImagerie{{ forloop.counter }}"
-                                                                         data-parent="#accordionImagerie">
+                                                                         data-bs-parent="#accordionImagerie">
                                                                         <div class="accordion-body">
                                                                             <ul class="list-group">
                                                                                 {% for imagerie in imageries %}
@@ -2872,7 +2872,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                                                                 <i class="fas fa-pills text-primary me-2"></i>
                                                                             </div>
                                                                             <div class="flex-grow-1">
-                                                                                <strong>{{ prescription.medication.nom }}</strong
+                                                                                <strong>{{ prescription.medication.nom }}</strong>
                                                                                 <div class="small text-muted">
                                                                                     {{ prescription.posology }}
                                                                                     • {{ prescription.quantity }} unités
