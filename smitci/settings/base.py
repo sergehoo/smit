@@ -328,7 +328,8 @@ SCHEDULER_ADMIN = True
 
 STATICFILES_DIRS = [BASE_DIR.parent / 'static']
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = '/smitci-app/static'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.environ.get('DJANGO_MEDIA_ROOT', str(BASE_DIR / 'media'))
