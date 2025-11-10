@@ -43,7 +43,7 @@ services:
     ulimits:
       nofile: 65535
 
-  redis:
+  smitredis:
     image: redis:7
     restart: unless-stopped
     environment:
