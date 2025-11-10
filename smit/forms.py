@@ -1639,14 +1639,11 @@ class HospitalizationUrgenceForm(forms.ModelForm):
                   'bed', 'reason_for_admission', ]
         widgets = {
             'admission_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            # 'discharge_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            # 'discharge_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+
             'reason_for_admission': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            # 'room': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'status': forms.Select(attrs={'class': 'form-control'}),
+
             'patient': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
-            # 'activite': forms.Select(attrs={'class': 'form-control'}),
-            # 'doctor': forms.Select(attrs={'class': 'form-control'}),
+
             'bed': forms.Select(attrs={'class': 'form-control form-select select2', 'data-search': 'on'}),
         }
 

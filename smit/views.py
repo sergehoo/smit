@@ -1133,27 +1133,29 @@ class PatientRecuListView(LoginRequiredMixin, ListView):
     ordering = ['-time']
 
     def get_queryset(self):
-        # Filtrer les rendez-vous passés
+        # Rendez-vous passés
         today = now().date()
         current_time = now().time()
-        return Appointment.objects.filter(date__lt=today, status='Completed') | Appointment.objects.filter(
-            date=today, time__lt=current_time
-        ).order_by('-date', '-time')
+        qs_past = Appointment.objects.filter(date__lt=today, status='Completed')
+        qs_today = Appointment.objects.filter(date=today, time__lt=current_time)
+        return (qs_past | qs_today).order_by('-date', '-time')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)
+
+        # Compteur
         today = now().date()
-
-        # Nombre de rendez-vous passés
         appointments_past_nbr = self.get_queryset().count()
+        ctx['salleattente_nbr'] = appointments_past_nbr
+        ctx['salleattente'] = ctx['object_list']  # évite de recalculer la requête
+        ctx['constanteform'] = ConstantesForm()
+        ctx['ConsultationSendForm'] = ConsultationSendForm()
 
-        # Ajouter des données supplémentaires au contexte
-        context['salleattente_nbr'] = appointments_past_nbr
-        context['salleattente'] = self.get_queryset()
-        context['constanteform'] = ConstantesForm()
-        context['ConsultationSendForm'] = ConsultationSendForm()
-
-        return context
+        # Querystring sans "page"
+        qs = self.request.GET.copy()
+        qs.pop('page', True)
+        ctx['qs'] = qs.urlencode()  # ex: "status=Completed&doctor=12"
+        return ctx
 
 
 # class ServiceContentDetailView(LoginRequiredMixin, DetailView):
@@ -2096,23 +2098,17 @@ class UrgenceListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     # ordering = "-admission_date"
-
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        qs = self.request.GET.copy()
+        qs.pop('page', True)  # retire le paramètre page s'il existe
+        ctx['qs'] = qs.urlencode()  # ex: "status=opened&doctor=12"
+        return ctx
     def get_queryset(self):
         # Filtrer les patients dont urgence est True
         return Patient.objects.filter(urgence=True)
 
 
-# class UrgenceCreateView(LoginRequiredMixin, CreateView):
-#     model = Patient
-#     template_name = "pages/urgence/urgence_create.html"
-#     form_class = UrgencePatientForm
-#     success_url = reverse_lazy('urgences_list')  # Rediriger après la création
-#
-#     def form_valid(self, form):
-#         # Forcer le champ urgence à True
-#         form.instance.urgence = True
-#         form.instance.created_by = self.request.user.employee  # Associer l'utilisateur connecté
-#         return super().form_valid(form)
 
 class JsonLoginRequiredMixin(AccessMixin):
     """ Comme LoginRequiredMixin mais renvoie JSON 401 au lieu d'un redirect HTML. """

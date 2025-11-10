@@ -6,177 +6,214 @@
     <div class="nk-content nk-content-fluid">
 
         <!--- Tableau de validation des hospi--->
-       {% if demande_hospi %}
-<div class="container-xl wide-lg">
-  <div class="section-head d-flex align-items-center justify-content-between mb-3">
-    <h4 class="mb-0">Demandes d'hospitalisation en attente</h4>
-    <span class="badge badge-pill badge-warning-soft">{{ demande_hospi|length }} en attente</span>
-  </div>
+        {% if demande_hospi %}
+            <div class="container-xl wide-lg">
+                <div class="section-head d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="mb-0">Demandes d'hospitalisation en attente</h4>
+                    <span class="badge badge-pill badge-warning-soft">{{ demande_hospi|length }} en attente</span>
+                </div>
 
-  <div class="card card-bordered card-elevated bg-danger-dim card-preview overflow-hidden">
-    <div class="table-responsive">
-      <table class="table table-hover table-align-middle mb-0">
-        <thead class="thead-sticky">
-          <tr class="tb-tnx-head">
-            <th>Code Patient</th>
-            <th>Patient &amp; Demande</th>
-            <th>Service &amp; Statut</th>
-            <th class="text-right pr-3">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for demande in demande_hospi.all %}
-          {% with m_accept_id="hospivalide"|add:demande.id|stringformat:"s" m_transfer_id="hospitransfert"|add:demande.id|stringformat:"s" m_reject_id="hospirejet"|add:demande.id|stringformat:"s" %}
-          <tr class="tb-tnx-item">
-            <td>
-              <a href="#" class="link link-primary" data-toggle="tooltip" title="Voir le dossier">
-                <span class="title"><i class="fa-solid fa-id-card"></i> {{ demande.patient.code_patient }}</span>
-              </a>
-            </td>
+                <div class="card card-bordered card-elevated bg-danger-dim card-preview overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-align-middle mb-0">
+                            <thead class="thead-sticky">
+                            <tr class="tb-tnx-head">
+                                <th>Code Patient</th>
+                                <th>Patient &amp; Demande</th>
+                                <th>Service &amp; Statut</th>
+                                <th class="text-right pr-3">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for demande in demande_hospi.all %}
+                                {% with m_accept_id="hospivalide"|add:demande.id|stringformat:"s" m_transfer_id="hospitransfert"|add:demande.id|stringformat:"s" m_reject_id="hospirejet"|add:demande.id|stringformat:"s" %}
+                                    <tr class="tb-tnx-item">
+                                        <td>
+                                            <a href="#" class="link link-primary" data-toggle="tooltip"
+                                               title="Voir le dossier">
+                                                <span class="title"><i
+                                                        class="fa-solid fa-id-card"></i> {{ demande.patient.code_patient }}</span>
+                                            </a>
+                                        </td>
 
-            <td class="tb-tnx-info">
-              <div class="d-flex flex-column">
-                <div class="d-flex align-items-center">
-                  <i class="fa-solid fa-user-alt mr-1 text-gray"></i>
-                  <span class="masked-name" id="masked-name-{{ demande.patient.id }}-{{ forloop.counter }}">************</span>
-                  <span class="full-name d-none" id="full-name-{{ demande.patient.id }}-{{ forloop.counter }}"></span>
+                                        <td class="tb-tnx-info">
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fa-solid fa-user-alt mr-1 text-gray"></i>
+                                                    <span class="masked-name"
+                                                          id="masked-name-{{ demande.patient.id }}-{{ forloop.counter }}">************</span>
+                                                    <span class="full-name d-none"
+                                                          id="full-name-{{ demande.patient.id }}-{{ forloop.counter }}"></span>
 
-                  {% if perms.core.view_patient_name %}
-                    <button class="btn btn-xxs btn-outline-secondary ml-2 toggle-name-btn"
-                            data-patient-id="{{ demande.patient.id }}"
-                            data-counter="{{ forloop.counter }}"
-                            data-source="demande">
-                      <i class="fa-solid fa-eye"></i>
-                    </button>
-                  {% else %}
-                    <span class="ml-2 text-gray" data-toggle="tooltip" title="Accès restreint">
+                                                    {% if perms.core.view_patient_name %}
+                                                        <button class="btn btn-xxs btn-outline-secondary ml-2 toggle-name-btn"
+                                                                data-patient-id="{{ demande.patient.id }}"
+                                                                data-counter="{{ forloop.counter }}"
+                                                                data-source="demande">
+                                                            <i class="fa-solid fa-eye"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <span class="ml-2 text-gray" data-toggle="tooltip"
+                                                              title="Accès restreint">
                       <i class="fa-solid fa-ban"></i>
                     </span>
-                  {% endif %}
-                </div>
-                <small class="text-soft mt-1">
-                  <i class="icon ni ni-clock"></i>
-                  Demande du <span class="date">{{ demande.requested_at }}</span>
-                </small>
-              </div>
-            </td>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-soft mt-1">
+                                                    <i class="icon ni ni-clock"></i>
+                                                    Demande du <span class="date">{{ demande.requested_at }}</span>
+                                                </small>
+                                            </div>
+                                        </td>
 
-            <td class="tb-tnx-amount is-alt">
-              <div class="tb-tnx-total">
-                <span class="badge badge-soft badge-primary"><i class="fa-solid fa-stethoscope"></i> {{ demande.services }}</span>
-              </div>
-              <div class="tb-tnx-status mt-1">
-                <span class="badge badge-dot badge-secondary">{{ demande.status }}</span>
-              </div>
-            </td>
+                                        <td class="tb-tnx-amount is-alt">
+                                            <div class="tb-tnx-total">
+                                                <span class="badge badge-soft badge-primary"><i
+                                                        class="fa-solid fa-stethoscope"></i> {{ demande.services }}</span>
+                                            </div>
+                                            <div class="tb-tnx-status mt-1">
+                                                <span class="badge badge-dot badge-secondary">{{ demande.status }}</span>
+                                            </div>
+                                        </td>
 
-            <td class="tb-tnx-action text-right">
-              <div class="drodown">
-                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger" data-toggle="dropdown" aria-label="Actions">
-                  <em class="icon ni ni-more-h"></em>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                  <ul class="link-list-plain">
-                    <li><a href="#" data-toggle="modal" data-target="#{{ m_accept_id }}"><i class="icon ni ni-check"></i> Accepter</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#{{ m_transfer_id }}"><i class="icon ni ni-shuffle"></i> Transférer</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#{{ m_reject_id }}"><i class="icon ni ni-cross-round text-danger"></i> Rejeter</a></li>
-                  </ul>
-                </div>
-              </div>
-            </td>
-          </tr>
+                                        <td class="tb-tnx-action text-right">
+                                            <div class="drodown">
+                                                <a class="text-soft dropdown-toggle btn btn-icon btn-trigger"
+                                                   data-toggle="dropdown" aria-label="Actions">
+                                                    <em class="icon ni ni-more-h"></em>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
+                                                    <ul class="link-list-plain">
+                                                        <li><a href="#" data-toggle="modal"
+                                                               data-target="#{{ m_accept_id }}"><i
+                                                                class="icon ni ni-check"></i> Accepter</a></li>
+                                                        <li><a href="#" data-toggle="modal"
+                                                               data-target="#{{ m_transfer_id }}"><i
+                                                                class="icon ni ni-shuffle"></i> Transférer</a></li>
+                                                        <li><a href="#" data-toggle="modal"
+                                                               data-target="#{{ m_reject_id }}"><i
+                                                                class="icon ni ni-cross-round text-danger"></i> Rejeter</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-          {# Modal: Accepter #}
-          <div class="modal fade" tabindex="-1" id="{{ m_accept_id }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content card-elevated">
-                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em class="icon ni ni-cross"></em></a>
-                <div class="modal-header">
-                  <h5 class="modal-title">
-                    Confirmer l'hospitalisation <span class="text-primary">{{ demande.services }}</span> ?
-                  </h5>
-                </div>
-                <form method="post" action="{% url 'send_hospitalisation' consultations_id=demande.id patient_id=demande.patient.id %}">
-                  {% csrf_token %}
-                  <div class="modal-body">
-                    <div class="alert alert-info-soft mb-3">
-                      <i class="icon ni ni-info"></i> Vérifie la chambre/lit avant de valider.
+                                    {# Modal: Accepter #}
+                                    <div class="modal fade" tabindex="-1" id="{{ m_accept_id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content card-elevated">
+                                                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em
+                                                        class="icon ni ni-cross"></em></a>
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        Confirmer l'hospitalisation <span
+                                                            class="text-primary">{{ demande.services }}</span> ?
+                                                    </h5>
+                                                </div>
+                                                <form method="post"
+                                                      action="{% url 'send_hospitalisation' consultations_id=demande.id patient_id=demande.patient.id %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body">
+                                                        <div class="alert alert-info-soft mb-3">
+                                                            <i class="icon ni ni-info"></i> Vérifie la chambre/lit avant
+                                                            de valider.
+                                                        </div>
+                                                        <div class="row">
+                                                            {% for form_field in demande_hospi_form %}
+                                                                <div class="col-lg-12 col-sm-12 mb-3">
+                                                                    <label for="{{ form_field.id_for_label }}"
+                                                                           class="form-label">{{ form_field.label }}</label>
+                                                                    {{ form_field }}
+                                                                    {% if form_field.help_text %}
+                                                                        <small class="text-soft d-block mt-1">{{ form_field.help_text }}</small>{% endif %}
+                                                                    {% for error in form_field.errors %}
+                                                                        <div class="text-danger">{{ error }}</div>{% endfor %}
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer bg-light d-flex justify-content-between">
+                                                        <button type="button" class="btn btn-outline-secondary"
+                                                                data-dismiss="modal">Annuler
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fa-solid fa-floppy-disk"></i> Enregistrer
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Modal: Transférer #}
+                                    <div class="modal fade" tabindex="-1" id="{{ m_transfer_id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content card-elevated">
+                                                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em
+                                                        class="icon ni ni-cross"></em></a>
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title"><i class="icon ni ni-shuffle"></i>
+                                                        Transférer la demande</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="text-soft mb-3">Sélectionne le service/cause du transfert
+                                                        (à implémenter selon ton formulaire).</p>
+                                                    <!-- TODO: Form transfert -->
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-outline-secondary"
+                                                            data-dismiss="modal">Fermer
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary disabled" disabled>
+                                                        Transférer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {# Modal: Rejeter #}
+                                    <div class="modal fade" tabindex="-1" id="{{ m_reject_id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content card-elevated">
+                                                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em
+                                                        class="icon ni ni-cross"></em></a>
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-danger"><i class="icon ni ni-alert"></i>
+                                                        Rejeter la demande</h5>
+                                                </div>
+                                                <form method="post" action="#">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label>Motif du rejet</label>
+                                                            <textarea class="form-control" rows="3"
+                                                                      placeholder="Décris la raison…"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer bg-light d-flex justify-content-between">
+                                                        <button type="button" class="btn btn-outline-secondary"
+                                                                data-dismiss="modal">Annuler
+                                                        </button>
+                                                        <button type="submit" class="btn btn-danger"><i
+                                                                class="icon ni ni-cross-round"></i> Rejeter
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endwith %}
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="row">
-                      {% for form_field in demande_hospi_form %}
-                        <div class="col-lg-12 col-sm-12 mb-3">
-                          <label for="{{ form_field.id_for_label }}" class="form-label">{{ form_field.label }}</label>
-                          {{ form_field }}
-                          {% if form_field.help_text %}<small class="text-soft d-block mt-1">{{ form_field.help_text }}</small>{% endif %}
-                          {% for error in form_field.errors %}<div class="text-danger">{{ error }}</div>{% endfor %}
-                        </div>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  <div class="modal-footer bg-light d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">
-                      <i class="fa-solid fa-floppy-disk"></i> Enregistrer
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </div>
             </div>
-          </div>
-
-          {# Modal: Transférer #}
-          <div class="modal fade" tabindex="-1" id="{{ m_transfer_id }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content card-elevated">
-                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em class="icon ni ni-cross"></em></a>
-                <div class="modal-header">
-                  <h5 class="modal-title"><i class="icon ni ni-shuffle"></i> Transférer la demande</h5>
-                </div>
-                <div class="modal-body">
-                  <p class="text-soft mb-3">Sélectionne le service/cause du transfert (à implémenter selon ton formulaire).</p>
-                  <!-- TODO: Form transfert -->
-                </div>
-                <div class="modal-footer bg-light">
-                  <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Fermer</button>
-                  <button type="button" class="btn btn-primary disabled" disabled>Transférer</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {# Modal: Rejeter #}
-          <div class="modal fade" tabindex="-1" id="{{ m_reject_id }}" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content card-elevated">
-                <a href="#" class="close" data-dismiss="modal" aria-label="Fermer"><em class="icon ni ni-cross"></em></a>
-                <div class="modal-header">
-                  <h5 class="modal-title text-danger"><i class="icon ni ni-alert"></i> Rejeter la demande</h5>
-                </div>
-                <form method="post" action="#">
-                  {% csrf_token %}
-                  <div class="modal-body">
-                    <div class="form-group">
-                      <label>Motif du rejet</label>
-                      <textarea class="form-control" rows="3" placeholder="Décris la raison…"></textarea>
-                    </div>
-                  </div>
-                  <div class="modal-footer bg-light d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger"><i class="icon ni ni-cross-round"></i> Rejeter</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          {% endwith %}
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-<hr>
-{% endif %}
+            <hr>
+        {% endif %}
 
 
 
@@ -336,26 +373,30 @@
 {#                                                                            src="{% static 'images/gift/livre-medical.gif' %}"#}
 {#                                                                            width="20"/></a> </span>#}
 {#                                                                {% endif %}#}
-                                                            {% with constante=patient.latest_constante %}
-                                                        {% if constante %}
-                                                            {% if constante.alerte %}
-                                                            <span class="badge badge-xs badge-danger" data-toggle="modal" data-target="#constanteover{{ patient.id }}">
+                                                                {% with constante=patient.latest_constante %}
+                                                                    {% if constante %}
+                                                                        {% if constante.alerte %}
+                                                                            <span class="badge badge-xs badge-danger"
+                                                                                  data-toggle="modal"
+                                                                                  data-target="#constanteover{{ patient.id }}">
                                                                 <em class="icon ni ni-alert-fill me-1"></em>
                                                                 Alertes constantes
                                                             </span>
-                                                            {% else %}
-                                                            <span class="badge badge-xs badge-success" data-toggle="modal" data-target="#constanteover{{ patient.id }}">
+                                                                        {% else %}
+                                                                            <span class="badge badge-xs badge-success"
+                                                                                  data-toggle="modal"
+                                                                                  data-target="#constanteover{{ patient.id }}">
                                                                 <em class="icon ni ni-check-circle-fill me-1"></em>
                                                                 Constantes normales
                                                             </span>
-                                                            {% endif %}
-                                                        {% else %}
-                                                            <span class="badge badge-xs badge-warning">
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        <span class="badge badge-xs badge-warning">
                                                                 <em class="icon ni ni-info-fill me-1"></em>
                                                                 Constantes manquantes
                                                             </span>
-                                                        {% endif %}
-                                                    {% endwith %}
+                                                                    {% endif %}
+                                                                {% endwith %}
                                         </div>
                                         <div class="nk-tb-col">
                                             <div class="user-card">
@@ -756,39 +797,81 @@
                         </div>
 
                         <div class="card-inner">
-                            <ul class="pagination justify-content-center justify-content-md-start">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item"><a class="page-link" href="hospitalisation/generale?
-                                            {% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Prev</a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                {% endif %}
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="text-soft">
+      Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }}
+      sur {{ page_obj.paginator.count }} entrées
+    </div>
 
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <li class="page-item"><a class="page-link" href="hospitalisation/generale?
-                                                {% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
+    <ul class="pagination justify-content-center justify-content-md-start">
+      {# Précédent #}
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link"
+             href="{% url 'appointment_over' %}?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.previous_page_number }}">
+            Précédent
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+      {% endif %}
 
-                                {% if page_obj.has_next %}
-                                    <li class="page-item"><a class="page-link"
-                                                             href="hospitalisation/generale?page={{ page_obj.next_page_number }}">Next</a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                {% endif %}
-                            </ul>
-                        </div><!-- .card-inner -->
+      {# Première page + ellipse gauche #}
+      {% if page_obj.number > 3 %}
+        <li class="page-item">
+          <a class="page-link" href="{% url 'appointment_over' %}?{% if qs %}{{ qs }}&{% endif %}page=1">1</a>
+        </li>
+        {% if page_obj.number > 4 %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endif %}
+
+      {# Fenêtre centrale (2 pages avant/après la page courante) #}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+          {% if num == page_obj.number %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{% url 'appointment_over' %}?{% if qs %}{{ qs }}&{% endif %}page={{ num }}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {# Ellipse droite + dernière page #}
+      {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+        {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        <li class="page-item">
+          <a class="page-link"
+             href="{% url 'appointment_over' %}?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+            {{ page_obj.paginator.num_pages }}
+          </a>
+        </li>
+      {% endif %}
+
+      {# Suivant #}
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link"
+             href="{% url 'appointment_over' %}?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.next_page_number }}">
+            Suivant
+          </a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+      {% endif %}
+    </ul>
+  </div>
+</div><!-- .card-inner -->
                     </div><!-- .card-inner-group -->
                 </div><!-- .card -->
             </div><!-- .nk-block -->
         </div>
-        </div>
+    </div>
     </div>
 
     <script>

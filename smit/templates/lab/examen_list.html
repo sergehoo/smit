@@ -9,19 +9,32 @@
                 <div class="nk-block-head nk-block-head-sm">
                     <div class="nk-block-between">
                         <div class="nk-block-head-content">
-                            <h3 class="nk-block-title page-title">Demande d'analyse </h3>
+                            <h3 class="nk-block-title page-title">Demande d'analyse</h3>
                             <div class="nk-block-des text-soft">
-                                <p> Liste des demandes d'Analyses </p>
+                                <p>Liste des demandes d'Analyses</p>
                             </div>
-                        </div><!-- .nk-block-head-content -->
+                        </div>
                         <div class="nk-block-head-content">
                             {% include 'layout/toggleoption.html' %}
-                        </div><!-- .nk-block-head-content -->
-                    </div><!-- .nk-block-between -->
-                </div><!-- .nk-block-head -->
+                        </div>
+                    </div>
+                </div>
                 <div class="nk-block">
                     <div class="card card-bordered card-stretch">
                         <div class="card-inner-group">
+
+                            <!-- En-tête avec bouton d'enregistrement multiple -->
+                            <div class="card-inner">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="text-muted small">
+                                        Sélectionnez une ou plusieurs lignes puis cliquez sur <strong>Enregistrer la sélection</strong>.
+                                    </div>
+                                    <button type="button" id="bulkSaveBtn" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-save mr-1"></i> Enregistrer la sélection
+                                    </button>
+                                </div>
+                            </div>
+
                             <form method="get" action="{% url 'examen_list' %}" class="mb-4">
                                 <div class="row p-2">
                                     <div class="col-md-3">{{ filter.form.type_examen.label_tag }} {{ filter.form.type_examen }}</div>
@@ -58,6 +71,9 @@
                                                             <table class="table table-striped">
                                                                 <thead class="thead-light">
                                                                 <tr>
+                                                                    <th style="width:38px;">
+                                                                        <input type="checkbox" class="select-all-type" data-type="{{ type_bilan|slugify }}" />
+                                                                    </th>
                                                                     <th>Code</th>
                                                                     <th>Patient</th>
                                                                     <th>Examen</th>
@@ -71,55 +87,47 @@
                                                                 <tbody>
                                                                 {% for entry in examens %}
                                                                     <tr id="exam-{{ entry.examen.id }}">
-                                                                        <!-- ✅ Corrigé -->
-                                                                        <td>{{ entry.examen.id }}</td>
-                                                                        <!-- ✅ Corrigé -->
-                                                                        <td>{{ entry.examen.patient.nom|upper }} {{ entry.examen.patient.prenoms|upper }}</td>
-                                                                        <td><span
-                                                                                class="text-primary">{{ entry.examen.examen }}</span>
+                                                                        <td>
+                                                                            <input type="checkbox" class="row-check" data-id="{{ entry.examen.id }}" data-type="{{ type_bilan|slugify }}" />
                                                                         </td>
+                                                                        <td>{{ entry.examen.id }}</td>
+                                                                        <td>{{ entry.examen.patient.nom|upper }} {{ entry.examen.patient.prenoms|upper }}</td>
+                                                                        <td><span class="text-primary">{{ entry.examen.examen }}</span></td>
                                                                         <td>{{ entry.examen.doctor }}</td>
 
-                                                                        <!-- ✅ Résultat -->
                                                                         <td>
                                                                             <input type="text"
                                                                                    class="form-control result-input"
                                                                                    name="result"
                                                                                    value="{{ entry.examen.result|default_if_none:'' }}"
                                                                                    data-id="{{ entry.examen.id }}">
-                                                                            <!-- ✅ Corrigé -->
                                                                         </td>
 
-                                                                        <!-- ✅ Date Résultat -->
                                                                         <td>
                                                                             <input type="datetime-local"
                                                                                    class="form-control result-date"
                                                                                    name="result_date"
                                                                                    value="{{ entry.examen.result_date|date:'Y-m-d\TH:i' }}"
                                                                                    data-id="{{ entry.examen.id }}">
-                                                                            <!-- ✅ Corrigé -->
                                                                         </td>
 
-                                                                        <!-- ✅ Commentaire -->
                                                                         <td>
             <textarea class="form-control result-comment"
                       name="comment"
                       rows="2"
                       data-id="{{ entry.examen.id }}">{{ entry.examen.comment|default_if_none:'' }}</textarea>
-                                                                            <!-- ✅ Corrigé -->
                                                                         </td>
 
                                                                         <td>
                                                                             <button class="btn btn-primary btn-sm save-btn"
                                                                                     data-id="{{ entry.examen.id }}">
-                                                                                <!-- ✅ Corrigé -->
                                                                                 Enregistrer
                                                                             </button>
                                                                         </td>
                                                                     </tr>
                                                                 {% empty %}
                                                                     <tr>
-                                                                        <td colspan="8" class="text-center">
+                                                                        <td colspan="9" class="text-center">
                                                                             Aucun examen en attente de résultat.
                                                                         </td>
                                                                     </tr>
@@ -142,42 +150,151 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast container -->
+    <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; z-index: 1060;">
+        <div id="toast-stack"></div>
+    </div>
+
+    <style>
+        .toast {
+            min-width: 300px;
+            margin-bottom: 10px;
+        }
+        .toast-header .badge-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .toast-success .badge-dot { background: #28a745; }
+        .toast-error .badge-dot { background: #dc3545; }
+        .toast-info .badge-dot { background: #17a2b8; }
+        .toast-warning .badge-dot { background: #ffc107; }
+
+        .table-primary {
+            background-color: #e3f2fd !important;
+        }
+
+        .is-valid {
+            border-color: #198754 !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             console.log("✅ DOM entièrement chargé !");
+            const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
+            // ————— Fonction de notification toast
+            function notify(type, message, subtitle = '') {
+                const $stack = document.getElementById('toast-stack');
+                if (!$stack) {
+                    alert(message);
+                    return;
+                }
+
+                const id = 't_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+                const cls = 'toast-' + (type || 'info');
+                const title = {
+                    success: 'Succès',
+                    error: 'Erreur',
+                    info: 'Information',
+                    warning: 'Attention'
+                }[type] || 'Information';
+
+                const toastEl = document.createElement('div');
+                toastEl.id = id;
+                toastEl.className = `toast ${cls}`;
+                toastEl.setAttribute('role', 'alert');
+                toastEl.setAttribute('aria-live', 'assertive');
+                toastEl.setAttribute('aria-atomic', 'true');
+                toastEl.innerHTML = `
+                    <div class="toast-header">
+                        <span class="badge-dot"></span>
+                        <strong class="me-auto">${title}</strong>
+                        ${subtitle ? `<small class="text-muted">${subtitle}</small>` : ''}
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                `;
+
+                $stack.appendChild(toastEl);
+
+                // Initialiser le toast Bootstrap
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+
+                toastEl.addEventListener('hidden.bs.toast', function() {
+                    toastEl.remove();
+                });
+            }
+
+            // ————— Sélection multiple par type
+            document.querySelectorAll('.select-all-type').forEach(selectAll => {
+                selectAll.addEventListener('change', function() {
+                    const type = this.getAttribute('data-type');
+                    const isChecked = this.checked;
+
+                    document.querySelectorAll(`.row-check[data-type="${type}"]`).forEach(cb => {
+                        cb.checked = isChecked;
+                        const row = cb.closest('tr');
+                        if (row) {
+                            row.classList.toggle('table-primary', isChecked);
+                        }
+                    });
+                });
+            });
+
+            // ————— Mise à jour visuelle des lignes sélectionnées
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('row-check')) {
+                    const row = e.target.closest('tr');
+                    if (row) {
+                        row.classList.toggle('table-primary', e.target.checked);
+                    }
+                }
+            });
+
+            // ————— Enregistrement unitaire
             document.querySelectorAll(".save-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     const examenId = this.getAttribute("data-id");
 
                     if (!examenId) {
-                        alert("⚠️ ID d'examen manquant !");
+                        notify('error', 'ID d\'examen manquant !');
                         return;
                     }
 
-                    // ✅ Construire dynamiquement l'URL
                     const updateUrl = "{% url 'update_examen_result' 0 %}".replace("0", examenId);
 
-                    // ✅ Sélection des champs liés à l'examen
                     const resultInput = document.querySelector(`.result-input[data-id="${examenId}"]`);
                     const resultDateInput = document.querySelector(`.result-date[data-id="${examenId}"]`);
                     const commentInput = document.querySelector(`.result-comment[data-id="${examenId}"]`);
-                    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-                    // Vérification des champs
                     if (!resultInput || !resultDateInput || !commentInput) {
-                        alert("⚠️ Un ou plusieurs champs sont introuvables.");
+                        notify('error', 'Un ou plusieurs champs sont introuvables.');
                         return;
                     }
 
-                    // ✅ Création des données à envoyer
+                    // Validation
+                    if (!resultInput.value.trim()) {
+                        notify('error', 'Le résultat est requis.');
+                        resultInput.focus();
+                        return;
+                    }
+
                     const formData = new FormData();
                     formData.append("csrfmiddlewaretoken", csrfToken);
                     formData.append("result", resultInput.value);
                     formData.append("result_date", resultDateInput.value);
                     formData.append("comment", commentInput.value);
 
-                    // ✅ Envoi de la requête
                     fetch(updateUrl, {
                         method: "POST",
                         body: formData
@@ -190,17 +307,124 @@
                         })
                         .then(data => {
                             if (data.success) {
-                                alert("✅ Résultat enregistré avec succès !");
-                                location.reload();
+                                notify('success', 'Résultat enregistré avec succès !');
+                                resultInput.classList.add('is-valid');
+                                setTimeout(() => {
+                                    // Optionnel: recharger la page
+                                    location.reload();
+                                }, 1500);
                             } else {
-                                alert("❌ Erreur : " + JSON.stringify(data.errors));
+                                notify('error', 'Erreur : ' + JSON.stringify(data.errors));
                             }
                         })
                         .catch(error => {
                             console.error("❌ Erreur de requête :", error);
-                            alert("Erreur lors de l'envoi des données.");
+                            notify('error', 'Erreur lors de l\'envoi des données.');
                         });
                 });
+            });
+
+            // ————— Enregistrement en masse
+            const bulkSaveBtn = document.getElementById('bulkSaveBtn');
+            if (bulkSaveBtn) {
+                bulkSaveBtn.addEventListener('click', function () {
+                    const selected = Array.from(document.querySelectorAll('.row-check:checked'));
+
+                    if (!selected.length) {
+                        notify('warning', 'Sélectionnez au moins une ligne.');
+                        return;
+                    }
+
+                    const items = selected.map(cb => {
+                        const id = cb.getAttribute('data-id');
+                        const result = (document.querySelector(`.result-input[data-id="${id}"]`)?.value || "").trim();
+                        const result_date = (document.querySelector(`.result-date[data-id="${id}"]`)?.value || "").trim();
+                        const comment = (document.querySelector(`.result-comment[data-id="${id}"]`)?.value || "").trim();
+                        return { id: parseInt(id, 10), result, result_date, comment };
+                    });
+
+                    // Validation
+                    const invalidItems = items.filter(it => !it.result);
+                    if (invalidItems.length) {
+                        notify('error', `${invalidItems.length} ligne(s) sans résultat. Veuillez remplir tous les résultats.`);
+                        return;
+                    }
+
+                    // Désactiver le bouton pendant le traitement
+                    bulkSaveBtn.disabled = true;
+                    bulkSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Traitement...';
+
+                    fetch("{% url 'update_examen_results_bulk' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": csrfToken,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ items })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                notify('success', `${data.updated} résultat(s) enregistré(s) avec succès !`);
+
+                                // Feedback visuel
+                                selected.forEach(cb => {
+                                    const id = cb.getAttribute('data-id');
+                                    const row = document.getElementById(`exam-${id}`);
+                                    const resultInput = document.querySelector(`.result-input[data-id="${id}"]`);
+
+                                    if (row && resultInput) {
+                                        row.classList.add('table-success');
+                                        resultInput.classList.add('is-valid');
+                                        cb.checked = false;
+                                        row.classList.remove('table-primary');
+                                    }
+                                });
+
+                                // Réinitialiser les sélections par type
+                                document.querySelectorAll('.select-all-type').forEach(selectAll => {
+                                    selectAll.checked = false;
+                                });
+
+                                // Recharger après un délai
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 2000);
+
+                            } else {
+                                const errorMsg = data.message || "Erreur lors de l'enregistrement multiple";
+                                notify('error', errorMsg);
+
+                                if (data.errors && data.errors.length) {
+                                    console.warn("Détails des erreurs:", data.errors);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error("❌ Erreur de requête bulk :", error);
+                            notify('error', 'Erreur réseau lors de l\'enregistrement multiple.');
+                        })
+                        .finally(() => {
+                            // Réactiver le bouton
+                            bulkSaveBtn.disabled = false;
+                            bulkSaveBtn.innerHTML = '<i class="fas fa-save mr-1"></i> Enregistrer la sélection';
+                        });
+                });
+            }
+
+            // ————— Auto-save sur Enter dans les champs de résultat
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.classList.contains('result-input')) {
+                    e.preventDefault();
+                    const examenId = e.target.getAttribute('data-id');
+                    const saveBtn = document.querySelector(`.save-btn[data-id="${examenId}"]`);
+                    if (saveBtn) saveBtn.click();
+                }
             });
         });
     </script>
@@ -211,4 +435,3 @@
         });
     </script>
 {% endblock %}
-

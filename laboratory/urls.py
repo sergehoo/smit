@@ -9,7 +9,8 @@ from laboratory.views import AnalyseListView, AnalyseDetailView, AnalyseCreateVi
     update_examen_result, export_examens_done, examens_by_type_paginated, EchantillonCreateView, request_serologie_vih, \
     validate_serologie_vih_request, EchantillonDetailView, update_echantillon_result, ResultatAnalyseListView, \
     ResultatAnalyseCreateView, ResultatAnalyseDetailView, ResultatAnalyseUpdateView, ResultatAnalyseDeleteView, \
-    ResultatAnalyseValidateView, ResultatAnalyseCorrigerView, validate_resultat_ajax, ExamenDoneDetailView
+    ResultatAnalyseValidateView, ResultatAnalyseCorrigerView, validate_resultat_ajax, ExamenDoneDetailView, \
+    update_examen_results_bulk
 from smitci import settings
 
 urlpatterns = [
@@ -123,6 +124,7 @@ urlpatterns = [
                       login_required(validate_resultat_ajax),
                       name='resultatanalyse_validate_ajax'
                   ),
+                  path("examens/bulk-update/",update_examen_results_bulk, name="update_examen_results_bulk"),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

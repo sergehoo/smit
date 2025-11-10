@@ -64,7 +64,7 @@
                                                         <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn"
                                                                 data-patient-id="{{ demande.patient.id }}"
                                                                 data-counter="{{ forloop.counter }}"><i
-                                                                class="fa-solid fa-eye"></i></button>
+                                                                class="icon ni ni-eye"></i></button>
                                                     {% else %}
                                                         <span class="btn-sm ml-1" data-toggle="tooltip"
                                                               data-placement="top"
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="full-name d-none" id="full-name-{{ patient.patient.id }}-{{ forloop.counter }}"></span>
         {% if perms.core.view_patient_name %}
         <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn" data-patient-id="{{ patient.patient.id }}" data-counter="{{ forloop.counter }}">
-            <i class="fa-solid fa-eye"></i>
+            <i class="icon ni ni-eye"></i>
         </button>
         {% else %}
         <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">

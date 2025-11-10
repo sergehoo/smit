@@ -726,23 +726,6 @@ class HospitalizationUrgenceCreateView(CreateView):
     template_name = "pages/hospitalization/hospitalization_urgence_create.html"
     success_url = reverse_lazy('hospitalisation')  # Redirige après la création
 
-    # def form_valid(self, form):
-    #     response = super().form_valid(form)
-    #
-    #     # Envoi du SMS après création
-    #     hospitalization = self.object
-    #     patient = hospitalization.patient
-    #     chambre = hospitalization.bed.box.chambre if hospitalization.bed else "N/A"
-    #     lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
-    #     formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
-    #
-    #     message = f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été hospitalisé en urgence: {lit}, {chambre},le {formatted_date}."
-    #     safe_message = optimize_sms_text(message)
-    #     send_sms(get_employees_to_notify(), safe_message)
-    #
-    #     messages.success(self.request, f"Hospitalisation d'urgence créée pour {patient.nom}. SMS envoyé.")
-    #     return response
-
     def form_valid(self, form):
         response = super().form_valid(form)
 

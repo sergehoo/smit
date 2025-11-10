@@ -8,11 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
@@ -102,41 +104,18 @@ def delete_echantillon_consultation_generale(request, echantillon_id, consultati
 
 # 📌 Vue pour soumettre les résultats dynamiquement via AJAX
 
-@login_required
-@require_POST
-def update_examen_result(request, examen_id):
-    examen = get_object_or_404(BilanParaclinique, id=examen_id)
-
-    result = request.POST.get("result")
-    result_date = request.POST.get("result_date")
-    comment = request.POST.get("comment")
-
-    if not result:
-        return JsonResponse({"success": False, "errors": "Le résultat est requis."}, status=400)
-
-    # ✅ Si result_date n'est pas fourni, on utilise la date actuelle
-    if result_date:
-        examen.result_date = result_date
-    else:
-        examen.result_date = timezone.now()
-
-    examen.result = result
-    examen.comment = comment
-    examen.status = "completed"
-    examen.save()
-
-    return JsonResponse({"success": True, "message": "✅ Résultat enregistré avec succès."})
-
-
 class ExamenListView(LoginRequiredMixin, ListView):
     model = BilanParaclinique
     template_name = 'lab/examen_list.html'
     context_object_name = 'examens'
 
     def get_queryset(self):
-        self.filterset = ExamenFilter(self.request.GET, queryset=BilanParaclinique.objects.select_related(
-            'examen__type_examen', 'patient', 'doctor'
-        ).filter(result__isnull=True).order_by("created_at"))
+        self.filterset = ExamenFilter(
+            self.request.GET,
+            queryset=BilanParaclinique.objects.select_related(
+                'examen__type_examen', 'patient', 'doctor'
+            ).filter(result__isnull=True).order_by("created_at")
+        )
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
@@ -151,9 +130,142 @@ class ExamenListView(LoginRequiredMixin, ListView):
             })
 
         context["examens_by_type"] = dict(examens_par_type)
-        context["examens_by_type_json"] = json.dumps({k: len(v) for k, v in examens_par_type.items()})
-        context["filter"] = self.filterset  # ✅ Ajout du filtre au contexte
+        context["filter"] = self.filterset
         return context
+
+
+@login_required
+@require_POST
+def update_examen_result(request, examen_id):
+    """
+    Met à jour un résultat d'examen individuel
+    """
+    examen = get_object_or_404(BilanParaclinique, id=examen_id)
+
+    result = request.POST.get("result", "").strip()
+    result_date = request.POST.get("result_date", "").strip()
+    comment = request.POST.get("comment", "").strip()
+
+    if not result:
+        return JsonResponse({"success": False, "errors": "Le résultat est requis."}, status=400)
+
+    try:
+        # Traitement de la date
+        if result_date:
+            # Conversion de la date depuis le format datetime-local
+            dt = datetime.fromisoformat(result_date.replace('Z', '+00:00'))
+            if timezone.is_naive(dt):
+                dt = timezone.make_aware(dt, timezone.get_current_timezone())
+            examen.result_date = dt
+        else:
+            examen.result_date = timezone.now()
+
+        examen.result = result
+        examen.comment = comment
+        examen.status = "completed"
+        examen.save()
+
+        return JsonResponse({
+            "success": True,
+            "message": "Résultat enregistré avec succès",
+            "examen_id": examen.id
+        })
+
+    except Exception as e:
+        return JsonResponse({"success": False, "errors": str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def update_examen_results_bulk(request):
+    """
+    Met à jour plusieurs résultats d'examens en une seule requête
+    """
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+        items = payload.get("items", [])
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return JsonResponse({"success": False, "message": "Payload JSON invalide."}, status=400)
+
+    if not isinstance(items, list) or not items:
+        return JsonResponse({"success": False, "message": "Aucun élément fourni."}, status=400)
+
+    # Extraction et validation des IDs
+    try:
+        ids = [int(item.get("id")) for item in items if item.get("id")]
+    except (ValueError, TypeError):
+        return JsonResponse({"success": False, "message": "IDs invalides."}, status=400)
+
+    if not ids:
+        return JsonResponse({"success": False, "message": "Aucun ID valide fourni."}, status=400)
+
+    # Récupération des objets
+    examens = BilanParaclinique.objects.filter(id__in=ids)
+    by_id = {e.id: e for e in examens}
+
+    updated_objects = []
+    errors = []
+    now = timezone.now()
+
+    for item in items:
+        try:
+            ex_id = int(item.get("id"))
+            result = (item.get("result") or "").strip()
+            result_date_raw = (item.get("result_date") or "").strip()
+            comment = (item.get("comment") or "").strip()
+
+            # Vérification de l'existence
+            obj = by_id.get(ex_id)
+            if not obj:
+                errors.append({"id": ex_id, "error": "Examen introuvable"})
+                continue
+
+            # Validation du résultat
+            if not result:
+                errors.append({"id": ex_id, "error": "Le résultat est requis"})
+                continue
+
+            # Traitement de la date
+            if result_date_raw:
+                try:
+                    dt = datetime.fromisoformat(result_date_raw.replace('Z', '+00:00'))
+                    if timezone.is_naive(dt):
+                        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+                except (ValueError, TypeError):
+                    dt = now
+            else:
+                dt = now
+
+            # Mise à jour de l'objet
+            obj.result = result
+            obj.result_date = dt
+            obj.comment = comment
+            obj.status = "completed"
+            updated_objects.append(obj)
+
+        except Exception as e:
+            errors.append({"id": item.get("id"), "error": str(e)})
+
+    # Sauvegarde en base
+    if updated_objects:
+        try:
+            with transaction.atomic():
+                BilanParaclinique.objects.bulk_update(
+                    updated_objects,
+                    ['result', 'result_date', 'comment', 'status']
+                )
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": f"Erreur lors de la sauvegarde: {str(e)}"
+            }, status=500)
+
+    return JsonResponse({
+        "success": True,
+        "message": f"{len(updated_objects)} examen(s) mis à jour",
+        "updated": len(updated_objects),
+        "errors": errors
+    })
 
 
 # class ExamenDoneListView(ListView):
@@ -250,6 +362,7 @@ class ExamenDoneListView(LoginRequiredMixin, FilterView, ListView):
         context["type_bilans_counts"] = bilan_counts
         return context
 
+
 class ExamenDoneDetailView(LoginRequiredMixin, DetailView):
     model = BilanParaclinique
     template_name = 'lab/examen_done_detail.html'
@@ -274,6 +387,7 @@ class ExamenDoneDetailView(LoginRequiredMixin, DetailView):
         )
         context["type_bilans_counts"] = bilan_counts
         return context
+
 
 class ExamenResultatsListView(LoginRequiredMixin, ListView):
     model = Examen
