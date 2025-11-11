@@ -9,6 +9,7 @@ volumes:
   static_volume:
   media_volume:
   dbbackups:
+  logs_volume:
 
 x-logging-rotated: &logging_rotated
   driver: "json-file"
@@ -101,6 +102,7 @@ services:
 #      - media_volume:/smitci-app/media
       - dbbackups:/smitci-app/dbbackup
       - media_volume:/var/www/media:rw
+      - logs_volume:/smitci-app/logs:rw
     depends_on:
       smitDB:
         condition: service_healthy
