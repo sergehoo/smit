@@ -84,6 +84,7 @@ services:
     env_file: [.env]
     environment:
       FORWARDED_ALLOW_IPS: "*"
+      GUNICORN_CMD_ARGS: "--forwarded-allow-ips=*"
       TZ: Africa/Abidjan
       RUN_MIGRATIONS: "0"
       RUN_COLLECTSTATIC: "0"

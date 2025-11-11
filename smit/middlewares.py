@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 
 from smitci import settings
+from smitci.utils.ip import client_ip
 
 
 class SessionTimeoutMiddleware:
@@ -43,3 +44,12 @@ class LogForbiddenMiddleware:
         if response.status_code == 403:
             print(f"403 Forbidden: {request.path} - Utilisateur : {request.user}")
         return response
+
+
+class ClientIPMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.client_ip = client_ip(request)
+        return self.get_response(request)
