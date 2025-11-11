@@ -41,124 +41,20 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key')
 # Cast manuel de DEBUG (les valeurs des .env sont des chaînes)
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-LOG_DIR = os.path.join(BASE_DIR, "logs")
-os.makedirs(LOG_DIR, exist_ok=True)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-
-    # === 🟦 FORMATTERS (Color/Detailed/JSON) ===
-    "formatters": {
-        "verbose": {
-            "format": (
-                "[{levelname}] {asctime} "
-                "{module}:{lineno} — {message}"
-            ),
-            "style": "{",
-        },
-        "colored": {
-            "()": "colorlog.ColoredFormatter",
-            "format": "%(log_color)s[%(levelname)s]%(reset)s "
-                      "%(asctime)s — %(cyan)s%(name)s:%(lineno)d%(reset)s — %(message)s",
-        },
-        "request": {
-            "format": (
-                "[REQUEST] {asctime} "
-                "IP={client_ip} USER={user} "
-                "{method} {path} — {status_code}"
-            ),
-            "style": "{",
-        },
-        "json": {
-            "format": (
-                '{{"time": "{asctime}", "level": "{levelname}", '
-                '"logger": "{name}", "line": {lineno}, '
-                '"message": "{message}" }}'
-            ),
-            "style": "{",
-        },
-    },
-
-    # === 🟧 HANDLERS ===
     "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "colored",
-        },
-        "file_django": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(LOG_DIR, "django.log"),
-            "maxBytes": 5 * 1024 * 1024,  # 5 MB
-            "backupCount": 5,
-            "formatter": "verbose",
-        },
-        "file_errors": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(LOG_DIR, "errors.log"),
-            "maxBytes": 5 * 1024 * 1024,
-            "backupCount": 5,
-            "level": "ERROR",
-            "formatter": "verbose",
-        },
-        "file_security": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(LOG_DIR, "security.log"),
-            "maxBytes": 5 * 1024 * 1024,
-            "backupCount": 5,
-            "formatter": "verbose",
-        },
-        "file_json": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(LOG_DIR, "structured.json"),
-            "formatter": "json",
-            "maxBytes": 10 * 1024 * 1024,
-            "backupCount": 20,
-        },
+        "console": {"class": "logging.StreamHandler"},
     },
-
-    # === 🟩 LOGGERS ===
     "loggers": {
-        # Django global
-        "django": {
-            "handlers": ["console", "file_django"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        # Django security alerts
-        "django.security": {
-            "handlers": ["console", "file_security"],
-            "level": "WARNING",
-            "propagate": False,
-        },
-        # Django request (400/403/404/500)
-        "django.request": {
-            "handlers": ["console", "file_errors"],
-            "level": "WARNING",
-            "propagate": False,
-        },
-        # ORM queries (pour debug SQL)
-        "django.db.backends": {
-            "handlers": ["console"],
-            "level": "ERROR",   # mettre DEBUG pour voir toutes les queries
-        },
-        # Celery
-        "celery": {
-            "handlers": ["console", "file_django"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        # Tes apps
-        "smitci": {
-            "handlers": ["console", "file_django", "file_json"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        # Root
-        "": {
-            "handlers": ["console", "file_django"],
-            "level": "WARNING",
-        },
+        "django": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        # ajoute si besoin:
+        "celery": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "recipes": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
+    "root": {"handlers": ["console"], "level": "WARNING"},
 }
 
 # Application definition
