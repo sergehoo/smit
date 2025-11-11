@@ -80,8 +80,10 @@ services:
       --log-level info
       --error-logfile - --access-logfile -
       --capture-output
+      --forwarded-allow-ips="*"
     env_file: [.env]
     environment:
+      FORWARDED_ALLOW_IPS: "*"
       TZ: Africa/Abidjan
       RUN_MIGRATIONS: "0"
       RUN_COLLECTSTATIC: "0"
@@ -91,6 +93,7 @@ services:
       WHITENOISE_USE_FINDERS: "False"
       DJANGO_MEDIA_ROOT: /var/www/media
       MPLCONFIGDIR: /tmp/matplotlib
+
     volumes:
       - static_volume:/smitci-app/static
       - static_volume:/smitci-app/smitci/staticfiles
