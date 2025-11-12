@@ -1,4 +1,5 @@
 import datetime
+import html
 import json
 import logging
 import random
@@ -24,6 +25,7 @@ from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import get_template
 from django.urls import reverse, reverse_lazy
+from django.utils.html import escape, strip_tags
 from django.utils.timezone import now, make_naive, is_aware
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -733,12 +735,17 @@ class HospitalizationUrgenceCreateView(CreateView):
         patient = hospitalization.patient
         chambre = hospitalization.bed.box.chambre if hospitalization.bed else "N/A"
         lit = hospitalization.bed.nom if hospitalization.bed else "N/A"
+        reason_html = hospitalization.reason_for_admission or ""
+        reason_plain = strip_tags(reason_html)  # retire <p>, <br>, etc.
+        reason_plain = html.unescape(reason_plain)  # &amp; -> &, &lt; -> <
+        reason_plain = " ".join(reason_plain.split())  # normalise les espaces/retours ligne
+
         formatted_date = hospitalization.admission_date.strftime("%d/%m/%Y %H:%M")
 
         # Message unique pour les deux canaux
         raw_message = (
-            f"🚨 Urgence ! Le patient {patient.nom} {patient.prenoms} a été "
-            f"hospitalisé en urgence : {lit}, {chambre}, le {formatted_date}."
+            f"Le patient {patient.nom} {patient.prenoms} a été "
+            f"admis aux urgences pour :{reason_plain} {lit}, {chambre}, le {formatted_date}."
         )
         sms_message = optimize_sms_text(raw_message)  # garde ta logique (longueur, accents, etc.)
         recipients = get_employees_to_notify()  # -> liste de numéros E.164 : +22507...
@@ -870,6 +877,10 @@ def export_indicateur_subjectif_pdf(request, hospitalisation_id):
 @login_required
 def update_hospitalisation_discharge(request, hospitalisation_id):
     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    reason_html = hospitalization.discharge_reason or ""
+    reason_plain = strip_tags(reason_html)  # retire <p>, <br>, etc.
+    reason_plain = html.unescape(reason_plain)  # &amp; -> &, &lt; -> <
+    reason_plain = " ".join(reason_plain.split())  # normalise les espaces/retours ligne
 
     if request.method == "POST":
         form = HospitalizationDischargeForm(request.POST, instance=hospitalization)
@@ -878,9 +889,9 @@ def update_hospitalisation_discharge(request, hospitalisation_id):
 
             # Envoi du SMS
             message = (
-                f"🏠 Sortie : {hospitalization.patient.nom} "
+                f"Sortie : {hospitalization.patient.nom} "
                 f"le {hospitalization.discharge_date.strftime('%d/%m/%Y à %Hh%M')}, "
-                f"motif : {hospitalization.status},{hospitalization.discharge_reason}."
+                f"motif : {hospitalization.status},{reason_plain}."
 
             )
             safe_message = optimize_sms_text(message)
@@ -1645,7 +1656,8 @@ def add_examen_apareil(request, hospitalisation_id):
 
     # Pré-cache des existants par (nom, type_parent_id)
     existants_cache = {}
-    for app in Appareil.objects.filter(hospitalisation=hospitalisation).only('id', 'nom', 'etat', 'observation', 'type_appareil_id'):
+    for app in Appareil.objects.filter(hospitalisation=hospitalisation).only('id', 'nom', 'etat', 'observation',
+                                                                             'type_appareil_id'):
         key = (app.nom.strip().lower(), app.type_appareil_id or 0)
         existants_cache[key] = app
 
@@ -1708,7 +1720,7 @@ def add_examen_apareil(request, hospitalisation_id):
                 a_mettre_a_jour.append(app_existant)
         else:
             a_creer.append(Appareil(
-                type_appareil=type_parent,              # 👈 parent par défaut
+                type_appareil=type_parent,  # 👈 parent par défaut
                 hospitalisation=hospitalisation,
                 nom=nom,
                 etat=etat,
@@ -1727,12 +1739,14 @@ def add_examen_apareil(request, hospitalisation_id):
     for w in warnings[:20]:
         messages.warning(request, w)
     if len(warnings) > 20:
-        messages.warning(request, f"… et {len(warnings)-20} avertissement(s) supplémentaire(s).")
+        messages.warning(request, f"… et {len(warnings) - 20} avertissement(s) supplémentaire(s).")
 
     if not a_creer and not a_mettre_a_jour and not warnings:
         messages.info(request, "Aucun changement détecté.")
 
     return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+
 def delete_resume(request, resume_id):
     resume = get_object_or_404(ResumeSyndromique, id=resume_id)
 

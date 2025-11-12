@@ -1,255 +1,296 @@
 {% extends 'layout/base.html' %}
 {% load static %}
+
+
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-        <div class="container-xl wide-lg">
-            <div class="nk-content-body">
-                <!-- En-tête amélioré avec overlay -->
-                <div class="nk-block-head nk-block-head-sm">
-                    <div class="row rounded position-relative overflow-hidden" style="height: 220px; background-image: url('{% static 'images/patient_add_banner1.png' %}'); background-size: cover; background-position: center;">
-                        <div class="position-absolute w-100 h-100" style="background: linear-gradient(135deg, rgba(0,119,182,0.85) 0%, rgba(3,4,94,0.8) 100%); top: 0; left: 0;"></div>
-                        <div class="nk-block-between position-relative z-index-1">
-                            <div class="nk-block-head-content text-center w-100 py-5">
-                                <h1 class="nk-block-title page-title text-white mb-3">ADMISSION EN URGENCE HOSPITALISATION</h1>
-                                <div class="nk-block-des">
-                                    <p class="text-white-80 lead">Ajouter un nouveau patient en urgence</p>
-                                </div>
-                                <div class="mt-3">
-                                    <span class="badge badge-pill badge-warning p-2">Formulaire d'admission prioritaire</span>
-                                </div>
+    <style>
+    .hospitalization-header {
+        height: 220px;
+        background-image: url('{% static 'images/patient_add_banner1.png' %}');
+        background-size: cover;
+        background-position: center;
+    }
+
+    .hospitalization-overlay {
+        background: linear-gradient(135deg, rgba(0,119,182,0.85) 0%, rgba(3,4,94,0.8) 100%);
+    }
+
+    .required-label::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .form-control:required:not(:focus):invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control:required:valid {
+        border-color: #198754;
+    }
+
+    .field-error {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .urgent-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .select2-container .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+</style>
+<div class="nk-content nk-content-fluid">
+    <div class="container-xl wide-lg">
+        <div class="nk-content-body">
+            <!-- En-tête -->
+            <div class="nk-block-head nk-block-head-sm">
+                <div class="row rounded position-relative overflow-hidden hospitalization-header">
+                    <div class="position-absolute w-100 h-100 hospitalization-overlay"></div>
+                    <div class="nk-block-between position-relative z-index-1">
+                        <div class="nk-block-head-content text-center w-100 py-5">
+                            <h1 class="nk-block-title page-title text-white mb-3">
+                                <i class="fas fa-ambulance mr-2"></i>
+                                ADMISSION EN URGENCE
+                            </h1>
+                            <div class="nk-block-des">
+                                <p class="text-white lead">Formulaire d'admission prioritaire</p>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge badge-pill badge-warning urgent-badge">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    Priorité haute
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Formulaire principal -->
-                <div class="nk-block">
-                    <div class="card card-bordered card-stretch shadow-sm">
-                        <div class="card-header border-bottom bg-light">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user-plus text-primary mr-2"></i>
-                                Informations du patient
-                            </h5>
-                            <p class="text-muted small mb-0">Veuillez remplir tous les champs obligatoires <span class="text-danger">*</span></p>
+            <!-- Formulaire principal -->
+            <div class="nk-block">
+                <div class="card card-bordered card-stretch shadow-sm">
+                    <div class="card-header border-bottom bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-user-plus text-primary mr-2"></i>
+                                    Informations du patient
+                                </h5>
+                                <p class="text-muted small mb-0">
+                                    Champs obligatoires <span class="text-danger">*</span>
+                                </p>
+                            </div>
+                            <div class="text-muted">
+                                <small><i class="fas fa-clock mr-1"></i> Création rapide</small>
+                            </div>
                         </div>
+                    </div>
 
-                        <form method="post" id="admission-form">
-                            {% csrf_token %}
-                            <div class="card-inner-group">
-                                <div class="card-inner p-4">
-                                    <div class="row g-4">
-                                        {% for field in form %}
-                                            <div class="col-12 col-md-6 col-lg-4 mb-3">
-                                                <div class="form-group">
-                                                    <label for="{{ field.id_for_label }}" class="form-label {% if field.field.required %}required-label{% endif %}">
-                                                        {{ field.label }}
-                                                        {% if field.field.required %}
-                                                            <span class="text-danger">*</span>
-                                                        {% endif %}
-                                                    </label>
-                                                    <div class="input-group">
-                                                        {{ field }}
-                                                        {% if field.name == 'date_naissance' %}
-                                                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                                        {% elif field.name == 'telephone' %}
-                                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                                        {% endif %}
-                                                    </div>
+                    <form method="post" id="admission-form" novalidate>
+                        {% csrf_token %}
 
-                                                    {% if field.help_text %}
-                                                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                                                    {% endif %}
-
-                                                    {% for error in field.errors %}
-                                                        <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle mr-1"></i>{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
+                        <div class="card-inner-group">
+                            <!-- Champs du formulaire -->
+                            <div class="card-inner p-4">
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        Erreurs de validation
+                                    </h6>
+                                    <ul class="mb-0">
+                                        {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
                                         {% endfor %}
-                                    </div>
+                                    </ul>
                                 </div>
+                                {% endif %}
 
-                                <!-- Section d'urgence -->
-                                <div class="card-inner bg-light-warning p-4 border-top">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h6 class="text-warning-dark mb-3">
-                                                <i class="fas fa-exclamation-triangle mr-2"></i>
-                                                Informations d'urgence
-                                            </h6>
-                                            <div class="alert alert-warning border-warning">
-                                                <div class="d-flex">
-                                                    <div class="mr-3">
-                                                        <i class="fas fa-info-circle fa-2x text-warning"></i>
-                                                    </div>
-                                                    <div>
-                                                        <p class="mb-1"><strong>Attention :</strong> Ce formulaire est destiné aux admissions en urgence.</p>
-                                                        <p class="mb-0">Veuillez vérifier soigneusement toutes les informations avant validation.</p>
-                                                    </div>
-                                                </div>
+                                <div class="row g-3">
+                                    {% for field in form %}
+                                    <div class="col-12 col-md-6 {% if field.name == 'reason_for_admission' %}col-lg-12{% else %}col-lg-6{% endif %}">
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}" class="form-label {% if field.field.required %}required-label{% endif %}">
+                                                {{ field.label }}
+                                            </label>
+
+                                            {{ field }}
+
+                                            {% if field.help_text %}
+                                            <small class="form-text text-muted"><i class="fas fa-info-circle mr-1"></i>{{ field.help_text }}
+                                            </small>
+                                            {% endif %}
+
+                                            {% for error in field.errors %}
+                                            <div class="text-danger small field-error">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
                                             </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
+                            </div>
 
-                                <!-- Actions du formulaire -->
-                                <div class="card-inner bg-light p-4 border-top">
-                                    <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                        <div>
-                                                <a href="{% url 'hospitalisation' %}" class="btn btn-outline-secondary">
-                                                <i class="fas fa-arrow-left mr-2"></i> Retour
-                                            </a>
-                                        </div>
-                                        <div class="d-flex">
-                                            <button type="reset" class="btn btn-outline-danger mr-3">
-                                                <i class="fas fa-undo mr-2"></i> Annuler
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">
-                                                <i class="fas fa-save mr-2"></i> Enregistrer l'admission
-                                            </button>
-                                        </div>
+                            <!-- Section d'urgence -->
+                            <div class="card-inner bg-light-warning p-4 border-top">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="text-warning-dark mb-1">Admission en urgence</h6>
+                                        <p class="mb-0 text-muted">
+                                            <strong>Attention :</strong> Cette admission est prioritaire.
+                                            Des notifications seront envoyées au personnel soignant.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-                        </form>
-                    </div>
+
+                            <!-- Actions du formulaire -->
+                            <div class="card-inner bg-light p-4 border-top">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                    <a href="{% url 'hospitalisation' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+                                    </a>
+
+                                    <div class="d-flex ">
+                                        <button type="reset" class="btn btn-outline-danger">
+                                            <i class="fas fa-eraser mr-2"></i> Effacer
+                                        </button>
+                                        <button type="submit" class="btn btn-primary ml-3" id="submit-btn">
+                                            <i class="fas fa-save mr-2"></i> Confirmer l'admission
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <style>
-        /* Styles pour l'indicateur de progression */
-        .progress-indicator {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .step {
-            text-align: center;
-            z-index: 2;
-        }
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            font-weight: bold;
-            border: 3px solid #e9ecef;
-            transition: all 0.3s;
-        }
-        .step.active .step-circle {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-        .step-label {
-            color: #6c757d;
-            font-weight: 500;
-        }
-        .step.active .step-label {
-            color: #007bff;
-        }
-        .progress-bar-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            height: 4px;
-            background-color: #e9ecef;
-            z-index: 1;
-        }
-        .progress-bar {
-            height: 100%;
-            background-color: #007bff;
-            transition: width 0.3s;
-        }
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('admission-form');
+    const submitBtn = document.getElementById('submit-btn');
 
-        /* Amélioration des champs de formulaire */
-        .form-control {
-            border-radius: 0.375rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-        .form-control:focus {
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-        .required-label:after {
-            content: " *";
-            color: #dc3545;
-        }
-
-        /* Amélioration des cartes */
-        .card {
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-        .card-header {
-            border-radius: 0.5rem 0.5rem 0 0 !important;
-        }
-
-        /* Styles pour les champs obligatoires vides */
-        .form-control:required:not(:focus):invalid {
-            border-color: #dc3545;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const communeSelect = document.getElementById('commune');
-            const nouvelleCommuneInput = document.getElementById('nouvelle_commune');
-
-            // Masquer le champ "nouvelle commune" au chargement
-            if (nouvelleCommuneInput) {
-                nouvelleCommuneInput.style.display = 'none';
-                nouvelleCommuneInput.parentElement.style.display = 'none';
-            }
-
-            // Afficher le champ si "Autre" est sélectionné
-            if (communeSelect) {
-                communeSelect.addEventListener('change', function () {
-                    if (this.value === '' || this.value === 'autre') {
-                        nouvelleCommuneInput.style.display = 'block';
-                        nouvelleCommuneInput.parentElement.style.display = 'block';
-                    } else {
-                        nouvelleCommuneInput.style.display = 'none';
-                        nouvelleCommuneInput.parentElement.style.display = 'none';
-                        nouvelleCommuneInput.value = ''; // Réinitialiser le champ
-                    }
-                });
-            }
-
-            // Validation en temps réel des champs obligatoires
-            const requiredFields = document.querySelectorAll('input[required], select[required]');
-            requiredFields.forEach(field => {
-                field.addEventListener('blur', function() {
-                    if (!this.value) {
-                        this.classList.add('is-invalid');
-                    } else {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    }
-                });
-            });
-
-            // Confirmation avant soumission
-            const form = document.getElementById('admission-form');
-            form.addEventListener('submit', function(e) {
-                const emptyRequiredFields = Array.from(requiredFields).filter(field => !field.value);
-                if (emptyRequiredFields.length > 0) {
-                    e.preventDefault();
-                    alert('Veuillez remplir tous les champs obligatoires avant de soumettre le formulaire.');
-                    emptyRequiredFields[0].focus();
-                } else {
-                    const confirmed = confirm('Êtes-vous sûr de vouloir enregistrer cette admission en urgence ?');
-                    if (!confirmed) {
-                        e.preventDefault();
-                    }
-                }
-            });
+    // Initialisation Select2 si disponible
+    if (typeof $.fn.select2 !== 'undefined') {
+        $('.select2').select2({
+            width: '100%',
+            placeholder: 'Sélectionnez...',
+            allowClear: true
         });
-    </script>
+    }
+
+    // Validation en temps réel
+    const requiredFields = form.querySelectorAll('[required]');
+
+    function validateField(field) {
+        if (!field.value && field.required) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+        } else if (field.value) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+    }
+
+    requiredFields.forEach(field => {
+        field.addEventListener('blur', () => validateField(field));
+        field.addEventListener('input', function() {
+            if (this.value) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+
+    // Validation avant soumission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const emptyRequiredFields = [];
+
+        requiredFields.forEach(field => {
+            validateField(field);
+            if (!field.value && field.required) {
+                isValid = false;
+                emptyRequiredFields.push(field);
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            const firstEmptyField = emptyRequiredFields[0];
+
+            // Message d'erreur
+            showAlert('error', 'Veuillez remplir tous les champs obligatoires marqués d\'un astérisque (*).');
+
+            // Scroll vers le premier champ vide
+            firstEmptyField.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            firstEmptyField.focus();
+        } else {
+            // Confirmation pour les admissions urgentes
+            const confirmed = confirm(
+                '🚨 CONFIRMATION D\'ADMISSION EN URGENCE\n\n' +
+                'Êtes-vous sûr de vouloir enregistrer cette admission en urgence ?\n' +
+                'Cette action enverra des notifications au personnel soignant.'
+            );
+
+            if (!confirmed) {
+                e.preventDefault();
+            } else {
+                // Désactiver le bouton pour éviter les doubles clics
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Traitement...';
+            }
+        }
+    });
+
+    function showAlert(type, message) {
+        // Supprimer les alertes existantes
+        const existingAlerts = document.querySelectorAll('.custom-alert');
+        existingAlerts.forEach(alert => alert.remove());
+
+        const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+        const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} custom-alert alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            <i class="fas fa-${icon} mr-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        form.prepend(alertDiv);
+
+        // Auto-dismiss après 5 secondes
+        setTimeout(() => {
+            if (alertDiv.parentElement) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // Focus sur le premier champ
+    const firstInput = form.querySelector('input, select, textarea');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+</script>
 {% endblock %}
