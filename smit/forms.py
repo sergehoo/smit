@@ -1239,19 +1239,53 @@ class HistoriqueMaladieForm(forms.ModelForm):
 
 
 class CommentaireInfirmierForm(forms.ModelForm):
+    contenu = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 8,
+            'placeholder': (
+                "Rédigez vos observations détaillées, commentaires cliniques "
+                "ou mises à jour sur l'état du patient..."
+            ),
+            'minlength': '10',
+            'maxlength': '5000',
+        }),
+        label='Commentaire médical',
+        help_text='Minimum 10 caractères, maximum 5000 caractères'
+    )
+
     class Meta:
         model = CommentaireInfirmier
         fields = ['contenu']
-        widgets = {
-            'contenu': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Entrez votre commentaire ici...'
-            }),
-        }
-        labels = {
-            'contenu': 'Commentaire',
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Ajout de classes Bootstrap pour la validation
+        if self.errors:
+            for field_name in self.errors:
+                if field_name in self.fields:
+                    existing_classes = self.fields[field_name].widget.attrs.get('class', '')
+                    self.fields[field_name].widget.attrs['class'] = (
+                            existing_classes + ' is-invalid'
+                    ).strip()
+
+    def clean_contenu(self):
+        contenu = self.cleaned_data.get('contenu', '')
+
+        # On enlève les espaces en début/fin
+        contenu = contenu.strip()
+
+        if not contenu:
+            raise forms.ValidationError("Le commentaire ne peut pas être vide.")
+
+        if len(contenu) < 10:
+            raise forms.ValidationError("Le commentaire doit contenir au moins 10 caractères.")
+
+        if len(contenu) > 5000:
+            raise forms.ValidationError("Le commentaire ne peut pas dépasser 5000 caractères.")
+
+        return contenu
 
 
 class MedicamentForm(forms.ModelForm):
@@ -1533,7 +1567,6 @@ class UrgencePatientForm(forms.ModelForm):
                                    'data-search': 'on', })
     )
 
-
     # ➕ “Autre commune”
     nouvelle_commune = forms.CharField(
         required=False,
@@ -1739,16 +1772,12 @@ class ResumeSyndromiqueForm(forms.ModelForm):
         model = ResumeSyndromique
         fields = ['description']
         widgets = {
-            # 'patient': forms.Select(attrs={'class': 'form-control'}),
-            # 'hospitalisation': forms.Select(attrs={'class': 'form-control'}),
+
             'description': TinyMCE(attrs={'class': 'tinymce-effet', 'cols': 65, 'rows': 10}),
-            # 'created_by': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
-            # 'patient': "Patient",
-            # 'hospitalisation': "Hospitalisation",
+
             'description': "Résumé Syndromique",
-            # 'created_by': "Ajouté par",
         }
 
 

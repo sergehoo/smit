@@ -1257,7 +1257,7 @@
                                                                     <em>{{ comment.date_commentaire|naturaltime }}</em>
                                                                 </div>
                                                                 <div class="card-body">
-                                                                    <p>{{ comment.contenu }}</p>
+                                                                    <p>{{ comment.contenu|safe }}</p>
                                                                 </div>
                                                             </div>
                                                         {% endfor %}
@@ -1903,95 +1903,255 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                                                 <!-- Resume Syndromique  -->
-                                                <li class="d-flex justify-content-between align-items-center">
-                                                    <button type="button" class="btn btn-success  uniform-btn mt-2"
-                                                            data-toggle="modal" data-target="#resumesyndromiqueModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em> Résumés
-                                                        Syndromique
-                                                    </button>
-                                                    <div class="modal fade" id="resumesyndromiqueModal" tabindex="-1"
-                                                         aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Ajouter un résumé</h5>
-                                                                    <button type="button" class="btn-close"
-                                                                            data-dismiss="modal"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form method="post"
-                                                                          action="{% url 'add_resume_syndromique' hospitalisation_id=hospitalisationdetail.id %}">
-                                                                        {% csrf_token %}
-                                                                        {{ resumesyndromiqueform.as_p }}
-                                                                        <button type="submit" class="btn btn-primary">
-                                                                            Enregistrer
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <script>
-                                                        document.addEventListener('DOMContentLoaded', function () {
-                                                            // Reinitialiser TinyMCE quand le modal est affiché
-                                                            $('#resumesyndromiqueModal').on('shown.bs.modal', function () {
-                                                                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                                                                tinymce.init({
-                                                                    selector: '.tinymce-effet',
-                                                                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                                                                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                                                                    menubar: false,
-                                                                    height: 300,
-                                                                });
-                                                            });
-                                                        });
-                                                    </script>
-                                                </li>
+                                     <li class="d-flex justify-content-between align-items-center">
+    <button type="button" class="btn btn-success uniform-btn mt-2"
+            data-toggle="modal" data-target="#resumesyndromiqueModal">
+        <em class="icon ni ni-plus-circle-fill"></em> Résumé Syndromique
+    </button>
+    
+    <div class="modal fade" id="resumesyndromiqueModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter un résumé syndromique</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Affichage des messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" 
+                          action="{% url 'add_resume_syndromique' hospitalisation_id=hospitalisationdetail.id %}"
+                          id="resumeSyndromiqueForm">
+                        {% csrf_token %}
+                        
+                        <!-- Affichage des erreurs non-field -->
+                        {% if resumesyndromiqueform.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in resumesyndromiqueform.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ resumesyndromiqueform.description.id_for_label }}" 
+                                   class="form-label fw-bold">
+                                {{ resumesyndromiqueform.description.label }}
+                            </label>
+                            {{ resumesyndromiqueform.description }}
+                            {% if resumesyndromiqueform.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in resumesyndromiqueform.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Décrivez le résumé syndromique du patient de manière détaillée.</div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary" id="submitResume">
+                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let tinymceInitialized = false;
+    
+    // Initialisation de TinyMCE
+    function initTinyMCE() {
+        if (!tinymceInitialized) {
+            tinymce.init({
+                selector: '.tinymce-effet',
+                plugins: 'advlist autolink lists link charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table paste code help wordcount',
+                toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                menubar: 'edit view insert format tools table help',
+                height: 400,
+                language: 'fr_FR',
+                branding: false,
+                promotion: false,
+                content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        editor.save();
+                    });
+                }
+            });
+            tinymceInitialized = true;
+        }
+    }
+    
+    // Initialiser TinyMCE quand le modal est affiché
+    $('#resumesyndromiqueModal').on('shown.bs.modal', function () {
+        initTinyMCE();
+    });
+    
+    // Nettoyer TinyMCE quand le modal est fermé
+    $('#resumesyndromiqueModal').on('hidden.bs.modal', function () {
+        if (tinymceInitialized) {
+            tinymce.remove();
+            tinymceInitialized = false;
+        }
+        // Réinitialiser le formulaire
+        document.getElementById('resumeSyndromiqueForm').reset();
+    });
+    
+    // Gestion du loading state sur le bouton submit
+    document.getElementById('resumeSyndromiqueForm').addEventListener('submit', function() {
+        const submitBtn = document.getElementById('submitResume');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+    });
+});
+</script>
 
                                                 <!-- Problemes posés  -->
-                                                <li class="d-flex justify-content-between align-items-center">
-                                                    <button type="button" class="btn btn-success  uniform-btn mt-2"
-                                                            data-toggle="modal" data-target="#problemesposerModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em>Problèmes posés
-                                                    </button>
-                                                    <div class="modal fade" id="problemesposerModal" tabindex="-1"
-                                                         aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Rediger le Problèmes</h5>
-                                                                    <button type="button" class="btn-close"
-                                                                            data-dismiss="modal"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form method="post"
-                                                                          action="{% url 'add_problemes_pose' hospitalisation_id=hospitalisationdetail.id %}">
-                                                                        {% csrf_token %}
-                                                                        {{ problemesposerform.as_p }}
-                                                                        <button type="submit" class="btn btn-primary">
-                                                                            Enregistrer
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <script>
-                                                        document.addEventListener('DOMContentLoaded', function () {
-                                                            // Reinitialiser TinyMCE quand le modal est affiché
-                                                            $('#problemesposerModal').on('shown.bs.modal', function () {
-                                                                tinymce.remove(); // Supprimer les anciennes instances (si rechargé)
-                                                                tinymce.init({
-                                                                    selector: '.tinymce-effet',
-                                                                    plugins: 'advlist autolink lists link charmap print preview anchor',
-                                                                    toolbar: 'bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent',
-                                                                    menubar: false,
-                                                                    height: 300,
-                                                                });
-                                                            });
-                                                        });
-                                                    </script>
-                                                </li>
+                                               <li class="d-flex justify-content-between align-items-center">
+    <button type="button" class="btn btn-success uniform-btn mt-2"
+            data-toggle="modal" data-target="#problemesposerModal">
+        <em class="icon ni ni-plus-circle-fill"></em> Problèmes Posés
+    </button>
+    
+    <div class="modal fade" id="problemesposerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rédiger les Problèmes Posés</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Affichage des messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" 
+                          action="{% url 'add_problemes_pose' hospitalisation_id=hospitalisationdetail.id %}"
+                          id="problemesPoseForm">
+                        {% csrf_token %}
+                        
+                        <!-- Affichage des erreurs non-field -->
+                        {% if problemesposerform.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in problemesposerform.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ problemesposerform.description.id_for_label }}" 
+                                   class="form-label fw-bold">
+                                {{ problemesposerform.description.label }}
+                            </label>
+                            {{ problemesposerform.description }}
+                            {% if problemesposerform.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in problemesposerform.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Listez et décrivez les problèmes de santé identifiés chez le patient.
+                            </div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary" id="submitProbleme">
+                                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let tinymceInitializedProblemes = false;
+    
+    // Initialisation de TinyMCE pour problèmes posés
+    function initTinyMCEProblemes() {
+        if (!tinymceInitializedProblemes) {
+            tinymce.init({
+                selector: '#problemesposerModal .tinymce-effet',
+                plugins: 'advlist autolink lists link charmap print preview anchor searchreplace visualblocks code fullscreen insertdatetime media table paste code help wordcount',
+                toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
+                menubar: 'edit view insert format tools table help',
+                height: 400,
+                language: 'fr_FR',
+                branding: false,
+                promotion: false,
+                content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        editor.save();
+                    });
+                }
+            });
+            tinymceInitializedProblemes = true;
+        }
+    }
+    
+    // Initialiser TinyMCE quand le modal est affiché
+    $('#problemesposerModal').on('shown.bs.modal', function () {
+        initTinyMCEProblemes();
+    });
+    
+    // Nettoyer TinyMCE quand le modal est fermé
+    $('#problemesposerModal').on('hidden.bs.modal', function () {
+        if (tinymceInitializedProblemes) {
+            tinymce.remove('#problemesposerModal .tinymce-effet');
+            tinymceInitializedProblemes = false;
+        }
+        // Réinitialiser le formulaire
+        document.getElementById('problemesPoseForm').reset();
+        // Supprimer les messages d'alerte
+        $('.alert').alert('close');
+    });
+    
+    // Gestion du loading state sur le bouton submit
+    document.getElementById('problemesPoseForm').addEventListener('submit', function() {
+        const submitBtn = document.getElementById('submitProbleme');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        submitBtn.disabled = true;
+        spinner.classList.remove('d-none');
+    });
+    
+    // Fermer les alertes après 5 secondes
+    setTimeout(function() {
+        $('.alert').alert('close');
+    }, 5000);
+});
+</script>
 
                                             </ul>
 
@@ -2455,36 +2615,272 @@ document.addEventListener("DOMContentLoaded", function () {
                                                     </script>
                                                 </li>
                                                 <!-- Commentaire -->
-                                                <li class="d-flex justify-content-between align-items-center">
-                                                    <button type="button" class="btn btn-light  uniform-btn mt-2"
-                                                            data-toggle="modal" data-target="#addcommentModal">
-                                                        <em class="icon ni ni-plus-circle-fill"></em> Commentaire /
-                                                        update
-                                                    </button>
-                                                    <div class="modal fade" id="addcommentModal" tabindex="-1"
-                                                         aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Ajouter un commentaire</h5>
-                                                                    <button type="button" class="btn-close"
-                                                                            data-dismiss="modal"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <form method="post"
-                                                                          action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id %}">
-                                                                        {% csrf_token %}
-                                                                        {{ hospicomment.as_p }}
-                                                                        <button type="submit" class="btn btn-primary">
-                                                                            Enregistrer
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                <!-- Commentaire -->
+<li class="d-flex justify-content-between align-items-center">
+    <button type="button"
+            class="btn btn-light uniform-btn mt-2"
+            data-toggle="modal"
+            data-target="#addcommentModal">
+        <em class="icon ni ni-plus-circle-fill"></em>
+        Commentaire / Mise à jour
+    </button>
 
-                                                </li>
+    <!-- Modal Commentaire -->
+    <div class="modal fade" id="addcommentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-comment-medical me-2"></i>
+                        Ajouter un commentaire
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Affichage des messages spécifiques aux commentaires -->
+                    {% for message in messages %}
+                        {% if 'commentaire' in message.extra_tags %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas 
+                                        {% if message.tags == 'success' %}fa-check-circle
+                                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                                        {% else %}fa-info-circle{% endif %} 
+                                        me-2"></i>
+                                    <div>{{ message }}</div>
+                                </div>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <form method="post"
+                          action="{% url 'add_coment' hospitalisation_id=hospitalisationdetail.id %}"
+                          id="commentForm"
+                          class="needs-validation"
+                          novalidate>
+                        {% csrf_token %}
+
+                        <!-- Erreurs non-field -->
+                        {% if hospicomment.non_field_errors %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Erreurs :</strong>
+                                <ul class="mb-0 mt-1">
+                                    {% for error in hospicomment.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ hospicomment.contenu.id_for_label }}"
+                                   class="form-label fw-bold">
+                                <i class="fas fa-edit me-1"></i>
+                                {{ hospicomment.contenu.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            {# Champ textarea #}
+                            {{ hospicomment.contenu }}
+
+                            {% if hospicomment.contenu.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    {% for error in hospicomment.contenu.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Rédigez vos observations, commentaires
+                                ou mises à jour sur l'état du patient.
+                                <span id="charCount" class="float-right text-muted">
+                                    0/5000 caractères
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div class="text-muted small">
+                                <i class="fas fa-user-md me-1"></i>
+                                Rédigé par :
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </div>
+                            <div>
+                                <button type="button"
+                                        class="btn btn-outline-secondary mr-2"
+                                        data-dismiss="modal">
+                                    <i class="fas fa-times me-1"></i>
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        id="submitComment">
+                                    <span class="spinner-border spinner-border-sm d-none me-1"
+                                          role="status"></span>
+                                    <i class="fas fa-save me-1"></i>
+                                    Enregistrer le commentaire
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div> <!-- /.modal-body -->
+            </div>
+        </div>
+    </div>
+</li>
+
+{#<script>#}
+{#    document.addEventListener('DOMContentLoaded', function () {#}
+{#        const commentForm = document.getElementById('commentForm');#}
+{#        const submitBtn = document.getElementById('submitComment');#}
+{#        const charCount = document.getElementById('charCount');#}
+{##}
+{#        // On cible de façon fiable le textarea par son "name" Django#}
+{#        const contentTextarea = document.querySelector(#}
+{#            'textarea[name="{{ hospicomment.contenu.html_name }}"]'#}
+{#        );#}
+{##}
+{#        let updateCharCount = null;#}
+{##}
+{#        // Compteur de caractères#}
+{#        if (contentTextarea && charCount) {#}
+{#            updateCharCount = function () {#}
+{#                const length = contentTextarea.value.length;#}
+{#                charCount.textContent = `${length}/5000 caractères`;#}
+{##}
+{#                if (length > 4900) {#}
+{#                    charCount.className = 'float-right text-danger';#}
+{#                } else if (length > 4500) {#}
+{#                    charCount.className = 'float-right text-warning';#}
+{#                } else {#}
+{#                    charCount.className = 'float-right text-muted';#}
+{#                }#}
+{#            };#}
+{##}
+{#            contentTextarea.addEventListener('input', updateCharCount);#}
+{#            updateCharCount(); // Initialisation#}
+{#        }#}
+{##}
+{#        // Ouverture du modal : on met à jour le compteur#}
+{#        $('#addcommentModal').on('show.bs.modal', function () {#}
+{#            if (updateCharCount) {#}
+{#                updateCharCount();#}
+{#            }#}
+{#        });#}
+{##}
+{#        // Fermeture du modal#}
+{#        $('#addcommentModal').on('hidden.bs.modal', function () {#}
+{#            // Réinitialiser le formulaire seulement si succès#}
+{#            const hasSuccess = document.querySelector('.alert-success');#}
+{#            if (hasSuccess && commentForm) {#}
+{#                commentForm.reset();#}
+{#                if (charCount) {#}
+{#                    charCount.textContent = '0/5000 caractères';#}
+{#                    charCount.className = 'float-right text-muted';#}
+{#                }#}
+{#            }#}
+{##}
+{#            // Supprimer les alertes après fermeture#}
+{#            setTimeout(() => {#}
+{#                $('.alert').alert('close');#}
+{#            }, 3000);#}
+{#        });#}
+{##}
+{#        // Validation côté client#}
+{#        if (commentForm) {#}
+{#            commentForm.addEventListener('submit', function (event) {#}
+{#                const content = contentTextarea ? contentTextarea.value.trim() : '';#}
+{##}
+{#                if (!content) {#}
+{#                    event.preventDefault();#}
+{#                    showAlert('Veuillez saisir un commentaire avant de soumettre.', 'warning');#}
+{#                    if (contentTextarea) contentTextarea.focus();#}
+{#                    return false;#}
+{#                }#}
+{##}
+{#                if (content.length < 10) {#}
+{#                    event.preventDefault();#}
+{#                    showAlert('Le commentaire doit contenir au moins 10 caractères.', 'warning');#}
+{#                    if (contentTextarea) contentTextarea.focus();#}
+{#                    return false;#}
+{#                }#}
+{##}
+{#                if (content.length > 5000) {#}
+{#                    event.preventDefault();#}
+{#                    showAlert('Le commentaire ne peut pas dépasser 5000 caractères.', 'warning');#}
+{#                    if (contentTextarea) contentTextarea.focus();#}
+{#                    return false;#}
+{#                }#}
+{##}
+{#                // Afficher le spinner de chargement#}
+{#                const spinner = submitBtn.querySelector('.spinner-border');#}
+{#                submitBtn.disabled = true;#}
+{#                if (spinner) {#}
+{#                    spinner.classList.remove('d-none');#}
+{#                }#}
+{##}
+{#                return true;#}
+{#            });#}
+{#        }#}
+{##}
+{#        function showAlert(message, type) {#}
+{#            // Supprimer les alertes existantes#}
+{#            $('.alert').alert('close');#}
+{##}
+{#            // Créer une nouvelle alerte#}
+{#            const alertDiv = document.createElement('div');#}
+{#            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;#}
+{#            alertDiv.innerHTML = `#}
+{#                <div class="d-flex align-items-center">#}
+{#                    <i class="fas fa-exclamation-circle me-2"></i>#}
+{#                    <div>${message}</div>#}
+{#                </div>#}
+{#                <button type="button" class="close" data-dismiss="alert">#}
+{#                    <span>&times;</span>#}
+{#                </button>#}
+{#            `;#}
+{##}
+{#            if (commentForm) {#}
+{#                commentForm.insertBefore(alertDiv, commentForm.firstChild);#}
+{#            }#}
+{##}
+{#            // Auto-fermeture après 5 secondes#}
+{#            setTimeout(() => {#}
+{#                $(alertDiv).alert('close');#}
+{#            }, 5000);#}
+{#        }#}
+{##}
+{#        // Auto-focus sur le textarea quand le modal s'ouvre#}
+{#        $('#addcommentModal').on('shown.bs.modal', function () {#}
+{#            if (contentTextarea) {#}
+{#                contentTextarea.focus();#}
+{##}
+{#                // Vérifier s'il y a des erreurs et scroll vers elles#}
+{#                if (commentForm) {#}
+{#                    const firstError = commentForm.querySelector('.is-invalid, .text-danger');#}
+{#                    if (firstError) {#}
+{#                        firstError.scrollIntoView({#}
+{#                            behavior: 'smooth',#}
+{#                            block: 'center'#}
+{#                        });#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#</script>#}
+
+
                                             </ul>
 
                                         </div>

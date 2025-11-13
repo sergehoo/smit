@@ -1478,7 +1478,7 @@ def add_avis_medical(request, hospitalisation_id):
             avis.date_avis = timezone.now()
             avis.medecin = request.user
             avis.save()
-            messages.success(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
+            messages.success(request, "Erreur lors de l'ajout de l'avis. Veuillez corriger les erreurs ci-dessous.")
             return redirect('hospitalisationdetails', pk=hospitalisation_id)
     else:
         form = AvisMedicalForm()
@@ -1493,20 +1493,36 @@ def add_hospi_comment(request, hospitalisation_id):
     if request.method == 'POST':
         form = CommentaireInfirmierForm(request.POST)
         if form.is_valid():
-            commentaire = form.save(commit=False)
-            commentaire.patient = hospitalisation.patient
-            commentaire.hospitalisation = hospitalisation
-            commentaire.medecin = request.user
-            commentaire.save()
-            messages.success(request, "Commentaire ajouté avec succès.")
-            return redirect('hospitalisationdetails', pk=hospitalisation_id)
-        else:
-            messages.error(request, "Erreur lors de l'ajout du commentaire. Veuillez corriger les erreurs ci-dessous.")
-    else:
-        form = CommentaireInfirmierForm()
-    messages.error(request, "Erreur lors de l'ajout du diagnostic. Veuillez corriger les erreurs ci-dessous.")
-    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            try:
+                commentaire = form.save(commit=False)
+                commentaire.patient = hospitalisation.patient
+                commentaire.hospitalisation = hospitalisation
+                commentaire.medecin = request.user
+                commentaire.save()
 
+                messages.success(request, "Commentaire ajouté avec succès.", extra_tags="commentaire")
+                return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+            except Exception as e:
+                messages.error(request, f"Erreur lors de l'enregistrement : {str(e)}", extra_tags="commentaire")
+        else:
+            messages.error(request, "Erreur lors de l'ajout du commentaire. Veuillez corriger les erreurs ci-dessous.",
+                           extra_tags="commentaire")
+
+            # Stocker le formulaire avec erreurs dans la session pour le réafficher
+            request.session['comment_form_data'] = request.POST
+            request.session['comment_form_errors'] = form.errors.get_json_data()
+
+    else:
+        # Nettoyer les données de session pour les requêtes GET
+        if 'comment_form_data' in request.session:
+            del request.session['comment_form_data']
+        if 'comment_form_errors' in request.session:
+            del request.session['comment_form_errors']
+
+        form = CommentaireInfirmierForm()
+
+    return redirect('hospitalisationdetails', pk=hospitalisation_id)
 
 @login_required
 def add_effet_indesirable(request, hospitalisation_id):
@@ -1758,46 +1774,66 @@ def delete_resume(request, resume_id):
     return redirect(request.META.get('HTTP_REFERER', 'hospitalisationdetails'))
 
 
+
 @login_required
 def add_resume_syndromique(request, hospitalisation_id):
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
     if request.method == 'POST':
         form = ResumeSyndromiqueForm(request.POST)
         if form.is_valid():
-            resume = form.save(commit=False)
-            resume.patient = hospitalisation.patient
-            resume.hospitalisation = hospitalisation
-            resume.created_by = request.user.employee  # Associe le médecin connecté
-            resume.save()
-            messages.success(request, "Résumé  ajouté avec succès.")
-            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            try:
+                resume = form.save(commit=False)
+                resume.patient = hospitalisation.patient
+                resume.hospitalisation = hospitalisation
+                resume.created_by = request.user.employee
+                resume.save()
+                messages.success(request, "Résumé syndromique ajouté avec succès.")
+                return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            except Exception as e:
+                messages.error(request, f"Erreur lors de l'enregistrement : {str(e)}")
         else:
-            messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
+            # Stocker les erreurs pour les afficher dans le template
+            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
     else:
         form = ResumeSyndromiqueForm()
-    messages.error(request, "Erreur lors de l'ajout du Résumé. Veuillez corriger les erreurs ci-dessous.")
-    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+
+    # Au lieu de rediriger, on affiche le template avec le formulaire et les erreurs
+    context = {
+        'hospitalisation': hospitalisation,
+        'resumesyndromiqueform': form,
+    }
+    return render(request, 'pages/hospitalisation/hospitalisation_details.html', context)
 
 
 @login_required
 def add_problemes_pose(request, hospitalisation_id):
     hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+
     if request.method == 'POST':
         form = ProblemePoseForm(request.POST)
         if form.is_valid():
-            probleme = form.save(commit=False)
-            probleme.patient = hospitalisation.patient
-            probleme.hospitalisation = hospitalisation
-            probleme.created_by = request.user.employee  # Associe le médecin connecté
-            probleme.save()
-            messages.success(request, "Problemes ajouté avec succès.")
-            return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            try:
+                probleme = form.save(commit=False)
+                probleme.patient = hospitalisation.patient
+                probleme.hospitalisation = hospitalisation
+                probleme.created_by = request.user.employee
+                probleme.save()
+                messages.success(request, "Problème posé ajouté avec succès.")
+                return redirect('hospitalisationdetails', pk=hospitalisation_id)
+            except Exception as e:
+                messages.error(request, f"Erreur lors de l'enregistrement : {str(e)}")
         else:
-            messages.error(request, "Erreur lors de l'ajout du Problemes. Veuillez corriger les erreurs ci-dessous.")
+            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
     else:
-        form = HistoriqueMaladieForm()
-    messages.error(request, "Erreur lors de l'ajout du Problemes. Veuillez corriger les erreurs ci-dessous.")
-    return redirect('hospitalisationdetails', pk=hospitalisation_id)
+        form = ProblemePoseForm()
+
+    # Au lieu de rediriger immédiatement, on retourne le contexte pour afficher les erreurs
+    context = {
+        'hospitalisation': hospitalisation,
+        'problemesposerform': form,
+    }
+    return render(request, 'pages/hospitalisation/hospitalisation_details.html', context)
 
 
 @csrf_exempt  # Désactive CSRF pour tester (à sécuriser avec le token dans les headers)
