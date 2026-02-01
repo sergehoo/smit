@@ -5,41 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/management/commands/create_vih_profiles_from_codes.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/migrations/0003_create_vihprofile.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/utils/phones.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/services.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/layout/aside_tailwind.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/layout/notif_header_tailwind.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/partials/_ud_row.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/smit/templates/partials/_ud_row_compact.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/logocermipa.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/lyne_hospital.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/consultation.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/file_active.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/hospitalisation.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/overview.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/suivi.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/RETROVIRAUX/vih_profile_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pages/services/VIH-SIDA/file_active_vih.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hospitalisation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/hospitalisation/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/custom_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/custom_filters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templates/employees/employee_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templates/employees/employee_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/templatetags/custom_filter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smit/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/smit/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/settings/prod.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/prod.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smitci/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/dossier_patient.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/dossier_patient.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/global_search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/global_search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pages/services/servicecontent_detail.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -336,7 +302,7 @@
       <workItem from="1768745632294" duration="384000" />
       <workItem from="1769030613859" duration="597000" />
       <workItem from="1769642141918" duration="598000" />
-      <workItem from="1769672137316" duration="56840000" />
+      <workItem from="1769672137316" duration="58834000" />
     </task>
     <servers />
   </component>
