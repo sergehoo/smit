@@ -35,10 +35,12 @@ AXES_FAILURE_LIMIT = 5  # nombre max d'échecs avant blocage
 AXES_COOLOFF_TIME = timedelta(hours=1)  # durée avant déblocage auto
 AXES_LOCK_OUT_AT_FAILURE = True
 AXES_RESET_ON_SUCCESS = True  # reset échecs après login réussi
-AXES_LOCKOUT_PARAMETERS = ["username", "ip_address", "user_agent"]
+AXES_LOCKOUT_PARAMETERS = ["username"]
 AXES_VERBOSE = True  # Pour logguer dans la console
 AXES_FAILURE_LOG_PER_USER_LIMIT = 100  # Historique d’échecs par user
 AXES_REVERSE_PROXY_HEADER = "HTTP_X_FORWARDED_FOR"
+
+
 
 # ✅ Nouveau style
 AXES_USE_X_FORWARDED_FOR = True

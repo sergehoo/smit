@@ -1,337 +1,566 @@
 {% extends 'layout/base.html' %}
 {% load static %}
-{% load unicorn %}
-{% load group_permissions %}
+{% load humanize %}
+
 {% block content %}
-    <div class="nk-content nk-content-fluid">
-        <div class="nk-content-body">
-            <div class="nk-block-head nk-block-head-sm">
-                <div class="nk-block-between">
-                    <div class="nk-block-head-content">
-                        <h3 class="nk-block-title page-title">LISTE DES UTILISATEURS & ROLES</h3>
-                        <div class="nk-block-des text-soft">
-                            <p> Liste des Roles Utilisateurs </p>
-                        </div>
-                    </div><!-- .nk-block-head-content -->
-                    <div class="nk-block-head-content">
 
-                    <a class="btn btn-primary" href="{% url 'employee_create' %}">creer</a>
+<div class="nk-content nk-content-fluid">
+  <div class="nk-content-body">
 
-                        <!-- Modal pour créer un rôle -->
-                        <div class="modal fade" id="createRoleModal" tabindex="-1" role="dialog"
-                             aria-labelledby="createRoleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="createRoleModalLabel">Créer un Nouveau Rôle</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <form method="post" action="{% url 'role_create' %}">
-                                        {% csrf_token %}
-                                        <div class="modal-body">
-                                            <!-- Champ Nom du rôle -->
-                                            <div class="form-group">
-                                                <label for="id_name">Nom du rôle</label>
-                                                {{ rolesform.name }}
-                                            </div>
-
-                                            <!-- Accordéon pour les permissions -->
-                                            <div class="accordion" id="permissionsAccordion">
-                                                {% for model_name, permissions in grouped_permissions.items %}
-                                                    <div class="card">
-                                                        <div class="card-header" id="heading{{ forloop.counter }}">
-                                                            <h2 class="mb-0">
-                                                                <button class="btn btn-link btn-block text-left"
-                                                                        type="button" data-toggle="collapse"
-                                                                        data-target="#collapse{{ forloop.counter }}"
-                                                                        aria-expanded="true"
-                                                                        aria-controls="collapse{{ forloop.counter }}">
-                                                                    {{ model_name|title }}
-                                                                </button>
-                                                            </h2>
-                                                        </div>
-                                                        <div id="collapse{{ forloop.counter }}"
-                                                             class="collapse {% if forloop.first %}show{% endif %}"
-                                                             aria-labelledby="heading{{ forloop.counter }}"
-                                                             data-parent="#permissionsAccordion">
-                                                            <div class="card-body">
-                                                                {% for permission in permissions %}
-                                                                    <div class="custom-control custom-checkbox">
-                                                                        <input type="checkbox"
-                                                                               class="custom-control-input"
-                                                                               id="permission{{ permission.id }}"
-                                                                               name="permissions"
-                                                                               value="{{ permission.id }}">
-                                                                        <label class="custom-control-label"
-                                                                               for="permission{{ permission.id }}">
-                                                                            {{ permission.name }}
-                                                                        </label>
-                                                                    </div>
-                                                                {% endfor %}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Enregistrer</button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                Annuler
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div><!-- .nk-block-head-content -->
-                </div><!-- .nk-block-between -->
-            </div><!-- .nk-block-head -->
-
-            <div class="nk-block">
-                <div class="card card-bordered card-stretch">
-                    <div class="card-inner-group">
-                        <div class="card-inner position-relative card-tools-toggle">
-                            <div class="card-title-group">
-                                <div class="card-tools">
-
-                                </div><!-- .card-tools -->
-                                <div class="card-tools mr-n1">
-                                    <ul class="btn-toolbar gx-1">
-                                        <li>
-                                            <a href="#" class="btn btn-icon search-toggle toggle-search"
-                                               data-target="search"><em class="icon ni ni-search"></em></a>
-                                        </li><!-- li -->
-                                        <li class="btn-toolbar-sep"></li><!-- li -->
-                                        <li>
-                                            <div class="toggle-wrap">
-                                                <a href="#" class="btn btn-icon btn-trigger toggle"
-                                                   data-target="cardTools"><em class="icon ni ni-menu-right"></em></a>
-                                                <div class="toggle-content" data-content="cardTools">
-                                                    <ul class="btn-toolbar gx-1">
-                                                        <li class="toggle-close">
-                                                            <a href="#" class="btn btn-icon btn-trigger toggle"
-                                                               data-target="cardTools"><em
-                                                                    class="icon ni ni-arrow-left"></em></a>
-                                                        </li><!-- li -->
-                                                        <li>
-                                                            <div class="dropdown">
-                                                                <a href="#"
-                                                                   class="btn btn-trigger btn-icon dropdown-toggle"
-                                                                   data-toggle="dropdown">
-                                                                    <div class="dot dot-primary"></div>
-                                                                    <em class="icon ni ni-filter-alt"></em>
-                                                                </a>
-                                                                <div class="filter-wg dropdown-menu dropdown-menu-xl dropdown-menu-right">
-                                                                    <div class="dropdown-head">
-                                                                        <span class="sub-title dropdown-title">Filter Users</span>
-                                                                        <div class="dropdown">
-                                                                            <a href="#" class="btn btn-sm btn-icon">
-                                                                                <em class="icon ni ni-more-h"></em>
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="dropdown-body dropdown-body-rg">
-                                                                        <div class="row gx-6 gy-3">
-                                                                            <div class="col-6">
-                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                    <input type="checkbox"
-                                                                                           class="custom-control-input"
-                                                                                           id="hasBalance">
-                                                                                    <label class="custom-control-label"
-                                                                                           for="hasBalance"> Have
-                                                                                        Balance</label>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-6">
-                                                                                <div class="custom-control custom-control-sm custom-checkbox">
-                                                                                    <input type="checkbox"
-                                                                                           class="custom-control-input"
-                                                                                           id="hasKYC">
-                                                                                    <label class="custom-control-label"
-                                                                                           for="hasKYC"> KYC
-                                                                                        Verified</label>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label class="overline-title overline-title-alt">Role</label>
-                                                                                    <select class="form-select form-select-sm">
-                                                                                        <option value="any">Any Role
-                                                                                        </option>
-                                                                                        <option value="investor">
-                                                                                            Investor
-                                                                                        </option>
-                                                                                        <option value="seller">Seller
-                                                                                        </option>
-                                                                                        <option value="buyer">Buyer
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-6">
-                                                                                <div class="form-group">
-                                                                                    <label class="overline-title overline-title-alt">Status</label>
-                                                                                    <select class="form-select form-select-sm">
-                                                                                        <option value="any">Any Status
-                                                                                        </option>
-                                                                                        <option value="active">Active
-                                                                                        </option>
-                                                                                        <option value="pending">
-                                                                                            Pending
-                                                                                        </option>
-                                                                                        <option value="suspend">
-                                                                                            Suspend
-                                                                                        </option>
-                                                                                        <option value="deleted">
-                                                                                            Deleted
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-12">
-                                                                                <div class="form-group">
-                                                                                    <button type="button"
-                                                                                            class="btn btn-secondary">
-                                                                                        Filter
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="dropdown-foot between">
-                                                                        <a class="clickable" href="#">Reset Filter</a>
-                                                                        <a href="#">Save Filter</a>
-                                                                    </div>
-                                                                </div><!-- .filter-wg -->
-                                                            </div><!-- .dropdown -->
-                                                        </li><!-- li -->
-                                                        <li>
-                                                            <div class="dropdown">
-                                                                <a href="#"
-                                                                   class="btn btn-trigger btn-icon dropdown-toggle"
-                                                                   data-toggle="dropdown">
-                                                                    <em class="icon ni ni-setting"></em>
-                                                                </a>
-                                                                <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
-                                                                    <ul class="link-check">
-                                                                        <li><span>Show</span></li>
-                                                                        <li class="active"><a href="#">10</a></li>
-                                                                        <li><a href="#">20</a></li>
-                                                                        <li><a href="#">50</a></li>
-                                                                    </ul>
-                                                                    <ul class="link-check">
-                                                                        <li><span>Order</span></li>
-                                                                        <li class="active"><a href="#">DESC</a></li>
-                                                                        <li><a href="#">ASC</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </div><!-- .dropdown -->
-                                                        </li><!-- li -->
-                                                    </ul><!-- .btn-toolbar -->
-                                                </div><!-- .toggle-content -->
-                                            </div><!-- .toggle-wrap -->
-                                        </li><!-- li -->
-                                    </ul><!-- .btn-toolbar -->
-                                </div><!-- .card-tools -->
-                            </div><!-- .card-title-group -->
-                           <div class="card-search search-wrap" data-search="search">
-    <div class="card-body">
-        <div class="search-content">
-            <form method="get" action="{% url 'employee_list' %}">
-                <a href="#" class="search-back btn btn-icon toggle-search" data-target="search">
-                    <em class="icon ni ni-arrow-left"></em>
-                </a>
-                <input type="text" name="search" class="form-control border-transparent form-focus-none"
-                       placeholder="Search by name, email, or phone"
-                       value="{{ search_query }}">
-                <button type="submit" class="search-submit btn btn-icon">
-                    <em class="icon ni ni-search"></em>
-                </button>
-            </form>
+    <!-- Header avec statistiques -->
+    <div class="nk-block-head nk-block-head-sm mb-4">
+      <div class="nk-block-between align-items-center">
+        <div class="nk-block-head-content">
+          <h3 class="nk-block-title page-title">
+            <em class="icon ni ni-users"></em>
+            Gestion des Employés
+          </h3>
+          <div class="nk-block-des text-soft">
+            <div class="d-flex flex-wrap gap-3">
+              <span>
+                <span class="text-primary font-weight-bold">{{ total_employees|intcomma }}</span> employés
+              </span>
+              <span class="text-success">
+                <span class="font-weight-bold">{{ active_employees|intcomma }}</span> actifs
+              </span>
+              <span class="text-muted">
+                <span class="font-weight-bold">{{ inactive_employees|intcomma }}</span> inactifs
+              </span>
+            </div>
+          </div>
         </div>
+
+        <div class="nk-block-head-content">
+          <div class="d-flex ">
+            {% if can_add_employee %}
+            <a class="btn btn-primary" href="{% url 'employee_create' %}">
+              <em class="icon ni ni-plus"></em>
+              <span>Nouvel employé</span>
+            </a>
+            {% endif %}
+
+            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#createRoleModal">
+              <em class="icon ni ni-shield"></em>
+              <span>Créer rôle</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-</div><!-- .card-search -->
-                        </div><!-- .card-inner -->
-                        <div class="card-inner p-0">
-                            <table class="table table-bordered">
-                                <thead>
-                                <tr>
-                                    <th>Employé(s)</th>
-                                    <th>Contact</th>
-                                    <th>Fonction</th>
-                                    <th>Rôle(s)</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for employee in employees %}
-                                    <tr>
-                                        <td>{{ employee.user.first_name }} {{ employee.user.last_name }}</td>
-                                        <td>{{ employee.phone }} </td>
-                                        <td>{{ employee.job_title }} </td>
-                                        <td>
-                                            {% for group in employee.user.groups.all %}
-                                                <span class="badge badge-outline-primary">{{ group.name }}</span>
-                                                {% if not forloop.last %}
-                                                {% endif %}
-                                            {% endfor %}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'employee_update' employee.id %}"
-                                               class="btn btn-sm btn-warning"><i class="ni ni-update"></i></a>
-                                            <a href="{% url 'employee_delete' employee.id %}"
-                                               class="btn btn-sm btn-danger ml-2"><i class="ni ni-trash"></i></a>
-                                            <a href="{% url 'send_sms_view' employee_id=employee.id %}"
-                                               class="btn btn-sm btn-outline-secondary ml-2">
-                                                <i class="ni ni-send"></i> SMS
-                                            </a>
-  <a href="{% url 'admin_password_reset' employee.pk %}" class="btn btn-sm btn-info ml-2">
-        <i class="ni ni-lock"></i> Modifier MDP
-    </a>
-                                            <!-- Autres boutons... -->
 
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div><!-- .nk-tb-list -->
-                        </div><!-- .card-inner -->
-                        <div class="card-inner">
-                            <ul class="pagination justify-content-center justify-content-md-start">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item"><a class="page-link" href="employees/?page={{ page_obj.previous_page_number }}">Prev</a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled"><span class="page-link">Prev</span></li>
-                                {% endif %}
+    <!-- Filtres -->
+    <div class="nk-block">
+      <div class="card card-bordered filter-card">
+        <div class="card-inner">
+          <form method="get" action="{% url 'employee_list' %}" class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">Recherche</label>
+              <div class="form-control-wrap">
+                <div class="form-icon form-icon-left">
+                  <em class="icon ni ni-search"></em>
+                </div>
+                <input
+                  type="text"
+                  name="search"
+                  class="form-control"
+                  placeholder="Nom, email, téléphone, fonction..."
+                  value="{{ search_query }}"
+                />
+              </div>
+            </div>
 
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="employees/?page={{ num }}">{{ num }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
+            <div class="col-md-3">
+              <label class="form-label">Rôle</label>
+              <select name="role" class="form-select">
+                <option value="">Tous les rôles</option>
+                {% for role in roles %}
+                  <option value="{{ role.id }}" {% if role_filter == role.id|stringformat:"s" %}selected{% endif %}>
+                    {{ role.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
 
-                                {% if page_obj.has_next %}
-                                    <li class="page-item"><a class="page-link"
-                                                             href="employees/?page={{ page_obj.next_page_number }}">Next</a>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
-                                {% endif %}
+            <div class="col-md-3">
+              <label class="form-label">Statut</label>
+              <select name="active" class="form-select">
+                <option value="">Tous les statuts</option>
+                <option value="true" {% if active_filter == "true" %}selected{% endif %}>Actif</option>
+                <option value="false" {% if active_filter == "false" %}selected{% endif %}>Inactif</option>
+              </select>
+            </div>
+
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">
+                <em class="icon ni ni-filter"></em>
+                Filtrer
+              </button>
+            </div>
+          </form>
+
+          {% if search_query or role_filter or active_filter %}
+          <div class="mt-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                {% if search_query %}
+                  <span class="badge badge-light">Recherche: {{ search_query }}</span>
+                {% endif %}
+                {% if role_filter %}
+                  {% for role in roles %}
+                    {% if role.id|stringformat:"s" == role_filter %}
+                      <span class="badge badge-light">Rôle: {{ role.name }}</span>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                {% if active_filter %}
+                  <span class="badge badge-light">
+                    Statut: {% if active_filter == "true" %}Actif{% else %}Inactif{% endif %}
+                  </span>
+                {% endif %}
+              </div>
+              <a href="{% url 'employee_list' %}" class="btn btn-sm btn-outline-light">
+                <em class="icon ni ni-cross"></em>
+                Réinitialiser
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des employés -->
+    <div class="nk-block">
+      <div class="card card-bordered card-stretch">
+        <div class="card-inner-group">
+          <!-- En-tête de la table -->
+          <div class="card-inner">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="title">Liste des employés</h6>
+              <div class="text-soft small">
+                {{ page_obj.paginator.count }} résultat(s)
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="card-inner p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center" style="width: 50px;">
+                      <span class="status-badge"></span>
+                    </th>
+                    <th>Employé</th>
+                    <th>Contact</th>
+                    <th>Fonction</th>
+                    <th>Rôle(s)</th>
+                    <th>Dernière connexion</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for employee in employees %}
+                  <tr class="employee-card">
+                    <td class="text-center">
+                      {% if employee.user.is_active %}
+                        <span class="status-badge status-active" title="Actif"></span>
+                      {% else %}
+                        <span class="status-badge status-inactive" title="Inactif"></span>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="user-avatar {% if employee.user.is_active %}bg-primary{% else %}bg-light{% endif %}">
+                          <span>{{ employee.user.first_name|first|upper|default:'?' }}{{ employee.user.last_name|first|upper|default:'' }}</span>
+                        </div>
+                        <div class="user-info">
+                          <span class="tb-lead">
+                            {{ employee.user.get_full_name|default:"Sans nom" }}
+                          </span>
+                          <span class="sub-text d-block">{{ employee.user.email|default:"—" }}</span>
+                          {% if employee.user.date_joined %}
+                            <span class="sub-text d-block">
+                              <small>Inscrit le {{ employee.user.date_joined|date:"d/m/Y" }}</small>
+                            </span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      {% if employee.phone %}
+                        <span class="tb-sub">{{ employee.phone }}</span>
+                        <br>
+                        {% if employee.phone2 %}
+                          <small class="text-muted">{{ employee.phone2 }}</small>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">—</span>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      <span class="tb-sub">{{ employee.job_title|default:"—" }}</span>
+                      {% if employee.department %}
+                        <br>
+                        <small class="text-muted">{{ employee.department }}</small>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      {% with groups=employee.user.groups.all %}
+                        {% if groups %}
+                          <div class="d-flex flex-wrap gap-1">
+                            {% for group in groups %}
+                              <span class="badge badge-outline-primary role-badge">{{ group.name }}</span>
+                            {% endfor %}
+                          </div>
+                        {% else %}
+                          <span class="badge badge-dim badge-outline-secondary">Aucun rôle</span>
+                        {% endif %}
+                      {% endwith %}
+                    </td>
+
+                    <td>
+                      {% if employee.user.last_login %}
+                        <span class="last-login">
+                          {{ employee.user.last_login|date:"d/m/Y H:i" }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">Jamais</span>
+                      {% endif %}
+                    </td>
+
+                    <td class="text-right">
+                      <div class="d-flex justify-content-end">
+                        {% if can_change_employee %}
+                        <a href="{% url 'employee_update' employee.id %}"
+                           class="btn btn-sm btn-icon btn-primary"
+                           title="Modifier">
+                          <em class="icon ni ni-edit"></em>
+                        </a>
+                        {% endif %}
+
+                        {% if employee.phone %}
+                        <a href="{% url 'send_sms_view' employee_id=employee.id %}"
+                           class="btn btn-sm btn-icon btn-success  ml-1"
+                           title="Envoyer SMS">
+                          <em class="icon ni ni-send"></em>
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'admin_password_reset' employee.pk %}" class="btn btn-sm btn-icon btn-warning  ml-1"
+                           title="Réinitialiser mot de passe">
+                          <em class="icon ni ni-lock"></em>
+                        </a>
+
+                        {% if can_delete_employee %}
+                        <a href="{% url 'employee_delete' employee.id %}" class="btn btn-sm btn-icon btn-danger  ml-1" title="Supprimer"
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer {{ employee.user.get_full_name|escapejs }} ?');">
+                          <em class="icon ni ni-trash"></em>
+                        </a>
+                        {% endif %}
+
+                        <!-- Menu déroulant pour actions supplémentaires -->
+                        <div class="dropdown">
+                          <a href="#" class="btn btn-sm btn-icon btn-light ml-2" data-toggle="dropdown">
+                            <em class="icon ni ni-more-h"></em>
+                          </a>
+                          <div class="dropdown-menu dropdown-menu-right z-index-1000">
+                            <ul class="link-list-plain">
+                              <li>
+                                <a href="{#% url 'employee_detail' employee.id %#}">
+                                  <em class="icon ni ni-eye"></em>
+                                  <span>Voir détails</span>
+                                </a>
+                              </li>
+                              {% if employee.user.email %}
+                              <li>
+                                <a href="mailto:{{ employee.user.email }}" class="text-info">
+                                  <em class="icon ni ni-mail"></em>
+                                  <span>Envoyer email</span>
+                                </a>
+                              </li>
+                              {% endif %}
+                              <li class="divider"></li>
+                              <li>
+                                <a href="#" class="btn text-danger btn-toggle-active"
+                                   data-employee-id="{{ employee.id }}"
+                                   data-employee-name="{{ employee.user.get_full_name }}"
+                                   data-is-active="{{ employee.user.is_active|yesno:'true,false' }}">
+                                  {% if employee.user.is_active %}
+                                    <em class="icon ni ni-pause"></em>
+                                    <span>Désactiver</span>
+                                  {% else %}
+                                    <em class="icon ni ni-play"></em>
+                                    <span>Activer</span>
+                                  {% endif %}
+                                </a>
+                              </li>
                             </ul>
-                        </div><!-- .card-inner -->
-                    </div><!-- .card-inner-group -->
-                </div><!-- .card -->
-            </div><!-- .nk-block -->
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="7" class="text-center py-5">
+                      <div class="text-soft">
+                        <em class="icon ni ni-info" style="font-size: 48px;"></em>
+                        <h6 class="mt-3">Aucun employé trouvé</h6>
+                        <p class="mb-0">
+                          {% if search_query or role_filter or active_filter %}
+                            Aucun résultat ne correspond à vos critères de recherche.
+                          {% else %}
+                            Aucun employé n'a encore été créé.
+                            {% if can_add_employee %}
+                              <a href="{% url 'employee_create' %}">Créez le premier</a>
+                            {% endif %}
+                          {% endif %}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          {% if is_paginated %}
+          <div class="card-inner">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <div class="text-soft small">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                • {{ page_obj.paginator.count }} employé(s) au total
+              </div>
+
+              <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page=1{% if querystring %}&{{ querystring }}{% endif %}">
+                      <em class="icon ni ni-chevrons-left"></em>
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">
+                      <em class="icon ni ni-chevron-left"></em>
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link"><em class="icon ni ni-chevrons-left"></em></span>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link"><em class="icon ni ni-chevron-left"></em></span>
+                  </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                  {% if num == page_obj.number %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ num }}</span>
+                    </li>
+                  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}{% if querystring %}&{{ querystring }}{% endif %}">{{ num }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">
+                      <em class="icon ni ni-chevron-right"></em>
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}">
+                      <em class="icon ni ni-chevrons-right"></em>
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link"><em class="icon ni ni-chevron-right"></em></span>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link"><em class="icon ni ni-chevrons-right"></em></span>
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal: Create Role -->
+<div class="modal fade" id="createRoleModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <em class="icon ni ni-shield mr-1"></em>
+          Créer un nouveau rôle
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <form method="post" action="{% url 'role_create' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Nom du rôle</label>
+            <input type="text"
+                   name="name"
+                   class="form-control"
+                   placeholder="Ex: Administrateur, RH, Superviseur…"
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description"
+                      class="form-control"
+                      rows="2"
+                      placeholder="Description optionnelle du rôle"></textarea>
+          </div>
+
+          <div class="alert alert-light alert-pro">
+            <div class="alert-text">
+              <h6 class="alert-heading">Sélectionnez les permissions</h6>
+              <p class="mb-0">Cochez les permissions à attribuer à ce rôle.</p>
+            </div>
+          </div>
+
+          <div class="accordion" id="permissionsAccordion">
+            {% for model_name, permissions in grouped_permissions.items %}
+              <div class="card">
+                <div class="card-header">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox"
+                           class="custom-control-input group-selector"
+                           id="group-{{ model_name|slugify }}">
+                    <label class="custom-control-label"
+                           for="group-{{ model_name|slugify }}"
+                           data-toggle="collapse"
+                           data-target="#collapse-{{ model_name|slugify }}">
+                      <strong>{{ model_name|title }}</strong>
+                      <small class="text-muted">({{ permissions|length }} permission(s))</small>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="collapse-{{ model_name|slugify }}"
+                     class="collapse"
+                     data-parent="#permissionsAccordion">
+                  <div class="card-body">
+                    <div class="row g-2">
+                      {% for permission in permissions %}
+                        <div class="col-md-6">
+                          <div class="custom-control custom-checkbox">
+                            <input type="checkbox"
+                                   class="custom-control-input permission-checkbox"
+                                   id="perm-{{ permission.id }}"
+                                   name="permissions"
+                                   value="{{ permission.id }}"
+                                   data-group="{{ model_name|slugify }}">
+                            <label class="custom-control-label" for="perm-{{ permission.id }}">
+                              {{ permission.name }}
+                              <br>
+                              <small class="text-muted">{{ permission.codename }}</small>
+                            </label>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
         </div>
 
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Créer le rôle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+    <script>
+$(document).ready(function() {
+  // Sélection/déselection de groupe de permissions
+  $('.group-selector').on('change', function() {
+    const groupId = $(this).attr('id').replace('group-', '');
+    const isChecked = $(this).prop('checked');
+    $(`.permission-checkbox[data-group="${groupId}"]`).prop('checked', isChecked);
+  });
+
+  // Vérification de l'état du groupe
+  $('.permission-checkbox').on('change', function() {
+    const groupId = $(this).data('group');
+    const groupCheckbox = $(`#group-${groupId}`);
+    const totalInGroup = $(`.permission-checkbox[data-group="${groupId}"]`).length;
+    const checkedInGroup = $(`.permission-checkbox[data-group="${groupId}"]:checked`).length;
+
+    if (checkedInGroup === 0) {
+      groupCheckbox.prop('checked', false);
+      groupCheckbox.prop('indeterminate', false);
+    } else if (checkedInGroup === totalInGroup) {
+      groupCheckbox.prop('checked', true);
+      groupCheckbox.prop('indeterminate', false);
+    } else {
+      groupCheckbox.prop('checked', false);
+      groupCheckbox.prop('indeterminate', true);
+    }
+  });
+
+  // Activation/désactivation d'un employé
+  $('.btn-toggle-active').on('click', function(e) {
+    e.preventDefault();
+    const employeeId = $(this).data('employee-id');
+    const employeeName = $(this).data('employee-name');
+    const isActive = $(this).data('is-active') === 'true';
+    const action = isActive ? 'désactiver' : 'activer';
+
+    if (confirm(`Êtes-vous sûr de vouloir ${action} ${employeeName} ?`)) {
+      $.ajax({
+        url: `/api/employees/${employeeId}/toggle-active/`,
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        success: function(response) {
+          location.reload();
+        },
+        error: function(xhr, status, error) {
+          alert('Erreur lors de la modification du statut');
+        }
+      });
+    }
+  });
+
+  // Confirmation avant suppression
+  $('.btn-danger[title="Supprimer"]').on('click', function(e) {
+    const employeeName = $(this).closest('tr').find('.tb-lead').text().trim();
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${employeeName} ? Cette action est irréversible.`)) {
+      e.preventDefault();
+    }
+  });
+});
+</script>
 {% endblock %}
+

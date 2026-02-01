@@ -1,0 +1,66 @@
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-md transition-colors duration-300 dark:border-slate-800/80 dark:bg-slate-950/80">
+  <div class="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+
+    <!-- Left: Navigation & Brand -->
+    <div class="flex items-center gap-4">
+      <!-- Mobile Sidebar Toggle -->
+      <button @click="sidebarOpen = true"
+              class="group relative inline-flex items-center justify-center rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 lg:hidden">
+        <iconify-icon icon="solar:hamburger-menu-linear" width="20" height="20" stroke-width="1.5"></iconify-icon>
+      </button>
+
+      <!-- Brand Identity -->
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold tracking-tight text-slate-900 dark:text-white text-sm">
+            KENEYA
+          </span>
+          <span class="inline-flex items-center rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 ring-1 ring-inset ring-brand-500/10 dark:bg-brand-500/10 dark:text-brand-400 dark:ring-brand-400/20">
+            SIH
+          </span>
+        </div>
+        <span class="text-xs font-medium text-slate-500 dark:text-slate-400 hidden sm:block">
+          Système d’Information Hospitalier
+        </span>
+      </div>
+    </div>
+
+    <!-- Right: Actions & User -->
+    <div class="flex items-center gap-3 sm:gap-4">
+
+      <!-- Theme Switcher -->
+      <button @click="toggleTheme()"
+              type="button"
+              class="group relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-all">
+        <span class="sr-only">Toggle theme</span>
+        <!-- Sun Icon (Show when Dark) -->
+        <iconify-icon x-show="theme === 'dark'" icon="solar:sun-2-linear" width="20" height="20" stroke-width="1.5" class="transition-transform duration-200 group-hover:rotate-12"></iconify-icon>
+        <!-- Moon Icon (Show when Light) -->
+        <iconify-icon x-show="theme !== 'dark'" icon="solar:moon-stars-linear" width="20" height="20" stroke-width="1.5" class="transition-transform duration-200 group-hover:-rotate-12"></iconify-icon>
+      </button>
+
+      <!-- Vertical Divider -->
+      <div class="h-6 w-px bg-slate-200 dark:bg-slate-800" aria-hidden="true"></div>
+
+      <!-- User Profile -->
+      <div class="flex items-center gap-3">
+        <div class="hidden text-right leading-none md:block">
+          <div class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+          <div class="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+            Compte
+          </div>
+        </div>
+
+        <button type="button" class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-700 transition-all hover:ring-slate-300 dark:hover:ring-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+            <div class="absolute inset-0 bg-gradient-to-tr from-brand-500 to-brand-400 opacity-90"></div>
+            <span class="relative text-xs font-semibold text-white tracking-tight">
+                {{ request.user.first_name|slice:1 }}{{ request.user.last_name|slice:1 }}
+            </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</header>

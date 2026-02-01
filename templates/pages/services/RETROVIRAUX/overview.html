@@ -1,0 +1,261 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+<div class="nk-content nk-content-fluid">
+  <div class="container-xl wide-lg">
+    <div class="nk-content-body">
+
+      <div class="nk-block-head nk-block-head-sm">
+        <div class="nk-block-between">
+          <div class="nk-block-head-content">
+            <h3 class="nk-block-title page-title">Overview VIH</h3>
+            <div class="nk-block-des text-soft">
+              <p>Indicateurs & activité clinique sur 12 mois.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="nk-block">
+        <div class="row g-gs">
+          <div class="col-md-3">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="fs-14 text-soft">File active</div>
+                    <div class="fs-22 fw-bold">{{ vih_actifs|default:0 }}</div>
+                  </div>
+                  <div class="user-avatar bg-primary-dim"><em class="icon ni ni-users"></em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="fs-14 text-soft">Tests VIH (12 mois)</div>
+                    <div class="fs-22 fw-bold">{{ total_tests|default:0|intcomma }}</div>
+                    <div class="fs-12 text-soft mt-1">
+                      Var. mois: {{ test_change_sign }} {{ test_change|default:0 }}%
+                    </div>
+                  </div>
+                  <div class="user-avatar bg-info-dim"><em class="icon ni ni-activity"></em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="fs-14 text-soft">Positifs (12 mois)</div>
+                    <div class="fs-22 fw-bold">{{ total_positifs|default:0|intcomma }}</div>
+                    <div class="fs-12 text-soft mt-1">
+                      Var. mois: {{ positif_change_sign }} {{ positif_change|default:0 }}%
+                    </div>
+                  </div>
+                  <div class="user-avatar bg-danger-dim"><em class="icon ni ni-cross-circle"></em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div class="fs-14 text-soft">Taux positivité</div>
+                    <div class="fs-22 fw-bold">{{ taux_positivite|default:0 }}%</div>
+                    <div class="fs-12 text-soft mt-1">
+                      {{ mois_actuel|default:"-" }} {{ annee_actuelle|default:"" }}
+                    </div>
+                  </div>
+                  <div class="user-avatar bg-success-dim"><em class="icon ni ni-trend-up"></em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Charts + sex distribution -->
+      <div class="nk-block">
+        <div class="row g-gs">
+          <div class="col-lg-8">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <h6 class="title mb-2">Évolution mensuelle des tests</h6>
+                <div style="height: 320px;">
+                  <canvas id="testsChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <h6 class="title mb-3">Répartition par sexe</h6>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="text-soft">Hommes</div>
+                  <div class="fw-bold">{{ hommes_tests|default:0 }} tests</div>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                  <div class="progress-bar" role="progressbar"
+                       style="width: {{ hommes_taux|default:0 }}%;"></div>
+                </div>
+                <div class="fs-12 text-soft mb-4">Taux positivité hommes: <strong>{{ hommes_taux|default:0 }}%</strong></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="text-soft">Femmes</div>
+                  <div class="fw-bold">{{ femmes_tests|default:0 }} tests</div>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                  <div class="progress-bar" role="progressbar"
+                       style="width: {{ femmes_taux|default:0 }}%;"></div>
+                </div>
+                <div class="fs-12 text-soft">Taux positivité femmes: <strong>{{ femmes_taux|default:0 }}%</strong></div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="nk-block">
+        <div class="row g-gs">
+
+          <div class="col-lg-4">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <h6 class="title mb-3">Derniers tests</h6>
+                {% if derniers_tests %}
+                  <ul class="list-unstyled">
+                    {% for t in derniers_tests %}
+                      <li class="py-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                          <div class="fw-bold">
+                            {{ t.patient.nom|default:"" }} {{ t.patient.prenoms|default:"" }}
+                          </div>
+                          <div class="text-soft">{{ t.date_test|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="mt-1">
+                          {% if t.resultat == "POSITIF" %}
+                            <span class="badge badge-dim bg-outline-danger">POSITIF</span>
+                          {% elif t.resultat == "NEGATIF" %}
+                            <span class="badge badge-dim bg-outline-success">NEGATIF</span>
+                          {% else %}
+                            <span class="badge badge-dim bg-outline-warning">{{ t.resultat|default:"-" }}</span>
+                          {% endif %}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="text-soft mb-0">Aucun test récent.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <h6 class="title mb-3">Consultations récentes</h6>
+                {% if consultations_recentes %}
+                  <ul class="list-unstyled">
+                    {% for c in consultations_recentes %}
+                      <li class="py-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                          <div class="fw-bold">{{ c.patient.nom|default:"" }} {{ c.patient.prenoms|default:"" }}</div>
+                          <div class="text-soft">{{ c.consultation_date|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="fs-12 text-soft">
+                          Médecin: {{ c.doctor.get_full_name|default:"-" }} • Service: {{ c.services.nom|default:"-" }}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="text-soft mb-0">Aucune consultation récente.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card card-bordered">
+              <div class="card-inner">
+                <h6 class="title mb-3">Hospitalisations en cours</h6>
+                {% if hospitalisations_vih %}
+                  <ul class="list-unstyled">
+                    {% for h in hospitalisations_vih %}
+                      <li class="py-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                          <div class="fw-bold">{{ h.patient.nom|default:"" }} {{ h.patient.prenoms|default:"" }}</div>
+                          <div class="text-soft">{{ h.admission_date|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="fs-12 text-soft">
+                          Lit: {{ h.bed|default:"-" }} • Médecin: {{ h.doctor.get_full_name|default:"-" }}
+                        </div>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="text-soft mb-0">Aucune hospitalisation en cours.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js (si déjà inclus par ton thème, retire le script) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const labels = {{ mois_labels|default:"[]"|safe }};
+    const testsData = {{ tests_data|default:"[]"|safe }};
+    const posData = {{ positifs_data|default:"[]"|safe }};
+
+    const ctx = document.getElementById('testsChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Tests', data: testsData, tension: 0.35 },
+          { label: 'Positifs', data: posData, tension: 0.35 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -5,11 +5,12 @@ from datetime import datetime, timedelta
 import phonenumbers
 from allauth.account.forms import LoginForm
 from django import forms
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission, Group, User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django_countries.fields import CountryField
+from phonenumber_field.formfields import PhoneNumberField
 from tinymce.widgets import TinyMCE
 
 from core.models import situation_matrimoniales_choices, villes_choices, Sexe_choices, pays_choices, \
@@ -1108,52 +1109,66 @@ class AssignRoleForm(forms.Form):
     )
 
 
-class EmployeeCreateForm(forms.ModelForm):
-    # Champs pour l'utilisateur
-    username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer votre nom d\'utilisateur'}),
-        max_length=150, label="Nom d'utilisateur")
-    first_name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le nom'}), max_length=30,
-        label="Prénom")
-    last_name = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le prenom'}), max_length=30,
-        label="Nom")
-    email = forms.EmailField(
-        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Entrer l\'adresse mail'}),
-        label="Email")
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le mot de passe'}),
-        label="Mot de passe")
-    role = forms.ModelChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), queryset=Group.objects.all(),
-                                  required=True, label="Rôle")
+class EmployeeBaseForm(forms.ModelForm):
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=30, label="Prénom")
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=30, label="Nom")
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}), label="Email")
 
-    gender = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}), choices=Sexe_choices,
-                               required=True, )
-    situation_matrimoniale = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}),
-                                               choices=situation_matrimoniales_choices, required=True, )
+    role = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True,
+        label="Rôle"
+    )
 
-    phone = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le numeros de Téléphone'}),
-        max_length=30, )
-
-    job_title = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Entrer le numeros de Téléphone'}),
-        max_length=30, )
+    phone = PhoneNumberField(
+        region="CI",
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+2250707070707'}),
+        label="Téléphone"
+    )
 
     class Meta:
         model = Employee
-        fields = [
-            'username', 'first_name', 'last_name', 'email', 'password',
-            'gender', 'situation_matrimoniale', 'phone', 'job_title', 'role'
-        ]
-        labels = {
-            'gender': "Sexe",
-            'situation_matrimoniale': "Situation matrimoniale",
-            'phone': "Téléphone",
-            'job_title': "Titre du poste",
-            'role': "Rôle",
+        fields = ['gender', 'situation_matrimoniale', 'phone', 'role']
+        widgets = {
+            'gender': forms.Select(attrs={'class': 'form-control'}),
+            'situation_matrimoniale': forms.Select(attrs={'class': 'form-control'}),
+
         }
+
+    def save_user_fields(self, user: User):
+        user.first_name = self.cleaned_data.get("first_name", "") or ""
+        user.last_name = self.cleaned_data.get("last_name", "") or ""
+        user.email = self.cleaned_data.get("email", "") or ""
+        user.save(update_fields=["first_name", "last_name", "email"])
+        return user
+
+
+class EmployeeCreateForm(EmployeeBaseForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=150,
+                               label="Username")
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Mot de passe")
+
+    class Meta(EmployeeBaseForm.Meta):
+        fields = ['gender', 'situation_matrimoniale', 'phone',  'role']
+
+    def save(self, commit=True):
+        employee = super().save(commit=False)
+
+        username = self.cleaned_data["username"]
+        password = self.cleaned_data["password"]
+
+        user = User.objects.create_user(username=username, password=password)
+        self.save_user_fields(user)
+
+        employee.user = user
+        if commit:
+            employee.save()
+            # ✅ remplace les rôles par celui choisi
+            role = self.cleaned_data["role"]
+            user.groups.set([role])
+        return employee
 
 
 class DiagnosticForm(forms.ModelForm):

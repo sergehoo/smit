@@ -14,6 +14,7 @@ def create_subservices(sender, instance, created, **kwargs):
         # Liste des sous-services par défaut à créer pour chaque service
         default_subservices = [
             {'nom': 'Overview', 'icon': 'fa-solid fa-chart-line'},
+            {'nom': 'File_active', 'icon': 'fa-solid fa-list'},
             {'nom': 'Consultation', 'icon': 'fa-solid fa-stethoscope'},
             {'nom': 'Hospitalisation', 'icon': 'fa-solid fa-bed-pulse'},
             {'nom': 'Suivi', 'icon': 'fa-solid fa-person-walking-arrow-loop-left'},

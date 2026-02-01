@@ -1,0 +1,394 @@
+{% load static %}
+
+<!-- Sidebar overlay (mobile) -->
+<div x-show="sidebarOpen" x-transition.opacity
+     class="fixed inset-0 z-50 lg:hidden bg-black/40"
+     @click="sidebarOpen = false"></div>
+
+<!-- Sidebar -->
+<aside
+  class="fixed lg:sticky top-0 left-0 z-50 lg:z-auto h-screen w-[300px] lg:w-[320px]
+         bg-white/80 dark:bg-slate-900/70 backdrop-blur
+         border-r border-slate-200/70 dark:border-slate-800/70
+         shadow-soft lg:shadow-none
+         transform transition duration-300
+         lg:translate-x-0"
+  :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+
+  <!-- Brand -->
+  <div class="h-16 px-4 flex items-center justify-between bg-gradient-to-br from-brand-400 to-brand-700 text-white">
+    <a href="{% url 'home' %}" class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-white/15 border border-white/20 grid place-items-center overflow-hidden">
+        <img src="{% static 'images/logokeneya.png' %}" class="h-8 w-8 object-contain" alt="logo">
+      </div>
+      <div class="leading-tight">
+        <div class="font-extrabold tracking-wide">SMIT</div>
+        <div class="text-[11px] opacity-90 font-semibold">KENEYA</div>
+      </div>
+    </a>
+
+    <button class="lg:hidden h-10 w-10 rounded-xl bg-white/15 border border-white/20 grid place-items-center"
+            @click="sidebarOpen = false" aria-label="Fermer">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+  </div>
+
+  <div class="px-4 py-3 text-[11px] font-extrabold tracking-wider uppercase text-slate-600 dark:text-slate-300 border-b border-slate-200/70 dark:border-slate-800/70">
+    Service des Maladies Infestieuses et Tropicales
+  </div>
+
+  <!-- User -->
+  <div class="px-4 py-4 border-b border-slate-200/70 dark:border-slate-800/70">
+    <div class="rounded-2xl p-3 bg-gradient-to-br from-brand-400/15 to-brand-700/15 border border-brand-200/40 dark:border-slate-700/50 flex items-center gap-3">
+      <div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700 text-white grid place-items-center font-extrabold">
+        {{ user.first_name|slice:1 }}{{ user.last_name|slice:1 }}
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-extrabold truncate text-slate-900 dark:text-white">Dr. {{ user.get_full_name|default:user.username }}</div>
+        <div class="text-xs font-semibold text-slate-500 dark:text-slate-300 truncate">{{ user.groups.first.name|default:"Médecin" }}</div>
+      </div>
+      <div class="h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></div>
+    </div>
+  </div>
+
+  <!-- Menu scroll -->
+  <nav class="h-[calc(100vh-16rem)] overflow-y-auto px-3 py-3 space-y-2">
+    <!-- Section label -->
+    <div class="px-2 pt-2 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Générale
+    </div>
+
+    <a data-nav-link href="{% url 'home' %}"
+       class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-gauge-high"></i></span>
+      <span class="flex-1 font-bold">Dashboard</span>
+    </a>
+
+    <a data-nav-link href="{% url 'global_search' %}"
+       class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-magnifying-glass"></i></span>
+      <span class="flex-1 font-bold">Recherche</span>
+      <span class="nav-badge">{{ patient_nbr }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Accueil
+    </div>
+
+    <a data-nav-link href="{% url 'attente' %}" class="nav-link">
+      <span class="nav-ico text-rose-600 dark:text-rose-300"><i class="fa-solid fa-users"></i></span>
+      <span class="flex-1 font-bold">Salle d'attente</span>
+      <span class="nav-badge nav-badge-danger">{{ apointments_nbr }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'appointment_over' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-calendar-check"></i></span>
+      <span class="flex-1 font-bold">Patients reçus</span>
+      <span class="nav-badge">{{ appointments_all }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'appointment_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-calendar-days"></i></span>
+      <span class="flex-1 font-bold">Rendez-vous</span>
+      <span class="nav-badge">{{ appointments_all }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Consultation
+    </div>
+
+    <a data-nav-link href="{% url 'consultation_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-stethoscope"></i></span>
+      <span class="flex-1 font-bold">Liste Consultations</span>
+      <span class="nav-badge">{{ consul_nbr }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Urgences
+    </div>
+
+    <a data-nav-link href="{% url 'urgences_list' %}" class="nav-link">
+      <span class="nav-ico text-rose-600 dark:text-rose-300"><i class="fa-solid fa-truck-medical"></i></span>
+      <span class="flex-1 font-bold">Liste des Urgences</span>
+      <span class="nav-badge">{{ urgencehospi }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Hospitalisation
+    </div>
+
+    <a data-nav-link href="{% url 'hospitalisation' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-bed-pulse"></i></span>
+      <span class="flex-1 font-bold">En cours d'hospitalisation</span>
+      <span class="nav-badge nav-badge-danger">{{ Hospitaliza_encours }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'suivie_soins_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-clock-rotate-left"></i></span>
+      <span class="flex-1 font-bold">Suivi soins hospitalisation</span>
+      <span class="nav-badge nav-badge-danger">{{ Hospitaliza_encours }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'hospitalised_patient' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-bed"></i></span>
+      <span class="flex-1 font-bold">Patients Sortis</span>
+      <span class="nav-badge">{{ discharged_count }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'hospi_unites' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-hospital"></i></span>
+      <span class="flex-1 font-bold">Unités d'hospitalisation</span>
+    </a>
+
+    <!-- Accordion: Paramètres -->
+    <div x-data="{ open:false }" data-accordion-item class="space-y-2">
+      <button @click="open=!open" class="nav-link w-full">
+        <span class="nav-ico"><i class="fa-solid fa-gears"></i></span>
+        <span class="flex-1 font-bold text-left">Paramètres</span>
+        <i class="fa-solid fa-chevron-right transition" :class="open?'rotate-90':''"></i>
+      </button>
+
+      <div x-show="open" x-collapse class="ml-3 pl-3 border-l border-dashed border-slate-300/70 dark:border-slate-700/70 space-y-2">
+        <a href="#" class="nav-sublink">
+          <span class="sub-dot"></span>
+          <span class="font-semibold">Analyses</span>
+        </a>
+        <a href="#" class="nav-sublink">
+          <span class="sub-dot"></span>
+          <span class="font-semibold">Kits</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Suivi Patients
+    </div>
+
+    <a data-nav-link href="{% url 'bilan_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-file-arrow-up"></i></span>
+      <span class="flex-1 font-bold">Bilans Initiaux</span>
+      <span class="nav-badge nav-badge-primary">{{ bilaninitial }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'suivi_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-folder-tree"></i></span>
+      <span class="flex-1 font-bold">Suivi des Patients</span>
+      <span class="nav-badge nav-badge-danger">{{ suivi_nbr }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Maladies sous surveillance
+    </div>
+
+    {% for maladie in services %}
+      <div x-data="{ open:false }" data-accordion-item class="space-y-2">
+        <button @click="open=!open" class="nav-link w-full">
+          <span class="nav-ico"><i class="fa-solid fa-virus"></i></span>
+          <span class="flex-1 font-bold text-left truncate">{{ maladie }}</span>
+          <i class="fa-solid fa-chevron-right transition" :class="open?'rotate-90':''"></i>
+        </button>
+
+        <div x-show="open" x-collapse class="ml-3 pl-3 border-l border-dashed border-slate-300/70 dark:border-slate-700/70 space-y-2">
+          {% for sbactivity in maladie.subactivities.all %}
+            <a data-nav-link
+               href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}"
+               class="nav-sublink">
+              <span class="sub-dot"></span>
+              <span class="font-semibold">{{ sbactivity.nom }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Laboratoire
+    </div>
+
+    <a data-nav-link href="{% url 'echantillons_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-vial"></i></span>
+      <span class="flex-1 font-bold">Prélèvements</span>
+    </a>
+
+    <a data-nav-link href="{% url 'examen_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-flask-vial"></i></span>
+      <span class="flex-1 font-bold">Demande d'Analyse</span>
+      <span class="nav-badge nav-badge-danger">{{ examencount }}</span>
+    </a>
+
+    <a data-nav-link href="{% url 'examen_done_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-clipboard-check"></i></span>
+      <span class="flex-1 font-bold">Analyses effectuées</span>
+      <span class="nav-badge">{{ examensdonecount }}</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Pharmacie
+    </div>
+
+    <a data-nav-link href="{% url 'medicaments' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+      <span class="flex-1 font-bold">Médicaments</span>
+    </a>
+
+    <a data-nav-link href="{% url 'mouvement-stock' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-arrow-down-up-across-line"></i></span>
+      <span class="flex-1 font-bold">Mouvement de stock</span>
+    </a>
+
+    <a data-nav-link href="{% url 'rendezvous_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-calendar"></i></span>
+      <span class="flex-1 font-bold">Rendez-vous</span>
+    </a>
+
+    <a data-nav-link href="{% url 'commandes-list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-basket-shopping"></i></span>
+      <span class="flex-1 font-bold">Commandes</span>
+    </a>
+
+    <a href="#" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-chart-column"></i></span>
+      <span class="flex-1 font-bold">Rapports</span>
+    </a>
+
+    <div class="px-2 pt-4 pb-1 text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+      Paramètres
+    </div>
+
+    <a data-nav-link href="{% url 'employee_list' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-user-gear"></i></span>
+      <span class="flex-1 font-bold">Gestion des Employés</span>
+    </a>
+
+    <a data-nav-link href="{% url 'user_role' %}" class="nav-link">
+      <span class="nav-ico"><i class="fa-solid fa-user-shield"></i></span>
+      <span class="flex-1 font-bold">Gestion des Rôles</span>
+    </a>
+
+    <!-- Quick actions -->
+    <div class="mt-6 px-2">
+      <div class="text-[11px] font-extrabold tracking-wider uppercase text-slate-500 dark:text-slate-400 mb-2">
+        Actions rapides
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <a href="{% url 'add_patient' %}"
+           class="qa qa-danger">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Nouveau Patient</span>
+        </a>
+
+        <a href="{% url 'consultation_list' %}"
+           class="qa qa-primary">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Nouvelle Consultation</span>
+        </a>
+
+        <a href="{% url 'examen_list' %}"
+           class="qa qa-warning">
+          <i class="fa-solid fa-flask-vial"></i>
+          <span>Demande d'Analyse</span>
+        </a>
+
+        <a href="{% url 'urgences_list' %}"
+           class="qa qa-teal">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Cas Urgent</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Sidebar styles (Tailwind utilities via @apply not possible in CDN, so small CSS) -->
+  <style>
+    .nav-link{
+      display:flex; align-items:center; gap:.75rem;
+      padding:.70rem .75rem;
+      border-radius: .95rem;
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(255,255,255,.55);
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease;
+    }
+    .dark .nav-link{ background: rgba(15,23,42,.55); border-color: rgba(148,163,184,.18); }
+    .nav-link:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(2,132,199,.12);
+      border-color: rgba(14,165,233,.35);
+      background: rgba(14,165,233,.08);
+    }
+    .dark .nav-link:hover{ background: rgba(14,165,233,.14); }
+
+    .nav-link.is-active{
+      background: linear-gradient(135deg, rgba(14,165,233,1), rgba(3,105,161,1));
+      color: #fff !important;
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 18px 60px rgba(2,132,199,.22);
+    }
+    .nav-link.is-active .nav-ico{ background: rgba(255,255,255,.18); color:#fff; }
+
+    .nav-ico{
+      height: 42px; width: 42px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: rgba(14,165,233,.12);
+      color: rgba(3,105,161,1);
+      flex: 0 0 auto;
+      transition: transform .22s ease, background .22s ease, color .22s ease;
+    }
+    .dark .nav-ico{ background: rgba(14,165,233,.16); color: rgba(224,242,254,1); }
+    .nav-link:hover .nav-ico{ background: rgba(14,165,233,1); color:#fff; transform: scale(1.03); }
+
+    .nav-badge{
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(100,116,139,.12);
+      border: 1px solid rgba(100,116,139,.16);
+    }
+    .dark .nav-badge{ background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.18); }
+    .nav-badge-danger{ background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.20); color: #991b1b; }
+    .dark .nav-badge-danger{ color: #fecaca; }
+    .nav-badge-primary{ background: rgba(14,165,233,.16); border-color: rgba(14,165,233,.20); color: rgba(3,105,161,1); }
+    .dark .nav-badge-primary{ color: rgba(224,242,254,1); }
+
+    .nav-sublink{
+      display:flex; align-items:center; gap:.6rem;
+      padding:.55rem .65rem;
+      border-radius: .85rem;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(255,255,255,.45);
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .dark .nav-sublink{ background: rgba(15,23,42,.45); border-color: rgba(148,163,184,.14); }
+    .nav-sublink:hover{ background: rgba(14,165,233,.08); border-color: rgba(14,165,233,.26); }
+    .dark .nav-sublink:hover{ background: rgba(14,165,233,.14); }
+
+    .sub-dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(14,165,233,.65);
+      flex: 0 0 auto;
+    }
+
+    .qa{
+      display:grid; place-items:center;
+      gap: .35rem;
+      padding: .75rem .5rem;
+      border-radius: 1rem;
+      color: #fff !important;
+      font-weight: 900;
+      text-align:center;
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 24px rgba(0,0,0,.10);
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+    }
+    .qa:hover{ transform: translateY(-2px); box-shadow: 0 16px 34px rgba(0,0,0,.14); filter: brightness(1.02); }
+    .qa span{ font-size: 11px; font-weight: 800; opacity: .95; }
+    .qa i{ font-size: 18px; }
+
+    .qa-primary{ background: linear-gradient(135deg, rgba(14,165,233,1), rgba(3,105,161,1)); }
+    .qa-danger{  background: linear-gradient(135deg, rgba(239,68,68,1), rgba(185,28,28,1)); }
+    .qa-warning{ background: linear-gradient(135deg, rgba(245,158,11,1), rgba(180,83,9,1)); }
+    .qa-teal{    background: linear-gradient(135deg, rgba(20,184,166,1), rgba(15,118,110,1)); }
+  </style>
+</aside>

@@ -2130,45 +2130,76 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
     template_name = "pages/hospitalisation/hospitalisation_details.html"
     context_object_name = "hospitalisationdetail"
 
+    def get_object(self, queryset=None):
+        """
+        Optionnel mais recommandé: charger le max en 1 fois.
+        Adapte les select_related selon TON modèle Hospitalization.
+        """
+        qs = super().get_queryset()
+        return (
+            qs.select_related(
+                "patient",
+                "doctor",
+                "bed",
+                "bed__box",
+                "bed__box__chambre",
+                "bed__box__chambre__unite",
+            )
+            .get(pk=self.kwargs["pk"])
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        hospitalization = self.get_object()
+        hospitalization = self.object  # self.get_object() déjà appelé par DetailView
 
-        # 📌 1. Compter les examens par type
+        # -------------------------------------------------------
+        # 1) EXAMENS / BILANS : stats + graphes
+        # -------------------------------------------------------
+        bilans_qs = (
+            BilanParaclinique.objects
+            .filter(hospitalisation=hospitalization)
+            .select_related("examen", "examen__type_examen", "doctor")
+        )
+
+        # 📌 1. Compter les examens par type (peut contenir None)
         examens_par_type = (
-            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            bilans_qs
             .values("examen__type_examen__nom")
             .annotate(total=Count("id"))
             .order_by("-total")
         )
-        labels_examens = [item["examen__type_examen__nom"] for item in examens_par_type]
+        labels_examens = [
+            (item["examen__type_examen__nom"] or "Autres")
+            for item in examens_par_type
+        ]
         data_examens = [item["total"] for item in examens_par_type]
 
         # 📌 2. Statut des examens
         status_data = (
-            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            bilans_qs
             .values("status")
             .annotate(count=Count("id"))
         )
-        labels_status = [item["status"] for item in status_data]
+        labels_status = [(item["status"] or "Inconnu") for item in status_data]
         data_status = [item["count"] for item in status_data]
 
-        # 📌 3. Evolution des examens (par jour) ✅ Correction pour PostgreSQL
+        # 📌 3. Evolution des examens (par jour) ✅ PostgreSQL
         examens_par_jour = (
-            BilanParaclinique.objects.filter(hospitalisation=hospitalization)
+            bilans_qs
             .annotate(day=TruncDate("created_at"))
             .values("day")
             .annotate(total=Count("id"))
             .order_by("day")
         )
-        labels_jours = [item["day"].strftime("%Y-%m-%d") for item in examens_par_jour]
+        labels_jours = [
+            item["day"].strftime("%Y-%m-%d") if item["day"] else "Inconnue"
+            for item in examens_par_jour
+        ]
         data_jours = [item["total"] for item in examens_par_jour]
 
-        # 📌 4. Résultats des examens par type
+        # 📌 4. Résultats des examens par type (OK)
         resultats_par_examen = defaultdict(lambda: defaultdict(int))
-        examens = BilanParaclinique.objects.filter(hospitalisation=hospitalization)
-
-        for bilan in examens:
+        for bilan in bilans_qs:
             if bilan.examen:
                 resultats_par_examen[bilan.examen.nom][bilan.status] += 1
 
@@ -2177,15 +2208,20 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context["examens_par_jour_json"] = json.dumps({"labels": labels_jours, "data": data_jours})
         context["resultats_par_examen_json"] = json.dumps(dict(resultats_par_examen))
 
-        # 📌 1. Regrouper les résultats par type d'examen
+        # -------------------------------------------------------
+        # 2) Evolution par type de bilan -> ✅ FIX None.nom ici
+        # -------------------------------------------------------
         evolution_par_bilan = defaultdict(lambda: defaultdict(list))
 
-        examens = BilanParaclinique.objects.filter(hospitalisation=hospitalization).order_by("result_date")
+        examens_evol = (
+            bilans_qs
+            .order_by("result_date")
+        )
 
-        for bilan in examens:
+        for bilan in examens_evol:
             if bilan.examen and bilan.result:
-                type_bilan = bilan.examen.type_examen.nom  # Type de bilan (ex: Hémogramme, Ionogramme)
-                nom_examen = bilan.examen.nom  # Nom de l'examen (ex: Créatinine, VGM)
+                type_bilan = getattr(getattr(bilan.examen, "type_examen", None), "nom", "Autres")
+                nom_examen = getattr(bilan.examen, "nom", "Examen")
                 valeur = bilan.result
                 date = bilan.result_date.strftime("%d-%m-%Y") if bilan.result_date else "Inconnue"
 
@@ -2194,162 +2230,139 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
                     "valeur": valeur
                 })
 
-        context["evolution_bilans_json"] = json.dumps(evolution_par_bilan)
+        context["evolution_bilans_json"] = json.dumps(evolution_par_bilan, cls=DjangoJSONEncoder)
 
-        # Add forms to context
-        context['constante_form'] = ConstanteForm()
-        context['Hospi_discharge_form'] = HospitalizationDischargeForm()
-        # Charger tous les types d'antécédents sous forme de liste de dictionnaires
+        # -------------------------------------------------------
+        # 3) Forms
+        # -------------------------------------------------------
+        context["constante_form"] = ConstanteForm()
+        context["Hospi_discharge_form"] = HospitalizationDischargeForm()
+
         types_antecedents = list(TypeAntecedent.objects.values("id", "nom"))
-        context['types_antecedents_json'] = json.dumps(types_antecedents, cls=DjangoJSONEncoder)
-        context['antecedentshospi'] = AntecedentsHospiForm()
+        context["types_antecedents_json"] = json.dumps(types_antecedents, cls=DjangoJSONEncoder)
+        context["antecedentshospi"] = AntecedentsHospiForm()
 
-        # Récupérer les catégories de mode de vie
         categorie_modedevie = list(ModeDeVieCategorie.objects.values("id", "nom"))
-        context['categorie_modedevie_json'] = json.dumps(categorie_modedevie, cls=DjangoJSONEncoder)
-        context['modedevieform'] = ModeDeVieForm()
+        context["categorie_modedevie_json"] = json.dumps(categorie_modedevie, cls=DjangoJSONEncoder)
+        context["modedevieform"] = ModeDeVieForm()
 
-        # Charger les types d'appareils avec leurs sous-types
-        types_parents = AppareilType.objects.filter(parent__isnull=True).prefetch_related('sous_types_appareil')
-
-        # Convertir les données en JSON pour Alpine.js
+        types_parents = AppareilType.objects.filter(parent__isnull=True).prefetch_related("sous_types_appareil")
         types_appareils = [
             {
                 "id": type_.id,
                 "nom": type_.nom,
-                "sous_types": [{"id": sous_type.id, "nom": sous_type.nom} for sous_type in
-                               type_.sous_types_appareil.all()]
+                "sous_types": [{"id": st.id, "nom": st.nom} for st in type_.sous_types_appareil.all()],
             }
             for type_ in types_parents
         ]
+        context["types_appareils_json"] = json.dumps(types_appareils, cls=DjangoJSONEncoder)
 
-        # Passer les données JSON au template
-        context['types_appareils_json'] = json.dumps(types_appareils, cls=DjangoJSONEncoder)
-
-        # Récupérer tous les types de bilans avec leurs examens associés
-        types_examens = TypeBilanParaclinique.objects.prefetch_related('examenstandard_set').all()
-
-        # Transformer les données pour Alpine.js
+        types_examens = TypeBilanParaclinique.objects.prefetch_related("examenstandard_set").all()
         types_examens_json = [
             {
-                "id": type_bilan.id,
-                "nom": type_bilan.nom,
-                "examens": [{"id": exam.id, "nom": exam.nom} for exam in type_bilan.examenstandard_set.all()]
+                "id": tb.id,
+                "nom": tb.nom,
+                "examens": [{"id": ex.id, "nom": ex.nom} for ex in tb.examenstandard_set.all()],
             }
-            for type_bilan in types_examens
+            for tb in types_examens
         ]
-
-        # Ajouter les examens au contexte en format JSON
         context["types_examens_json"] = json.dumps(types_examens_json, ensure_ascii=False)
-        context['bilanForm'] = BilanParacliniqueMultiForm()
 
-        context['appareilForm'] = AppareilForm()
-        context['problemesposerform'] = ProblemePoseForm()
-        # context['antecedentshospigroup'] = GroupedAntecedentsForm()
-        context['prescription_hospi_form'] = PrescriptionHospiForm()
-        context['signe_fonctionnel_form'] = SigneFonctionnelForm()
+        context["bilanForm"] = BilanParacliniqueMultiForm()
+        context["appareilForm"] = AppareilForm()
+        context["problemesposerform"] = ProblemePoseForm()
+        context["prescription_hospi_form"] = PrescriptionHospiForm()
+        context["signe_fonctionnel_form"] = SigneFonctionnelForm()
+        context["indicateur_biologique_form"] = IndicateurBiologiqueForm()
+        context["indicateur_fonctionnel_form"] = IndicateurFonctionnelForm()
+        context["indicateur_subjectif_form"] = IndicateurSubjectifForm()
+        context["autresindicatorsform"] = HospitalizationIndicatorsForm()
+        context["resumesyndromiqueform"] = ResumeSyndromiqueForm()
 
-        context['indicateur_biologique_form'] = IndicateurBiologiqueForm()
-        context['indicateur_fonctionnel_form'] = IndicateurFonctionnelForm()
-        context['indicateur_subjectif_form'] = IndicateurSubjectifForm()
-        context['autresindicatorsform'] = HospitalizationIndicatorsForm()
+        types_imagerie = list(TypeImagerie.objects.all().values("id", "nom"))
+        context["types_imagerie_json"] = json.dumps(types_imagerie, cls=DjangoJSONEncoder)
+        context["imagerieForm"] = ImagerieMedicaleForm()
 
-        context['resumesyndromiqueform'] = ResumeSyndromiqueForm()
+        context["diagnosticsform"] = DiagnosticForm()
+        context["observationform"] = ObservationForm()
+        context["avismedicalform"] = AvisMedicalForm()
+        context["effetindesirableform"] = EffetIndesirableForm()
+        context["historiquemaladieform"] = HistoriqueMaladieForm()
+        context["hospicomment"] = CommentaireInfirmierForm()
 
-        # Serializer les types d'imagerie en JSON pour Alpine.js
-        types_imagerie = TypeImagerie.objects.all().values("id", "nom")
-        context["types_imagerie_json"] = json.dumps(list(types_imagerie))
+        # -------------------------------------------------------
+        # 4) Observations / historiques
+        # -------------------------------------------------------
+        context["observations"] = Observation.objects.filter(hospitalisation=hospitalization).order_by("-date_enregistrement")
+        context["observationscount"] = Observation.objects.filter(hospitalisation=hospitalization).count()
 
-        context['imagerieForm'] = ImagerieMedicaleForm()
+        context["historiques_maladie"] = HistoriqueMaladie.objects.filter(hospitalisation=hospitalization).order_by("-date_enregistrement")
 
-        context['diagnosticsform'] = DiagnosticForm()
-        context['observationform'] = ObservationForm()
-        context['avismedicalform'] = AvisMedicalForm()
-        context['effetindesirableform'] = EffetIndesirableForm()
-        context['historiquemaladieform'] = HistoriqueMaladieForm()
-        context['hospicomment'] = CommentaireInfirmierForm()
-        # context['antecedents'] = AntecedentsHospiForm()
-
-        context['observations'] = Observation.objects.filter(hospitalisation=self.object).order_by(
-            '-date_enregistrement')
-        context['observationscount'] = Observation.objects.filter(hospitalisation=self.object).count
-
-        context['historiques_maladie'] = HistoriqueMaladie.objects.filter(hospitalisation=self.object).order_by(
-            '-date_enregistrement')
-
-        # Récupérer tous les modes de vie liés à cette hospitalisation
-        modedevies = ModeDeVie.objects.filter(hospitalisation=hospitalization).select_related('categorie')
-
-        # Regrouper les modes de vie par catégorie
+        # -------------------------------------------------------
+        # 5) Mode de vie -> ✅ FIX None.nom ici
+        # -------------------------------------------------------
+        modedevies = ModeDeVie.objects.filter(hospitalisation=hospitalization).select_related("categorie")
         modedevies_par_categorie = defaultdict(list)
+
         for modevie in modedevies:
-            modedevies_par_categorie[modevie.categorie.nom].append(modevie)
+            cat_name = getattr(modevie.categorie, "nom", "Autres")
+            modedevies_par_categorie[cat_name].append(modevie)
 
-        # Trier les catégories pour un affichage ordonné
-        context['modedevies_by_categories'] = OrderedDict(sorted(modedevies_par_categorie.items()))
-        context['modedevies_count'] = modedevies.count()
+        context["modedevies_by_categories"] = OrderedDict(sorted(modedevies_par_categorie.items(), key=lambda x: x[0]))
+        context["modedevies_count"] = modedevies.count()
 
-        # Regrouper les antécédents par type
+        # -------------------------------------------------------
+        # 6) Antécédents (ok)
+        # -------------------------------------------------------
         antecedents = AntecedentsMedicaux.objects.filter(hospitalisation=hospitalization)
-
         antecedents_par_type = defaultdict(list)
         for antecedent in antecedents:
-            antecedents_par_type[antecedent.type.nom].append(antecedent)
+            antecedents_par_type[antecedent.type].append(antecedent)
 
-        # Trier par type pour un affichage ordonné
-        context['antecedents_par_type'] = dict(antecedents_par_type)
-        context['antecedentscount'] = AntecedentsMedicaux.objects.filter(hospitalisation=self.object).count()
+        context["antecedents_par_type"] = dict(antecedents_par_type)
+        context["antecedentscount"] = antecedents.count()
 
-        # Récupérer tous les appareils liés à cette hospitalisation
-        appareils = Appareil.objects.filter(hospitalisation=hospitalization).select_related('type_appareil',
-                                                                                            'created_by')
-
-        # Grouper les appareils par type
+        # -------------------------------------------------------
+        # 7) Appareils (ok)
+        # -------------------------------------------------------
+        appareils = Appareil.objects.filter(hospitalisation=hospitalization).select_related("type_appareil", "created_by")
         appareils_by_categories = defaultdict(list)
         for appareil in appareils:
-            categorie = appareil.type_appareil.nom if appareil.type_appareil else "Autres"
+            categorie = getattr(appareil.type_appareil, "nom", "Autres")
             appareils_by_categories[categorie].append(appareil)
+
         context["appareils_by_categories"] = dict(appareils_by_categories)
         context["appareils_count"] = appareils.count()
 
-        # Récupérer tous les résumés liés à cette hospitalisation
+        # -------------------------------------------------------
+        # 8) Résumés / Problèmes / Bilans regroupés
+        # -------------------------------------------------------
         resumes = ResumeSyndromique.objects.filter(hospitalisation=hospitalization)
-
-        # Grouper les résumés par hospitalisation
         resumes_by_hospitalisation = defaultdict(list)
         for resume in resumes:
             hosp_name = f"Hospitalisation du {resume.created_at.strftime('%d/%m/%Y')}"
             resumes_by_hospitalisation[hosp_name].append(resume)
+        context["resumes_by_hospitalisation"] = dict(resumes_by_hospitalisation)
+        context["resumes_count"] = resumes.count()
 
-        context["resumes_by_hospitalisation"] = dict(resumes_by_hospitalisation)  # ✅ Correction ici
-        context["resumes_count"] = resumes.count()  # ✅ Correction ici
-
-        # Récupérer tous les bilans liés à cette hospitalisation
-        bilans = BilanParaclinique.objects.filter(hospitalisation=hospitalization).select_related('examen', 'doctor',
-                                                                                                  'examen__type_examen')
-
-        # Regrouper les bilans par type de bilan
-        bilans_by_type = defaultdict(list)
-        for bilan in bilans:
-            type_bilan = bilan.examen.type_examen.nom if bilan.examen and bilan.examen.type_examen else "Autres"
-            bilans_by_type[type_bilan].append(bilan)
-
-        context["bilans_by_type"] = dict(bilans_by_type)
-        context["bilans_count"] = bilans.count()
-
-        # Récupérer tous les problèmes liés à cette hospitalisation
-        problemes = ProblemePose.objects.filter(hospitalisation=hospitalization).select_related('patient', 'created_by')
-
-        # Grouper les problèmes par hospitalisation
+        problemes = ProblemePose.objects.filter(hospitalisation=hospitalization).select_related("patient", "created_by")
         problemes_by_hospitalisation = defaultdict(list)
         for probleme in problemes:
             hosp_name = f"Hospitalisation du {probleme.created_at.strftime('%d/%m/%Y')}"
             problemes_by_hospitalisation[hosp_name].append(probleme)
+        context["problemes_by_hospitalisation"] = dict(problemes_by_hospitalisation)
+        context["problemes_count"] = problemes.count()
 
-        context["problemes_by_hospitalisation"] = dict(problemes_by_hospitalisation)  # ✅ Correction ici
-        context["problemes_count"] = problemes.count()  # ✅ Correction ici
+        bilans_by_type = defaultdict(list)
+        for bilan in bilans_qs:
+            type_bilan = getattr(getattr(bilan.examen, "type_examen", None), "nom", "Autres")
+            bilans_by_type[type_bilan].append(bilan)
+        context["bilans_by_type"] = dict(bilans_by_type)
+        context["bilans_count"] = bilans_qs.count()
 
-        # Récupérer les unités et lits disponibles
+        # -------------------------------------------------------
+        # 9) Unités / lits
+        # -------------------------------------------------------
         unites = UniteHospitalisation.objects.prefetch_related("chambres__boxes__lits").all()
         lits_disponibles = LitHospitalisation.objects.filter(occuper=False, is_out_of_service=False, is_cleaning=False)
 
@@ -2357,149 +2370,152 @@ class HospitalisationDetailView(LoginRequiredMixin, DetailView):
         context["unites"] = unites
         context["lits_disponibles"] = lits_disponibles
 
-        # Récupérer les examens d'imagerie liés à l'hospitalisation
-        imageries = ImagerieMedicale.objects.filter(hospitalisation=hospitalization).select_related(
-            "type_imagerie", "medecin_prescripteur", "radiologue"
-        ).order_by("-date_examen")
+        # -------------------------------------------------------
+        # 10) Imagerie (ok, safe déjà)
+        # -------------------------------------------------------
+        imageries = (
+            ImagerieMedicale.objects
+            .filter(hospitalisation=hospitalization)
+            .select_related("type_imagerie", "medecin_prescripteur", "radiologue")
+            .order_by("-date_examen")
+        )
 
-        # Organiser les imageries par type
-        imageries_by_type = {}
+        imageries_by_type = defaultdict(list)
         for imagerie in imageries:
-            type_nom = imagerie.type_imagerie.nom if imagerie.type_imagerie else "Autres"
-            if type_nom not in imageries_by_type:
-                imageries_by_type[type_nom] = []
+            type_nom = getattr(imagerie.type_imagerie, "nom", "Autres")
             imageries_by_type[type_nom].append(imagerie)
 
-        context['calendar_days'] = self.generate_calendar_days()
-
-        context["imageries_by_type"] = imageries_by_type
+        context["imageries_by_type"] = dict(imageries_by_type)
         context["imageries_count"] = imageries.count()
 
-        context['diagnostics'] = Diagnostic.objects.filter(hospitalisation=self.object).order_by('-date_diagnostic')
-        context['diagnosticscount'] = Diagnostic.objects.filter(hospitalisation=self.object).count()
+        # -------------------------------------------------------
+        # 11) Timeline / Calendar
+        # -------------------------------------------------------
+        context["calendar_days"] = self.generate_calendar_days(days=7)
 
-        context['avis_medicaux'] = AvisMedical.objects.filter(hospitalisation=self.object).order_by('-date_avis')
-        context['avis_medicauxcount'] = AvisMedical.objects.filter(hospitalisation=self.object).count()
+        # -------------------------------------------------------
+        # 12) Divers
+        # -------------------------------------------------------
+        context["diagnostics"] = Diagnostic.objects.filter(hospitalisation=hospitalization).order_by("-date_diagnostic")
+        context["diagnosticscount"] = Diagnostic.objects.filter(hospitalisation=hospitalization).count()
 
-        context['effets_indesirables'] = EffetIndesirable.objects.filter(hospitalisation=self.object).order_by(
-            '-date_signalement')
-        context['effets_indesirablescount'] = EffetIndesirable.objects.filter(hospitalisation=self.object).count()
+        context["avis_medicaux"] = AvisMedical.objects.filter(hospitalisation=hospitalization).order_by("-date_avis")
+        context["avis_medicauxcount"] = AvisMedical.objects.filter(hospitalisation=hospitalization).count()
 
-        context['hopi_comment'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).order_by(
-            '-date_commentaire')
-        context['hopi_commentcount'] = CommentaireInfirmier.objects.filter(hospitalisation=self.object).count()
+        context["effets_indesirables"] = EffetIndesirable.objects.filter(hospitalisation=hospitalization).order_by("-date_signalement")
+        context["effets_indesirablescount"] = EffetIndesirable.objects.filter(hospitalisation=hospitalization).count()
 
-        context['constantes'] = Constante.objects.filter(hospitalisation=self.object)
-        # Retrieve related 'Constante' data for the current hospitalization
-        context['constantescharts'] = Constante.objects.filter(hospitalisation=self.object).order_by('created_at')
-        context['prescriptions'] = Prescription.objects.filter(patient=self.object.patient).order_by('-created_at')
-        context['suivie_prescriptions'] = Prescription.objects.filter(hospitalisation=hospitalization).order_by(
-            '-created_at')
-        prescriptions = Prescription.objects.filter(hospitalisation=hospitalization)
-        executions = PrescriptionExecution.objects.filter(prescription__in=prescriptions,
-                                                          scheduled_time__gte=now()).order_by('scheduled_time')
-        # context['prescriptions'] = prescriptions
-        context['executions'] = executions
-        # context['prescription_execution_form'] = PrescriptionExecutionForm()
-        context['signe_fonctionnel'] = SigneFonctionnel.objects.filter(hospitalisation=self.object)
-        context['indicateur_biologique'] = IndicateurBiologique.objects.filter(hospitalisation=self.object)
-        context['indicateur_fonctionnel'] = IndicateurFonctionnel.objects.filter(hospitalisation=self.object)
-        context['indicateur_subjectif'] = IndicateurSubjectif.objects.filter(hospitalisation=self.object)
-        context['indicators'] = HospitalizationIndicators.objects.filter(hospitalisation=self.object)
+        context["hopi_comment"] = CommentaireInfirmier.objects.filter(hospitalisation=hospitalization).order_by("-date_commentaire")
+        context["hopi_commentcount"] = CommentaireInfirmier.objects.filter(hospitalisation=hospitalization).count()
 
-        # Récupérer toutes les exécutions liées à cette hospitalisation
-        executions = PrescriptionExecution.objects.filter(
+        context["constantes"] = Constante.objects.filter(hospitalisation=hospitalization)
+        context["constantescharts"] = Constante.objects.filter(hospitalisation=hospitalization).order_by("created_at")
+
+        # ⚠️ Ici tu affiches toutes les prescriptions du patient (global)
+        context["prescriptions"] = Prescription.objects.filter(patient=hospitalization.patient).order_by("-created_at")
+        context["suivie_prescriptions"] = Prescription.objects.filter(hospitalisation=hospitalization).order_by("-created_at")
+
+        prescriptions_hospi = Prescription.objects.filter(hospitalisation=hospitalization)
+        context["executions"] = PrescriptionExecution.objects.filter(
+            prescription__in=prescriptions_hospi,
+            scheduled_time__gte=now()
+        ).order_by("scheduled_time")
+
+        context["signe_fonctionnel"] = SigneFonctionnel.objects.filter(hospitalisation=hospitalization)
+        context["indicateur_biologique"] = IndicateurBiologique.objects.filter(hospitalisation=hospitalization)
+        context["indicateur_fonctionnel"] = IndicateurFonctionnel.objects.filter(hospitalisation=hospitalization)
+        context["indicateur_subjectif"] = IndicateurSubjectif.objects.filter(hospitalisation=hospitalization)
+        context["indicators"] = HospitalizationIndicators.objects.filter(hospitalisation=hospitalization)
+
+        all_exec = PrescriptionExecution.objects.filter(
             prescription__hospitalisation=hospitalization
-        ).order_by('scheduled_time')
-        # Trouver la prochaine prise
-        next_execution = executions.filter(scheduled_time__gte=now(), status='Pending').first()
-        # Trouver la dernière prise manquée
-        # missed_execution = executions.filter(scheduled_time__lt=now(), status='Pending').order_by('-scheduled_time')
-        missed_executions = executions.filter(scheduled_time__lt=now(), status='Missed'
-                                              ).order_by('-scheduled_time')
-        context['next_execution'] = next_execution
-        context['missed_executions'] = missed_executions
+        ).order_by("scheduled_time")
+
+        context["next_execution"] = all_exec.filter(scheduled_time__gte=now(), status="Pending").first()
+        context["missed_executions"] = all_exec.filter(scheduled_time__lt=now(), status="Missed").order_by("-scheduled_time")
+
         return context
 
     def generate_calendar_days(self, days=7):
-        """Génère les jours du calendrier avec leurs créneaux horaires"""
-        from datetime import datetime, timedelta
-
+        """
+        FIX: ton `is_past: i < 0` était toujours False.
+        """
+        today = now().date()
         calendar_days = []
-        today = datetime.now().date()
-
         for i in range(days):
             current_date = today + timedelta(days=i)
             calendar_days.append({
-                'date': current_date,
-                'is_today': i == 0,
-                'is_past': i < 0,
-                'time_slots': ['morning', 'noon', 'evening']  # Matin, Midi, Soir
+                "date": current_date,
+                "is_today": current_date == today,
+                "is_past": current_date < today,
+                "time_slots": ["morning", "noon", "evening"],
             })
-
         return calendar_days
 
     def post(self, request, *args, **kwargs):
-        form_type = request.POST.get("form_type")  # Get the form type
+        form_type = request.POST.get("form_type")
         hospitalisation = self.get_object()
+
         constante_form = ConstanteForm(request.POST)
         prescription_form = PrescriptionHospiForm(request.POST)
         signe_fonctionnel_form = SigneFonctionnelForm(request.POST)
         indicateur_biologique_form = IndicateurBiologiqueForm(request.POST)
         indicateur_fonctionnel_form = IndicateurFonctionnelForm(request.POST)
         indicateur_subjectif_form = IndicateurSubjectifForm(request.POST)
-        autresindicatorsform = HospitalizationIndicatorsForm()
+        autresindicatorsform = HospitalizationIndicatorsForm(request.POST)  # ✅ il manquait request.POST
 
-        # Check which form was submitted and process accordingly
+        # ✅ Pour éviter un crash si ton user n'a pas employee
+        employee = getattr(request.user, "employee", None)
+
         if form_type == "constante" and constante_form.is_valid():
             constante = constante_form.save(commit=False)
             constante.hospitalisation = hospitalisation
             constante.patient = hospitalisation.patient
-            constante.created_by = request.user.employee
+            constante.created_by = employee
             constante.save()
-            messages.success(request, "Constante saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Constante enregistrée avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
         elif form_type == "prescription" and prescription_form.is_valid():
             prescription = prescription_form.save(commit=False)
             prescription.patient = hospitalisation.patient
             prescription.hospitalisation = hospitalisation
-            prescription.created_by = request.user.employee
+            prescription.created_by = employee
             prescription.status = "Pending"
             prescription.save()
             prescription.generate_executions()
-            messages.success(request, "Prescription saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Prescription enregistrée avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
         elif form_type == "signe_fonctionnel" and signe_fonctionnel_form.is_valid():
             signe_fonctionnel = signe_fonctionnel_form.save(commit=False)
             signe_fonctionnel.hospitalisation = hospitalisation
             signe_fonctionnel.save()
-            messages.success(request, "Signe Fonctionnel saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Signe Fonctionnel enregistré avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
         elif form_type == "indicateur_biologique" and indicateur_biologique_form.is_valid():
             indicateur_biologique = indicateur_biologique_form.save(commit=False)
             indicateur_biologique.hospitalisation = hospitalisation
             indicateur_biologique.save()
-            messages.success(request, "Indicateur Biologique saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Indicateur Biologique enregistré avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
         elif form_type == "indicateur_fonctionnel" and indicateur_fonctionnel_form.is_valid():
             indicateur_fonctionnel = indicateur_fonctionnel_form.save(commit=False)
             indicateur_fonctionnel.hospitalisation = hospitalisation
             indicateur_fonctionnel.save()
-            messages.success(request, "Indicateur Fonctionnel saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Indicateur Fonctionnel enregistré avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
         elif form_type == "complication" and autresindicatorsform.is_valid():
             complication = autresindicatorsform.save(commit=False)
             complication.hospitalisation = hospitalisation
             complication.save()
-            messages.success(request, "Indicateur de complications saved successfully.")
-            return redirect(reverse('hospitalisationdetails', args=[hospitalisation.id]))
+            messages.success(request, "Indicateur de complications enregistré avec succès.")
+            return redirect(reverse("hospitalisationdetails", args=[hospitalisation.id]))
 
-        # If none of the forms are valid or no form type matches, render the page with errors
+        # sinon, réafficher la page
         return self.get(request, *args, **kwargs)
 
 

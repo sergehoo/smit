@@ -10,13 +10,13 @@ from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Max, F
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -144,37 +144,98 @@ class EmployeeListView(PermissionRequiredMixin, ListView):
     template_name = "employees/employee_list.html"
     context_object_name = "employees"
     paginate_by = 10
-    ordering = ['user__first_name', 'user__last_name']
-    permission_required = 'core.can_view_employee'
+    permission_required = "core.can_view_employee"
 
     def get_queryset(self):
-        # Récupérer tous les employés
-        queryset = super().get_queryset()
+        qs = (
+            Employee.objects
+            .select_related("user")
+            .prefetch_related("user__groups", "user__user_permissions")
+            .annotate(
+                last_login=Max('user__last_login'),
+                is_active=F('user__is_active'),
+                date_joined=F('user__date_joined')
+            )
+            .order_by("user__last_name", "user__first_name")
+        )
 
-        # Récupérer le paramètre de recherche
-        search_query = self.request.GET.get('search', '')
-
-        # Filtrer les employés si une recherche est effectuée
+        # Recherche
+        search_query = self.request.GET.get("search", "").strip()
         if search_query:
-            queryset = queryset.filter(
+            qs = qs.filter(
                 Q(user__first_name__icontains=search_query) |
                 Q(user__last_name__icontains=search_query) |
                 Q(user__email__icontains=search_query) |
-                Q(phone__icontains=search_query)
-            )
+                Q(phone__icontains=search_query) |
+                Q(job_title__icontains=search_query)
+            ).distinct()
 
-        return queryset
+        # Filtre par rôle
+        role_filter = self.request.GET.get("role", "")
+        if role_filter:
+            qs = qs.filter(user__groups__id=role_filter)
+
+        # Filtre par statut actif
+        active_filter = self.request.GET.get("active", "")
+        if active_filter in ["true", "false"]:
+            qs = qs.filter(user__is_active=(active_filter == "true"))
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')  # Ajouter la recherche au contexte
+
+        # Paramètres de recherche
+        search_query = self.request.GET.get("search", "").strip()
+        role_filter = self.request.GET.get("role", "")
+        active_filter = self.request.GET.get("active", "")
+
+        # Construire la querystring pour la pagination
+        params = []
+        if search_query:
+            params.append(f"search={search_query}")
+        if role_filter:
+            params.append(f"role={role_filter}")
+        if active_filter:
+            params.append(f"active={active_filter}")
+        querystring = "&".join(params)
+
+        # Récupérer tous les rôles pour le filtre
+        roles = Group.objects.all().order_by("name")
+
+        # Créer un dictionnaire des rôles par ID pour le template
+        roles_dict = {str(role.id): role for role in roles}
+
+        # Permissions groupées pour le modal
+        permissions = Permission.objects.select_related('content_type').order_by('content_type__model', 'codename')
+        grouped_permissions = {}
+        for perm in permissions:
+            model_name = perm.content_type.model_class().__name__ if perm.content_type.model_class() else perm.content_type.model
+            if model_name not in grouped_permissions:
+                grouped_permissions[model_name] = []
+            grouped_permissions[model_name].append(perm)
+
+        # Statistiques
+        total_employees = Employee.objects.count()
+        active_employees = Employee.objects.filter(user__is_active=True).count()
+        inactive_employees = total_employees - active_employees
+
+        context.update({
+            "search_query": search_query,
+            "role_filter": role_filter,
+            "active_filter": active_filter,
+            "querystring": querystring,
+            "roles": roles,
+            "roles_dict": roles_dict,
+            "grouped_permissions": grouped_permissions,
+            "total_employees": total_employees,
+            "active_employees": active_employees,
+            "inactive_employees": inactive_employees,
+            "can_add_employee": self.request.user.has_perm("core.can_add_employee"),
+            "can_change_employee": self.request.user.has_perm("core.can_change_employee"),
+            "can_delete_employee": self.request.user.has_perm("core.can_delete_employee"),
+        })
         return context
-
-    # def get_ordering(self):
-    #     # Récupère l'ordre de tri à partir de l'URL ou utilise 'nom' par défaut
-    #     return self.request.GET.get('ordering', 'nom')
-
-
 def generate_password(length=8):
     """Génère un mot de passe aléatoire avec seulement des chiffres et des lettres minuscules"""
     characters = string.ascii_lowercase + string.digits

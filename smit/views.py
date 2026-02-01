@@ -6,20 +6,25 @@ from datetime import date, timedelta
 from datetime import datetime
 from itertools import groupby
 
+import django_filters
 import qrcode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, AccessMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, AccessMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Avg, Prefetch, Q
 from django.db.models.functions import ExtractMonth, ExtractYear
+from django import forms
 from django.http import request, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template import TemplateDoesNotExist
+from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.text import slugify
 from django.utils.timezone import now
 from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -34,7 +39,7 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus.tables import TableStyle, Table
 from six import BytesIO
 
-from core.models import communes_et_quartiers_choices, Location
+from core.models import communes_et_quartiers_choices, Location, VIHProfile
 from core.utils.notifications import get_employees_to_notify
 from core.utils.sms import send_sms
 from pharmacy.models import RendezVous
@@ -47,7 +52,8 @@ from smit.forms import PatientCreateForm, AppointmentForm, ConstantesForm, Consu
     RendezVousSuiviForm, ProtocoleForm, UrgenceHospitalizationStep2Form
 from smit.models import Patient, Appointment, Constante, Service, ServiceSubActivity, Consultation, Symptomes, \
     Hospitalization, Suivi, TestRapideVIH, EnqueteVih, Examen, Protocole, SuiviProtocole, TraitementARV, BilanInitial, \
-    TypeBilanParaclinique, ExamenStandard, BilanParaclinique, Echantillon
+    TypeBilanParaclinique, ExamenStandard, BilanParaclinique, Echantillon, ParaclinicalExam, ImagerieMedicale, \
+    Prescription
 
 
 # Create your views here.
@@ -72,6 +78,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 
 import json
 from datetime import timedelta
+
 
 # Importe tes modèles
 # from .models import Patient, Consultation, Appointment, Hospitalization, Service
@@ -221,7 +228,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
         # Hospitalisations
         current_hospitalizations = Hospitalization.objects.filter(discharge_date__isnull=True).count()
-        hospitalizations_by_reason_qs = Hospitalization.objects.values('reason_for_admission').annotate(count=Count('id'))
+        hospitalizations_by_reason_qs = Hospitalization.objects.values('reason_for_admission').annotate(
+            count=Count('id'))
         recent_hospitalizations = Hospitalization.objects.select_related('patient', 'doctor').order_by(
             '-admission_date')[:10]
 
@@ -294,8 +302,8 @@ class HomePageView(LoginRequiredMixin, TemplateView):
             "hospitalizations_by_reason": hospitalizations_by_reason_qs,
             "recent_hospitalizations": recent_hospitalizations,
 
-            "consultation_counts": consultation_counts,   # encore dispo si ailleurs
-            "appointment_counts": appointment_counts,     # idem
+            "consultation_counts": consultation_counts,  # encore dispo si ailleurs
+            "appointment_counts": appointment_counts,  # idem
 
             # Blobs JSON pour le template (charts)
             "consultations_by_service_json": consultations_by_service_json,
@@ -306,6 +314,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
             "appointment_counts_json": appointment_counts_json,
         })
         return context
+
 
 @login_required
 def appointment_create(request):
@@ -874,7 +883,7 @@ def Conseils_add(request, consultation_id):
 def Rendezvous_create(request, consultation_id):
     consultation = get_object_or_404(Consultation, id=consultation_id)
     if request.method == 'POST':
-        form = RendezvousForm(request.POST)
+        form = RendezVousForm(request.POST)
         if form.is_valid():
             rendezvous = form.save()
             consultation.rendezvous.add(rendezvous)
@@ -884,7 +893,7 @@ def Rendezvous_create(request, consultation_id):
         else:
             messages.error(request, 'Erreur lors de la création du rendez-vous.')
     else:
-        form = RendezvousForm()
+        form = RendezVousForm()
     return redirect('detail_consultation', pk=consultation.id)
 
 
@@ -970,6 +979,41 @@ def add_cas_contact(request, patient_id):
     return render(request, 'add_cas_contact.html', {'form': form, 'patient': patient})
 
 
+# class PatientDetailView(LoginRequiredMixin, DetailView):
+#     model = Patient
+#     template_name = "pages/dossier_patient.html"
+#     context_object_name = "patientsdetail"
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         patient = self.get_object()
+#         services_with_consultations = []
+#
+#         for service in patient.services_passed:
+#             consultations = service.consultations.filter(patient=patient)
+#             services_with_consultations.append((service, consultations))
+#
+#         context['services_with_consultations'] = services_with_consultations
+#
+#         # Récupérer les éléments liés au patient
+#         context["consultations"] = patient.consultation_set.all().order_by('-created_at')
+#         context["appointments"] = patient.appointments.all().order_by('-created_at')
+#         context["suivis"] = patient.suivimedecin.all()
+#         context['case_contacts'] = self.object.case_contacts.all()
+#         context['cascontactsForm'] = CasContactForm()
+#
+#         # Ajouter les hospitalisations
+#         hospitalizations = patient.hospitalized.all().prefetch_related(
+#             'indicateurs_biologiques',
+#             'indicateurs_fonctionnels',
+#             'indicateurs_subjectifs',
+#             'indicateurs_compliques',
+#             'indicateurs_autres',
+#         ).order_by('-created_at')
+#
+#         context['hospitalizations'] = hospitalizations
+#
+#         return context
 class PatientDetailView(LoginRequiredMixin, DetailView):
     model = Patient
     template_name = "pages/dossier_patient.html"
@@ -977,32 +1021,137 @@ class PatientDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        patient = self.get_object()
-        services_with_consultations = []
+        patient = self.object
 
-        for service in patient.services_passed:
-            consultations = service.consultations.filter(patient=patient)
-            services_with_consultations.append((service, consultations))
+        # -----------------------------
+        # CONSULTATIONS (optimisées)
+        # -----------------------------
+        consultations = (
+            Consultation.objects
+            .filter(patient=patient)
+            .select_related("doctor", "services", "suivi", "constante", "examens")
+            .prefetch_related("symptomes", "antecedentsMedicaux", "allergies")
+            .order_by("-consultation_date")
+        )
+        context["consultations"] = consultations
 
-        context['services_with_consultations'] = services_with_consultations
-
-        # Récupérer les éléments liés au patient
-        context["consultations"] = patient.consultation_set.all().order_by('-created_at')
-        context["appointments"] = patient.appointments.all().order_by('-created_at')
+        # -----------------------------
+        # RENDEZ-VOUS / SUIVIS
+        # -----------------------------
+        context["appointments"] = patient.appointments.all().order_by("-created_at")
         context["suivis"] = patient.suivimedecin.all()
-        context['case_contacts'] = self.object.case_contacts.all()
-        context['cascontactsForm'] = CasContactForm()
 
-        # Ajouter les hospitalisations
-        hospitalizations = patient.hospitalized.all().prefetch_related(
-            'indicateurs_biologiques',
-            'indicateurs_fonctionnels',
-            'indicateurs_subjectifs',
-            'indicateurs_compliques',
-            'indicateurs_autres',
-        ).order_by('-created_at')
+        # -----------------------------
+        # CAS CONTACTS
+        # -----------------------------
+        context["case_contacts"] = patient.case_contacts.all()
+        context["cascontactsForm"] = CasContactForm()
 
-        context['hospitalizations'] = hospitalizations
+        # -----------------------------
+        # HOSPITALISATIONS FULL
+        # -----------------------------
+        hospitalizations = (
+            Hospitalization.objects
+            .filter(patient=patient)
+            .select_related("doctor", "bed", "bed__box")
+            .prefetch_related(
+                "diagnostics",
+                "hospiconstantes",
+                "hospitalization_exams",
+                "bilans",
+                "imagerieshospi",
+                "hospiantecedents",
+                "hospimodedevie",
+                "examens_appareils",
+                "indicateurs_biologiques",
+                "indicateurs_fonctionnels",
+                "indicateurs_subjectifs",
+                "indicateurs_compliques",
+                "indicateurs_autres",
+                Prefetch(
+                    "hospiprescriptions",
+                    queryset=Prescription.objects
+                        .select_related("doctor", "medication", "created_by", "executed_by", "cancellation_by")
+                        .prefetch_related("executions")
+                        .order_by("-prescribed_at")
+                ),
+            )
+            .order_by("-admission_date")
+        )
+        context["hospitalizations"] = hospitalizations
+
+        # -----------------------------
+        # PHARMACIE (toutes prescriptions du patient)
+        # -----------------------------
+        prescriptions = (
+            Prescription.objects
+            .filter(patient=patient)
+            .select_related("doctor", "medication", "hospitalisation", "created_by", "executed_by", "cancellation_by")
+            .prefetch_related("executions")
+            .order_by("-prescribed_at")
+        )
+        context["prescriptions"] = prescriptions
+
+        # -----------------------------
+        # EXAMENS PARACLINIQUES (patient)
+        # -----------------------------
+        context["paraclinical_exams"] = (
+            ParaclinicalExam.objects
+            .filter(patient=patient)
+            .select_related("hospitalisation")
+            .order_by("-prescribed_at")
+        )
+
+        # -----------------------------
+        # EXAMENS "DEMANDE LABO" (Examen lié aux consultations)
+        # Ton modèle Examen a patients_requested + consultation
+        # -----------------------------
+        context["consultation_examens"] = (
+            Examen.objects
+            .filter(patients_requested=patient)
+            .select_related("consultation", "analyses")
+            .order_by("-created_at")
+        )
+
+        # -----------------------------
+        # BILANS PARACLINIQUES
+        # -----------------------------
+        context["bilans"] = (
+            BilanParaclinique.objects
+            .filter(patient=patient)
+            .select_related("doctor", "hospitalisation", "examen", "examen__type_examen")
+            .order_by("-created_at")
+        )
+
+        # -----------------------------
+        # IMAGERIE
+        # -----------------------------
+        context["imageries"] = (
+            ImagerieMedicale.objects
+            .filter(patient=patient)
+            .select_related("hospitalisation", "type_imagerie", "medecin_prescripteur", "radiologue")
+            .order_by("-date_examen")
+        )
+
+        # -----------------------------
+        # CONSTANTES (patient global)
+        # -----------------------------
+        context["constantes"] = (
+            Constante.objects
+            .filter(patient=patient, hospitalisation__isnull=True)
+            .select_related("created_by")
+            .order_by("-created_at")
+        )
+
+        # -----------------------------
+        # TESTS VIH
+        # -----------------------------
+        context["tests_vih"] = (
+            TestRapideVIH.objects
+            .filter(patient=patient)
+            .select_related("consultation")
+            .order_by("-date_test")
+        )
 
         return context
 
@@ -1208,159 +1357,489 @@ class PatientRecuListView(LoginRequiredMixin, ListView):
 
 # class ServiceContentDetailView(LoginRequiredMixin, DetailView):
 #     model = ServiceSubActivity
-#     # template_name = "pages/services/servicecontent_detail.html"
 #     context_object_name = "subservice"
 #
+#     # ---------------------------------------------------
+#     # TEMPLATE RESOLUTION
+#     # ---------------------------------------------------
 #     def get_template_names(self):
-#         # Déterminer le template en fonction du service ou de la sous-activité
-#         service = self.object.service
-#         if service.nom == 'VIH/SIDA':
-#             # if self.object.nom == 'overview':
-#             #     return ["pages/services/soverview.html"]
-#             # elif self.object.nom == 'consultation':
-#             return ["pages/services/servicecontent_detail.html"]
-#         elif service.nom == 'TUBERCULOSE':
-#             # if self.object.nom == 'overview':
-#             #     return ["pages/services/soverview.html"]
-#             # elif self.object.nom == 'consultation':
-#             return ["pages/services/consultation.html"]
-#         else:
-#             return ["pages/services/servicecontent_default.html"]
 #
+#         service = self.object.service
+#         sub = self.object
+#
+#         service_slug = slugify(service.nom).upper()
+#         activity_slug = slugify(sub.nom)
+#
+#         candidates = [
+#             f"pages/services/{service_slug}/{activity_slug}.html",
+#             f"pages/services/default/{activity_slug}.html",
+#             "pages/services/servicecontent_detail.html",
+#         ]
+#
+#         for tpl in candidates:
+#             try:
+#                 get_template(tpl)
+#                 return [tpl]
+#             except TemplateDoesNotExist:
+#                 pass
+#
+#         return ["pages/services/servicecontent_detail.html"]
+#
+#     # ---------------------------------------------------
+#     # CONTEXT
+#     # ---------------------------------------------------
 #     def get_context_data(self, **kwargs):
 #         context = super().get_context_data(**kwargs)
-#         context['service'] = self.object.service  # Ajoutez le service parent au contexte
+#
+#         service = self.object.service
+#         sub = self.object
+#
+#         context["service"] = service
+#         context["subservice"] = sub
+#
+#         # ==================================================
+#         #  Cas spécifique VIH-SIDA (overview uniquement)
+#         # ==================================================
+#         if service.nom == "VIH-SIDA" and sub.nom == "Overview":
+#             self.build_vih_overview_context(context)
+#
 #         return context
+#
+#     # ---------------------------------------------------
+#     #  VIH dashboard logic isolée
+#     # ---------------------------------------------------
+#     def build_vih_overview_context(self, context):
+#
+#         now = timezone.now()
+#         date_debut = now - timedelta(days=365)
+#
+#         tests = TestRapideVIH.objects.filter(
+#             consultation__services__nom="VIH-SIDA"
+#         )
+#
+#         total_tests = tests.count()
+#         total_positifs = tests.filter(resultat='POSITIF').count()
+#
+#         taux_positivite = round(
+#             (total_positifs / total_tests) * 100, 2
+#         ) if total_tests else 0
+#
+#         mois_labels = []
+#         tests_data = []
+#         positifs_data = []
+#
+#         current_month = now.month
+#         last_month = (now - timedelta(days=30)).month
+#
+#         test_this_month = 0
+#         test_last_month = 0
+#         positif_this_month = 0
+#         positif_last_month = 0
+#
+#         for i in range(12):
+#             mois = now - timedelta(days=30 * (11 - i))
+#             mois_labels.append(mois.strftime("%b %Y"))
+#
+#             mois_debut = mois.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+#             mois_fin = (mois_debut + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
+#
+#             tests_mois = tests.filter(date_test__range=(mois_debut, mois_fin))
+#
+#             tests_count = tests_mois.count()
+#             positifs_count = tests_mois.filter(resultat='POSITIF').count()
+#
+#             tests_data.append(tests_count)
+#             positifs_data.append(positifs_count)
+#
+#             if mois.month == current_month:
+#                 test_this_month = tests_count
+#                 positif_this_month = positifs_count
+#
+#             elif mois.month == last_month:
+#                 test_last_month = tests_count
+#                 positif_last_month = positifs_count
+#
+#         def variation(new, old):
+#             if old == 0:
+#                 return 0
+#             return round(((new - old) / old) * 100, 2)
+#
+#         test_change = variation(test_this_month, test_last_month)
+#         positif_change = variation(positif_this_month, positif_last_month)
+#
+#         # ⚠️ attention : dans ton modèle Patient -> genre = 'HOMME' / 'FEMME'
+#         hommes_tests = tests.filter(patient__genre='HOMME').count()
+#         hommes_positifs = tests.filter(patient__genre='HOMME', resultat='POSITIF').count()
+#
+#         femmes_tests = tests.filter(patient__genre='FEMME').count()
+#         femmes_positifs = tests.filter(patient__genre='FEMME', resultat='POSITIF').count()
+#
+#         hommes_taux = round((hommes_positifs / hommes_tests) * 100, 2) if hommes_tests else 0
+#         femmes_taux = round((femmes_positifs / femmes_tests) * 100, 2) if femmes_tests else 0
+#
+#         traitements = TraitementARV.objects.filter(
+#             type_traitement__in=[
+#                 'première_ligne',
+#                 'deuxième_ligne',
+#                 'troisième_ligne'
+#             ]
+#         )
+#
+#         suivi_arv = Suivi.objects.filter(services__nom="VIH-SIDA")
+#
+#         context.update({
+#
+#             "total_tests": total_tests,
+#             "total_positifs": total_positifs,
+#             "taux_positivite": taux_positivite,
+#
+#             "test_change": abs(test_change),
+#             "positif_change": abs(positif_change),
+#
+#             "test_change_sign": "↑" if test_change > 0 else "↓" if test_change < 0 else "=",
+#             "positif_change_sign": "↑" if positif_change > 0 else "↓" if positif_change < 0 else "=",
+#
+#             "mois_labels": mois_labels,
+#             "tests_data": tests_data,
+#             "positifs_data": positifs_data,
+#
+#             "hommes_tests": hommes_tests,
+#             "hommes_positifs": hommes_positifs,
+#             "hommes_taux": hommes_taux,
+#
+#             "femmes_tests": femmes_tests,
+#             "femmes_positifs": femmes_positifs,
+#             "femmes_taux": femmes_taux,
+#
+#             "total_arv": traitements.count(),
+#
+#             "arv_adherence_bonne": suivi_arv.filter(adherence_traitement="bonne").count(),
+#             "arv_adherence_moyenne": suivi_arv.filter(adherence_traitement="moyenne").count(),
+#             "arv_adherence_faible": suivi_arv.filter(adherence_traitement="faible").count(),
+#
+#             "derniers_tests": tests.select_related("patient").order_by("-date_test")[:5],
+#
+#             "consultations_recentes": Consultation.objects.filter(
+#                 services__nom="VIH-SIDA"
+#             ).order_by("-consultation_date")[:5],
+#
+#             "prochains_rdv": Appointment.objects.filter(
+#                 service__nom="VIH-SIDA",
+#                 date__gte=now.date(),
+#                 status="Scheduled"
+#             ).order_by("date", "time")[:5],
+#
+#             "hospitalisations_vih": Hospitalization.objects.filter(
+#                 activite__service__nom="VIH-SIDA",
+#                 discharge_date__isnull=True
+#             ).order_by("-admission_date")[:3],
+#
+#             "suivis_recents": suivi_arv.order_by("-date_suivi")[:3],
+#
+#             "mois_actuel": now.strftime("%B"),
+#             "annee_actuelle": now.year,
+#         })
+
+class VIHFileActiveFilter(django_filters.FilterSet):
+    code_vih = django_filters.CharFilter(
+        field_name="vih_profile__code_vih",
+        lookup_expr="icontains",
+        label="Code VIH",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Ex: AMI-0001"})
+    )
+    nom = django_filters.CharFilter(
+        field_name="nom",
+        lookup_expr="icontains",
+        label="Nom",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Nom"})
+    )
+    prenoms = django_filters.CharFilter(
+        field_name="prenoms",
+        lookup_expr="icontains",
+        label="Prénoms",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Prénoms"})
+    )
+    contact = django_filters.CharFilter(
+        field_name="contact",
+        lookup_expr="icontains",
+        label="Contact",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Téléphone"})
+    )
+    vih_status = django_filters.ChoiceFilter(
+        field_name="vih_profile__status",
+        choices=VIHProfile.VIHStatus.choices,
+        label="Statut VIH",
+        empty_label="Tous",
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    class Meta:
+        model = Patient
+        fields = ["code_vih", "nom", "prenoms", "contact", "vih_status"]
 class ServiceContentDetailView(LoginRequiredMixin, DetailView):
     model = ServiceSubActivity
     context_object_name = "subservice"
 
+    # ---------------------------------------------------
+    # TEMPLATE RESOLUTION (robuste nouveaux services)
+    # ---------------------------------------------------
     def get_template_names(self):
         service = self.object.service
-        if service.nom == 'VIH-SIDA' and self.object.nom == 'Overview':
-            print("SERVICE = ", service.nom)
-            print("SUBSERVICE = ", self.object.nom)
-            return ["pages/services/VIH-SIDA/vih_sida_overview.html"]
-        elif service.nom == 'VIH-SIDA':
-            return ["pages/services/servicecontent_detail.html"]
-        elif service.nom == 'TUBERCULOSE':
-            return ["pages/services/consultation.html"]
-        else:
-            return ["pages/services/servicecontent_default.html"]
+        sub = self.object
 
+        service_slug = slugify(service.nom).upper()           # VIH-SIDA -> VIH-SIDA (ok si folder)
+        activity_slug_dash = slugify(sub.nom)                 # File_active -> file-active
+        activity_slug_underscore = activity_slug_dash.replace("-", "_")  # file_active
+
+        candidates = [
+            f"pages/services/{service_slug}/{activity_slug_dash}.html",
+            f"pages/services/{service_slug}/{activity_slug_underscore}.html",
+            f"pages/services/default/{activity_slug_dash}.html",
+            f"pages/services/default/{activity_slug_underscore}.html",
+            "pages/services/servicecontent_detail.html",
+        ]
+
+        for tpl in candidates:
+            try:
+                get_template(tpl)
+                return [tpl]
+            except TemplateDoesNotExist:
+                continue
+
+        return ["pages/services/servicecontent_detail.html"]
+
+    # ---------------------------------------------------
+    # CONTEXT
+    # ---------------------------------------------------
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         service = self.object.service
-        context['service'] = service
+        sub = self.object
 
-        if service.nom == 'VIH-SIDA':
-            now = timezone.now()
+        context["service"] = service
+        context["subservice"] = sub
+
+        # Router VIH-SIDA
+        if service.nom == "RETROVIRAUX":
+            self.build_vih_context(context, sub.nom)
+
+        return context
+
+    # ---------------------------------------------------
+    # VIH CONTEXT
+    # ---------------------------------------------------
+    def build_vih_context(self, context, sub_name: str):
+        """
+        Alimente les pages VIH:
+        - Overview
+        - File_active
+        - Consultation
+        - Hospitalisation
+        - Suivi
+        """
+
+        now = timezone.now()
+
+        # Base: patients VIH = ceux qui ont VIHProfile
+        vih_patients = (
+            Patient.objects
+            .filter(vih_profile__status__in=["active", "transferred_in"])
+            .select_related("vih_profile")  # pour patient.vih_profile sans N+1
+            .order_by("-updated_at")
+        )
+
+        vih_patients_count = vih_patients.count()
+
+        # --------------------------
+        # FILE ACTIVE (liste patients VIH)
+        # --------------------------
+        if sub_name in ("File_active", "File active", "File-active"):
+            base_qs = (
+                Patient.objects
+                .filter(vih_profile__isnull=False)
+                .select_related("vih_profile")
+                .order_by("-updated_at")
+            )
+
+            f = VIHFileActiveFilter(self.request.GET, queryset=base_qs)
+            context["filter"] = f
+
+            paginator = Paginator(f.qs, 10)  # ✅ on pagine la queryset filtrée
+            page_number = self.request.GET.get("page")
+            page_obj = paginator.get_page(page_number)
+
+            context.update({
+                "patients": page_obj.object_list,  # ✅ ton template boucle sur patients
+                "page_obj": page_obj,  # ✅ ton template utilise page_obj
+                "resultfiltre": paginator.count,  # ✅ nombre après filtre
+                "patient_nbr": base_qs.count(),  # ✅ total VIH sans filtre
+                "vih_patients_count": paginator.count,  # optionnel
+            })
+            return
+
+        # --------------------------
+        # CONSULTATIONS VIH
+        # --------------------------
+        if sub_name == "Consultation":
+            consultations = (
+                Consultation.objects
+                .filter(services__nom="RETROVIRAUX")
+                .select_related("doctor", "services", "suivi", "constante")
+                .prefetch_related("symptomes", "antecedentsMedicaux", "allergies")
+                .order_by("-consultation_date")
+            )
+            context["consultations"] = consultations
+            context["consultations_count"] = consultations.count()
+            return
+
+        # --------------------------
+        # HOSPITALISATIONS VIH
+        # --------------------------
+        if sub_name == "Hospitalisation":
+            hospitalisations = (
+                Hospitalization.objects
+                .filter(activite__service__nom="RETROVIRAUX")
+                .select_related("doctor", "bed", "bed__box", "activite", "activite__service")
+                .order_by("-admission_date")
+            )
+            context["hospitalisations"] = hospitalisations
+            context["hospitalisations_encours"] = hospitalisations.filter(discharge_date__isnull=True).count()
+            context["hospitalisations_total"] = hospitalisations.count()
+            return
+
+        # --------------------------
+        # SUIVI VIH
+        # --------------------------
+        if sub_name == "Suivi":
+            suivis = (
+                Suivi.objects
+                .filter(services__nom="RETROVIRAUX")
+                .select_related("patient", "services")
+                .order_by("-date_suivi")
+            )
+            context["suivis"] = suivis
+            context["suivis_count"] = suivis.count()
+            return
+
+        # --------------------------
+        # OVERVIEW VIH (KPIs + graphes)
+        # --------------------------
+        if sub_name == "Overview":
             date_debut = now - timedelta(days=365)
-            tests = TestRapideVIH.objects.filter(date_test__gte=date_debut)
+
+            # Tests VIH sur 12 mois
+            tests = (
+                TestRapideVIH.objects
+                .filter(date_test__gte=date_debut)
+                # IMPORTANT : ne pas dépendre uniquement de consultation, certains tests peuvent être hors consultation
+                .filter(patient__vih_profile__isnull=False)
+                .select_related("patient", "consultation")
+            )
+
             total_tests = tests.count()
-            total_positifs = tests.filter(resultat='POSITIF').count()
-            taux_positivite = round((total_positifs / total_tests * 100), 2) if total_tests > 0 else 0
+            total_positifs = tests.filter(resultat="POSITIF").count()
+            taux_positivite = round((total_positifs / total_tests) * 100, 2) if total_tests else 0
 
+            # Evolution mensuelle (12 mois)
             mois_labels, tests_data, positifs_data = [], [], []
-
-            # Données actuelles et précédentes pour calcul des variations
             current_month = now.month
             last_month = (now - timedelta(days=30)).month
 
-            test_this_month = 0
-            test_last_month = 0
-            positif_this_month = 0
-            positif_last_month = 0
+            test_this_month = test_last_month = 0
+            pos_this_month = pos_last_month = 0
 
             for i in range(12):
                 mois = now - timedelta(days=30 * (11 - i))
                 mois_labels.append(mois.strftime("%b %Y"))
-                mois_debut = mois.replace(day=1, hour=0, minute=0, second=0)
-                mois_fin = (mois_debut + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
-                tests_mois = TestRapideVIH.objects.filter(date_test__range=(mois_debut, mois_fin))
-                tests_count = tests_mois.count()
-                positifs_count = tests_mois.filter(resultat='POSITIF').count()
+                mois_debut = mois.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                mois_fin = (mois_debut + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
 
-                tests_data.append(tests_count)
-                positifs_data.append(positifs_count)
+                tests_mois = tests.filter(date_test__range=(mois_debut, mois_fin))
+                tcount = tests_mois.count()
+                pcount = tests_mois.filter(resultat="POSITIF").count()
+
+                tests_data.append(tcount)
+                positifs_data.append(pcount)
 
                 if mois.month == current_month:
-                    test_this_month = tests_count
-                    positif_this_month = positifs_count
+                    test_this_month, pos_this_month = tcount, pcount
                 elif mois.month == last_month:
-                    test_last_month = tests_count
-                    positif_last_month = positifs_count
+                    test_last_month, pos_last_month = tcount, pcount
 
-            # Calcul des variations (%)
             def variation(new, old):
                 if old == 0:
                     return 0
                 return round(((new - old) / old) * 100, 2)
 
             test_change = variation(test_this_month, test_last_month)
-            positif_change = variation(positif_this_month, positif_last_month)
+            positif_change = variation(pos_this_month, pos_last_month)
 
-            hommes_tests = tests.filter(patient__genre='Homme').count()
-            hommes_positifs = tests.filter(patient__genre='Homme', resultat='POSITIF').count()
-            hommes_taux = round((hommes_positifs / hommes_tests * 100), 2) if hommes_tests > 0 else 0
+            # Répartition sexe (attention à tes valeurs: HOMME/FEMME)
+            hommes_tests = tests.filter(patient__genre="HOMME").count()
+            hommes_positifs = tests.filter(patient__genre="HOMME", resultat="POSITIF").count()
+            femmes_tests = tests.filter(patient__genre="FEMME").count()
+            femmes_positifs = tests.filter(patient__genre="FEMME", resultat="POSITIF").count()
 
-            femmes_tests = tests.filter(patient__genre='Femme').count()
-            femmes_positifs = tests.filter(patient__genre='Femme', resultat='POSITIF').count()
-            femmes_taux = round((femmes_positifs / femmes_tests * 100), 2) if femmes_tests > 0 else 0
+            hommes_taux = round((hommes_positifs / hommes_tests) * 100, 2) if hommes_tests else 0
+            femmes_taux = round((femmes_positifs / femmes_tests) * 100, 2) if femmes_tests else 0
 
-            traitements = TraitementARV.objects.filter(
-                type_traitement__in=['première_ligne', 'deuxième_ligne', 'troisième_ligne'])
-            total_arv = traitements.count()
+            # Activité clinique VIH
+            consultations_recentes = (
+                Consultation.objects
+                .filter(services__nom="RETROVIRAUX")
+                .order_by("-consultation_date")[:5]
+            )
 
-            suivi_arv = Suivi.objects.filter(services__nom='VIH-SIDA')
-            arv_adherence_bonne = suivi_arv.filter(adherence_traitement='bonne').count()
-            arv_adherence_moyenne = suivi_arv.filter(adherence_traitement='moyenne').count()
-            arv_adherence_faible = suivi_arv.filter(adherence_traitement='faible').count()
+            hospitalisations_vih = (
+                Hospitalization.objects
+                .filter(activite__service__nom="RETROVIRAUX", discharge_date__isnull=True)
+                .order_by("-admission_date")[:5]
+            )
+
+            suivis_recents = (
+                Suivi.objects
+                .filter(services__nom="RETROVIRAUX")
+                .order_by("-date_suivi")[:5]
+            )
+
+            # File active
+            vih_actifs = Patient.objects.filter(vih_profile__status="active").count()
 
             context.update({
-                'total_tests': total_tests,
-                'total_positifs': total_positifs,
-                'taux_positivite': taux_positivite,
-                'test_change': abs(test_change),
-                'positif_change': abs(positif_change),
-                'test_change_sign': '↑' if test_change > 0 else '↓' if test_change < 0 else '=',
-                'positif_change_sign': '↑' if positif_change > 0 else '↓' if positif_change < 0 else '=',
-                'mois_labels': mois_labels,
-                'tests_data': tests_data,
-                'positifs_data': positifs_data,
-                'hommes_tests': hommes_tests,
-                'hommes_positifs': hommes_positifs,
-                'hommes_taux': hommes_taux,
-                'femmes_tests': femmes_tests,
-                'femmes_positifs': femmes_positifs,
-                'femmes_taux': femmes_taux,
-                'total_arv': total_arv,
-                'arv_adherence_bonne': arv_adherence_bonne,
-                'arv_adherence_moyenne': arv_adherence_moyenne,
-                'arv_adherence_faible': arv_adherence_faible,
-                'derniers_tests': TestRapideVIH.objects.order_by('-date_test')[:5],
-                'consultations_recentes': Consultation.objects.filter(
-                    services__nom='VIH-SIDA'
-                ).order_by('-consultation_date')[:5],
-                'prochains_rdv': Appointment.objects.filter(
-                    service__nom='VIH-SIDA',
-                    date__gte=now.date(),
-                    status='Scheduled'
-                ).order_by('date', 'time')[:5],
-                'hospitalisations_vih': Hospitalization.objects.filter(
-                    activite__service__nom='VIH-SIDA',
-                    discharge_date__isnull=True
-                ).order_by('-admission_date')[:3],
-                'suivis_recents': Suivi.objects.filter(
-                    services__nom='VIH-SIDA'
-                ).order_by('-date_suivi')[:3],
-                'mois_actuel': now.strftime("%B"),
-                'annee_actuelle': now.year,
+                "vih_actifs": vih_actifs,
+
+                "total_tests": total_tests,
+                "total_positifs": total_positifs,
+                "taux_positivite": taux_positivite,
+
+                "test_change": abs(test_change),
+                "positif_change": abs(positif_change),
+                "test_change_sign": "↑" if test_change > 0 else "↓" if test_change < 0 else "=",
+                "positif_change_sign": "↑" if positif_change > 0 else "↓" if positif_change < 0 else "=",
+
+                "mois_labels": mois_labels,
+                "tests_data": tests_data,
+                "positifs_data": positifs_data,
+
+                "hommes_tests": hommes_tests,
+                "hommes_positifs": hommes_positifs,
+                "hommes_taux": hommes_taux,
+
+                "femmes_tests": femmes_tests,
+                "femmes_positifs": femmes_positifs,
+                "femmes_taux": femmes_taux,
+
+                "derniers_tests": tests.order_by("-date_test")[:5],
+                "consultations_recentes": consultations_recentes,
+                "hospitalisations_vih": hospitalisations_vih,
+                "suivis_recents": suivis_recents,
+
+                "mois_actuel": now.strftime("%B"),
+                "annee_actuelle": now.year,
             })
-
-        return context
-
+            return
 
 class ActiviteListView(LoginRequiredMixin, ListView):
     context_object_name = 'activities'
@@ -1408,27 +1887,253 @@ class ActiviteListView(LoginRequiredMixin, ListView):
         return context
 
     def get_template_names(self):
-        template_map = {
-            ('VIH-SIDA', 'Overview'): 'pages/services/VIH-SIDA/vih_sida_overview.html',
-            ('VIH-SIDA', 'Consultation'): 'pages/services/VIH-SIDA/consultation_VIH.html',
-            ('VIH-SIDA', 'Hospitalisation'): 'pages/services/VIH-SIDA/hospitalisation_VIH.html',
-            ('VIH-SIDA', 'Suivi'): 'pages/services/VIH-SIDA/suivi_VIH.html',
+        serv = self.kwargs.get("serv") or ""
+        acty = self.kwargs.get("acty") or ""
 
-            ('COVID', 'Overview'): 'pages/services/COVID/overview_COVID.html',
-            ('COVID', 'Consultation'): 'pages/services/COVID/consultation_COVID.html',
-            ('COVID', 'Hospitalisation'): 'pages/services/COVID/hospitalisation_COVID.html',
-            ('COVID', 'Suivi'): 'pages/services/COVID/suivi_COVID.html',
-
-            ('TUBERCULOSE', 'Overview'): 'pages/services/TUBERCULOSE/overview_TB.html',
-            ('TUBERCULOSE', 'Consultation'): 'pages/services/TUBERCULOSE/consultation_TB.html',
-            ('TUBERCULOSE', 'Hospitalisation'): 'pages/services/TUBERCULOSE/hospitalisation_TB.html',
-            ('TUBERCULOSE', 'Suivi'): 'pages/services/TUBERCULOSE/suivi_TB.html',
+        # normaliser le nom de sous-activité => fichiers stables
+        allowed = {
+            "Overview": "overview",
+            "File_active": "file_active",
+            "Consultation": "consultation",
+            "Hospitalisation": "hospitalisation",
+            "Suivi": "suivi",
         }
-        serv = self.kwargs['serv']
-        acty = self.kwargs['acty']
-        return [template_map.get((serv, acty), 'pages/services/servicecontent_detail.html')]
+        acty_key = allowed.get(acty, "overview")
+
+        # normaliser le nom service => éviter espaces/accents etc.
+        # (idéalement: utiliser un slug en DB, mais ici on fait simple)
+        service_folder = serv.strip().replace(" ", "_")
+
+        candidates = [
+            f"pages/services/{service_folder}/{acty_key}.html",     # template dédié au service
+            f"pages/services/default/{acty_key}.html",             # fallback générique
+            "pages/services/servicecontent_detail.html",           # fallback ultime
+        ]
+
+        # retourne la première qui existe réellement
+        for tpl in candidates:
+            try:
+                get_template(tpl)
+                return [tpl]
+            except TemplateDoesNotExist:
+                continue
+
+        return ["pages/services/servicecontent_detail.html"]
 
 
+class VIHAccessMixin(UserPassesTestMixin):
+    allowed_groups = ["VIH Team", "SMIT", "Admin VIH"]
+
+    def test_func(self):
+        u = self.request.user
+        return (
+            u.is_superuser
+            or u.groups.filter(name__in=self.allowed_groups).exists()
+        )
+
+class VIHProfileDetailView(LoginRequiredMixin, VIHAccessMixin, DetailView):
+    model = VIHProfile
+    context_object_name = "vih_profile"
+    template_name = "pages/services/RETROVIRAUX/vih_profile_detail.html"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            VIHProfile.objects.select_related("patient", "created_by", "updated_by"),
+            pk=self.kwargs["pk"]
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vih = self.object
+        patient = vih.patient
+        today = timezone.now().date()
+
+        # ---------------------------
+        # Derniers suivis utiles
+        # ---------------------------
+        last_suivi = vih.last_suivi
+
+        last_cd4 = getattr(last_suivi, "cd4", None) if last_suivi else None
+        last_cv = getattr(last_suivi, "charge_virale", None) if last_suivi else None
+        last_poids = getattr(last_suivi, "poids", None) if last_suivi else None
+
+        # si tu stockes stage OMS dans "oms_stage" du suivi, ok,
+        # sinon fallback sur vih.oms_stage
+        last_stade = getattr(last_suivi, "oms_stage", None) if last_suivi else None
+        if not last_stade:
+            last_stade = getattr(vih, "oms_stage", None)
+
+        # ---------------------------
+        # QuerySets
+        # ---------------------------
+        suivis_qs = vih.suivis
+        arv_qs = vih.traitements_arv
+        exams_qs = vih.exams_bilan
+        depistages_qs = vih.depistages_vih
+        io_qs = vih.infections_opportunistes
+        comorb_qs = vih.comorbidites
+
+        # ---------------------------
+        # Counts
+        # ---------------------------
+        counts = {
+            "suivis": suivis_qs.count(),
+            "arv": arv_qs.count(),
+            "exams": exams_qs.count(),
+            "depistages": depistages_qs.count(),
+            "io": io_qs.count(),
+            "comorbidites": comorb_qs.count(),
+        }
+
+        # ---------------------------
+        # Listes (limitées)
+        # ---------------------------
+        exams_list = list(exams_qs[:50])
+        depistages_list = list(depistages_qs[:50])
+        io_list = list(io_qs[:50])
+        comorb_list = list(comorb_qs[:50])
+
+        # ---------------------------
+        # Prescriptions ARV (optionnel)
+        # ---------------------------
+        arv_prescriptions = []
+        if hasattr(patient, "prescriptions"):
+            arv_prescriptions = list(
+                patient.prescriptions.select_related("medication").order_by("-prescribed_at")[:10]
+            )
+
+        # ---------------------------
+        # Timeline unifiée (safe)
+        # ---------------------------
+        timeline = []
+
+        for s in suivis_qs:
+            timeline.append({
+                "type": "suivi",
+                "date": getattr(s, "date_suivi", None) or getattr(s, "created_at", None),
+                "title": "Consultation / suivi",
+                "meta": f"CD4: {s.cd4}" if getattr(s, "cd4", None) else None,
+            })
+
+        for a in arv_qs:
+            title = "Traitement ARV"
+            meta = getattr(a, "regimen", None) or getattr(a, "regimen_code", None) or None
+            timeline.append({
+                "type": "arv",
+                "date": getattr(a, "date_mise_a_jour", None) or getattr(a, "date_creation", None),
+                "title": title,
+                "meta": meta,
+            })
+
+        for e in exams_qs:
+            exam_date = e.performed_at or e.prescribed_at or e.created_at
+
+            result_short = None
+            if e.result_value is not None:
+                result_short = str(e.result_value)
+            elif e.result_text:
+                result_short = (e.result_text[:50] + "…") if len(e.result_text) > 50 else e.result_text
+
+            meta_parts = []
+            meta_parts.append(e.exam_type)  # obligatoire
+            meta_parts.append(f"#{e.iteration}" if e.iteration else None)
+            meta_parts.append(e.get_status_display())
+            if result_short:
+                meta_parts.append(f"Résultat: {result_short}")
+
+            meta_parts = [m for m in meta_parts if m]
+
+            timeline.append({
+                "type": "exam",
+                "date": exam_date,
+                "title": e.exam_name or "Examen paraclinique",
+                "meta": " • ".join(meta_parts) if meta_parts else None,
+            })
+
+        for d in depistages_qs:
+            meta = None
+            if hasattr(d, "get_resultat_display"):
+                meta = d.get_resultat_display()
+            else:
+                meta = getattr(d, "resultat", None)
+
+            timeline.append({
+                "type": "depistage",
+                "date": getattr(d, "date_test", None) or getattr(d, "created_at", None),
+                "title": "Dépistage VIH",
+                "meta": meta,
+            })
+
+        for io in io_qs:
+            timeline.append({
+                "type": "io",
+                "date": getattr(io, "date_diagnostic", None) or getattr(io, "date_creation", None),
+                "title": "Infection opportuniste",
+                "meta": str(getattr(io, "type_infection", "")) or None,
+            })
+
+        for c in comorb_qs:
+            timeline.append({
+                "type": "comorb",
+                "date": getattr(c, "date_diagnostic", None) or getattr(c, "date_creation", None),
+                "title": "Comorbidité",
+                "meta": str(getattr(c, "type_comorbidite", "")) or None,
+            })
+
+        timeline_events = sorted(
+            timeline,
+            key=lambda x: x["date"] or timezone.now(),
+            reverse=True
+        )
+
+        # ---------------------------
+        # Visites
+        # ---------------------------
+        days_since_last = None
+        if vih.date_derniere_visite:
+            days_since_last = (today - vih.date_derniere_visite).days
+
+        days_until_next = None
+        is_next_overdue = False
+        is_next_soon = False
+        if vih.date_prochaine_visite:
+            days_until_next = (vih.date_prochaine_visite - today).days
+            is_next_overdue = days_until_next < 0
+            is_next_soon = 0 <= days_until_next <= 7
+
+        # ---------------------------
+        # ARV depuis
+        # ---------------------------
+        arv_days = None
+        if vih.date_debut_arv:
+            arv_days = (today - vih.date_debut_arv).days
+
+        context.update({
+            "counts": counts,
+
+            "last_suivi": last_suivi,
+            "last_cd4": last_cd4,
+            "last_cv": last_cv,
+            "last_poids": last_poids,
+            "last_stade": last_stade,
+
+            "exams_list": exams_list,
+            "depistages_list": depistages_list,
+            "io_list": io_list,
+            "comorb_list": comorb_list,
+
+            "timeline_events": timeline_events,
+
+            "days_since_last_visit": days_since_last,
+            "days_until_next_visit": days_until_next,
+            "is_next_visit_overdue": is_next_overdue,
+            "is_next_visit_soon": is_next_soon,
+
+            "arv_days": arv_days,
+            "arv_prescriptions": arv_prescriptions,
+        })
+
+        return context
 class ConstanteUpdateView(LoginRequiredMixin, UpdateView):
     model = Constante
     form_class = ConstantesForm
@@ -2152,10 +2857,10 @@ class UrgenceListView(LoginRequiredMixin, ListView):
         qs.pop('page', True)  # retire le paramètre page s'il existe
         ctx['qs'] = qs.urlencode()  # ex: "status=opened&doctor=12"
         return ctx
+
     def get_queryset(self):
         # Filtrer les patients dont urgence est True
         return Patient.objects.filter(urgence=True)
-
 
 
 class JsonLoginRequiredMixin(AccessMixin):
@@ -2222,7 +2927,6 @@ class HospitalizationCreateAPI(JsonLoginRequiredMixin, View):
                 "detail": "Admission en urgence créée avec succès.",
                 "redirect": reverse('urgences_list')
             })
-
 
         return JsonResponse({"ok": False, "errors": form.errors}, status=400)
 

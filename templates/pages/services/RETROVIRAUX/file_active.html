@@ -1,0 +1,522 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="nk-content nk-content-fluid">
+        <div class="container-xl wide-lg">
+            <div class="nk-content-body">
+
+                <!-- =========================
+                     HEADER / STATS
+                ========================== -->
+                <div class="nk-block-head nk-block-head-sm">
+                    <div class="nk-block-between">
+                        <div class="nk-block-head-content">
+                            <h3 class="nk-block-title page-title">File active VIH</h3>
+                            <div class="nk-block-des text-soft">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-dim bg-outline-primary rounded-pill">{{ resultfiltre }}</span>
+                                    <span class="ms-2">patients VIH trouvés sur {{ patient_nbr }} enregistrés</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nk-block-head-content">
+                            <div class="toggle-wrap nk-block-tools-toggle">
+                                <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu">
+                                    <em class="icon ni ni-menu-alt-r"></em>
+                                </a>
+                                <div class="toggle-expand-content" data-content="pageMenu">
+                                    <ul class="nk-block-tools g-3">
+                                        <li>
+                                            <div class="dropdown">
+                                                <a href="#" class="btn btn-white btn-outline-light dropdown-toggle"
+                                                   data-toggle="dropdown">
+                                                    <em class="icon ni ni-download-cloud"></em>
+                                                    <span>Export</span>
+                                                </a>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="#">Excel</a>
+                                                    <a class="dropdown-item" href="#">PDF</a>
+                                                    <a class="dropdown-item" href="#">CSV</a>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li class="nk-block-tools-opt">
+                                            <div class="drodown">
+                                                <a href="#" class="dropdown-toggle btn btn-icon btn-primary"
+                                                   data-toggle="dropdown">
+                                                    <em class="icon ni ni-plus"></em>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <ul class="link-list-opt no-bdr">
+                                                        <li>
+                                                            <a href="{% url 'add_patient' %}">
+                                                                <em class="icon ni ni-user-add"></em><span>Nouveau Patient</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{% url 'appointment_list' %}">
+                                                                <em class="icon ni ni-calendar"></em><span>Rendez-vous</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="{% url 'consultation_list' %}">
+                                                                <em class="icon ni ni-notes"></em><span>Consultation</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- =========================
+                     FILTERS
+                ========================== -->
+                <div class="nk-block">
+                    <div class="card card-bordered">
+                        <div class="card-inner">
+
+                            <div class="card-title-group">
+                                <div class="card-title">
+                                    <h6 class="title">Filtres de recherche</h6>
+                                    <div class="text-soft fs-12 mt-1">
+                                        Astuce : filtre aussi par <strong>statut</strong> du dossier VIH et dates (si
+                                        disponibles).
+                                    </div>
+                                </div>
+                                <div class="card-tools">
+                                    <a href="#" class="link fs-13" id="toggle-filters">
+                                        <em class="icon ni ni-menu-alt"></em>
+                                        <span>Masquer les filtres</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <form method="get" id="filter-form">
+                                <div class="row g-3" id="filters-container">
+                                    {% for field in filter.form %}
+                                        <div class="col-lg-4 col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label"
+                                                       for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                                <div class="form-control-wrap">
+                                                    {{ field }}
+                                                    {% for error in field.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                                {% if field.help_text %}
+                                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn btn-primary btn-lg me-2" type="submit">
+                                                <em class="icon ni ni-search me-1"></em>Appliquer les filtres
+                                            </button>
+                                            <a class="btn btn-outline-light btn-lg" href="?">
+                                                <em class="icon ni ni-reload me-1"></em>Réinitialiser
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =========================
+                     TABLE / LIST
+                ========================== -->
+                <div class="nk-block">
+                    <div class="card card-bordered card-stretch">
+                        <div class="card-inner-group">
+
+                            <!-- Top tools -->
+
+
+                            <!-- Table -->
+                            <div class="card-inner p-0">
+                                <div class="nk-tb-list nk-tb-ulist is-compact">
+
+                                    <!-- Head -->
+                                    <div class="nk-tb-item nk-tb-head">
+                                        <div class="nk-tb-col tb-col-sm col-code"><span
+                                                class="sub-text">Code Patient</span></div>
+                                        <div class="nk-tb-col tb-col-sm col-vih"><span class="sub-text">Code VIH</span>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-md col-nom"><span class="sub-text">Nom</span></div>
+                                        <div class="nk-tb-col tb-col-sm col-prenom"><span class="sub-text">Prénom</span>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-sm col-age"><span class="sub-text">Âge</span></div>
+                                        <div class="nk-tb-col tb-col-md col-contact"><span
+                                                class="sub-text">Contact</span></div>
+                                        <div class="nk-tb-col tb-col-sm col-statut"><span class="sub-text">Statut</span>
+                                        </div>
+                                        <div class="nk-tb-col tb-col-md col-last"><span
+                                                class="sub-text">Dernière visite</span></div>
+                                        <div class="nk-tb-col tb-col-md col-next"><span class="sub-text">Prochaine visite</span>
+                                        </div>
+                                        <div class="nk-tb-col nk-tb-col-tools text-right"><span
+                                                class="sub-text">Actions</span></div>
+                                    </div>
+
+                                    <!-- Body -->
+                                    {% for patient in patients %}
+                                        <div class="nk-tb-item patient-row"
+                                             data-search="{{ patient.nom|default:''|lower }} {{ patient.prenoms|default:''|lower }} {{ patient.code_patient|default:''|lower }} {{ patient.vih_profile.code_vih|default:''|lower }}">
+
+                                            <div class="nk-tb-col tb-col-sm col-code">
+                                                <span class="tb-status text-primary">{{ patient.code_patient }}</span>
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-sm col-vih">
+                                                {% if patient.vih_profile %}
+                                                    <span class="tb-status text-info">{{ patient.vih_profile.code_vih }}</span>
+                                                {% else %}
+                                                    <span class="text-soft">—</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="nk-tb-col col-nom">
+                                                <div class="user-card">
+                                                    <div class="user-avatar bg-primary-dim">
+                                                        <span>{{ patient.nom|default:""|first|upper }}{{ patient.prenoms|default:""|first|upper }}</span>
+                                                    </div>
+                                                    <div class="user-name">
+                                                        <span class="tb-lead">{{ patient.nom|default:""|upper }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-sm col-prenom">
+                                                <span>{{ patient.prenoms|default:""|upper }}</span>
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-sm col-age">
+                    <span class="tb-status text-success">
+                      {% if patient.calculate_age %}{{ patient.calculate_age }} ans{% else %}—{% endif %}
+                    </span>
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-md col-contact">
+                                                <div class="d-flex align-items-center">
+                                                    <em class="icon ni ni-call me-1"></em>
+                                                    <span>{{ patient.contact|default:"—" }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-sm col-statut">
+                                                {% if patient.vih_profile %}
+                                                    {% if patient.vih_profile.status == "active" %}
+                                                        <span class="badge badge-dim bg-outline-success">Actif</span>
+                                                    {% elif patient.vih_profile.status == "lost" %}
+                                                        <span class="badge badge-dim bg-outline-warning">Perdu de vue</span>
+                                                    {% elif patient.vih_profile.status == "deceased" %}
+                                                        <span class="badge badge-dim bg-outline-danger">Décédé</span>
+                                                    {% elif patient.vih_profile.status == "closed" %}
+                                                        <span class="badge badge-dim bg-outline-secondary">Clos</span>
+                                                    {% else %}
+                                                        <span class="badge badge-dim bg-outline-info">{{ patient.vih_profile.get_status_display }}</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-soft">—</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-md col-last">
+                                                {% if patient.vih_profile and patient.vih_profile.date_derniere_visite %}
+                                                    <span>{{ patient.vih_profile.date_derniere_visite|date:"d/m/Y" }}</span>
+                                                {% else %}
+                                                    <span class="text-soft">—</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="nk-tb-col tb-col-md col-next">
+                                                {% if patient.vih_profile and patient.vih_profile.date_prochaine_visite %}
+                                                    <span class="tb-status text-primary">{{ patient.vih_profile.date_prochaine_visite|date:"d/m/Y" }}</span>
+                                                {% else %}
+                                                    <span class="text-soft">—</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="nk-tb-col nk-tb-col-tools">
+                                                <ul class="nk-tb-actions gx-1">
+                                                    <li>
+                                                        <div class="drodown">
+                                                            <a href="#"
+                                                               class="btn btn-sm btn-icon btn-trigger dropdown-toggle"
+                                                               data-toggle="dropdown">
+                                                                <em class="icon ni ni-more-h"></em>
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right">
+                                                                <ul class="link-list-opt no-bdr">
+                                                                    {% if patient.vih_profile %}
+                                                                        <li>
+                                                                            <a href="{% url 'vih_profile_detail' patient.vih_profile.pk %}">
+                                                                                <em class="icon ni ni-activity"></em><span>Dossier VIH</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                    <li>
+                                                                        <a href="{% url 'detail_patient' patient.pk %}">
+                                                                            <em class="icon ni ni-eye"></em><span>Voir Dossier</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="{% url 'update_patient' patient.pk %}">
+                                                                            <em class="icon ni ni-edit"></em><span>Modifier</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li class="divider"></li>
+                                                                    <li>
+                                                                        <a href="#" class="text-danger">
+                                                                            <em class="icon ni ni-user-cross"></em><span>Archiver</span>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </div>
+                                    {% empty %}
+                                        <div class="nk-tb-item">
+                                            <div class="nk-tb-col text-center py-5">
+                                                <div class="nk-block-content">
+                                                    <em class="icon ni ni-users icon-3x text-light mb-3"></em>
+                                                    <h5>Aucun patient VIH trouvé</h5>
+                                                    <p class="text-soft">Aucun patient ne correspond à vos critères de
+                                                        recherche.</p>
+                                                    <a href="{% url 'add_patient' %}" class="btn btn-primary">
+                                                        <em class="icon ni ni-plus"></em>
+                                                        <span>Ajouter un patient</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+
+                            <!-- Pagination -->
+                            {% if patients %}
+                                <div class="card-inner">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap g-3">
+                                        <div class="fs-14 text-soft">
+                                            Affichage de <strong>{{ page_obj.start_index }}</strong> à
+                                            <strong>{{ page_obj.end_index }}</strong>
+                                            sur <strong>{{ page_obj.paginator.count }}</strong> patients
+                                        </div>
+
+                                        <ul class="pagination justify-content-center justify-content-md-start">
+                                            {% if page_obj.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page=1"><em
+                                                            class="icon ni ni-chevrons-left"></em></a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ page_obj.previous_page_number }}"><em
+                                                            class="icon ni ni-chevron-left"></em></a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled"><a class="page-link" href="#"><em
+                                                        class="icon ni ni-chevrons-left"></em></a></li>
+                                                <li class="page-item disabled"><a class="page-link" href="#"><em
+                                                        class="icon ni ni-chevron-left"></em></a></li>
+                                            {% endif %}
+
+                                            {% for num in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == num %}
+                                                    <li class="page-item active"><span
+                                                            class="page-link">{{ num }}</span></li>
+                                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                    <li class="page-item"><a class="page-link"
+                                                                             href="?page={{ num }}">{{ num }}</a></li>
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            {% if page_obj.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ page_obj.next_page_number }}"><em
+                                                            class="icon ni ni-chevron-right"></em></a>
+                                                </li>
+                                                <li class="page-item">
+                                                    <a class="page-link"
+                                                       href="?page={{ page_obj.paginator.num_pages }}"><em
+                                                            class="icon ni ni-chevrons-right"></em></a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item disabled"><a class="page-link" href="#"><em
+                                                        class="icon ni ni-chevron-right"></em></a></li>
+                                                <li class="page-item disabled"><a class="page-link" href="#"><em
+                                                        class="icon ni ni-chevrons-right"></em></a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================
+         SCRIPTS (single DOMContentLoaded)
+    ========================== -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // 1) Live search in table
+            const searchInput = document.getElementById("search-patients");
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    const term = (this.value || "").toLowerCase();
+                    document.querySelectorAll(".patient-row").forEach(row => {
+                        const data = (row.getAttribute("data-search") || "").toLowerCase();
+                        row.style.display = data.includes(term) ? "" : "none";
+                    });
+                });
+            }
+
+            // 2) Toggle filters
+            const toggleBtn = document.getElementById("toggle-filters");
+            const filtersContainer = document.getElementById("filters-container");
+            if (toggleBtn && filtersContainer) {
+                toggleBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const isVisible = filtersContainer.style.display !== "none";
+                    filtersContainer.style.display = isVisible ? "none" : "flex";
+                    this.querySelector("span").textContent = isVisible ? "Afficher les filtres" : "Masquer les filtres";
+                });
+            }
+
+            // 3) Columns display toggle
+            document.querySelectorAll('input[id^="col-"]').forEach(cb => {
+                cb.addEventListener("change", function () {
+                    document.querySelectorAll("." + this.id).forEach(col => {
+                        col.style.display = this.checked ? "" : "none";
+                    });
+                });
+            });
+
+            // 4) Force visibility / classes for django-filter fields
+            const container = document.getElementById("filters-container");
+            if (container) {
+                container.querySelectorAll("input, textarea").forEach(el => {
+                    if (el.type === "hidden") return;
+                    if (el.type === "checkbox" || el.type === "radio") return;
+                    el.classList.add("form-control");
+
+                    // Date fields: make them native date input (optional)
+                    if (el.name && (el.name.includes("date") || el.name.includes("created") || el.name.includes("updated"))) {
+                        if (!el.getAttribute("type") || el.getAttribute("type") === "text") {
+                            el.setAttribute("type", "date");
+                        }
+                    }
+                });
+
+                container.querySelectorAll("select").forEach(el => {
+                    el.classList.add("form-select");
+                });
+
+                container.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
+                    el.classList.add("custom-control-input");
+                });
+            }
+
+        });
+    </script>
+
+    <!-- =========================
+         STYLES
+    ========================== -->
+    <style>
+        /* Make filter fields always visible */
+        #filters-container input:not([type="hidden"]),
+        #filters-container select,
+        #filters-container textarea {
+            width: 100% !important;
+            display: block !important;
+            min-height: 40px;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        /* Some themes can overlap/hide inside wrap */
+        #filters-container .form-control-wrap {
+            position: relative;
+            z-index: 2;
+        }
+
+        #filters-container .form-control,
+        #filters-container .form-select {
+            background-color: #fff;
+        }
+
+        /* Hover row */
+        .nk-tb-list .nk-tb-item:hover {
+            background-color: rgba(95, 99, 242, 0.05);
+            transition: background-color 0.2s ease;
+        }
+
+        .badge.badge-dim {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .card-tools-toggle .form-control-wrap {
+            min-width: 280px;
+        }
+
+        @media (max-width: 767px) {
+            .card-tools-toggle .form-control-wrap {
+                min-width: 100%;
+            }
+
+            .nk-tb-col {
+                padding: 8px 12px;
+            }
+        }
+
+        /* Row entrance animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nk-tb-item {
+            animation: fadeIn 0.25s ease-out;
+        }
+    </style>
+{% endblock %}

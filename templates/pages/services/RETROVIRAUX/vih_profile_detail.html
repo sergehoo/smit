@@ -1,0 +1,1201 @@
+{% extends "layout/base.html" %}
+{% load static %}
+{% load humanize %}
+{% load custom_filter %}
+{% block content %}
+<style>
+  :root {
+    --vih-primary: #4a6cf7;
+    --vih-secondary: #6c757d;
+    --vih-success: #28a745;
+    --vih-danger: #dc3545;
+    --vih-warning: #ffc107;
+    --vih-info: #17a2b8;
+    --vih-light: #f8f9fa;
+    --vih-dark: #343a40;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  .vih-header{
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(74, 108, 247, 0.15);
+    animation: fadeIn 0.6s ease-out;
+    border-left: 5px solid var(--vih-primary);
+  }
+
+  .vih-card{
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    transition: all .3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    height: 100%;
+  }
+  .vih-card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,.1);
+  }
+
+  .vih-card .card-header{
+    background: linear-gradient(135deg, var(--vih-primary), #3a5bd9);
+    color: #fff;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 15px 20px;
+    font-weight: 600;
+    border: none;
+  }
+  .vih-card .card-body{ padding: 20px; }
+
+  .info-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .info-item{
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+  }
+  .info-item:last-child{ border-bottom: none; }
+
+  .info-label{
+    color: var(--vih-secondary);
+    font-weight: 500;
+    font-size: .9rem;
+    margin-bottom: 4px;
+  }
+  .info-value{
+    color: var(--vih-dark);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .badge-vih{
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: .85rem;
+  }
+  .badge-active{ background-color: var(--vih-success); color:#fff; }
+  .badge-lost{ background-color: var(--vih-danger); color:#fff; }
+  .badge-transferred{ background-color: var(--vih-warning); color:#000; }
+  .badge-deceased{ background-color: var(--vih-dark); color:#fff; }
+  .badge-closed{ background-color: var(--vih-secondary); color:#fff; }
+
+  .timeline-vih{
+    position: relative;
+    padding-left: 30px;
+    margin-top: 20px;
+  }
+  .timeline-vih::before{
+    content:'';
+    position:absolute;
+    left:10px;
+    top:0; bottom:0;
+    width:2px;
+    background: var(--vih-primary);
+    opacity:.3;
+  }
+
+  .timeline-item{
+    position: relative;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .timeline-item::before{
+    content:'';
+    position:absolute;
+    left:-30px;
+    top:20px;
+    width:16px; height:16px;
+    border-radius:50%;
+    background: var(--vih-primary);
+    border:3px solid #fff;
+    box-shadow: 0 0 0 3px rgba(74,108,247,.2);
+  }
+
+  .btn-vih{
+    background: linear-gradient(135deg, var(--vih-primary), #3a5bd9);
+    border:none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all .3s ease;
+    box-shadow: 0 4px 12px rgba(74,108,247,.25);
+    color:#fff;
+  }
+  .btn-vih:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(74,108,247,.35);
+    color:#fff;
+  }
+
+  .alert-vih{
+    border-radius: 10px;
+    border-left: 4px solid var(--vih-primary);
+    animation: pulse 2s infinite;
+  }
+
+  .stat-number{
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--vih-primary);
+    line-height: 1;
+  }
+  .stat-label{
+    color: var(--vih-secondary);
+    font-size: .9rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px){
+    .info-grid{ grid-template-columns: 1fr; }
+    .vih-header{ padding: 20px !important; }
+  }
+</style>
+
+<div class="nk-content nk-content-fluid">
+  <div class="container-xl wide-lg">
+    <div class="nk-content-body">
+
+      <!-- En-tête du dossier VIH -->
+      <div class="nk-block-head nk-block-head-sm mb-4">
+        <div class="nk-block-between g-3 align-items-center vih-header p-4">
+          <div class="d-flex align-items-center">
+            <div class="mr-4">
+              <div class="avatar avatar-xl bg-primary" style="width:70px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:12px;">
+                <i class="fas fa-virus fa-2x text-white"></i>
+              </div>
+            </div>
+            <div>
+              <h3 class="nk-block-title page-title mb-1">
+                <strong class="text-primary">DOSSIER VIH</strong> - {{ vih_profile.code_vih|default:"-" }}
+              </h3>
+              <div class="nk-block-des">
+                <div class="d-flex flex-wrap align-items-center">
+                  <span class="mr-3">
+                    <i class="fas fa-user-injured text-primary mr-1"></i>
+                    <strong>{{ vih_profile.patient.nom|default:"-" }} {{ vih_profile.patient.prenoms|default:"-" }}</strong>
+                  </span>
+                  <span class="mr-3">
+                    <i class="fas fa-id-badge text-secondary mr-1"></i>
+                    {{ vih_profile.patient.code_patient|default:"-" }}
+                  </span>
+                  <span class="mr-3">
+                    <i class="fas fa-birthday-cake text-info mr-1"></i>
+                    {{ vih_profile.patient.calculate_age|default:"-" }} ans
+                  </span>
+                  <span>
+                    {% if vih_profile.patient.genre == "HOMME" %}
+                      <i class="fas fa-mars text-warning mr-1"></i>
+                    {% elif vih_profile.patient.genre == "FEMME" %}
+                      <i class="fas fa-venus text-warning mr-1"></i>
+                    {% else %}
+                      <i class="fas fa-genderless text-warning mr-1"></i>
+                    {% endif %}
+                    {{ vih_profile.patient.get_genre_display|default:"-" }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nk-block-head-content">
+            <div class="d-flex">
+              <a href="{% url 'detail_patient' vih_profile.patient.pk %}" class="btn btn-outline-light bg-white mr-2">
+                <em class="icon ni ni-user mr-1"></em>Dossier patient
+              </a>
+              <button class="btn btn-vih" onclick="window.print()">
+                <i class="fas fa-print mr-1"></i>Imprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="row g-4 mb-4">
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.suivis|default:"0" }}</div><div class="stat-label">Suivis</div></div></div>
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.arv|default:"0" }}</div><div class="stat-label">ARV</div></div></div>
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.exams|default:"0" }}</div><div class="stat-label">Examens</div></div></div>
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.depistages|default:"0" }}</div><div class="stat-label">Dépistages</div></div></div>
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.io|default:"0" }}</div><div class="stat-label">Infections O.</div></div></div>
+        <div class="col-xl-2 col-md-4"><div class="vih-card text-center p-3"><div class="stat-number">{{ counts.comorbidites|default:"0" }}</div><div class="stat-label">Comorbidités</div></div></div>
+      </div>
+
+      <!-- Derniers indicateurs -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-3">
+          <div class="vih-card p-3">
+            <div class="info-label">Dernier CD4</div>
+            <div class="info-value">{% if last_cd4 %}{{ last_cd4 }} cellules/µL{% else %}<span class="text-muted">-</span>{% endif %}</div>
+            {% if last_suivi and last_suivi.date_suivi %}
+              <small class="text-muted">({{ last_suivi.date_suivi|date:"d/m/Y" }})</small>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="vih-card p-3">
+            <div class="info-label">Dernière CV</div>
+            <div class="info-value">{% if last_cv %}{{ last_cv|intcomma }} copies/mL{% else %}<span class="text-muted">-</span>{% endif %}</div>
+            {% if last_suivi and last_suivi.date_suivi %}
+              <small class="text-muted">({{ last_suivi.date_suivi|date:"d/m/Y" }})</small>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="vih-card p-3">
+            <div class="info-label">Dernier poids</div>
+            <div class="info-value">{% if last_poids %}{{ last_poids }} kg{% else %}<span class="text-muted">-</span>{% endif %}</div>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="vih-card p-3">
+            <div class="info-label">Stade OMS (dernier)</div>
+            <div class="info-value">{% if last_stade %}Stade {{ last_stade }}{% else %}<span class="text-muted">-</span>{% endif %}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertes -->
+      {% if vih_profile.status == 'lost' %}
+        <div class="alert alert-danger alert-vih mb-4">
+          <div class="d-flex align-items-center">
+            <div class="mr-3"><i class="fas fa-exclamation-triangle fa-2x"></i></div>
+            <div>
+              <h5 class="alert-heading mb-1">PATIENT PERDU DE VUE</h5>
+              <p class="mb-0">
+                Dernière visite :
+                {% if vih_profile.date_derniere_visite %}
+                  {{ vih_profile.date_derniere_visite|date:"d/m/Y" }}
+                {% else %}
+                  Non enregistrée
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if vih_profile.date_prochaine_visite %}
+        {% if is_next_visit_overdue %}
+          <div class="alert alert-warning alert-vih mb-4">
+            <div class="d-flex align-items-center">
+              <div class="mr-3"><i class="fas fa-calendar-exclamation fa-2x"></i></div>
+              <div>
+                <h5 class="alert-heading mb-1">VISITE EN RETARD</h5>
+                <p class="mb-0">
+                  Visite programmée pour le {{ vih_profile.date_prochaine_visite|date:"d/m/Y" }}
+                  {% if days_until_next_visit is not None %}
+                    (retard : {{ days_until_next_visit|abs }} jour(s))
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        {% elif is_next_visit_soon %}
+          <div class="alert alert-info alert-vih mb-4">
+            <div class="d-flex align-items-center">
+              <div class="mr-3"><i class="fas fa-calendar-alt fa-2x"></i></div>
+              <div>
+                <h5 class="alert-heading mb-1">VISITE À VENIR</h5>
+                <p class="mb-0">
+                  Prochaine visite le {{ vih_profile.date_prochaine_visite|date:"d/m/Y" }}
+                  {% if days_until_next_visit is not None %}
+                    (dans {{ days_until_next_visit }} jour(s))
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <!-- Statistiques rapides -->
+      <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="vih-card text-center p-4">
+            <div class="stat-number">{{ vih_profile.patient.calculate_age|default:"-" }}</div>
+            <div class="stat-label">Âge du patient</div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="vih-card text-center p-4">
+            <div class="stat-number">{% if vih_profile.cd4_baseline %}{{ vih_profile.cd4_baseline }}{% else %}-{% endif %}</div>
+            <div class="stat-label">CD4 baseline</div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="vih-card text-center p-4">
+            <div class="stat-number">{% if arv_days is not None %}{{ arv_days }} j{% else %}-{% endif %}</div>
+            <div class="stat-label">Sous ARV depuis</div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="vih-card text-center p-4">
+            <div class="stat-number">{% if days_since_last_visit is not None %}{{ days_since_last_visit }} j{% else %}-{% endif %}</div>
+            <div class="stat-label">Dernière visite</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Onglets -->
+      <div class="nk-block">
+        <ul class="nav nav-tabs nav-tabs-mb-icon nav-tabs-card">
+          <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabIdentite"><em class="icon ni ni-user"></em><span>Identité & Statut</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabClinique"><em class="icon ni ni-heart"></em><span>Données Cliniques</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabTraitement"><em class="icon ni ni-capsule"></em><span>Traitement ARV</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabSuivi"><em class="icon ni ni-calendar"></em><span>Suivi & Visites</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabExams"><em class="icon ni ni-file-text"></em><span>Examens</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabIO"><em class="icon ni ni-alert"></em><span>Comorbidités</span></a></li>
+          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabHistorique"><em class="icon ni ni-history"></em><span>Historique</span></a></li>
+        </ul>
+
+        <div class="tab-content">
+
+          <!-- Identité -->
+          <div class="tab-pane fade show active" id="tabIdentite">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-id-card mr-2"></i>Identifiants VIH</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Code VIH</div>
+                        <div class="info-value"><span class="badge badge-primary">{{ vih_profile.code_vih|default:"-" }}</span></div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Site</div>
+                        <div class="info-value">{{ vih_profile.site_code|default:"Non spécifié" }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">N° dossier VIH</div>
+                        <div class="info-value">{{ vih_profile.numero_dossier_vih|default:"-" }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Code Patient</div>
+                        <div class="info-value">{{ vih_profile.patient.code_patient|default:"-" }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-info-circle mr-2"></i>Statut du Dossier</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Statut VIH</div>
+                        <div class="info-value">
+                          <span class="badge-vih
+                            {% if vih_profile.status == 'active' %}badge-active
+                            {% elif vih_profile.status == 'lost' %}badge-lost
+                            {% elif vih_profile.status == 'transferred_out' or vih_profile.status == 'transferred_in' %}badge-transferred
+                            {% elif vih_profile.status == 'deceased' %}badge-deceased
+                            {% else %}badge-closed{% endif %}">
+                            {{ vih_profile.get_status_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Type VIH</div>
+                        <div class="info-value"><span class="badge badge-info">{{ vih_profile.get_vih_type_display|default:"-" }}</span></div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Dossier créé le</div>
+                        <div class="info-value">{{ vih_profile.created_at|date:"d/m/Y H:i" }}</div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Dernière mise à jour</div>
+                        <div class="info-value">{{ vih_profile.updated_at|date:"d/m/Y H:i" }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Clinique -->
+          <div class="tab-pane fade" id="tabClinique">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-stethoscope mr-2"></i>Stade et Baseline</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Stade OMS</div>
+                        <div class="info-value">
+                          {% if vih_profile.oms_stage %}
+                            <span class="badge
+                              {% if vih_profile.oms_stage == 1 %}badge-success
+                              {% elif vih_profile.oms_stage == 2 %}badge-info
+                              {% elif vih_profile.oms_stage == 3 %}badge-warning
+                              {% else %}badge-danger{% endif %}">
+                              {{ vih_profile.get_oms_stage_display|default:"-" }}
+                            </span>
+                          {% else %}
+                            Non spécifié
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">CD4 Baseline</div>
+                        <div class="info-value">{% if vih_profile.cd4_baseline %}{{ vih_profile.cd4_baseline }} cellules/μL{% else %}-{% endif %}</div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Charge virale Baseline</div>
+                        <div class="info-value">{% if vih_profile.charge_virale_baseline %}{{ vih_profile.charge_virale_baseline|intcomma }} copies/mL{% else %}-{% endif %}</div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Date bilan baseline</div>
+                        <div class="info-value">{{ vih_profile.date_bilan_baseline|default:"-" }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-allergies mr-2"></i>Co-infections</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Co-infection TB</div>
+                        <div class="info-value">
+                          <span class="badge
+                            {% if vih_profile.tb_coinfection == 'yes' %}badge-danger
+                            {% elif vih_profile.tb_coinfection == 'no' %}badge-success
+                            {% else %}badge-secondary{% endif %}">
+                            {{ vih_profile.get_tb_coinfection_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Co-infection HBV</div>
+                        <div class="info-value">
+                          <span class="badge
+                            {% if vih_profile.hbv_coinfection == 'yes' %}badge-warning
+                            {% elif vih_profile.hbv_coinfection == 'no' %}badge-success
+                            {% else %}badge-secondary{% endif %}">
+                            {{ vih_profile.get_hbv_coinfection_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <div class="info-label">Co-infection HCV</div>
+                        <div class="info-value">
+                          <span class="badge
+                            {% if vih_profile.hcv_coinfection == 'yes' %}badge-warning
+                            {% elif vih_profile.hcv_coinfection == 'no' %}badge-success
+                            {% else %}badge-secondary{% endif %}">
+                            {{ vih_profile.get_hcv_coinfection_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="vih-card h-100">
+                  <div class="card-header"><i class="fas fa-user-circle mr-2"></i>Contexte Patient</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Grossesse en cours</div>
+                        <div class="info-value">
+                          {% if vih_profile.patient.genre == 'FEMME' %}
+                            {% if vih_profile.grossesse_en_cours %}
+                              <span class="badge badge-success">Oui</span>
+                            {% else %}
+                              <span class="badge badge-secondary">Non</span>
+                            {% endif %}
+                          {% else %}
+                            <span class="badge badge-info">Non applicable</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Allaitement</div>
+                        <div class="info-value">
+                          {% if vih_profile.patient.genre == 'FEMME' %}
+                            {% if vih_profile.allaitement %}
+                              <span class="badge badge-success">Oui</span>
+                            {% else %}
+                              <span class="badge badge-secondary">Non</span>
+                            {% endif %}
+                          {% else %}
+                            <span class="badge badge-info">Non applicable</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Provenance</div>
+                        <div class="info-value">{{ vih_profile.provenance|default:"-" }}</div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Motif transfert</div>
+                        <div class="info-value">{{ vih_profile.motif_transfert|default:"-" }}</div>
+                      </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="info-item">
+                      <div class="info-label">Dernières constantes</div>
+                      <div class="info-value">
+                        {% with constante=vih_profile.patient.latest_constante %}
+                          {% if constante %}
+                            <div class="d-flex justify-content-between flex-wrap">
+                              <span>TA: {{ constante.tension_systolique|default:"-" }}/{{ constante.tension_diastolique|default:"-" }}</span>
+                              <span>FC: {{ constante.frequence_cardiaque|default:"-" }}</span>
+                              <span>Temp: {{ constante.temperature|default:"-" }}°C</span>
+                              <span>Poids: {{ constante.poids|default:"-" }} kg</span>
+                            </div>
+                          {% else %}
+                            Aucune constante récente
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Traitement -->
+          <div class="tab-pane fade" id="tabTraitement">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-8">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-prescription-bottle-alt mr-2"></i>Schéma Thérapeutique</div>
+                  <div class="card-body">
+
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Régimen ARV</div>
+                        <div class="info-value">
+                          {% if vih_profile.regimen_code %}
+                            <span class="badge badge-primary">{{ vih_profile.regimen_code }}</span>
+                          {% else %}
+                            <span class="text-muted">Non spécifié</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Ligne de traitement</div>
+                        <div class="info-value">
+                          <span class="badge
+                            {% if vih_profile.ligne_traitement == 'first' %}badge-success
+                            {% elif vih_profile.ligne_traitement == 'second' %}badge-warning
+                            {% elif vih_profile.ligne_traitement == 'third' %}badge-danger
+                            {% else %}badge-secondary{% endif %}">
+                            {{ vih_profile.get_ligne_traitement_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Adhérence estimée</div>
+                        <div class="info-value">
+                          <span class="badge
+                            {% if vih_profile.adherence_estimee == 'good' %}badge-success
+                            {% elif vih_profile.adherence_estimee == 'fair' %}badge-warning
+                            {% elif vih_profile.adherence_estimee == 'poor' %}badge-danger
+                            {% else %}badge-secondary{% endif %}">
+                            {{ vih_profile.get_adherence_estimee_display|default:"-" }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Date début ARV</div>
+                        <div class="info-value">
+                          {% if vih_profile.date_debut_arv %}
+                            {{ vih_profile.date_debut_arv|date:"d/m/Y" }}
+                            {% if arv_days is not None %}
+                              (il y a {{ arv_days }} jour(s))
+                            {% endif %}
+                          {% else %}
+                            Non débuté
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+
+                    {% if arv_prescriptions %}
+                      <hr class="my-4">
+                      <h6 class="text-primary mb-3"><i class="fas fa-history mr-2"></i>Dernières prescriptions</h6>
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Médicament</th>
+                              <th>Posologie</th>
+                              <th>Statut</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for prescription in arv_prescriptions %}
+                              <tr>
+                                <td>{{ prescription.prescribed_at|date:"d/m/Y" }}</td>
+                                <td>
+                                  {% if prescription.medication %}
+                                    {{ prescription.medication.nom|default:"-"|truncatechars:30 }}
+                                  {% else %}
+                                    {{ prescription|truncatechars:30 }}
+                                  {% endif %}
+                                </td>
+                                <td>{{ prescription.dosage|default:"-" }}</td>
+                                <td>
+                                  <span class="badge
+                                    {% if prescription.status == 'Dispensed' %}badge-success
+                                    {% elif prescription.status == 'Pending' %}badge-warning
+                                    {% else %}badge-secondary{% endif %}">
+                                    {{ prescription.get_status_display|default:prescription.status }}
+                                  </span>
+                                </td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% endif %}
+
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="vih-card h-100">
+                  <div class="card-header"><i class="fas fa-chart-line mr-2"></i>Évolution CD4</div>
+                  <div class="card-body d-flex align-items-center justify-content-center">
+                    {% if vih_profile.cd4_baseline %}
+                      <div class="text-center">
+                        <div class="display-4 text-primary font-weight-bold">{{ vih_profile.cd4_baseline }}</div>
+                        <div class="text-muted">cellules/μL (baseline)</div>
+                        <div class="mt-3">
+                          {% if vih_profile.cd4_baseline < 200 %}
+                            <span class="badge badge-danger">Immunodépression sévère</span>
+                          {% elif vih_profile.cd4_baseline < 350 %}
+                            <span class="badge badge-warning">Immunodépression modérée</span>
+                          {% elif vih_profile.cd4_baseline < 500 %}
+                            <span class="badge badge-info">Immunodépression légère</span>
+                          {% else %}
+                            <span class="badge badge-success">Immunité préservée</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class="text-center">
+                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucune donnée CD4 disponible</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Suivi & Visites -->
+          <div class="tab-pane fade" id="tabSuivi">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-calendar-alt mr-2"></i>Calendrier des Visites</div>
+                  <div class="card-body">
+                    <div class="timeline-vih">
+
+                      {% if vih_profile.date_diagnostic %}
+                        <div class="timeline-item">
+                          <div class="d-flex justify-content-between">
+                            <div>
+                              <h6 class="mb-1">Diagnostic VIH</h6>
+                              <div class="text-muted">{{ vih_profile.date_diagnostic|date:"d/m/Y" }}</div>
+                            </div>
+                            <div class="text-right"><span class="badge badge-info">Évènement clé</span></div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      {% if vih_profile.date_enrolement %}
+                        <div class="timeline-item">
+                          <div class="d-flex justify-content-between">
+                            <div>
+                              <h6 class="mb-1">Enrôlement programme</h6>
+                              <div class="text-muted">{{ vih_profile.date_enrolement|date:"d/m/Y" }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      {% if vih_profile.date_debut_arv %}
+                        <div class="timeline-item">
+                          <div class="d-flex justify-content-between">
+                            <div>
+                              <h6 class="mb-1">Début traitement ARV</h6>
+                              <div class="text-muted">{{ vih_profile.date_debut_arv|date:"d/m/Y" }}</div>
+                            </div>
+                            <div class="text-right"><span class="badge badge-success">Traitement</span></div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      {% if vih_profile.date_derniere_visite %}
+                        <div class="timeline-item">
+                          <div class="d-flex justify-content-between">
+                            <div>
+                              <h6 class="mb-1">Dernière visite</h6>
+                              <div class="text-muted">{{ vih_profile.date_derniere_visite|date:"d/m/Y" }}</div>
+                              {% if days_since_last_visit is not None %}
+                                <small>Il y a {{ days_since_last_visit }} jour(s)</small>
+                              {% endif %}
+                            </div>
+                            <div class="text-right">
+                              <span class="badge
+                                {% if days_since_last_visit is not None and days_since_last_visit <= 30 %}badge-success
+                                {% elif days_since_last_visit is not None and days_since_last_visit <= 90 %}badge-warning
+                                {% elif days_since_last_visit is not None %}badge-danger
+                                {% else %}badge-secondary{% endif %}">
+                                Visite
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                      {% if vih_profile.date_prochaine_visite %}
+                        <div class="timeline-item">
+                          <div class="d-flex justify-content-between">
+                            <div>
+                              <h6 class="mb-1">Prochaine visite</h6>
+                              <div class="text-muted">{{ vih_profile.date_prochaine_visite|date:"d/m/Y" }}</div>
+                              {% if days_until_next_visit is not None %}
+                                {% if days_until_next_visit >= 0 %}
+                                  <small>Dans {{ days_until_next_visit }} jour(s)</small>
+                                {% else %}
+                                  <small>En retard de {{ days_until_next_visit|abs }} jour(s)</small>
+                                {% endif %}
+                              {% endif %}
+                            </div>
+                            <div class="text-right">
+                              <span class="badge
+                                {% if is_next_visit_overdue %}badge-danger
+                                {% elif is_next_visit_soon %}badge-warning
+                                {% else %}badge-info{% endif %}">
+                                Planifiée
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      {% endif %}
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="vih-card h-100">
+                  <div class="card-header"><i class="fas fa-chart-pie mr-2"></i>Statistiques de Suivi</div>
+                  <div class="card-body">
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div class="info-label">Dernier bilan biologique</div>
+                        <div class="info-value">{{ vih_profile.date_bilan_baseline|default:"-" }}</div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Statut du dossier</div>
+                        <div class="info-value">
+                          {% if vih_profile.is_active %}
+                            <span class="badge badge-success">Actif en suivi</span>
+                          {% else %}
+                            <span class="badge badge-secondary">Non actif</span>
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="info-item">
+                        <div class="info-label">Risque perte de vue</div>
+                        <div class="info-value">
+                          {% if days_since_last_visit is not None %}
+                            {% if days_since_last_visit > 180 %}
+                              <span class="badge badge-danger">Élevé (&gt; 6 mois)</span>
+                            {% elif days_since_last_visit > 90 %}
+                              <span class="badge badge-warning">Modéré (3-6 mois)</span>
+                            {% else %}
+                              <span class="badge badge-success">Faible (&lt; 3 mois)</span>
+                            {% endif %}
+                          {% else %}
+                            <span class="badge badge-warning">À évaluer</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h6 class="text-primary mb-3"><i class="fas fa-comment-medical mr-2"></i>Notes de suivi</h6>
+                    {% if vih_profile.notes %}
+                      <div class="alert alert-light">
+                        {{ vih_profile.notes|linebreaks }}
+                      </div>
+                    {% else %}
+                      <p class="text-muted">Aucune note de suivi enregistrée</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Examens -->
+          <div class="tab-pane fade" id="tabExams">
+            <div class="vih-card mt-3">
+              <div class="card-header"><i class="fas fa-vials mr-2"></i>Examens paracliniques</div>
+              <div class="card-body">
+                {% if exams_list %}
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Type</th>
+                          <th>Nom</th>
+                          <th>Résultat</th>
+                          <th>Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for e in exams_list %}
+                          <tr>
+                            <td>
+                              {% if e.performed_at %}{{ e.performed_at|date:"d/m/Y" }}
+                              {% elif e.prescribed_at %}{{ e.prescribed_at|date:"d/m/Y" }}
+                              {% else %}-{% endif %}
+                            </td>
+                            <td>{{ e.exam_type|default:"-" }}</td>
+                            <td>{{ e.exam_name|default:"-" }}</td>
+                            <td>
+                              {% if e.result_value %}{{ e.result_value }}
+                              {% elif e.result_text %}{{ e.result_text|truncatechars:40 }}
+                              {% else %}<span class="text-muted">-</span>{% endif %}
+                            </td>
+                          <td>
+  {% if e.result_value is not None %}
+    {{ e.result_value }}
+  {% elif e.result_text %}
+    {{ e.result_text|truncatechars:40 }}
+  {% else %}
+    <span class="text-muted">-</span>
+  {% endif %}
+
+  {% if e.result_file %}
+    <div>
+      <a href="{{ e.result_file.url }}" target="_blank" class="text-primary">
+        <i class="fas fa-paperclip"></i> Voir fichier
+      </a>
+    </div>
+  {% endif %}
+</td>
+                            <td>
+                              <span class="badge
+                                {% if e.status == 'Completed' %}badge-success
+                                {% elif e.status == 'Pending' %}badge-warning
+                                {% elif e.status == 'Cancelled' %}badge-danger
+                                {% else %}badge-secondary{% endif %}">
+                                {{ e.get_status_display|default:e.status|default:"-" }}
+                              </span>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="text-muted mb-0">Aucun examen enregistré.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Dépistage -->
+          <div class="tab-pane fade" id="tabDepistage">
+            <div class="vih-card mt-3">
+              <div class="card-header"><i class="fas fa-microscope mr-2"></i>Dépistage VIH</div>
+              <div class="card-body">
+                {% if depistages_list %}
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Type</th>
+                          <th>Résultat</th>
+                          <th>Confirmation</th>
+                          <th>Agent</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for d in depistages_list %}
+                          <tr>
+                            <td>{% if d.date_test %}{{ d.date_test|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                            <td>{{ d.get_type_test_display|default:d.type_test|default:"-" }}</td>
+                            <td>
+                              <span class="badge
+                                {% if d.resultat == 'POSITIF' %}badge-danger
+                                {% elif d.resultat == 'NEGATIF' %}badge-success
+                                {% else %}badge-warning{% endif %}">
+                                {{ d.get_resultat_display|default:d.resultat|default:"-" }}
+                              </span>
+                            </td>
+                            <td>
+                              {% if d.test_confirmation %}
+                                <span class="badge badge-info">
+                                  {{ d.get_resultat_confirmation_display|default:"Demandée" }}
+                                </span>
+                              {% else %}
+                                <span class="text-muted">Non</span>
+                              {% endif %}
+                            </td>
+                            <td>
+                              {% if d.agent %}
+                                {{ d.agent.get_full_name|default:"-" }}
+                              {% else %}
+                                -
+                              {% endif %}
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <p class="text-muted mb-0">Aucun test enregistré.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- IO & Comorbidités -->
+          <div class="tab-pane fade" id="tabIO">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-bug mr-2"></i>Infections opportunistes</div>
+                  <div class="card-body">
+                    {% if io_list %}
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Type</th>
+                              <th>Gravité</th>
+                              <th>Statut</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for io in io_list %}
+                              <tr>
+                                <td>{% if io.date_diagnostic %}{{ io.date_diagnostic|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                                <td>{{ io.type_infection|default:"-" }}</td>
+                                <td>{{ io.gravite|default:"-" }}</td>
+                                <td>{{ io.get_statut_traitement_display|default:io.statut_traitement|default:"-" }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% else %}
+                      <p class="text-muted mb-0">Aucune infection opportuniste enregistrée.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6">
+                <div class="vih-card">
+                  <div class="card-header"><i class="fas fa-notes-medical mr-2"></i>Comorbidités</div>
+                  <div class="card-body">
+                    {% if comorb_list %}
+                      <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Type</th>
+                              <th>Statut</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for c in comorb_list %}
+                              <tr>
+                                <td>{% if c.date_diagnostic %}{{ c.date_diagnostic|date:"d/m/Y" }}{% else %}-{% endif %}</td>
+                                <td>{{ c.type_comorbidite|default:"-" }}</td>
+                                <td>{{ c.get_statut_traitement_display|default:c.statut_traitement|default:"-" }}</td>
+                              </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    {% else %}
+                      <p class="text-muted mb-0">Aucune comorbidité enregistrée.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historique -->
+          <div class="tab-pane fade" id="tabHistorique">
+            <div class="row g-4 mt-3">
+              <div class="col-lg-12">
+                <div class="vih-card">
+                  <div class="card-header">
+                    <i class="fas fa-stream mr-2"></i>Timeline complète (Suivi / Examens / Dépistage / IO / Comorbidités)
+                  </div>
+                  <div class="card-body">
+                    {% if timeline_events %}
+                      <div class="timeline-vih">
+                        {% for ev in timeline_events %}
+                          <div class="timeline-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                              <div>
+                                <h6 class="mb-1">{{ ev.title|default:"-" }}</h6>
+                                <div class="text-muted">
+                                  {% if ev.date %}{{ ev.date|date:"d/m/Y" }}{% else %}-{% endif %}
+                                  {% if ev.meta %} • {{ ev.meta }}{% endif %}
+                                </div>
+                              </div>
+                              <div class="text-right">
+                                {% if ev.type == 'suivi' %}
+                                  <span class="badge badge-primary">Suivi</span>
+                                {% elif ev.type == 'exam' %}
+                                  <span class="badge badge-info">Examen</span>
+                                {% elif ev.type == 'arv' %}
+                                  <span class="badge badge-success">ARV</span>
+                                {% elif ev.type == 'depistage' %}
+                                  <span class="badge badge-warning">Dépistage</span>
+                                {% elif ev.type == 'io' %}
+                                  <span class="badge badge-danger">IO</span>
+                                {% elif ev.type == 'comorb' %}
+                                  <span class="badge badge-secondary">Comorbidité</span>
+                                {% else %}
+                                  <span class="badge badge-light">Clé</span>
+                                {% endif %}
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <p class="text-muted mb-0">Aucun évènement enregistré.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- tab-content -->
+      </div><!-- nk-block -->
+
+      <!-- Informations supplémentaires -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="vih-card">
+            <div class="card-header"><i class="fas fa-info-circle mr-2"></i>Informations complémentaires</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="text-muted small">Créé par</div>
+                    <div class="font-weight-bold">
+                      {% if vih_profile.created_by %}
+                        {{ vih_profile.created_by.get_full_name|default:"Système" }}
+                      {% else %}
+                        Système
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="text-muted small">Dernière modification</div>
+                    <div class="font-weight-bold">{{ vih_profile.updated_at|date:"d/m/Y H:i" }}</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="text-muted small">Statut VIH Patient</div>
+                    <div class="font-weight-bold">{{ vih_profile.patient.status|default:"-" }}</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="text-center">
+                    <div class="text-muted small">Contact patient</div>
+                    <div class="font-weight-bold">{{ vih_profile.patient.contact|default:"-" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- nk-content-body -->
+  </div><!-- container -->
+</div><!-- nk-content -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.jQuery && jQuery.fn && jQuery.fn.tooltip) {
+    $('[data-toggle="tooltip"]').tooltip();
+  }
+  if (window.jQuery) {
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      const target = $(e.target).attr("href");
+      $(target).addClass('animate__animated animate__fadeIn');
+    });
+  }
+});
+</script>
+{% endblock %}

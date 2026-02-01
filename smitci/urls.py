@@ -39,7 +39,7 @@ from smit.views import HomePageView, PatientListView, PatientCreateView, RendezV
     delete_test_rapide_consultation_generale, Examens_Consultation_generale_create, AppointmentDeleteView, \
     hospitalization_chart_data, BilanListView, BilanCreateView, BilanDetailView, BilanUpdateView, BilanDeleteView, \
     CompleteBilanView, create_bilan_initial, suivi_send_from_bilan, add_traitement_arv, add_suivi_protocole, add_bilan, \
-    add_rdv, Landing, UrgencePatientCreateAPI, HospitalizationCreateAPI
+    add_rdv, Landing, UrgencePatientCreateAPI, HospitalizationCreateAPI, VIHProfileDetailView
 
 
 def healthz(_):
@@ -150,6 +150,7 @@ urlpatterns = [
 
                   path('service/<str:serv>/<str:acty>/<int:acty_id>', ActiviteListView.as_view(),
                        name='service_activity_list'),
+                  path("vih/profile/<int:pk>/", VIHProfileDetailView.as_view(), name="vih_profile_detail"),
 
                   path('symptomes/create/<int:consultation_id>', create_symptome_and_update_consultation,
                        name='create_symptomes'),

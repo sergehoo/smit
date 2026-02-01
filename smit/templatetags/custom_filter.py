@@ -2,7 +2,82 @@ from django import template
 
 register = template.Library()
 
+@register.filter
+def filter_by_status(queryset, status):
+    """Filtre un queryset par statut"""
+    if hasattr(queryset, 'filter'):
+        return queryset.filter(status=status)
+    return []
 
+@register.filter
+def filter_by_result(queryset, result):
+    """Filtre un queryset par résultat"""
+    if hasattr(queryset, 'filter'):
+        return queryset.filter(resultat=result)
+    return []
+
+@register.filter
+def get_item(dictionary, key):
+    """Récupère un élément d'un dictionnaire"""
+    return dictionary.get(key)
+
+@register.filter
+def multiply(value, arg):
+    """Multiplie value par arg"""
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0
+
+@register.filter
+def divide(value, arg):
+    """Divise value par arg"""
+    try:
+        return float(value) / float(arg)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
+
+@register.filter
+def percentage(value, total):
+    """Calcule le pourcentage"""
+    try:
+        if total == 0:
+            return 0
+        return (float(value) / float(total)) * 100
+    except (ValueError, TypeError):
+        return 0
+
+@register.filter
+def status_color(status):
+    """Retourne la couleur CSS selon le statut"""
+    colors = {
+        'completed': 'success',
+        'confirmed': 'success',
+        'active': 'primary',
+        'in_progress': 'primary',
+        'discharged': 'info',
+        'pending': 'warning',
+        'cancelled': 'danger',
+        'transferred': 'secondary',
+    }
+    return colors.get(status, 'secondary')
+
+@register.filter
+def urgency_color(is_urgent):
+    """Retourne la couleur selon l'urgence"""
+    return 'danger' if is_urgent else 'secondary'
+
+@register.filter
+def age_range(age):
+    """Retourne la tranche d'âge"""
+    if age < 18:
+        return 'enfant'
+    elif age < 30:
+        return 'jeune adulte'
+    elif age < 60:
+        return 'adulte'
+    else:
+        return 'senior'
 @register.filter
 def get_etat_count(appareils_by_categories, etat):
     count = 0
@@ -110,3 +185,66 @@ def mul(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return 0
+
+@register.filter
+def abs_filter(value):
+    """Retourne la valeur absolue"""
+    try:
+        return abs(float(value))
+    except (ValueError, TypeError):
+        return value
+
+@register.filter
+def timesince_days(date):
+    """Retourne le nombre de jours depuis une date"""
+    from django.utils import timezone
+    if not date:
+        return None
+    delta = timezone.now().date() - date
+    return delta.days
+
+@register.filter
+def timeuntil_days(date):
+    """Retourne le nombre de jours jusqu'à une date"""
+    from django.utils import timezone
+    if not date:
+        return None
+    delta = date - timezone.now().date()
+    return delta.days if delta.days >= 0 else -delta.days
+
+@register.filter
+def get_item(dictionary, key):
+    """Retourne un élément d'un dictionnaire"""
+    return dictionary.get(key)
+
+@register.filter
+def multiply(value, arg):
+    """Multiplie value par arg"""
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0
+
+@register.filter
+def divide(value, arg):
+    """Divise value par arg"""
+    try:
+        return float(value) / float(arg)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return 0
+
+@register.filter
+def safe_get(obj, attr_name):
+    """
+    Retourne getattr(obj, attr_name) si existe, sinon None.
+    Marche aussi si obj est un dict.
+    """
+    if obj is None or not attr_name:
+        return None
+
+    # dict-like
+    if isinstance(obj, dict):
+        return obj.get(attr_name)
+
+    # objet Django / python
+    return getattr(obj, attr_name, None)

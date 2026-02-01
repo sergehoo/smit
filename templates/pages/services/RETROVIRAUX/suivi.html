@@ -1,0 +1,90 @@
+{% extends "layout/base.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="nk-content nk-content-fluid">
+  <div class="container-xl wide-lg">
+    <div class="nk-content-body">
+
+      <div class="nk-block-head nk-block-head-sm">
+        <div class="nk-block-between">
+          <div class="nk-block-head-content">
+            <h3 class="nk-block-title page-title">Suivis VIH</h3>
+            <div class="nk-block-des text-soft">
+              <p>Total : <strong>{{ suivis_count|default:0 }}</strong> suivis</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nk-block">
+        <div class="card card-bordered">
+          <div class="card-inner p-0">
+            <div class="nk-tb-list nk-tb-ulist is-compact">
+
+              <div class="nk-tb-item nk-tb-head">
+                <div class="nk-tb-col"><span class="sub-text">Date</span></div>
+                <div class="nk-tb-col"><span class="sub-text">Patient</span></div>
+                <div class="nk-tb-col"><span class="sub-text">CD4</span></div>
+                <div class="nk-tb-col"><span class="sub-text">Charge virale</span></div>
+                <div class="nk-tb-col"><span class="sub-text">Poids</span></div>
+                <div class="nk-tb-col nk-tb-col-tools text-right"><span class="sub-text">Action</span></div>
+              </div>
+
+              {% for s in suivis %}
+                <div class="nk-tb-item">
+                  <div class="nk-tb-col">
+                    <span>{{ s.date_suivi|date:"d/m/Y" }}</span>
+                  </div>
+
+                  <div class="nk-tb-col">
+                    <span class="tb-lead">{{ s.patient.nom|default:"" }} {{ s.patient.prenoms|default:"" }}</span>
+                    <div class="text-soft fs-12">{{ s.patient.code_patient|default:"-" }}</div>
+                  </div>
+
+                  <div class="nk-tb-col">
+                    <span class="fw-bold text-primary">
+                      {% if s.cd4 is not None %}{{ s.cd4 }}{% else %}—{% endif %}
+                    </span>
+                  </div>
+
+                  <div class="nk-tb-col">
+                    <span class="fw-bold text-info">
+                      {% if s.charge_virale is not None %}{{ s.charge_virale|intcomma }}{% else %}—{% endif %}
+                    </span>
+                  </div>
+
+                  <div class="nk-tb-col">
+                    <span class="text-soft">
+                      {% if s.poids is not None %}{{ s.poids }} kg{% else %}—{% endif %}
+                    </span>
+                  </div>
+
+                  <div class="nk-tb-col nk-tb-col-tools">
+                    <ul class="nk-tb-actions gx-1">
+                      <li>
+                        <a class="btn btn-sm btn-icon btn-trigger" href="{% url 'detail_patient' s.patient.pk %}">
+                          <em class="icon ni ni-eye"></em>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="nk-tb-item">
+                  <div class="nk-tb-col text-center py-4">
+                    <span class="text-soft">Aucun suivi.</span>
+                  </div>
+                </div>
+              {% endfor %}
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

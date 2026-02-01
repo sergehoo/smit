@@ -1,1197 +1,618 @@
-{#{% load static %}#}
-{#<!-- sidebar @s -->#}
-{#<div class="nk-sidebar nk-sidebar-fixed" data-content="sidebarMenu">#}
-{#    <div class="nk-sidebar-element nk-sidebar-head">#}
-{#        <div class="nk-sidebar-brand">#}
-{#            <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">#}
-{#                <div class="logo-container">#}
-{#                    <img class="logo-light logo-img" src="{% static 'images/logokeneya.png' %}" alt="KENEYA SIH">#}
-{#                    <img class="logo-dark logo-img" src="{% static 'images/logokeneya.png' %}" alt="KENEYA SIH">#}
-{#                </div>#}
-{#            </a>#}
-{#        </div>#}
-{#        <div class="hospital-info text-primary">#}
-{#            <div class="hospital-name">SMIT</div>#}
-{#            <div class="department-name">Service des Maladies Infectieuses et Tropicales</div>#}
-{#        </div>#}
-{#        <div class="nk-menu-trigger mr-n2">#}
-{#            <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu">#}
-{#                <em class="icon ni ni-arrow-left"></em>#}
-{#            </a>#}
-{#        </div>#}
-{#    </div>#}
-{#    <!-- .nk-sidebar-element -->#}
-{#    #}
-{#    <div class="nk-sidebar-element">#}
-{#        <div class="nk-sidebar-body" data-simplebar>#}
-{#            <div class="nk-sidebar-content">#}
-{#                <div class="nk-sidebar-user">#}
-{#                    <div class="user-avatar">#}
-{#                        <img src="{% static 'images/avatar.png' %}" alt="Utilisateur">#}
-{#                        <span class="text-white">{{ user.first_name|slice:1 }}{{ user.last_name|slice:1 }}</span>#}
-{#                    </div>#}
-{#                    <div class="user-info">#}
-{#                        <div class="user-name">Dr. {{ user.get_full_name|default:user.username }}</div>#}
-{#                        <div class="user-role">{{ user.groups.first.name|default:"Médecin" }}</div>#}
-{#                    </div>#}
-{#                    <div class="user-status online"></div>#}
-{#                </div>#}
-{##}
-{#                <div class="nk-sidebar-menu">#}
-{#                    <ul class="nk-menu">#}
-{#                        <!-- Section Générale -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Navigation Principale</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'home' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon">#}
-{#                                    <em class="icon ni ni-dashboard-fill"></em>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Tableau de Bord</span>#}
-{#                                <span class="nk-menu-badge new-feature">Nouveau</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'global_search' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon">#}
-{#                                    <em class="icon ni ni-search"></em>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Recherche Globale</span>#}
-{#                                <span class="nk-menu-badge bg-hospital">{{ patient_nbr }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Accueil -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Accueil & Admission</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'attente' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-warning">#}
-{#                                    <em class="icon ni ni-users-fill"></em>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Salle d'Attente</span>#}
-{#                                <span class="nk-menu-badge bg-danger pulse">{{ apointments_nbr }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'appointment_over' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-success">#}
-{#                                    <em class="icon ni ni-calendar-check"></em>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Patients Reçus</span>#}
-{#                                <span class="nk-menu-badge bg-success">{{ appointments_all }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'appointment_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-info">#}
-{#                                    <em class="icon ni ni-calendar-booking-fill"></em>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Gestion des Rendez-vous</span>#}
-{#                                <span class="nk-menu-badge bg-info">{{ appointments_all }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Consultation -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Consultations</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'consultation_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-teal">#}
-{#                                    <i class="fa-solid fa-stethoscope"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Liste des Consultations</span>#}
-{#                                <span class="nk-menu-badge bg-teal">{{ consul_nbr }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Urgence -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Services d'Urgence</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'urgences_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-danger">#}
-{#                                    <i class="fa-solid fa-ambulance"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Urgences</span>#}
-{#                                <span class="nk-menu-badge bg-danger pulse">{{ urgencehospi }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Hospitalisation -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Hospitalisation</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'hospitalisation' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-purple">#}
-{#                                    <i class="fa-solid fa-bed-pulse"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Hospitalisations en Cours</span>#}
-{#                                <span class="nk-menu-badge bg-danger pulse">{{ Hospitaliza_encours }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'suivie_soins_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-orange">#}
-{#                                    <i class="fa-solid fa-clock-rotate-left"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Suivi des Soins</span>#}
-{#                                <span class="nk-menu-badge bg-orange">{{ Hospitaliza_encours }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'hospitalised_patient' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-success">#}
-{#                                    <i class="fa-solid fa-bed"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Patients Sortis</span>#}
-{#                                <span class="nk-menu-badge bg-success">{{ discharged_count }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'hospi_unites' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-secondary">#}
-{#                                    <i class="fa-solid fa-hospital"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Unités d'Hospitalisation</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Suivi Patients -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Suivi Médical</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'bilan_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-info">#}
-{#                                    <i class="fa-solid fa-file-arrow-up"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Bilans Initiaux</span>#}
-{#                                <span class="nk-menu-badge bg-info">{{ bilaninitial }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'suivi_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-primary">#}
-{#                                    <i class="fa-solid fa-folder-tree"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Suivi des Patients</span>#}
-{#                                <span class="nk-menu-badge bg-danger pulse">{{ suivi_nbr }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Maladies sous Surveillance -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Maladies Surveillées</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        {% for maladie in services %}#}
-{#                        <li class="nk-menu-item has-sub">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon medical-icon bg-{{ forloop.counter|add:2 }}">#}
-{#                                    <i class="fa-solid fa-virus"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">{{ maladie.nom }}</span>#}
-{#                                <span class="nk-menu-badge">{{ maladie.subactivities.count }}</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                {% for sbactivity in maladie.subactivities.all %}#}
-{#                                <li class="nk-menu-item">#}
-{#                                    <a href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}" class="nk-menu-link">#}
-{#                                        <span class="submenu-icon">#}
-{#                                            <i class="{{ sbactivity.icon }}"></i>#}
-{#                                        </span>#}
-{#                                        <span class="nk-menu-text">{{ sbactivity.nom }}</span>#}
-{#                                        {% if sbactivity.is_new %}#}
-{#                                        <span class="nk-menu-badge new">New</span>#}
-{#                                        {% endif %}#}
-{#                                    </a>#}
-{#                                </li>#}
-{#                                {% endfor %}#}
-{#                            </ul>#}
-{#                        </li>#}
-{#                        {% endfor %}#}
-{##}
-{#                        <!-- Section Laboratoire -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Laboratoire</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'echantillons_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-teal">#}
-{#                                    <i class="fa-solid fa-vial"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Prélèvements</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'examen_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-warning">#}
-{#                                    <i class="fa-solid fa-flask-vial"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Demandes d'Analyse</span>#}
-{#                                <span class="nk-menu-badge bg-warning pulse">{{ examencount }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'examen_done_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-success">#}
-{#                                    <i class="fa-solid fa-flask"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Analyses Effectuées</span>#}
-{#                                <span class="nk-menu-badge bg-success">{{ examensdonecount }}</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Pharmacie -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Pharmacie</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'medicaments' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-primary">#}
-{#                                    <i class="fa-solid fa-prescription-bottle-medical"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Médicaments</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'mouvement-stock' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-info">#}
-{#                                    <i class="fa-solid fa-arrow-down-up-across-line"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Mouvements de Stock</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'rendezvous_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-teal">#}
-{#                                    <i class="fa-solid fa-calendar"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Rendez-vous Pharmacie</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'commandes-list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-orange">#}
-{#                                    <i class="fa-solid fa-basket-shopping"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Commandes</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="#" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-secondary">#}
-{#                                    <i class="fa-solid fa-chart-bar"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Rapports Pharmacie</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Paramètres Hospitalisation -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Configuration</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item has-sub">#}
-{#                            <a href="#" class="nk-menu-link nk-menu-toggle">#}
-{#                                <span class="nk-menu-icon medical-icon bg-purple">#}
-{#                                    <i class="fa-solid fa-gears"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Paramètres Hospitalisation</span>#}
-{#                            </a>#}
-{#                            <ul class="nk-menu-sub">#}
-{#                                <li class="nk-menu-item">#}
-{#                                    <a href="#" class="nk-menu-link">#}
-{#                                        <span class="submenu-icon">#}
-{#                                            <i class="fa-solid fa-flask-vial"></i>#}
-{#                                        </span>#}
-{#                                        <span class="nk-menu-text">Analyses Médicales</span>#}
-{#                                    </a>#}
-{#                                </li>#}
-{#                                <li class="nk-menu-item">#}
-{#                                    <a href="#" class="nk-menu-link">#}
-{#                                        <span class="submenu-icon">#}
-{#                                            <i class="fa-solid fa-tools"></i>#}
-{#                                        </span>#}
-{#                                        <span class="nk-menu-text">Kits Médicaux</span>#}
-{#                                    </a>#}
-{#                                </li>#}
-{#                                <li class="nk-menu-item">#}
-{#                                    <a href="#" class="nk-menu-link">#}
-{#                                        <span class="submenu-icon">#}
-{#                                            <i class="fa-solid fa-procedures"></i>#}
-{#                                        </span>#}
-{#                                        <span class="nk-menu-text">Lits & Chambres</span>#}
-{#                                    </a>#}
-{#                                </li>#}
-{#                            </ul>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Administration -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Administration</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'employee_list' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-secondary">#}
-{#                                    <i class="fa-solid fa-user-circle"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Gestion des Employés</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="{% url 'user_role' %}" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-dark">#}
-{#                                    <i class="fa-solid fa-user-secret"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Gestion des Rôles</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{##}
-{#                        <!-- Section Aide -->#}
-{#                        <li class="nk-menu-heading">#}
-{#                            <h6 class="overline-title text-primary-alt">Support</h6>#}
-{#                        </li>#}
-{#                        #}
-{#                        <li class="nk-menu-item">#}
-{#                            <a href="#" class="nk-menu-link">#}
-{#                                <span class="nk-menu-icon medical-icon bg-info">#}
-{#                                    <i class="fa-solid fa-circle-question"></i>#}
-{#                                </span>#}
-{#                                <span class="nk-menu-text">Aide & Support</span>#}
-{#                            </a>#}
-{#                        </li>#}
-{#                    </ul>#}
-{#                    <!-- .nk-menu -->#}
-{#                </div>#}
-{#                <!-- .nk-sidebar-menu -->#}
-{##}
-{#                <!-- Quick Actions -->#}
-{#                <div class="sidebar-quick-actions">#}
-{#                    <div class="quick-actions-title">Actions Rapides</div>#}
-{#                    <div class="quick-actions-grid">#}
-{#                        <a href="{% url 'attente' %}" class="quick-action-item bg-danger">#}
-{#                            <i class="fa-solid fa-user-plus"></i>#}
-{#                            <span>Nouveau Patient</span>#}
-{#                        </a>#}
-{#                        <a href="{% url 'consultation_list' %}" class="quick-action-item bg-primary">#}
-{#                            <i class="fa-solid fa-stethoscope"></i>#}
-{#                            <span>Nouvelle Consultation</span>#}
-{#                        </a>#}
-{#                        <a href="{% url 'examen_list' %}" class="quick-action-item bg-warning">#}
-{#                            <i class="fa-solid fa-flask-vial"></i>#}
-{#                            <span>Demande d'Analyse</span>#}
-{#                        </a>#}
-{#                        <a href="{% url 'urgences_list' %}" class="quick-action-item bg-teal">#}
-{#                            <i class="fa-solid fa-ambulance"></i>#}
-{#                            <span>Cas Urgent</span>#}
-{#                        </a>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <!-- .nk-sidebar-content -->#}
-{#        </div>#}
-{#        <!-- .nk-sidebar-body -->#}
-{#    </div>#}
-{#    <!-- .nk-sidebar-element -->#}
-{#</div>#}
-{#<!-- sidebar @e -->#}
-{##}
-{#<style>#}
-{#    /* === Styles Améliorés pour la Sidebar === */#}
-{#    #}
-{#    .nk-sidebar-head {#}
-{#        background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);#}
-{#        border-bottom: 1px solid rgba(255, 255, 255, 0.1);#}
-{#        padding: 1.5rem 1rem;#}
-{#    }#}
-{##}
-{#    .hospital-info {#}
-{#        text-align: center;#}
-{#        margin-top: 1rem;#}
-{#    }#}
-{##}
-{#    .hospital-name {#}
-{#        font-weight: 700;#}
-{#        font-size: 1.1rem;#}
-{#        color: #006eff;#}
-{#        margin-bottom: 0.25rem;#}
-{#    }#}
-{##}
-{#    .department-name {#}
-{#        font-size: 0.8rem;#}
-{#        color: rgba(255, 255, 255, 0.9);#}
-{#        line-height: 1.3;#}
-{#    }#}
-{##}
-{#    .nk-sidebar-user {#}
-{#        display: flex;#}
-{#        align-items: center;#}
-{#        padding: 1.5rem 1rem;#}
-{#        border-bottom: 1px solid #e2e8f0;#}
-{#        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);#}
-{#    }#}
-{##}
-{#    .user-avatar {#}
-{#        width: 45px;#}
-{#        height: 45px;#}
-{#        border-radius: 12px;#}
-{#        overflow: hidden;#}
-{#        margin-right: 12px;#}
-{#        border: 3px solid #e2e8f0;#}
-{#    }#}
-{##}
-{#    .user-avatar img {#}
-{#        width: 100%;#}
-{#        height: 100%;#}
-{#        object-fit: cover;#}
-{#    }#}
-{##}
-{#    .user-info {#}
-{#        flex: 1;#}
-{#    }#}
-{##}
-{#    .user-name {#}
-{#        font-weight: 600;#}
-{#        color: #1e293b;#}
-{#        font-size: 0.95rem;#}
-{#    }#}
-{##}
-{#    .user-role {#}
-{#        font-size: 0.8rem;#}
-{#        color: #64748b;#}
-{#    }#}
-{##}
-{#    .user-status {#}
-{#        width: 12px;#}
-{#        height: 12px;#}
-{#        border-radius: 50%;#}
-{#        border: 2px solid white;#}
-{#    }#}
-{##}
-{#    .user-status.online {#}
-{#        background: var(--medical-success);#}
-{#    }#}
-{##}
-{#    .user-status.offline {#}
-{#        background: var(--medical-error);#}
-{#    }#}
-{##}
-{#    .nk-menu-heading {#}
-{#        padding: 1rem 1rem 0.5rem;#}
-{#        margin-top: 0.5rem;#}
-{#    }#}
-{##}
-{#    .overline-title {#}
-{#        font-size: 0.75rem;#}
-{#        font-weight: 600;#}
-{#        text-transform: uppercase;#}
-{#        letter-spacing: 0.5px;#}
-{#        color: #64748b !important;#}
-{#    }#}
-{##}
-{#    .nk-menu-item {#}
-{#        margin: 2px 0.75rem;#}
-{#    }#}
-{##}
-{#    .nk-menu-link {#}
-{#        border-radius: 10px;#}
-{#        padding: 12px 16px;#}
-{#        margin: 2px 0;#}
-{#        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);#}
-{#        border-left: 3px solid transparent;#}
-{#        position: relative;#}
-{#        overflow: hidden;#}
-{#    }#}
-{##}
-{#    .nk-menu-link::before {#}
-{#        content: '';#}
-{#        position: absolute;#}
-{#        top: 0;#}
-{#        left: -100%;#}
-{#        width: 100%;#}
-{#        height: 100%;#}
-{#        background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);#}
-{#        transition: left 0.6s;#}
-{#    }#}
-{##}
-{#    .nk-menu-link:hover::before {#}
-{#        left: 100%;#}
-{#    }#}
-{##}
-{#    .nk-menu-link:hover {#}
-{#        background: var(--hospital-primary-light);#}
-{#        transform: translateX(4px);#}
-{#        border-left-color: var(--hospital-primary);#}
-{#    }#}
-{##}
-{#    .nk-menu-link.active {#}
-{#        background: linear-gradient(135deg, var(--hospital-primary) 0%, var(--hospital-primary-dark) 100%);#}
-{#        color: white;#}
-{#        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);#}
-{#        border-left-color: white;#}
-{#    }#}
-{##}
-{#    .nk-menu-link.active .medical-icon {#}
-{#        background: rgba(255, 255, 255, 0.2);#}
-{#        color: white;#}
-{#    }#}
-{##}
-{#    .medical-icon {#}
-{#        width: 40px;#}
-{#        height: 40px;#}
-{#        border-radius: 10px;#}
-{#        display: flex;#}
-{#        align-items: center;#}
-{#        justify-content: center;#}
-{#        font-size: 16px;#}
-{#        transition: all 0.3s ease;#}
-{#        background: var(--hospital-primary-light);#}
-{#        color: var(--hospital-primary);#}
-{#        margin-right: 12px;#}
-{#    }#}
-{##}
-{#    .nk-menu-link:hover .medical-icon {#}
-{#        background: var(--hospital-primary);#}
-{#        color: white;#}
-{#        transform: scale(1.05);#}
-{#    }#}
-{##}
-{#    .nk-menu-text {#}
-{#        font-weight: 500;#}
-{#        font-size: 0.9rem;#}
-{#        flex: 1;#}
-{#    }#}
-{##}
-{#    .nk-menu-badge {#}
-{#        padding: 4px 8px;#}
-{#        border-radius: 12px;#}
-{#        font-size: 0.7rem;#}
-{#        font-weight: 600;#}
-{#        min-width: 24px;#}
-{#        text-align: center;#}
-{#    }#}
-{##}
-{#    .nk-menu-badge.pulse {#}
-{#        animation: pulse-badge 2s infinite;#}
-{#    }#}
-{##}
-{#    @keyframes pulse-badge {#}
-{#        0%, 100% { transform: scale(1); }#}
-{#        50% { transform: scale(1.1); }#}
-{#    }#}
-{##}
-{#    .nk-menu-badge.new-feature {#}
-{#        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);#}
-{#        color: white;#}
-{#        font-size: 0.65rem;#}
-{#        padding: 2px 6px;#}
-{#    }#}
-{##}
-{#    .nk-menu-badge.new {#}
-{#        background: var(--medical-success);#}
-{#        color: white;#}
-{#        font-size: 0.6rem;#}
-{#        padding: 1px 4px;#}
-{#    }#}
-{##}
-{#    /* Sous-menus améliorés */#}
-{#    .nk-menu-sub {#}
-{#        padding-left: 1.5rem;#}
-{#        margin: 0.25rem 0;#}
-{#    }#}
-{##}
-{#    .nk-menu-sub .nk-menu-link {#}
-{#        padding: 10px 16px;#}
-{#        border-radius: 8px;#}
-{#        margin: 1px 0;#}
-{#    }#}
-{##}
-{#    .submenu-icon {#}
-{#        width: 24px;#}
-{#        height: 24px;#}
-{#        display: flex;#}
-{#        align-items: center;#}
-{#        justify-content: center;#}
-{#        margin-right: 12px;#}
-{#        color: #64748b;#}
-{#    }#}
-{##}
-{#    .nk-menu-sub .nk-menu-link:hover .submenu-icon {#}
-{#        color: var(--hospital-primary);#}
-{#    }#}
-{##}
-{#    /* Quick Actions */#}
-{#    .sidebar-quick-actions {#}
-{#        padding: 1.5rem 1rem;#}
-{#        border-top: 1px solid #e2e8f0;#}
-{#        margin-top: 1rem;#}
-{#    }#}
-{##}
-{#    .quick-actions-title {#}
-{#        font-size: 0.8rem;#}
-{#        font-weight: 600;#}
-{#        color: #64748b;#}
-{#        text-transform: uppercase;#}
-{#        letter-spacing: 0.5px;#}
-{#        margin-bottom: 1rem;#}
-{#    }#}
-{##}
-{#    .quick-actions-grid {#}
-{#        display: grid;#}
-{#        grid-template-columns: 1fr 1fr;#}
-{#        gap: 0.5rem;#}
-{#    }#}
-{##}
-{#    .quick-action-item {#}
-{#        display: flex;#}
-{#        flex-direction: column;#}
-{#        align-items: center;#}
-{#        justify-content: center;#}
-{#        padding: 0.75rem 0.5rem;#}
-{#        border-radius: 10px;#}
-{#        color: white;#}
-{#        text-decoration: none;#}
-{#        transition: all 0.3s ease;#}
-{#        text-align: center;#}
-{#    }#}
-{##}
-{#    .quick-action-item:hover {#}
-{#        transform: translateY(-2px);#}
-{#        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);#}
-{#        color: white;#}
-{#        text-decoration: none;#}
-{#    }#}
-{##}
-{#    .quick-action-item i {#}
-{#        font-size: 1.25rem;#}
-{#        margin-bottom: 0.5rem;#}
-{#    }#}
-{##}
-{#    .quick-action-item span {#}
-{#        font-size: 0.7rem;#}
-{#        font-weight: 500;#}
-{#        line-height: 1.2;#}
-{#    }#}
-{##}
-{#    /* Couleurs pour les badges et icônes */#}
-{#    .bg-hospital { background: var(--hospital-primary); }#}
-{#    .bg-teal { background: var(--medical-teal); }#}
-{#    .bg-orange { background: var(--medical-warning); }#}
-{#    .bg-purple { background: var(--medical-purple); }#}
-{##}
-{#    .medical-icon.bg-primary { background: var(--hospital-primary-light); color: var(--hospital-primary); }#}
-{#    .medical-icon.bg-success { background: #dcfce7; color: #166534; }#}
-{#    .medical-icon.bg-warning { background: #fef3c7; color: #92400e; }#}
-{#    .medical-icon.bg-danger { background: #fee2e2; color: #dc2626; }#}
-{#    .medical-icon.bg-info { background: #dbeafe; color: #1e40af; }#}
-{#    .medical-icon.bg-teal { background: #ccfbf1; color: #0f766e; }#}
-{#    .medical-icon.bg-purple { background: #f3e8ff; color: #7e22ce; }#}
-{#    .medical-icon.bg-orange { background: #ffedd5; color: #c2410c; }#}
-{#    .medical-icon.bg-secondary { background: #f1f5f9; color: #475569; }#}
-{#    .medical-icon.bg-dark { background: #e2e8f0; color: #1e293b; }#}
-{##}
-{#    /* Responsive */#}
-{#    @media (max-width: 1200px) {#}
-{#        .hospital-name {#}
-{#            font-size: 1rem;#}
-{#        }#}
-{#        #}
-{#        .department-name {#}
-{#            font-size: 0.75rem;#}
-{#        }#}
-{#        #}
-{#        .nk-menu-link {#}
-{#            padding: 10px 12px;#}
-{#        }#}
-{#        #}
-{#        .medical-icon {#}
-{#            width: 36px;#}
-{#            height: 36px;#}
-{#            font-size: 14px;#}
-{#        }#}
-{#    }#}
-{##}
-{#    /* Animation d'ouverture des sous-menus */#}
-{#    .nk-menu-sub {#}
-{#        max-height: 0;#}
-{#        overflow: hidden;#}
-{#        transition: max-height 0.3s ease;#}
-{#    }#}
-{##}
-{#    .nk-menu-item.has-sub.open .nk-menu-sub {#}
-{#        max-height: 500px;#}
-{#    }#}
-{##}
-{#    /* Indicateur de menu ouvert */#}
-{#    .nk-menu-toggle::after {#}
-{#        content: '';#}
-{#        border: solid;#}
-{#        border-width: 0 2px 2px 0;#}
-{#        display: inline-block;#}
-{#        padding: 3px;#}
-{#        transform: rotate(45deg);#}
-{#        transition: transform 0.3s ease;#}
-{#        margin-left: auto;#}
-{#    }#}
-{##}
-{#    .nk-menu-item.has-sub.open .nk-menu-toggle::after {#}
-{#        transform: rotate(-135deg);#}
-{#    }#}
-{#</style>#}
+{% load static %}
 
-
-{% load  static %}
 <!-- sidebar @s -->
 <div class="nk-sidebar nk-sidebar-fixed shadow" data-content="sidebarMenu">
-    <div class="nk-sidebar-element nk-sidebar-head ">
-        <div class="nk-sidebar-brand ">
-            <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">
-                <img class="logo-light logo-img " src="{% static 'images/logokeneya.png' %}" alt="logo">
-                <img class="logo-dark logo-img" src="{% static 'images/logokeneya.png' %}" alt="logo-dark">
-
-            </a>
-            <span class="h3">SMIT</span>
-        </div>
-
-        <div class="nk-menu-trigger mr-n2">
-            <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu">
-                <em class="icon ni ni-arrow-left"></em>
-            </a>
-        </div>
+  <!-- Header -->
+  <div class="nk-sidebar-element nk-sidebar-head">
+    <div class="nk-sidebar-brand">
+      <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">
+        <img class="logo-light logo-img" src="{% static 'images/lyne_hospital.png' %}" alt="logo">
+        <img class="logo-dark logo-img" src="{% static 'images/lyne_hospital.png' %}" alt="logo-dark">
+      </a>
+      
+        <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">
+        <img class="logo-light logo-img" src="{% static 'images/logocermipa.png' %}" alt="logo">
+        <img class="logo-dark logo-img" src="{% static 'images/logocermipa.png' %}" alt="logo-dark">
+      </a><span class="sidebar-brand-title">SMIT</span>
     </div>
-    <span style="font-size: xx-small; text-align: center ; margin-left: 15px;">SERVICE DES MALADIES INFESTIEUSES ET TROPICALES</span>
-    <!-- .nk-sidebar-element -->
-    <div class="nk-sidebar-element">
-        <div class="nk-sidebar-body" data-simplebar>
-            <div class="nk-sidebar-content">
-            <div class="nk-sidebar-user">
-                    <div class="user-avatar">
-                        <span class="text-white">{{ user.first_name|slice:1 }}{{ user.last_name|slice:1 }}</span>
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name">Dr. {{ user.get_full_name|default:user.username }}</div>
-                        <div class="user-role">{{ user.groups.first.name|default:"Médecin" }}</div>
-                    </div>
-                    <div class="user-status online"></div>
-                </div>
-                <div class="nk-sidebar-menu">
-                    <ul class="nk-menu">
-                        <!-- Section Générale -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Générale</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'home' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><span class="icon-circle bg-primary"><em
-                                        class="icon icon-circle ni ni-dashboard-fill "></em></span></span>
-                                <span class="nk-menu-text">Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'global_search' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><em class="icon ni ni-search"></em></span>
-                                <span class="nk-menu-text">Recherche</span>
-                                <span class="nk-menu-badge">{{ patient_nbr }}</span>
-                            </a>
-                        </li>
 
-                        <!-- Section Accueil -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Accueil</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'attente' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><em class="icon ni ni-users-fill"></em></span>
-                                <span class="nk-menu-text">Salle d'attente</span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ apointments_nbr }}</span>
-                            </a>
-                        </li>
+    <div class="nk-menu-trigger mr-n2">
+      <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu" aria-label="Fermer le menu">
+        <em class="icon ni ni-arrow-left"></em>
+      </a>
+    </div>
+  </div>
 
-                        <li class="nk-menu-item">
-                            <a href="{% url 'appointment_over' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><em class="icon ni ni-calendar-check"></em></span>
-                                <span class="nk-menu-text">Patients reçus</span>
-                                <span class="nk-menu-badge">{{ appointments_all }}</span>
-                            </a>
-                        </li>
+  <div class="sidebar-department">
+    SERVICE DES MALADIES INFESTIEUSES ET TROPICALES
+  </div>
 
-                        <li class="nk-menu-item">
-                            <a href="{% url 'appointment_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
-                                <span class="nk-menu-text">Rendez-vous</span>
-                                <span class="nk-menu-badge">{{ appointments_all }}</span>
-                            </a>
-                        </li>
+  <!-- Body -->
+  <div class="nk-sidebar-element">
+    <div class="nk-sidebar-body" data-simplebar>
+      <div class="nk-sidebar-content">
 
+        <!-- User Card -->
+        <div class="nk-sidebar-user">
+          <div class="user-avatar">
+            <span class="user-initials">{{ user.first_name|slice:1 }}{{ user.last_name|slice:1 }}</span>
+          </div>
 
-                        <!-- Section Consultation -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Consultation</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'consultation_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-stethoscope"></i></span>
-                                <span class="nk-menu-text">Liste Consultations</span>
-                                <span class="nk-menu-badge ">{{ consul_nbr }}</span>
-                            </a>
-                        </li>
+          <div class="user-info">
+            <div class="user-name">Dr. {{ user.get_full_name|default:user.username }}</div>
+            <div class="user-role">{{ user.groups.first.name|default:"Médecin" }}</div>
+          </div>
 
-                        <!-- Section Urgence -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">URGENCES</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'urgences_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-ambulance text-danger"></i></span>
-                                <span class="nk-menu-text">Liste des Urgences </span>
-                                <span class="nk-menu-badge">{{ urgencehospi }}</span>
-                            </a>
-                        </li>
+          <div class="user-status online" title="Connecté"></div>
+        </div>
 
-                        <!-- Section Hospitalisation -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Hospitalisation</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'hospitalisation' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-bed-pulse "></i></span>
-                                <span class="nk-menu-text">En cours d'hospitalisation</span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ Hospitaliza_encours }}</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'suivie_soins_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-clock-rotate-left "></i></span>
-                                <span class="nk-menu-text">Suivi soins hospitalisation</span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ Hospitaliza_encours }}</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'hospitalised_patient' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-bed "></i></span>
-                                <span class="nk-menu-text">Patients Sortis</span>
-                                <span class="nk-menu-badge">{{ discharged_count }}</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'hospi_unites' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-bed"></i></span>
-                                <span class="nk-menu-text">Unités d'hospitalisation</span>
-                            </a>
-                        </li>
-                        <!-- Section Paramètres sous-menu pour Hospitalisation -->
-                        <li class="nk-menu-item has-sub">
-                            <a href="#" class="nk-menu-link nk-menu-toggle">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-gears"></i></span>
-                                <span class="nk-menu-text">Paramètres</span>
-                            </a>
-                            <ul class="nk-menu-sub">
-                                <li class="nk-menu-item">
-                                    <a href="#" class="nk-menu-link">
-                                        <i class=" fa-solid fa-flask-vial mr-3"></i>
-                                        <span class="nk-menu-text">Analyses</span>
-                                    </a>
-                                </li>
-                                <li class="nk-menu-item">
-                                    <a href="#" class="nk-menu-link">
-                                        <i class=" fa-solid fa-tools mr-3"></i>
-                                        <span class="nk-menu-text">Kits</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- Section Suivi -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Suivi Patients</h6>
-                        </li>
+        <!-- Menu -->
+        <div class="nk-sidebar-menu">
+          <ul class="nk-menu">
 
-                        <li class="nk-menu-item">
-                            <a href="{% url 'bilan_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-file-arrow-up"></i></span>
-                                <span class="nk-menu-text">Bilans Initiaux </span>
-                                <span class="nk-menu-badge bg-primary text-white">{{ bilaninitial }}</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'suivi_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-folder-tree"></i></span>
-                                <span class="nk-menu-text">Suivi des Patients </span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ suivi_nbr }}</span>
-                            </a>
-                        </li>
+            <!-- Générale -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Générale</h6>
+            </li>
 
-                        <!-- Section Spécialités -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Maladies sous surveillance</h6>
-                        </li>
-                        {% for maladie in services %}
-                            <li class="nk-menu-item has-sub">
-                                <a href="#" class="nk-menu-link nk-menu-toggle">
-                                    <span class="nk-menu-icon"><i class="fa-solid fa-virus"></i></span>
-                                    <span class="nk-menu-text">{{ maladie }}</span>
-                                </a>
-                                <ul class="nk-menu-sub">
-                                    {% for sbactivity in maladie.subactivities.all %}
-                                        <li class="nk-menu-item">
-                                            <a href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}"
-                                               class="nk-menu-link">
-                                                <i class="{{ sbactivity.icon }} mr-3"></i>
-                                                <span class="nk-menu-text">{{ sbactivity.nom }}</span>
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endfor %}
+            <li class="nk-menu-item">
+              <a href="{% url 'home' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><em class="icon ni ni-dashboard-fill text-primary"></em></span>
+                </span>
+                <span class="nk-menu-text text-dark">Dashboard</span>
+              </a>
+            </li>
 
-                        <!-- Section Laboratoire -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Laboratoire</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'echantillons_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-vial"></i></span>
-                                <span class="nk-menu-text">Prélèvements</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'examen_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-flask-vial"></i></span>
-                                <span class="nk-menu-text">Demande d'Analyse </span>
-                                <span class="nk-menu-badge bg-danger text-white">{{ examencount }}</span>
-                            </a>
-                        </li>
+            <li class="nk-menu-item">
+              <a href="{% url 'global_search' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><em class="icon ni ni-search"></em></span>
+                </span>
+                <span class="nk-menu-text">Recherche</span>
+                <span class="nk-menu-badge">{{ patient_nbr }}</span>
+              </a>
+            </li>
 
-                        <li class="nk-menu-item">
-                            <a href="{% url 'examen_done_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-flask-vial"></i></span>
-                                <span class="nk-menu-text">Analyses effectués </span>
-                                <span class="nk-menu-badge">{{ examensdonecount }}</span>
-                            </a>
-                        </li>
+            <!-- Accueil -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Accueil</h6>
+            </li>
 
-                        <!-- Section Pharmacie -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Pharmacie</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'medicaments' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i
-                                        class="fa-solid fa-prescription-bottle-medical"></i></span>
-                                <span class="nk-menu-text">Médicaments</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'mouvement-stock' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-arrow-down-up-across-line"></i></span>
-                                <span class="nk-menu-text">Mouvement de stock</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'rendezvous_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-calendar"></i></span>
-                                <span class="nk-menu-text">Rendez-vous</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'commandes-list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-basket-shopping"></i></span>
-                                <span class="nk-menu-text">Commandes</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="#" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-chart-bar"></i></span>
-                                <span class="nk-menu-text">Rapports</span>
-                            </a>
-                        </li>
+            <li class="nk-menu-item">
+              <a href="{% url 'attente' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><em class="icon ni ni-users-fill"></em></span>
+                </span>
+                <span class="nk-menu-text">Salle d'attente</span>
+                <span class="nk-menu-badge badge-danger">{{ apointments_nbr }}</span>
+              </a>
+            </li>
 
-                        <!-- Section Parametres -->
-                        <li class="nk-menu-heading">
-                            <h6 class="overline-title text-primary-alt">Paramètres</h6>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'employee_list' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-user-circle"></i></span>
-                                <span class="nk-menu-text">Gestion des Employees</span>
-                            </a>
-                        </li>
-                        <li class="nk-menu-item">
-                            <a href="{% url 'user_role' %}" class="nk-menu-link">
-                                <span class="nk-menu-icon"><i class="fa-solid fa-user-secret"></i></span>
-                                <span class="nk-menu-text">Gestion des Rôles</span>
-                            </a>
-                        </li>   
-                    </ul>
-                    <!-- Quick Actions -->
-                    <div class="sidebar-quick-actions mb-5">
-                        <div class="quick-actions-title">Actions Rapides</div>
-                        <div class="quick-actions-grid mb-5">
-                            <a href="{% url 'add_patient' %}" class="quick-action-item bg-danger">
-                                <i class="fa-solid fa-user-plus"></i>
-                                <span>Nouveau Patient</span>
-                            </a>
-                            <a href="{% url 'consultation_list' %}" class="quick-action-item bg-primary">
-                                <i class="fa-solid fa-stethoscope"></i>
-                                <span>Nouvelle Consultation</span>
-                            </a>
-                            <a href="{% url 'examen_list' %}" class="quick-action-item bg-warning">
-                                <i class="fa-solid fa-flask-vial"></i>
-                                <span>Demande d'Analyse</span>
-                            </a>
-                            <a href="{% url 'urgences_list' %}" class="quick-action-item bg-teal">
-                                <i class="fa-solid fa-ambulance"></i>
-                                <span>Cas Urgent</span>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- .nk-menu -->
-                </div>
-                <!-- .nk-sidebar-menu -->
+            <li class="nk-menu-item">
+              <a href="{% url 'appointment_over' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><em class="icon ni ni-calendar-check"></em></span>
+                </span>
+                <span class="nk-menu-text">Patients reçus</span>
+                <span class="nk-menu-badge">{{ appointments_all }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'appointment_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
+                </span>
+                <span class="nk-menu-text">Rendez-vous</span>
+                <span class="nk-menu-badge">{{ appointments_all }}</span>
+              </a>
+            </li>
+
+            <!-- Consultation -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Consultation</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'consultation_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-stethoscope"></i></span>
+                </span>
+                <span class="nk-menu-text">Liste Consultations</span>
+                <span class="nk-menu-badge">{{ consul_nbr }}</span>
+              </a>
+            </li>
+
+            <!-- Urgences -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Urgences</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'urgences_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon icon-danger"><i class="fa-solid fa-ambulance"></i></span>
+                </span>
+                <span class="nk-menu-text">Liste des Urgences</span>
+                <span class="nk-menu-badge">{{ urgencehospi }}</span>
+              </a>
+            </li>
+
+            <!-- Hospitalisation -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Hospitalisation</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'hospitalisation' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-bed-pulse"></i></span>
+                </span>
+                <span class="nk-menu-text">En cours d'hospitalisation</span>
+                <span class="nk-menu-badge badge-danger">{{ Hospitaliza_encours }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'suivie_soins_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                </span>
+                <span class="nk-menu-text">Suivi soins hospitalisation</span>
+                <span class="nk-menu-badge badge-danger">{{ Hospitaliza_encours }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'hospitalised_patient' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-bed"></i></span>
+                </span>
+                <span class="nk-menu-text">Patients Sortis</span>
+                <span class="nk-menu-badge">{{ discharged_count }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'hospi_unites' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-hospital"></i></span>
+                </span>
+                <span class="nk-menu-text">Unités d'hospitalisation</span>
+              </a>
+            </li>
+
+            <!-- Paramètres hospi (submenu) -->
+            <li class="nk-menu-item has-sub">
+              <a href="#" class="nk-menu-link nk-menu-toggle" aria-expanded="false">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-gears"></i></span>
+                </span>
+                <span class="nk-menu-text">Paramètres</span>
+                <span class="submenu-caret"><em class="icon ni ni-chevron-right"></em></span>
+              </a>
+              <ul class="nk-menu-sub">
+                <li class="nk-menu-item">
+                  <a href="#" class="nk-menu-link">
+                    <span class="sub-dot"></span>
+                    <span class="nk-menu-text">Analyses</span>
+                  </a>
+                </li>
+                <li class="nk-menu-item">
+                  <a href="#" class="nk-menu-link">
+                    <span class="sub-dot"></span>
+                    <span class="nk-menu-text">Kits</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <!-- Suivi -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Suivi Patients</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'bilan_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-file-arrow-up"></i></span>
+                </span>
+                <span class="nk-menu-text">Bilans Initiaux</span>
+                <span class="nk-menu-badge badge-primary">{{ bilaninitial }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'suivi_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-folder-tree"></i></span>
+                </span>
+                <span class="nk-menu-text">Suivi des Patients</span>
+                <span class="nk-menu-badge badge-danger">{{ suivi_nbr }}</span>
+              </a>
+            </li>
+
+            <!-- Maladies -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Maladies sous surveillance</h6>
+            </li>
+
+            {% for maladie in services %}
+              <li class="nk-menu-item has-sub">
+                <a href="#" class="nk-menu-link nk-menu-toggle" aria-expanded="false">
+                  <span class="nk-menu-icon">
+                    <span class="medical-icon"><i class="fa-solid fa-virus"></i></span>
+                  </span>
+                  <span class="nk-menu-text">{{ maladie }}</span>
+                  <span class="submenu-caret"><em class="icon ni ni-chevron-right"></em></span>
+                </a>
+                <ul class="nk-menu-sub">
+                  {% for sbactivity in maladie.subactivities.all %}
+                    <li class="nk-menu-item">
+                      <a href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}"
+                         class="nk-menu-link">
+                        <span class="sub-dot"></span>
+                        <span class="nk-menu-text">{{ sbactivity.nom }}</span>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+
+            <!-- Laboratoire -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Laboratoire</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'echantillons_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-vial"></i></span>
+                </span>
+                <span class="nk-menu-text">Prélèvements</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'examen_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-flask-vial"></i></span>
+                </span>
+                <span class="nk-menu-text">Demande d'Analyse</span>
+                <span class="nk-menu-badge badge-danger">{{ examencount }}</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'examen_done_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-clipboard-check"></i></span>
+                </span>
+                <span class="nk-menu-text">Analyses effectuées</span>
+                <span class="nk-menu-badge">{{ examensdonecount }}</span>
+              </a>
+            </li>
+
+            <!-- Pharmacie -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Pharmacie</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'medicaments' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+                </span>
+                <span class="nk-menu-text">Médicaments</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'mouvement-stock' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-arrow-down-up-across-line"></i></span>
+                </span>
+                <span class="nk-menu-text">Mouvement de stock</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'rendezvous_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-calendar"></i></span>
+                </span>
+                <span class="nk-menu-text">Rendez-vous</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'commandes-list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-basket-shopping"></i></span>
+                </span>
+                <span class="nk-menu-text">Commandes</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="#" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-chart-bar"></i></span>
+                </span>
+                <span class="nk-menu-text">Rapports</span>
+              </a>
+            </li>
+
+            <!-- Paramètres -->
+            <li class="nk-menu-heading">
+              <h6 class="overline-title text-primary-alt">Paramètres</h6>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'employee_list' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-user-circle"></i></span>
+                </span>
+                <span class="nk-menu-text">Gestion des Employés</span>
+              </a>
+            </li>
+
+            <li class="nk-menu-item">
+              <a href="{% url 'user_role' %}" class="nk-menu-link">
+                <span class="nk-menu-icon">
+                  <span class="medical-icon"><i class="fa-solid fa-user-secret"></i></span>
+                </span>
+                <span class="nk-menu-text">Gestion des Rôles</span>
+              </a>
+            </li>
+
+          </ul>
+
+          <!-- Quick Actions -->
+          <div class="sidebar-quick-actions">
+            <div class="quick-actions-title">Actions Rapides</div>
+
+            <div class="quick-actions-grid">
+              <a href="{% url 'add_patient' %}" class="quick-action-item qa-danger">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Nouveau Patient</span>
+              </a>
+
+              <a href="{% url 'consultation_list' %}" class="quick-action-item qa-primary">
+                <i class="fa-solid fa-stethoscope"></i>
+                <span>Nouvelle Consultation</span>
+              </a>
+
+              <a href="{% url 'examen_list' %}" class="quick-action-item qa-warning">
+                <i class="fa-solid fa-flask-vial"></i>
+                <span>Demande d'Analyse</span>
+              </a>
+
+              <a href="{% url 'urgences_list' %}" class="quick-action-item qa-teal">
+                <i class="fa-solid fa-ambulance"></i>
+                <span>Cas Urgent</span>
+              </a>
             </div>
-            <!-- .nk-sidebar-content -->
-        </div>
-        <!-- .nk-sidebar-body -->
-    </div>
-    <!-- .nk-sidebar-element -->
+          </div>
+
+        </div><!-- .nk-sidebar-menu -->
+      </div><!-- .nk-sidebar-content -->
+    </div><!-- .nk-sidebar-body -->
+  </div><!-- .nk-sidebar-element -->
 </div>
 <!-- sidebar @e -->
 
+
 <style>
-    
-        .nk-sidebar-user {
-        display: flex;
-        align-items: center;
-        padding: 1rem 1rem;
-        border-bottom: 1px solid #e2e8f0;
-        background: linear-gradient(135deg, #5da0e3 0%, #011b35 100%);
-    }
+  /* ============== Sidebar brand ============== */
+  .sidebar-brand-title{
+    font-weight: 900;
+    color: var(--text);
+    margin-left: 5px;
+    letter-spacing: .4px;
+  }
+  html[data-theme="dark"] .sidebar-brand-title{
+    color: var(--text);
+  }
 
-    .user-avatar {
-        width: 45px;
-        height: 45px;
-        border-radius: 12px;
-        overflow: hidden;
-        {#margin-right: 5px;#}
-        border: 3px solid #e2e8f0;
-    }
+  .sidebar-department{
+    font-size: 10px;
+    padding: 10px 7px;
+    text-align: center;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
 
-    .user-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+  /* ============== User card ============== */
+  .nk-sidebar-user{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(7, 85, 232, 0.22) 0%, rgba(2, 48, 83, 0.65) 100%);
+  }
+  html[data-theme="dark"] .nk-sidebar-user{
+    background: linear-gradient(135deg, rgba(14,165,233,.18) 0%, rgba(3,105,161,.20) 100%);
+  }
 
-    .user-info {
-        flex: 1;
-    }
+  .user-avatar{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    border: 2px solid rgba(255,255,255,.55);
+    background: rgba(15,23,42,.30);
+    flex: 0 0 auto;
+    overflow: hidden;
+  }
 
-    .user-name {
-        font-weight: 600;
-        color: #ffffff;
-        font-size: 0.95rem;
-    }
+  .user-initials{
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .5px;
+  }
 
-    .user-role {
-        font-size: 0.8rem;
-        color: #e8eaed;
-    }
+  .user-info{ flex: 1; min-width: 0; }
+  .user-name{
+    font-weight: 800;
+    color: #fff;
+    font-size: .95rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .user-role{
+    font-size: .78rem;
+    color: rgba(255,255,255,.88);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    .user-status {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid white;
-    }
+  .user-status{
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,.9);
+    flex: 0 0 auto;
+  }
+  .user-status.online{ background: var(--success); }
+  .user-status.offline{ background: var(--danger); }
 
-    .user-status.online {
-        background: var(--medical-success);
-    }
+  /* ============== Submenu visuals ============== */
+  .submenu-caret{
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 10px;
+    background: rgba(14,165,233,.10);
+    transition: transform .28s var(--ease), background .28s var(--ease);
+  }
+  html[data-theme="dark"] .submenu-caret{
+    background: rgba(14,165,233,.14);
+  }
 
-    .user-status.offline {
-        background: var(--medical-error);
-    }
-    /* Quick Actions */
-    .sidebar-quick-actions {
-        padding: 1.5rem 1rem;
-        border-top: 1px solid #e2e8f0;
-        margin-top: 1rem;
-    }
+  .nk-menu-item.has-sub.open > .nk-menu-toggle .submenu-caret{
+    transform: rotate(90deg);
+    background: rgba(14,165,233,.18);
+  }
 
-    .quick-actions-title {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 1rem;
-    }
+  /* Submenu dot */
+  .sub-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(14,165,233,.55);
+    display: inline-block;
+    margin-right: 10px;
+    flex: 0 0 auto;
+  }
+  html[data-theme="dark"] .sub-dot{
+    background: rgba(14,165,233,.65);
+  }
 
-    .quick-actions-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
-    }
+  /* ============== Badges premium ============== */
+  .nk-menu-badge{
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 12px;
+    padding: 4px 10px;
+    background: rgba(100,116,139,.12);
+    color: var(--text-2);
+    border: 1px solid rgba(100,116,139,.16);
+  }
+  html[data-theme="dark"] .nk-menu-badge{
+    background: rgba(148,163,184,.12);
+    color: var(--text-2);
+    border-color: rgba(148,163,184,.18);
+  }
 
-    .quick-action-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem 0.5rem;
-        border-radius: 10px;
-        color: white;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        text-align: center;
-    }
+  .nk-menu-badge.badge-danger{
+    background: rgba(239,68,68,.14);
+    color: #991b1b;
+    border-color: rgba(239,68,68,.22);
+  }
+  html[data-theme="dark"] .nk-menu-badge.badge-danger{
+    color: #fecaca;
+  }
 
-    .quick-action-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        color: white;
-        text-decoration: none;
-    }
+  .nk-menu-badge.badge-primary{
+    background: rgba(14,165,233,.16);
+    color: var(--primary-700);
+    border-color: rgba(14,165,233,.26);
+  }
+  html[data-theme="dark"] .nk-menu-badge.badge-primary{
+    color: #e0f2fe;
+  }
 
-    .quick-action-item i {
-        font-size: 1.25rem;
-        margin-bottom: 0.5rem;
-    }
+  /* Danger icon helper */
+  .medical-icon.icon-danger{
+    background: rgba(239,68,68,.14) !important;
+    color: #ef4444 !important;
+  }
+  .nk-menu-link:hover .medical-icon.icon-danger{
+    background: #ef4444 !important;
+    color: #fff !important;
+  }
 
-    .quick-action-item span {
-        font-size: 0.7rem;
-        font-weight: 500;
-        line-height: 1.2;
-    }
+  /* ============== Quick actions premium ============== */
+  .sidebar-quick-actions{
+    padding: 16px 14px 18px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+  }
+  .quick-actions-title{
+    font-size: .78rem;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    margin-bottom: 12px;
+  }
+  .quick-actions-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
 
+  .quick-action-item{
+    display: grid;
+    place-items: center;
+    gap: 6px;
+    padding: 12px 10px;
+    border-radius: 14px;
+    color: #fff !important;
+    text-decoration: none !important;
+    font-weight: 800;
+    line-height: 1.1;
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 10px 22px rgba(2, 8, 23, .08);
+    transition: transform .28s var(--ease), box-shadow .28s var(--ease), filter .28s var(--ease);
+  }
+
+  .quick-action-item i{ font-size: 1.15rem; }
+  .quick-action-item span{ font-size: .72rem; text-align: center; opacity: .95; }
+
+  .quick-action-item:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 16px 34px rgba(2, 8, 23, .12);
+    filter: brightness(1.02);
+  }
+
+  /* Color variants aligned to system tokens */
+  .qa-primary{ background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%); }
+  .qa-danger{ background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+  .qa-warning{ background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
+  .qa-teal{ background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
 </style>

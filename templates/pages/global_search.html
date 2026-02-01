@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
             const patientRows = document.querySelectorAll('.patient-row');
-            
+
             patientRows.forEach(row => {
                 const searchData = row.getAttribute('data-search');
                 if (searchData.includes(searchTerm)) {
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleFilters.addEventListener('click', function(e) {
             e.preventDefault();
             const isVisible = filtersContainer.style.display !== 'none';
-            
+
             if (isVisible) {
                 filtersContainer.style.display = 'none';
                 this.querySelector('span').textContent = 'Afficher les filtres';
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkbox.addEventListener('change', function() {
             const columnClass = this.id.replace('col-', 'col-');
             const columns = document.querySelectorAll('.' + columnClass);
-            
+
             columns.forEach(col => {
                 col.style.display = this.checked ? '' : 'none';
             });
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .card-tools-toggle .form-control-wrap {
         min-width: 100%;
     }
-    
+
     .nk-tb-col {
         padding: 8px 12px;
     }

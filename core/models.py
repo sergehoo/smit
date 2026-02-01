@@ -5,13 +5,17 @@ import random
 import uuid
 
 import requests
+
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Max
+from django.utils import timezone
 from django.utils.html import format_html
+from django.utils.text import slugify
 from django.utils.timezone import now
 from django_countries.fields import CountryField
 from guardian.models import UserObjectPermissionBase, GroupObjectPermissionBase
@@ -20,6 +24,8 @@ from simple_history.models import HistoricalRecords
 from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 import qrcode
+
+from core.utils.phones import normalize_phone
 
 
 def generate_avatar(name, bg_color, size=26, text_color=(255, 255, 255)):
@@ -825,11 +831,18 @@ class TimestampedModel(models.Model):
 class Service(models.Model):
     nom = models.CharField(max_length=225, null=True, blank=True)
     icon = models.CharField(max_length=225, null=True, blank=True, default='fa-solid fa-virus')
+    slug = models.SlugField(max_length=225, unique=True, db_index=True, null=True,
+                            blank=True)  # ex: retroviraux, tuberculose
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if not self.slug and self.nom:
+            self.slug = slugify(self.nom)
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.nom
+        return self.nom or ""
 
     # @property
     # def consultation_count(self):
@@ -847,8 +860,8 @@ class ServiceSubActivity(models.Model):
 
 class Employee(models.Model):
     from pharmacy.models import Pharmacy
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee",db_index=True )
-    qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100,db_index=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee", db_index=True)
+    qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100, db_index=True)
     gender = models.CharField(choices=Sexe_choices, max_length=100, null=True, blank=True, )
     situation_matrimoniale = models.CharField(choices=situation_matrimoniales_choices, max_length=100, null=True,
                                               blank=True, )
@@ -857,7 +870,8 @@ class Employee(models.Model):
     email = models.CharField(null=True, blank=True, default='email@sah.com', max_length=70)
     birthdate = models.DateField(null=True, blank=True)
     departement = models.ForeignKey('Service', on_delete=models.CASCADE, verbose_name="service", blank=True, null=True)
-    pharmacie = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name="Pharmacie", blank=True, null=True,db_index=True)
+    pharmacie = models.ForeignKey(Pharmacy, on_delete=models.CASCADE, verbose_name="Pharmacie", blank=True, null=True,
+                                  db_index=True)
     photo = models.ImageField(null=True, blank=True, default='urap/users/5.png', upload_to='urap/users')
     sortie = models.SmallIntegerField(null=True, blank=True, default=0)
     is_deleted = models.SmallIntegerField(null=True, blank=True, default=0)
@@ -880,25 +894,25 @@ class Employee(models.Model):
 
 
 class PolesRegionaux(models.Model):
-    name = models.CharField(max_length=100,db_index=True)
+    name = models.CharField(max_length=100, db_index=True)
 
     def __str__(self):
         return self.name if self.name else "Unnamed Pole"
 
 
 class HealthRegion(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True,db_index=True)
-    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
+    name = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
 
     def __str__(self):
         return self.name if self.name else "Unnamed Region"
 
 
 class DistrictSanitaire(models.Model):
-    nom = models.CharField(max_length=100, null=True, blank=True,db_index=True )
-    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True,db_index=True )
-    geom = models.PointField(null=True, blank=True,db_index=True )
-    geojson = models.JSONField(null=True, blank=True,db_index=True )
+    nom = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, db_index=True)
+    geom = models.PointField(null=True, blank=True, db_index=True)
+    geojson = models.JSONField(null=True, blank=True, db_index=True)
     previous_rank = models.IntegerField(null=True, blank=True)
 
     def clean(self):
@@ -917,8 +931,8 @@ class DistrictSanitaire(models.Model):
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True, unique=True,db_index=True)
-    type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True,db_index=True)
+    name = models.CharField(max_length=100, null=True, blank=True, unique=True, db_index=True)
+    type = models.CharField(choices=type_localite_choices, max_length=100, null=True, blank=True, db_index=True)
     population = models.CharField(max_length=100, null=True, blank=True)
     source = models.CharField(max_length=255, null=True, blank=True)
     district = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, null=True, blank=True, )
@@ -928,17 +942,17 @@ class Location(models.Model):
 
 
 class Patient(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
-    code_patient = models.CharField(max_length=100, unique=True,db_index=True)
-    code_vih = models.CharField(max_length=100, blank=True, unique=True,db_index=True)
-    nom = models.CharField(max_length=225,db_index=True)
-    prenoms = models.CharField(max_length=225,db_index=True)
-    contact = models.CharField(max_length=225,db_index=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
+    code_patient = models.CharField(max_length=100, unique=True, db_index=True)
+    code_vih = models.CharField(max_length=100, blank=True, unique=True, db_index=True)
+    nom = models.CharField(max_length=225, db_index=True)
+    prenoms = models.CharField(max_length=225, db_index=True)
+    contact = models.CharField(max_length=225, db_index=True)
     adresse_mail = models.CharField(max_length=50, blank=True, unique=True)
     situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
     lieu_naissance = models.CharField(max_length=200, )
-    date_naissance = models.DateField(null=True, blank=True,db_index=True)
-    genre = models.CharField(max_length=50, choices=Sexe_choices,db_index=True)
+    date_naissance = models.DateField(null=True, blank=True, db_index=True)
+    genre = models.CharField(max_length=50, choices=Sexe_choices, db_index=True)
     nationalite = models.CharField(max_length=200)
     ethnie = models.CharField(null=True, blank=True, max_length=100)
     profession = models.CharField(max_length=100, null=True, blank=True)
@@ -950,12 +964,12 @@ class Patient(models.Model):
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True)
     qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)
-    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True,db_index=True)
+    localite = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, db_index=True)
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     urgence = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True,db_index=True)
-    updated_at = models.DateTimeField(auto_now=True,db_index=True)
-    details = models.JSONField(null=True, blank=True,db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+    details = models.JSONField(null=True, blank=True, db_index=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -964,6 +978,14 @@ class Patient(models.Model):
             ('view_dossier_patient', 'Can View dossier patient'),
             # ('delete_patient', 'Can delete patient'),
         )
+
+    def clean(self):
+        super().clean()
+        if self.contact:
+            try:
+                self.contact = normalize_phone(self.contact, region="CI")
+            except ValueError as e:
+                raise ValidationError({"contact": _(str(e))})
 
     def generate_qr_code(self):
         """
@@ -1014,6 +1036,13 @@ class Patient(models.Model):
         return all_services
 
     def save(self, *args, **kwargs):
+        if self.contact:
+            try:
+                self.contact = normalize_phone(self.contact, region="CI")
+            except ValueError:
+                # si tu veux refuser en prod -> raise
+                # sinon tu peux juste laisser tel quel (mais je déconseille)
+                raise
         if not self.code_vih:
             self.code_vih = get_incremental_code()
         if not self.code_patient:
@@ -1056,38 +1085,6 @@ class Patient(models.Model):
 
         return new_code
 
-    # def get_incremental_code(self) -> str:
-    #     current_year = datetime.date.today().year
-    #     current_year_short = str(current_year)[2:]
-    #
-    #     # Use a transaction to ensure atomicity and uniqueness
-    #     with transaction.atomic():
-    #         # Lock the table to prevent race conditions
-    #         latest_patient = Patient.objects.select_for_update().filter(code_vih__startswith=current_year_short
-    #                                                                     ).aggregate(Max('code_vih'))['code_vih__max']
-    #
-    #         if latest_patient:
-    #             # Extract the numeric part and increment it
-    #             latest_number = int(latest_patient.split('-')[1])
-    #             new_number = latest_number + 1
-    #         else:
-    #             # If no patient for the current year, start with 1
-    #             new_number = 1
-    #
-    #         # Format the new number with leading zeros
-    #         new_code = f"{current_year_short}-{new_number:06d}"
-    #
-    #     return new_code
-
-    # Optionally, you can also use signals to handle the avatar generation
-    # @receiver(post_save, sender=Patient)
-    # def create_patient_avatar(sender, instance, created, **kwargs):
-    #     if created and not instance.avatar:
-    #         name = f"{instance.nom} {instance.prenoms}"
-    #         avatar_image = generate_avatar(name)
-    #         instance.avatar.save(f"{instance.code_patient}.png", ContentFile(avatar_image.read()), save=False)
-    #         instance.save()
-
     @property
     def calculate_age(self):
         if self.date_naissance:
@@ -1107,6 +1104,293 @@ class Patient(models.Model):
         prenoms = self.prenoms if self.prenoms else "Inconnu"
         nom = self.nom if self.nom else "Inconnu"
         return f'{prenoms} {nom} '
+
+
+class VIHProfile(models.Model):
+    """
+    Dossier VIH séparé du modèle Patient (discrétion / sécurité).
+    Point d’entrée "sécurisé" pour accéder à toutes les activités du patient.
+    """
+
+    # =========================
+    # Liens & Identifiants
+    # =========================
+    patient = models.OneToOneField(
+        "Patient",
+        on_delete=models.CASCADE,
+        related_name="vih_profile",
+        db_index=True,
+    )
+
+    code_vih = models.CharField(max_length=100, unique=True, db_index=True)
+
+    site_code = models.CharField(max_length=50, null=True, blank=True, db_index=True)
+    numero_dossier_vih = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+
+    # =========================
+    # Statut & Dates clés
+    # =========================
+    class VIHStatus(models.TextChoices):
+        ACTIVE = "active", "Actif (suivi en cours)"
+        TRANSFERRED_OUT = "transferred_out", "Transféré (sortant)"
+        TRANSFERRED_IN = "transferred_in", "Transféré (entrant)"
+        LOST = "lost", "Perdu de vue"
+        DECEASED = "deceased", "Décédé"
+        CLOSED = "closed", "Clos (archivé)"
+
+    status = models.CharField(max_length=20, choices=VIHStatus.choices, default=VIHStatus.ACTIVE, db_index=True)
+
+    date_diagnostic = models.DateField(null=True, blank=True, db_index=True)
+    date_enrolement = models.DateField(null=True, blank=True, db_index=True)
+    date_debut_arv = models.DateField(null=True, blank=True, db_index=True)
+    date_derniere_visite = models.DateField(null=True, blank=True, db_index=True)
+    date_prochaine_visite = models.DateField(null=True, blank=True, db_index=True)
+
+    # =========================
+    # Données cliniques "noyau"
+    # =========================
+    class VIHType(models.TextChoices):
+        HIV1 = "hiv1", "VIH-1"
+        HIV2 = "hiv2", "VIH-2"
+        DUAL = "dual", "VIH-1/2"
+        UNKNOWN = "unknown", "Inconnu"
+
+    vih_type = models.CharField(max_length=10, choices=VIHType.choices, default=VIHType.UNKNOWN, db_index=True)
+
+    class OMSStage(models.IntegerChoices):
+        STAGE_1 = 1, "OMS I"
+        STAGE_2 = 2, "OMS II"
+        STAGE_3 = 3, "OMS III"
+        STAGE_4 = 4, "OMS IV"
+
+    oms_stage = models.IntegerField(choices=OMSStage.choices, null=True, blank=True, db_index=True)
+
+    cd4_baseline = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(0)])
+    charge_virale_baseline = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(0)])
+    date_bilan_baseline = models.DateField(null=True, blank=True)
+
+    class YesNoUnknown(models.TextChoices):
+        YES = "yes", "Oui"
+        NO = "no", "Non"
+        UNKNOWN = "unknown", "Inconnu"
+
+    tb_coinfection = models.CharField(max_length=10, choices=YesNoUnknown.choices, default=YesNoUnknown.UNKNOWN)
+    hbv_coinfection = models.CharField(max_length=10, choices=YesNoUnknown.choices, default=YesNoUnknown.UNKNOWN)
+    hcv_coinfection = models.CharField(max_length=10, choices=YesNoUnknown.choices, default=YesNoUnknown.UNKNOWN)
+
+    # =========================
+    # Traitement ARV (résumé programme)
+    # =========================
+    regimen_code = models.CharField(
+        max_length=80,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Code schéma ARV (ex: TDF/3TC/DTG, AZT/3TC/EFV, etc.)",
+    )
+
+    class RegimenLine(models.TextChoices):
+        FIRST = "first", "1ère ligne"
+        SECOND = "second", "2ème ligne"
+        THIRD = "third", "3ème ligne"
+        UNKNOWN = "unknown", "Inconnue"
+
+    ligne_traitement = models.CharField(max_length=10, choices=RegimenLine.choices, default=RegimenLine.UNKNOWN,
+                                        db_index=True)
+
+    class Adherence(models.TextChoices):
+        GOOD = "good", "Bonne"
+        FAIR = "fair", "Moyenne"
+        POOR = "poor", "Mauvaise"
+        UNKNOWN = "unknown", "Inconnue"
+
+    adherence_estimee = models.CharField(max_length=10, choices=Adherence.choices, default=Adherence.UNKNOWN)
+
+    # =========================
+    # Contexte
+    # =========================
+    grossesse_en_cours = models.BooleanField(default=False)
+    allaitement = models.BooleanField(default=False)
+
+    provenance = models.CharField(max_length=255, null=True, blank=True)
+    motif_transfert = models.CharField(max_length=255, null=True, blank=True)
+
+    notes = models.TextField(null=True, blank=True)
+    extra = models.JSONField(null=True, blank=True)
+
+    # =========================
+    # Traçabilité
+    # =========================
+    created_by = models.ForeignKey(
+        "Employee",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="vih_profiles_created",
+    )
+    updated_by = models.ForeignKey(
+        "Employee",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="vih_profiles_updated",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Dossier VIH"
+        verbose_name_plural = "Dossiers VIH"
+        indexes = [
+            models.Index(fields=["status", "date_prochaine_visite"]),
+            models.Index(fields=["site_code", "status"]),
+            models.Index(fields=["date_debut_arv"]),
+        ]
+
+    def __str__(self):
+        return f"Dossier VIH ({self.code_vih})"
+
+    # =========================
+    # Helpers
+    # =========================
+    @property
+    def is_active(self) -> bool:
+        return self.status == self.VIHStatus.ACTIVE
+
+    def touch_last_visit(self, date=None, save=True):
+        self.date_derniere_visite = date or timezone.now().date()
+        if save:
+            self.save(update_fields=["date_derniere_visite", "updated_at"])
+
+    def _generate_code_vih(self) -> str:
+        current_year_short = str(datetime.date.today().year)[2:]
+        random_digits = random.randint(100000, 999999)
+        return f"{current_year_short}-{random_digits}"
+
+    def save(self, *args, **kwargs):
+        if not self.code_vih:
+            for _ in range(10):
+                code = self._generate_code_vih()
+                if not VIHProfile.objects.filter(code_vih=code).exists():
+                    self.code_vih = code
+                    break
+            if not self.code_vih:
+                self.code_vih = f"{str(datetime.date.today().year)[2:]}-{random.randint(1000000, 9999999)}"
+        super().save(*args, **kwargs)
+
+    # ==========================================================
+    # ✅ PROPERTIES: accès centralisé aux activités (via Patient)
+    # ==========================================================
+    @property
+    def suivis(self):
+        return (
+            self.patient.suivimedecin
+            .select_related("services", "activite")
+            .prefetch_related("examens")  # ✅ si examens = M2M
+            .order_by("-date_suivi", "-created_at")
+        )
+
+    @property
+    def traitements_arv(self):
+        """
+        Historique des traitements ARV enregistrés (schémas, posologie, etc.)
+        """
+        return (
+            self.patient.patientarv
+            .select_related("suivi")
+            .order_by("-date_mise_a_jour", "-date_creation")
+        )
+
+    @property
+    def depistages_vih(self):
+        """
+        Historique dépistage VIH (TROD/ELISA/PCR…)
+        """
+        # related_name='depistages' sur Patient (mais ici tu as 'core.Patient' dans DepistageVIH)
+        # => si Patient est le même modèle, ça marche direct: self.patient.depistages.all()
+        return (
+            self.patient.depistages
+            .select_related("agent")
+            .order_by("-date_test", "-created_at")
+        )
+
+    @property
+    def infections_opportunistes(self):
+        """
+        Historique des infections opportunistes
+        """
+        return (
+            self.patient.infections_opportunistes
+            .select_related("suivi")
+            .order_by("-date_diagnostic", "-date_creation")
+        )
+
+    @property
+    def comorbidites(self):
+        """
+        Historique des comorbidités
+        """
+        return (
+            self.patient.comorbidites
+            .select_related("suivi")
+            .order_by("-date_diagnostic", "-date_creation")
+        )
+
+    @property
+    def exams_bilan(self):
+        return (
+            self.patient.paraclinical_exams
+            .select_related("hospitalisation", "created_by")  # OK
+            .order_by("-performed_at", "-prescribed_at", "-created_at")
+        )
+
+    # ------------------------
+    # Sous-vues utiles (CD4/CV)
+    # ------------------------
+    @property
+    def cd4_history(self):
+        """
+        Série CD4 basée sur les suivis (si cd4 est renseigné dans Suivi)
+        """
+        return (
+            self.patient.suivimedecin
+            .exclude(cd4__isnull=True)
+            .only("id", "date_suivi", "cd4", "created_at")
+            .order_by("date_suivi", "created_at")
+        )
+
+    @property
+    def charge_virale_history(self):
+        """
+        Série charge virale basée sur les suivis (si charge_virale est renseignée dans Suivi)
+        """
+        return (
+            self.patient.suivimedecin
+            .exclude(charge_virale__isnull=True)
+            .only("id", "date_suivi", "charge_virale", "created_at")
+            .order_by("date_suivi", "created_at")
+        )
+
+    @property
+    def last_suivi(self):
+        """
+        Dernier suivi (pratique pour dashboard)
+        """
+        return self.patient.suivimedecin.order_by("-date_suivi", "-created_at").first()
+
+    @property
+    def last_arv(self):
+        """
+        Dernier traitement ARV enregistré
+        """
+        return self.patient.patientarv.order_by("-date_mise_a_jour", "-date_creation").first()
+
+    @property
+    def last_exam(self):
+        """
+        Dernier examen paraclinique
+        """
+        return self.patient.paraclinical_exams.order_by("-performed_at", "-prescribed_at", "-created_at").first()
 
 
 class PatientAdresses(models.Model):
@@ -1251,9 +1535,9 @@ class Maladie(models.Model):
         ('modere', 'Modéré'),
         ('grave', 'Grave'),
     ]
-    code_cim = models.CharField(max_length=50, unique=True, blank=True, null=True,db_index=True)  # Code CIM-10
-    urlcim = models.CharField(max_length=100, unique=True, blank=True, null=True,db_index=True)  # Code CIM-10
-    nom = models.CharField(max_length=255,db_index=True)  # Nom de la maladie
+    code_cim = models.CharField(max_length=50, unique=True, blank=True, null=True, db_index=True)  # Code CIM-10
+    urlcim = models.CharField(max_length=100, unique=True, blank=True, null=True, db_index=True)  # Code CIM-10
+    nom = models.CharField(max_length=255, db_index=True)  # Nom de la maladie
     categorie = models.CharField(
         max_length=50,
         choices=CATEGORY_CHOICES,
@@ -1355,5 +1639,3 @@ class VisitCounter(models.Model):
         return "🌍 Localisation non disponible"
 
     get_map_url.short_description = "Carte"
-
-
