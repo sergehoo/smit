@@ -327,7 +327,7 @@ SCHEDULER_ADMIN = True
 
 # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, 'components')
 
-STATICFILES_DIRS = [BASE_DIR.parent / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
