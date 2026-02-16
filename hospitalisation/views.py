@@ -874,37 +874,76 @@ def export_indicateur_subjectif_pdf(request, hospitalisation_id):
     return pdf
 
 
+
 @login_required
+@transaction.atomic
 def update_hospitalisation_discharge(request, hospitalisation_id):
-    hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    if request.method != "POST":
+        messages.info(request, "Action invalide. Veuillez soumettre le formulaire de sortie.")
+        return redirect("hospitalisationdetails", pk=hospitalisation_id)
+
+    # 🔒 Lock hospitalization (et éventuellement bed) pour éviter double sortie/concurrence
+    hospitalization = (
+        Hospitalization.objects
+        .select_for_update()
+        .select_related("patient")  # OK si patient non-null
+        .get(id=hospitalisation_id)
+    )
+
+    form = HospitalizationDischargeForm(request.POST, instance=hospitalization)
+
+    if not form.is_valid():
+        messages.error(request, "Veuillez vérifier les champs du formulaire.")
+        return redirect("hospitalisationdetails", pk=hospitalization.id)
+
+    hospitalization = form.save()
+
+    # (Optionnel) si tu veux forcer une date de sortie si non fournie
+    if not getattr(hospitalization, "discharge_date", None):
+        hospitalization.discharge_date = timezone.now()
+        hospitalization.save(update_fields=["discharge_date"])
+
+    # ✅ Recalcul motif APRES save (sinon tu envoies l'ancien texte)
     reason_html = hospitalization.discharge_reason or ""
-    reason_plain = strip_tags(reason_html)  # retire <p>, <br>, etc.
-    reason_plain = html.unescape(reason_plain)  # &amp; -> &, &lt; -> <
-    reason_plain = " ".join(reason_plain.split())  # normalise les espaces/retours ligne
+    reason_plain = html.unescape(strip_tags(reason_html))
+    reason_plain = " ".join(reason_plain.split())
 
-    if request.method == "POST":
-        form = HospitalizationDischargeForm(request.POST, instance=hospitalization)
-        if form.is_valid():
-            hospitalization = form.save()  # form.save() met déjà à jour l'objet
+    # Nettoyage (évite SMS trop long)
+    reason_plain = reason_plain[:220]  # ajuste si besoin
 
-            # Envoi du SMS
-            message = (
-                f"Sortie : {hospitalization.patient.nom} "
-                f"le {hospitalization.discharge_date.strftime('%d/%m/%Y à %Hh%M')}, "
-                f"motif : {hospitalization.status},{reason_plain}."
+    patient_name = getattr(hospitalization.patient, "nom", None) or str(hospitalization.patient)
 
-            )
-            safe_message = optimize_sms_text(message)
-            send_sms(get_employees_to_notify(), safe_message)
+    discharge_dt = hospitalization.discharge_date
+    discharge_str = discharge_dt.strftime("%d/%m/%Y à %Hh%M") if discharge_dt else "—"
 
-            messages.success(request, f"{hospitalization.patient.nom} a bien été sorti et notifié.")
-        else:
-            messages.error(request, "Veuillez vérifier les champs du formulaire.")
+    status = (getattr(hospitalization, "status", None) or "").strip()
 
-        return redirect('hospitalisationdetails', pk=hospitalization.id)
+    # ✅ SMS propre (pas de ponctuation bizarre)
+    parts = [f"Sortie: {patient_name}", f"le {discharge_str}"]
+    if status:
+        parts.append(f"statut: {status}")
+    if reason_plain:
+        parts.append(f"motif: {reason_plain}")
 
-    return redirect('hospitalisationdetails', pk=hospitalization.id)
+    message = " | ".join(parts)
+    safe_message = optimize_sms_text(message)
+    send_sms(get_employees_to_notify(), safe_message)
 
+    # (Optionnel mais recommandé) libérer le lit à la sortie
+    if getattr(hospitalization, "bed_id", None):
+        bed = (
+            LitHospitalisation.objects
+            .select_for_update()
+            .filter(id=hospitalization.bed_id)
+            .first()
+        )
+        if bed and bed.occuper:
+            bed.occupant = None
+            bed.occuper = False
+            bed.save(update_fields=["occupant", "occuper"])
+
+    messages.success(request, f"{patient_name} a bien été sorti et notifié.")
+    return redirect("hospitalisationdetails", pk=hospitalization.id)
 
 # def update_hospitalisation_discharge(request, hospitalisation_id):
 #     hospitalization = get_object_or_404(Hospitalization, id=hospitalisation_id)
@@ -2048,61 +2087,97 @@ def delete_bilan(request, bilan_id):
 
 @transaction.atomic
 def transferer_patient(request, hospitalisation_id):
-    """
-    Transfère un patient d'un lit à un autre en tenant compte des unités d'hospitalisation.
-    """
-    hospitalisation = get_object_or_404(Hospitalization, id=hospitalisation_id)
+    # 1) LOCK uniquement la ligne Hospitalization (sans JOIN)
+    hospitalisation = (
+        Hospitalization.objects
+        .select_for_update()   # lock row
+        .get(id=hospitalisation_id)
+    )
+
+    # 2) Charger patient (pas besoin de lock ici, mais ok)
     patient = hospitalisation.patient
 
     if request.method == "POST":
-        new_lit_id = request.POST.get("new_lit_id")
-
+        new_lit_id = (request.POST.get("new_lit_id") or "").strip()
         if not new_lit_id:
             messages.error(request, "Veuillez sélectionner un lit.")
             return redirect("hospitalisationdetails", pk=hospitalisation_id)
 
-        new_lit = get_object_or_404(LitHospitalisation, id=new_lit_id)
+        # 3) LOCK le lit cible
+        new_lit = (
+            LitHospitalisation.objects
+            .select_for_update()
+            .select_related("box__chambre__unite")  # OK si ces FK ne sont pas nullables
+            .get(id=new_lit_id)
+        )
 
-        # Vérifier si le lit est déjà occupé
+        # Si même lit
+        if hospitalisation.bed_id == new_lit.id:
+            messages.info(request, "Le patient est déjà dans ce lit.")
+            return redirect("hospitalisationdetails", pk=hospitalisation_id)
+
+        # Vérifier disponibilité
         if new_lit.occuper or new_lit.is_out_of_service or new_lit.is_cleaning:
             messages.error(request, "Ce lit est déjà occupé ou indisponible.")
             return redirect("hospitalisationdetails", pk=hospitalisation_id)
 
-        # Vérifier si le patient est déjà assigné à un lit
-        if hospitalisation.bed:
-            old_lit = hospitalisation.bed
+        # 4) Libérer ancien lit (si présent) => lock ancien lit aussi
+        old_lit_id = hospitalisation.bed_id
+        if old_lit_id:
+            old_lit = (
+                LitHospitalisation.objects
+                .select_for_update()
+                .get(id=old_lit_id)
+            )
             old_lit.occupant = None
             old_lit.occuper = False
-            old_lit.save()
+            old_lit.save(update_fields=["occupant", "occuper"])
 
-        # Assigner le patient au nouveau lit
+        # 5) Assigner nouveau lit
         new_lit.occupant = patient
         new_lit.occuper = True
-        new_lit.save()
+        new_lit.save(update_fields=["occupant", "occuper"])
 
-        # Mettre à jour l'hospitalisation
-        hospitalisation.bed = new_lit
+        # 6) Update hospitalisation
+        hospitalisation.bed_id = new_lit.id
         hospitalisation.updated_at = timezone.now()
-        hospitalisation.save()
+        hospitalisation.save(update_fields=["bed", "updated_at"])
+
+        # 7) Notification
         formatted_date = hospitalisation.updated_at.strftime("%d/%m/%Y %H:%M")
-        message = f"🔁 le patient : {patient.nom} → a été tranféré à l'unité ({new_lit.box.chambre.unite.nom}), {new_lit.nom} , le {formatted_date}"
+        patient_name = getattr(patient, "nom", None) or str(patient)
+        unite_name = getattr(new_lit.box.chambre.unite, "nom", None) or "Unité"
+        lit_name = getattr(new_lit, "nom", None) or f"Lit #{new_lit.id}"
+
+        message = (
+            f"🔁 Patient: {patient_name} transféré à l'unité ({unite_name}), "
+            f"{lit_name}, le {formatted_date}"
+        )
         safe_message = optimize_sms_text(message)
         send_sms(get_employees_to_notify(), safe_message)
 
-        messages.success(request, f"Le patient {patient.nom} a été transféré dans le lit {new_lit.nom}.")
+        messages.success(request, f"Le patient {patient_name} a été transféré dans le lit {lit_name}.")
         return redirect("hospitalisationdetails", pk=hospitalisation_id)
 
-    # Récupérer les unités et lits disponibles
-    unites = UniteHospitalisation.objects.prefetch_related("chambres__boxes__lits").all()
-    lits_disponibles = LitHospitalisation.objects.filter(occuper=False, is_out_of_service=False, is_cleaning=False)
+    # GET: pour UI
+    unites = UniteHospitalisation.objects.prefetch_related(
+        "chambres", "chambres__boxes", "chambres__boxes__lits"
+    )
+
+    lits_disponibles = LitHospitalisation.objects.select_related(
+        "box__chambre__unite"
+    ).filter(
+        occuper=False, is_out_of_service=False, is_cleaning=False
+    ).order_by(
+        "box__chambre__unite__nom", "box__chambre__nom", "box__nom", "nom"
+    )
 
     context = {
         "hospitalisation": hospitalisation,
         "unites": unites,
         "lits_disponibles": lits_disponibles,
     }
-
-
+    return render(request, "hospitalisation/transferer_patient.html", context)
 @login_required()
 def telecharger_fichier(request, fichier_id, type_fichier):
     """

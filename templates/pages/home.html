@@ -186,9 +186,7 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between">
                         <div>
                             <h1 class="h2 mb-1 text-white">SMIT — Tableau de bord</h1>
-                            <p class="mb-0 opacity-75">Bienvenue sur le tableau de bord KENEYA · <span
-                                    class="badge-modern"
-                                    style="background:rgba(255,255,255,0.2);color:#fff">National</span></p>
+                            <p class="mb-0 opacity-75">Bienvenue sur le tableau de bord KENEYA · <span class="badge-modern" style="background:rgba(255,255,255,0.2);color:#fff">National</span></p>
                         </div>
                         <div class="mt-2 mt-md-0">
                             <div class="d-flex align-items-center text-white">
@@ -396,7 +394,6 @@
             </div>
         </div>
     </div>
-
     {# --------- Blobs JSON injectés par la vue (voir patch ci-dessous) --------- #}
     <script id="consultations-by-service"
             type="application/json">{{ consultations_by_service_json|default:"[]"|safe }}</script>
@@ -405,7 +402,6 @@
     <script id="patient-status" type="application/json">{{ patient_status_counts_json|default:"[]"|safe }}</script>
     <script id="monthly-consultations" type="application/json">{{ consultation_counts_json|default:"[]"|safe }}</script>
     <script id="monthly-appointments" type="application/json">{{ appointment_counts_json|default:"[]"|safe }}</script>
-
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
 document.addEventListener("DOMContentLoaded", function () {
