@@ -98,6 +98,7 @@ services:
 
     volumes:
       - static_volume:/smitci-app/static
+      - static_volume:/smitci-app/staticfiles:rw
 #      - static_volume:/smitci-app/smitci/staticfiles
 #      - media_volume:/smitci-app/media
       - dbbackups:/smitci-app/dbbackup
