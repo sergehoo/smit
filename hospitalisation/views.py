@@ -939,7 +939,7 @@ def update_hospitalisation_discharge(request, hospitalisation_id):
         )
         if bed and bed.occuper:
             bed.occupant = None
-            bed.occuper = Falseit 
+            bed.occuper = False
             bed.save(update_fields=["occupant", "occuper"])
 
     messages.success(request, f"{patient_name} a bien été sorti et notifié.")

@@ -329,7 +329,7 @@ SCHEDULER_ADMIN = True
 
 STATICFILES_DIRS = [BASE_DIR.parent / 'static']
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 MEDIA_URL = "/media/"
