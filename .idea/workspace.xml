@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smitci/settings/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/smitci/settings/base.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -305,7 +306,7 @@
       <workItem from="1769672137316" duration="65724000" />
       <workItem from="1770362340894" duration="597000" />
       <workItem from="1770575663167" duration="597000" />
-      <workItem from="1770682739234" duration="16627000" />
+      <workItem from="1770682739234" duration="16968000" />
     </task>
     <servers />
   </component>
