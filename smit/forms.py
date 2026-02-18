@@ -5,9 +5,11 @@ from datetime import datetime, timedelta
 import phonenumbers
 from allauth.account.forms import LoginForm
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission, Group, User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import modelformset_factory
 from django_countries.fields import CountryField
 from phonenumber_field.formfields import PhoneNumberField
@@ -17,7 +19,7 @@ from core.models import situation_matrimoniales_choices, villes_choices, Sexe_ch
     professions_choices, Goupe_sanguin_choices, communes_et_quartiers_choices, nationalite_choices, \
     Patient_statut_choices, CasContact, Location
 
-from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande, Fournisseur, MouvementStock
+from pharmacy.models import Medicament, RendezVous, ArticleCommande, Commande, Fournisseur, MouvementStock, Pharmacy
 from smit.models import Patient, Appointment, Service, Employee, Constante, \
     Hospitalization, Consultation, Symptomes, Allergies, AntecedentsMedicaux, Examen, Prescription, LitHospitalisation, \
     Analyse, TestRapideVIH, RAPID_HIV_TEST_TYPES, EnqueteVih, MaladieOpportuniste, SigneFonctionnel, \
@@ -1108,7 +1110,7 @@ class AssignRoleForm(forms.Form):
         label="Rôle",
     )
 
-
+User = get_user_model()
 class EmployeeBaseForm(forms.ModelForm):
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=30, label="Prénom")
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=30, label="Nom")
@@ -1141,35 +1143,82 @@ class EmployeeBaseForm(forms.ModelForm):
         user.first_name = self.cleaned_data.get("first_name", "") or ""
         user.last_name = self.cleaned_data.get("last_name", "") or ""
         user.email = self.cleaned_data.get("email", "") or ""
-        user.save(update_fields=["first_name", "last_name", "email"])
+        user.is_staff = True
+        user.save(update_fields=["first_name", "last_name", "email","is_staff"])
         return user
 
-
 class EmployeeCreateForm(EmployeeBaseForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), max_length=150,
-                               label="Username")
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Mot de passe")
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label="Username",
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        label="Mot de passe",
+    )
+
+    pharmacie = forms.ModelChoiceField(
+        queryset=Pharmacy.objects.all(),
+        required=False,
+        label="Pharmacie",
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
 
     class Meta(EmployeeBaseForm.Meta):
-        fields = ['gender', 'situation_matrimoniale', 'phone',  'role']
+        fields = [
+            "username", "password",
+            "first_name", "last_name", "email",
+            "phone", "gender", "situation_matrimoniale",
+            "pharmacie", "role",
+        ]
 
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip()
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError("Ce username est déjà utilisé.")
+        return username
+
+    @transaction.atomic
     def save(self, commit=True):
         employee = super().save(commit=False)
 
         username = self.cleaned_data["username"]
         password = self.cleaned_data["password"]
 
-        user = User.objects.create_user(username=username, password=password)
-        self.save_user_fields(user)
+        # ✅ validation sécurité mot de passe
+        validate_password(password)
 
+        # champs user viennent du base form
+        first_name = (self.cleaned_data.get("first_name") or "").strip()
+        last_name = (self.cleaned_data.get("last_name") or "").strip()
+        email = (self.cleaned_data.get("email") or "").strip()
+        role = self.cleaned_data.get("role")
+
+        # 1) créer le user UNE SEULE FOIS
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+        )
+
+        # 2) assigner rôle
+        if role:
+            user.groups.set([role])
+
+        # 3) lier employee
         employee.user = user
+
+        # 4) si tu veux synchroniser employee.email aussi
+        if hasattr(employee, "email") and email:
+            employee.email = email
+
         if commit:
             employee.save()
-            # ✅ remplace les rôles par celui choisi
-            role = self.cleaned_data["role"]
-            user.groups.set([role])
-        return employee
 
+        return employee
 
 class DiagnosticForm(forms.ModelForm):
     class Meta:

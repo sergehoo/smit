@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from smit.models import InfectionOpportuniste, Comorbidite, ParaclinicalExam, DepistageVIH, TraitementARV, Suivi
 
 
@@ -9,6 +11,7 @@ class PatientActivityBundle:
     depistages: list
     infections: list
     comorbidites: list
+
 
 def get_patient_vih_activities(patient):
     suivis = (

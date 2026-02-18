@@ -148,8 +148,6 @@
                         <div class="card-inner-group">
 
                             <!-- Top tools -->
-
-
                             <!-- Table -->
                             <div class="card-inner p-0">
                                 <div class="nk-tb-list nk-tb-ulist is-compact">
@@ -160,12 +158,10 @@
                                                 class="sub-text">Code Patient</span></div>
                                         <div class="nk-tb-col tb-col-sm col-vih"><span class="sub-text">Code VIH</span>
                                         </div>
-                                        <div class="nk-tb-col tb-col-md col-nom"><span class="sub-text">Nom</span></div>
-                                        <div class="nk-tb-col tb-col-sm col-prenom"><span class="sub-text">Prénom</span>
-                                        </div>
+                                        <div class="nk-tb-col tb-col-md col-nom"><span class="sub-text">Nom & Prénoms</span></div>
+                                        
                                         <div class="nk-tb-col tb-col-sm col-age"><span class="sub-text">Âge</span></div>
-                                        <div class="nk-tb-col tb-col-md col-contact"><span
-                                                class="sub-text">Contact</span></div>
+                                     
                                         <div class="nk-tb-col tb-col-sm col-statut"><span class="sub-text">Statut</span>
                                         </div>
                                         <div class="nk-tb-col tb-col-md col-last"><span
@@ -197,29 +193,36 @@
                                                 <div class="user-card">
                                                     <div class="user-avatar bg-primary-dim">
                                                         <span>{{ patient.nom|default:""|first|upper }}{{ patient.prenoms|default:""|first|upper }}</span>
-                                                    </div>
-                                                    <div class="user-name">
-                                                        <span class="tb-lead">{{ patient.nom|default:""|upper }}</span>
+                                                        </div>
+                                                    <div class="user-name" style ="color: #0a0f18">
+{#                                                        <span class="tb-lead">{{ patient.nom|default:""|upper }}</span>#}
+                                                         <span>
+                                                                <span>
+        <span class="masked-name" id="masked-name-{{ patient.id }}-{{ forloop.counter }}">************</span>
+        <span class="full-name d-none" id="full-name-{{ patient.id }}-{{ forloop.counter }}"></span>
+        {% if perms.core.view_patient_name %}
+        <button class="btn btn-xs btn-outline-secondary ml-1 toggle-name-btn" data-patient-id="{{ patient.id }}" data-counter="{{ forloop.counter }}">
+            <i class="icon ni ni-eye"></i>
+        </button>
+        {% else %}
+        <span class="btn-sm ml-1" data-toggle="tooltip" data-placement="top" title="Vous n'avez pas accès à ce contenu">
+            <i class="fa-solid fa-cancel"></i>
+        </span>
+        {% endif %}
+    </span>
+                                                    
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div class="nk-tb-col tb-col-sm col-prenom">
-                                                <span>{{ patient.prenoms|default:""|upper }}</span>
-                                            </div>
+                                         
 
                                             <div class="nk-tb-col tb-col-sm col-age">
                     <span class="tb-status text-success">
                       {% if patient.calculate_age %}{{ patient.calculate_age }} ans{% else %}—{% endif %}
                     </span>
                                             </div>
-
-                                            <div class="nk-tb-col tb-col-md col-contact">
-                                                <div class="d-flex align-items-center">
-                                                    <em class="icon ni ni-call me-1"></em>
-                                                    <span>{{ patient.contact|default:"—" }}</span>
-                                                </div>
-                                            </div>
+                                        
 
                                             <div class="nk-tb-col tb-col-sm col-statut">
                                                 {% if patient.vih_profile %}
@@ -388,6 +391,47 @@
     <!-- =========================
          SCRIPTS (single DOMContentLoaded)
     ========================== -->
+     <script>
+    document.querySelectorAll('.toggle-name-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const patientId = this.dataset.patientId; // ID du patient
+            const counter = this.dataset.counter; // Numéro unique pour cet élément
+            const maskedName = document.getElementById(`masked-name-${patientId}-${counter}`);
+            const fullName = document.getElementById(`full-name-${patientId}-${counter}`);
+            const icon = this.querySelector('i');
+
+            if (maskedName.classList.contains('d-none')) {
+                // Revenir à l'affichage masqué
+                maskedName.classList.remove('d-none');
+                fullName.classList.add('d-none');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else if (!fullName.textContent) {
+                // Charger le nom complet via AJAX
+                fetch(`/api/get-patient-all-name/${patientId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            fullName.textContent = data.full_name; // Ajouter le nom complet
+                            maskedName.classList.add('d-none');
+                            fullName.classList.remove('d-none');
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            alert('Erreur : Impossible de charger le nom.');
+                        }
+                    })
+                    .catch(err => console.error('Erreur lors de la requête AJAX :', err));
+            } else {
+                // Afficher le nom complet déjà chargé
+                maskedName.classList.add('d-none');
+                fullName.classList.remove('d-none');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+    });
+</script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 

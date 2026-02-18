@@ -66,7 +66,7 @@ def global_context(request):
 
     if not context:
         context = {
-            'services': Service.objects.all(),
+            'services': Service.objects.filter(active=True),
             'apointments_nbr': Appointment.objects.filter(date=today, status='Scheduled').count(),
             'patient_nbr': Patient.objects.count(),
             'appointments_all': Appointment.objects.count(),

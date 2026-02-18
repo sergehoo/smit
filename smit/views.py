@@ -1576,6 +1576,8 @@ class VIHFileActiveFilter(django_filters.FilterSet):
     class Meta:
         model = Patient
         fields = ["code_vih", "nom", "prenoms", "contact", "vih_status"]
+
+
 class ServiceContentDetailView(LoginRequiredMixin, DetailView):
     model = ServiceSubActivity
     context_object_name = "subservice"
@@ -1841,6 +1843,7 @@ class ServiceContentDetailView(LoginRequiredMixin, DetailView):
             })
             return
 
+
 class ActiviteListView(LoginRequiredMixin, ListView):
     context_object_name = 'activities'
     ordering = ['-created_at']
@@ -1863,14 +1866,12 @@ class ActiviteListView(LoginRequiredMixin, ListView):
         consultations_page = self.request.GET.get('consultations_page')
         context['consultations'] = consultations_paginator.get_page(consultations_page)
 
-        hospitalizations = Hospitalization.objects.filter(activite=subactivity).order_by(
-            '-admission_date') if subactivity else []
+        hospitalizations = Hospitalization.objects.filter(activite=subactivity).order_by('-admission_date') if subactivity else []
         hospitalizations_paginator = Paginator(hospitalizations, 10)
         hospitalizations_page = self.request.GET.get('hospitalizations_page')
         context['hospitalizations'] = hospitalizations_paginator.get_page(hospitalizations_page)
 
-        suivis = Suivi.objects.filter(
-            services=subactivity.service) if subactivity else []  # Assuming you have a Suivi model
+        suivis = Suivi.objects.filter(services=subactivity.service) if subactivity else []  # Assuming you have a Suivi model
         suivis_paginator = Paginator(suivis, 10)
         suivis_page = self.request.GET.get('suivis_page')
         context['suivis'] = suivis_paginator.get_page(suivis_page)

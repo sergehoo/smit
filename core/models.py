@@ -835,6 +835,7 @@ class Service(models.Model):
                             blank=True)  # ex: retroviraux, tuberculose
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         if not self.slug and self.nom:
@@ -853,6 +854,7 @@ class ServiceSubActivity(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, null=True, blank=True, related_name='subactivities')
     nom = models.CharField(max_length=225, null=True, blank=True)
     icon = models.CharField(max_length=225, null=True, blank=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.nom} - {self.service}'
@@ -862,7 +864,7 @@ class Employee(models.Model):
     from pharmacy.models import Pharmacy
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee", db_index=True)
     qlook_id = models.CharField(default=qlook, unique=True, editable=False, max_length=100, db_index=True)
-    gender = models.CharField(choices=Sexe_choices, max_length=100, null=True, blank=True, )
+    gender = models.CharField(choices=Sexe_choices,verbose_name="Genre", max_length=100, null=True, blank=True, )
     situation_matrimoniale = models.CharField(choices=situation_matrimoniales_choices, max_length=100, null=True,
                                               blank=True, )
     phone = models.CharField(null=True, blank=True, max_length=20, default='+22507070707')

@@ -154,7 +154,7 @@
                     </th>
                     <th>Employé</th>
                     <th>Contact</th>
-                    <th>Fonction</th>
+
                     <th>Rôle(s)</th>
                     <th>Dernière connexion</th>
                     <th class="text-right">Actions</th>
@@ -193,20 +193,9 @@
                     <td>
                       {% if employee.phone %}
                         <span class="tb-sub">{{ employee.phone }}</span>
-                        <br>
-                        {% if employee.phone2 %}
-                          <small class="text-muted">{{ employee.phone2 }}</small>
-                        {% endif %}
+
                       {% else %}
                         <span class="text-muted">—</span>
-                      {% endif %}
-                    </td>
-
-                    <td>
-                      <span class="tb-sub">{{ employee.job_title|default:"—" }}</span>
-                      {% if employee.department %}
-                        <br>
-                        <small class="text-muted">{{ employee.department }}</small>
                       {% endif %}
                     </td>
 

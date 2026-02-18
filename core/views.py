@@ -31,9 +31,10 @@ import random
 import string
 from django.contrib.auth.models import User
 
-
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 def custom_403_view(request, exception=None):
@@ -166,8 +167,8 @@ class EmployeeListView(PermissionRequiredMixin, ListView):
                 Q(user__first_name__icontains=search_query) |
                 Q(user__last_name__icontains=search_query) |
                 Q(user__email__icontains=search_query) |
-                Q(phone__icontains=search_query) |
-                Q(job_title__icontains=search_query)
+                Q(phone__icontains=search_query)
+
             ).distinct()
 
         # Filtre par rôle
@@ -236,6 +237,8 @@ class EmployeeListView(PermissionRequiredMixin, ListView):
             "can_delete_employee": self.request.user.has_perm("core.can_delete_employee"),
         })
         return context
+
+
 def generate_password(length=8):
     """Génère un mot de passe aléatoire avec seulement des chiffres et des lettres minuscules"""
     characters = string.ascii_lowercase + string.digits
@@ -459,34 +462,38 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
     form_class = EmployeeCreateForm
     template_name = "employees/employee_form.html"
     success_url = reverse_lazy("employee_list")
-    permission_required = 'can_view_employee'
+    permission_required = "core.can_create_employee"
 
+    # def form_valid(self, form):
+    #     # Créer l'utilisateur
+    #     username = form.cleaned_data['username']
+    #     password = form.cleaned_data['password']
+    #     first_name = form.cleaned_data['first_name']
+    #     last_name = form.cleaned_data['last_name']
+    #     email = form.cleaned_data['email']
+    #     role = form.cleaned_data['role']
+    #
+    #     user = User.objects.create_user(
+    #         username=username,
+    #         password=password,
+    #         first_name=first_name,
+    #         last_name=last_name,
+    #         email=email
+    #     )
+    #
+    #     # Associer le rôle à l'utilisateur
+    #     user.groups.add(role)
+    #
+    #     # Créer l'employé en associant l'utilisateur
+    #     employee = form.save(commit=False)
+    #     employee.user = user
+    #     employee.save()
+    #     messages.success(self.request, "Employee creer avec successfully")
+    #     return super().form_valid(form)
     def form_valid(self, form):
-        # Créer l'utilisateur
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password']
-        first_name = form.cleaned_data['first_name']
-        last_name = form.cleaned_data['last_name']
-        email = form.cleaned_data['email']
-        role = form.cleaned_data['role']
-
-        user = User.objects.create_user(
-            username=username,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            email=email
-        )
-
-        # Associer le rôle à l'utilisateur
-        user.groups.add(role)
-
-        # Créer l'employé en associant l'utilisateur
-        employee = form.save(commit=False)
-        employee.user = user
-        employee.save()
-        messages.success(self.request, "Employee creer avec successfully")
-        return super().form_valid(form)
+        response = super().form_valid(form)  # ✅ ça appelle form.save() UNE seule fois
+        messages.success(self.request, "Employé créé avec succès.")
+        return response
 
 
 class EmployeeUpdateView(LoginRequiredMixin, UpdateView):

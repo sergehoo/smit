@@ -118,8 +118,8 @@
                 <span class="nk-menu-icon">
                   <span class="medical-icon"><i class="fa-solid fa-stethoscope"></i></span>
                 </span>
-                <span class="nk-menu-text">Liste Consultations</span>
-                <span class="nk-menu-badge">{{ consul_nbr }}</span>
+                <span class="nk-menu-text">Liste Consultations  <span class="text-danger">{{ consul_nbr }}</span></span>
+               
               </a>
             </li>
 
@@ -133,8 +133,8 @@
                 <span class="nk-menu-icon">
                   <span class="medical-icon icon-danger"><i class="fa-solid fa-ambulance"></i></span>
                 </span>
-                <span class="nk-menu-text">Liste des Urgences</span>
-                <span class="nk-menu-badge">{{ urgencehospi }}</span>
+                <span class="nk-menu-text">Liste des Urgences <span class="text-danger">{{ urgencehospi }}</span></span>
+                
               </a>
             </li>
 
@@ -227,8 +227,8 @@
                 <span class="nk-menu-icon">
                   <span class="medical-icon"><i class="fa-solid fa-folder-tree"></i></span>
                 </span>
-                <span class="nk-menu-text">Suivi des Patients</span>
-                <span class="nk-menu-badge badge-danger">{{ suivi_nbr }}</span>
+                <span class="nk-menu-text">Suivi des Patients <span class="text-danger">{{ suivi_nbr }}</span></span>
+                
               </a>
             </li>
 
@@ -279,8 +279,8 @@
                 <span class="nk-menu-icon">
                   <span class="medical-icon"><i class="fa-solid fa-flask-vial"></i></span>
                 </span>
-                <span class="nk-menu-text">Demande d'Analyse</span>
-                <span class="nk-menu-badge badge-danger">{{ examencount }}</span>
+                <span class="nk-menu-text">Demande d'Analyse  <span class="text-danger">{{ examencount }}</span></span>
+               
               </a>
             </li>
 
@@ -289,8 +289,8 @@
                 <span class="nk-menu-icon">
                   <span class="medical-icon"><i class="fa-solid fa-clipboard-check"></i></span>
                 </span>
-                <span class="nk-menu-text">Analyses effectuées</span>
-                <span class="nk-menu-badge">{{ examensdonecount }}</span>
+                <span class="nk-menu-text">Analyses effectuées <span class="text-danger">{{ examensdonecount }}</span></span>
+                
               </a>
             </li>
 
@@ -370,10 +370,10 @@
           </ul>
 
           <!-- Quick Actions -->
-          <div class="sidebar-quick-actions">
+          <div class="sidebar-quick-actions mb-5">
             <div class="quick-actions-title">Actions Rapides</div>
 
-            <div class="quick-actions-grid">
+            <div class="quick-actions-grid mb-3">
               <a href="{% url 'add_patient' %}" class="quick-action-item qa-danger">
                 <i class="fa-solid fa-user-plus"></i>
                 <span>Nouveau Patient</span>

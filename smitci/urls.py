@@ -184,26 +184,21 @@ urlpatterns = [
                   path('appointments/new/', views.appointment_create, name='appointment_create'),
 
                   # path('appointments/new/', views.appointment_create, name='appointment_create'),
-
                   # path('appointments/<int:pk>/edit/', views.appointment_update, name='appointment_update'),
 
                   # path('service/<int:pk>/contents/', ServiceContentDetailView.as_view(), name='service_content_detail'),
-                  path('service/<str:serv>/<str:acty>/<int:pk>/', ServiceContentDetailView.as_view(),
-                       name='service_content_detail'
-                       ),
+
+                  path('service/<str:serv>/<str:acty>/<int:pk>/', ServiceContentDetailView.as_view(),name='service_content_detail'),
                   path('constantes/<int:pk>/update', ConstanteUpdateView.as_view(), name='constantesupdate'),
 
                   path('api/get-patient-name/<int:appointment_id>/', views.get_patient_name, name='get_patient_name'),
-                  path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name,
-                       name='get_patient_all_name'),
+                  path('api/get-patient-all-name/<int:patient_id>/', views.get_patient_all_name,name='get_patient_all_name'),
                   path('urgence/liste', UrgenceListView.as_view(), name='urgences_list'),
                   path('urgence/create/', UrgenceCreateView.as_view(), name='urgence_create'),
                   path('api/urgences/patient/', UrgencePatientCreateAPI.as_view(), name='urgence_patient_api'),
-                  path('api/urgences/<int:patient_id>/hospitalisation/', HospitalizationCreateAPI.as_view(),
-                       name='urgence_hosp_api'),
+                  path('api/urgences/<int:patient_id>/hospitalisation/', HospitalizationCreateAPI.as_view(), name='urgence_hosp_api'),
 
-                  path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(),
-                       name='hospitalization_urgence_create'),
+                  path('hospitalization/create/', HospitalizationUrgenceCreateView.as_view(),name='hospitalization_urgence_create'),
                   path('send_employee_sms/<int:employee_id>', send_sms_view, name='send_sms_view'),
                   path('suivie_soins', SuivieSoinsListView.as_view(), name='suivie_soins_list'),
                   path('suivie_soins/detail<int:pk>', SuivieSoinsDetailView.as_view(), name='suivie_soins_detail'),
@@ -214,8 +209,7 @@ urlpatterns = [
                   path('<int:pk>/update/', BilanUpdateView.as_view(), name='bilan_update'),
                   path('<int:pk>/delete/', BilanDeleteView.as_view(), name='bilan_delete'),
                   path('<int:pk>/complete/', CompleteBilanView.as_view(), name='bilan_complete'),
-                  path('create-bilan-initial/<int:consultation_id>/<int:patient_id>/', create_bilan_initial,
-                       name='create_bilan_initial'),
+                  path('create-bilan-initial/<int:consultation_id>/<int:patient_id>/', create_bilan_initial,name='create_bilan_initial'),
 
                   path('suivi/<int:suivi_id>/add-traitement/', add_traitement_arv, name='add_traitement'),
                   path('suivi/<int:suivi_id>/add-protocole/', add_suivi_protocole, name='add_protocole'),
