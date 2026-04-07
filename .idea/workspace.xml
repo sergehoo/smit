@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="" />
+    <list default="true" id="087d2814-3cad-4049-abc4-eba10f1f379b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/assets/css/dashlite.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/assets/css/dashlite.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/aside.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/aside.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/layout/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pages/hospitalisation/hospitalisation_details.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -303,7 +310,13 @@
       <workItem from="1769672137316" duration="65724000" />
       <workItem from="1770362340894" duration="597000" />
       <workItem from="1770575663167" duration="597000" />
-      <workItem from="1770682739234" duration="32580000" />
+      <workItem from="1770682739234" duration="44414000" />
+      <workItem from="1772139026080" duration="592000" />
+      <workItem from="1772184814403" duration="598000" />
+      <workItem from="1772533337174" duration="207000" />
+      <workItem from="1773154001591" duration="580000" />
+      <workItem from="1773222290901" duration="598000" />
+      <workItem from="1774687784299" duration="587000" />
     </task>
     <servers />
   </component>

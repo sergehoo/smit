@@ -24,18 +24,17 @@
                             <div class="toggle-expand-content" data-content="pageMenu">
                                 <ul class="nk-block-tools g-3">
                                     <li>
-                                        <div class="dropdown">
-                                            <a href="#" class="btn btn-white btn-outline-light dropdown-toggle" data-toggle="dropdown">
-                                                <em class="icon ni ni-download-cloud"></em>
-                                                <span>Export</span>
-                                            </a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">Excel</a>
-                                                <a class="dropdown-item" href="#">PDF</a>
-                                                <a class="dropdown-item" href="#">CSV</a>
-                                            </div>
-                                        </div>
-                                    </li>
+    <div class="dropdown">
+        <a href="#" class="btn btn-white btn-outline-light dropdown-toggle" data-toggle="dropdown">
+            <em class="icon ni ni-download-cloud"></em>
+            <span>Export</span>
+        </a>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#" id="export-excel-btn">Excel</a>
+        </div>
+    </div>
+</li>
+
                                     <li class="nk-block-tools-opt">
                                         <div class="drodown">
                                             <a href="#" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown">
@@ -409,7 +408,20 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const exportExcelBtn = document.getElementById('export-excel-btn');
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
 
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('export', 'excel');
+            window.location.href = currentUrl.toString();
+        });
+    }
+});
+</script>
 <!-- Scripts pour améliorer l'UX -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {

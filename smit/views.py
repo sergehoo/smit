@@ -30,6 +30,8 @@ from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView, ListView, CreateView, DetailView, UpdateView, DeleteView
 from django_filters.views import FilterView
+from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.workbook import Workbook
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import landscape, A4
@@ -949,13 +951,94 @@ class PatientListView(LoginRequiredMixin, FilterView):
     ordering = ['-id']
     filterset_class = PatientFilter
 
+    def get_queryset(self):
+        return (
+            Patient.objects
+            .select_related("localite")
+            .prefetch_related("consultation_set", "hospitalized")
+            .order_by("-id")
+            .distinct()
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # patient_nbr = Patient.objects.all().count()
-        context['resultfiltre'] = self.object_list.count()
-        context['filter'] = self.get_filterset(self.filterset_class)
-
+        context["resultfiltre"] = self.object_list.count()
+        context["patient_nbr"] = Patient.objects.count()
+        context["filter"] = self.filterset
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.GET.get("export") == "excel":
+            return self.export_excel(context["filter"].qs)
+        return super().render_to_response(context, **response_kwargs)
+
+    def export_excel(self, queryset):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Patients"
+
+        headers = [
+            "Code patient",
+            "Nom",
+            "Prénoms",
+            "Contact",
+            "Genre",
+            "Date naissance",
+            "Âge",
+            "Localité",
+            "Date création",
+            "Nb consultations",
+            "Nb hospitalisations",
+            "Dernière consultation",
+            "Dernière hospitalisation",
+        ]
+
+        ws.append(headers)
+
+        header_fill = PatternFill("solid", fgColor="1F4E78")
+        header_font = Font(color="FFFFFF", bold=True)
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        for patient in queryset:
+            consultations = patient.consultation_set.order_by("-consultation_date")
+            hospitalisations = patient.hospitalized.order_by("-admission_date")
+
+            last_consultation = consultations.first()
+            last_hospitalisation = hospitalisations.first()
+
+            ws.append([
+                patient.code_patient,
+                patient.nom,
+                patient.prenoms,
+                patient.contact,
+                patient.genre,
+                patient.date_naissance.strftime("%d/%m/%Y") if patient.date_naissance else "",
+                patient.calculate_age if patient.calculate_age is not None else "",
+                str(patient.localite) if patient.localite else "",
+                patient.created_at.strftime("%d/%m/%Y %H:%M") if patient.created_at else "",
+                consultations.count(),
+                hospitalisations.count(),
+                last_consultation.consultation_date.strftime("%d/%m/%Y %H:%M") if last_consultation else "",
+                last_hospitalisation.admission_date.strftime("%d/%m/%Y %H:%M") if last_hospitalisation else "",
+            ])
+
+        widths = {
+            "A": 18, "B": 20, "C": 25, "D": 18, "E": 12, "F": 15,
+            "G": 10, "H": 20, "I": 20, "J": 18, "K": 18, "L": 22, "M": 22
+        }
+        for col, width in widths.items():
+            ws.column_dimensions[col].width = width
+
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = 'attachment; filename="patients_filtres.xlsx"'
+        wb.save(response)
+        return response
 
 
 @login_required

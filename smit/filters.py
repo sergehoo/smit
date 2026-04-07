@@ -8,65 +8,128 @@ from smit.models import BilanParaclinique, TypeBilanParaclinique
 
 
 class PatientFilter(django_filters.FilterSet):
-    code_patient = django_filters.CharFilter(
-        lookup_expr='icontains',
-        label='Code patient',
-        widget=TextInput(attrs={'class': 'form-control', 'placeholder': 'Rechercher par cod patient'})
-    )
-
     nom = django_filters.CharFilter(
-        lookup_expr='icontains',
-        label='Nom',
-        widget=TextInput(attrs={'class': 'form-control', 'placeholder': 'Rechercher par nom'})
+        field_name="nom",
+        lookup_expr="icontains",
+        label="Nom"
     )
     prenoms = django_filters.CharFilter(
-        lookup_expr='icontains',
-        label='Prénoms',
-        widget=TextInput(attrs={'class': 'form-control', 'placeholder': 'Rechercher par prénoms'})
+        field_name="prenoms",
+        lookup_expr="icontains",
+        label="Prénoms"
+    )
+    code_patient = django_filters.CharFilter(
+        field_name="code_patient",
+        lookup_expr="icontains",
+        label="Code patient"
     )
     contact = django_filters.CharFilter(
-        lookup_expr='icontains',
-        label='Contact',
-        widget=TextInput(attrs={'class': 'form-control', 'placeholder': 'Rechercher par contact'})
-    )
-
-    nationalite = django_filters.ChoiceFilter(
-        choices=pays_choices,
-        label='Nationalite',
-        widget=Select(attrs={'class': 'form-select select2', 'data-search': 'on', })
-    )
-
-    profession = django_filters.ChoiceFilter(
-        choices=professions_choices,
-        label='Profession',
-        widget=Select(attrs={'class': 'form-select select2 ', 'data-search': 'on', })
-    )
-
-    situation_matrimoniale = django_filters.ChoiceFilter(
-        choices=situation_matrimoniales_choices,
-        label='Situation Matrimoniale',
-        widget=Select(attrs={'class': 'form-select'})
+        field_name="contact",
+        lookup_expr="icontains",
+        label="Contact"
     )
     genre = django_filters.ChoiceFilter(
-        choices=Sexe_choices,
-        label='Genre',
-        widget=Select(attrs={'class': 'form-select'})
-    )
-    groupe_sanguin = django_filters.ChoiceFilter(
-        choices=Goupe_sanguin_choices,
-        label='Groupe Sanguin',
-        widget=Select(attrs={'class': 'form-select'})
+        field_name="genre",
+        choices=Patient._meta.get_field("genre").choices,
+        label="Sexe",
+        widget = forms.Select(attrs={"class": "form-control"})
     )
 
-    # date_naissance = django_filters.DateFromToRangeFilter(
-    #     label='Date de Naissance',
-    #     widget=django_filters.widgets.RangeWidget(attrs={'class': 'form-control', 'type': 'date'})
-    # )
+    # période d'enregistrement patient
+    created_at_after = django_filters.DateFilter(
+        field_name="created_at",
+        lookup_expr="date__gte",
+        label="Enregistré du",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    created_at_before = django_filters.DateFilter(
+        field_name="created_at",
+        lookup_expr="date__lte",
+        label="Enregistré au",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+
+    # période consultation
+    consultation_after = django_filters.DateFilter(
+        method="filter_consultation_after",
+        label="Consultation du",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    consultation_before = django_filters.DateFilter(
+        method="filter_consultation_before",
+        label="Consultation au",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+
+    # période hospitalisation
+    hospitalization_after = django_filters.DateFilter(
+        method="filter_hospitalization_after",
+        label="Hospitalisation du",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    hospitalization_before = django_filters.DateFilter(
+        method="filter_hospitalization_before",
+        label="Hospitalisation au",
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+
+    # type de parcours
+    passage_type = django_filters.ChoiceFilter(
+        method="filter_passage_type",
+        label="Passage",
+        choices=[
+            ("", "Tous"),
+            ("consultation", "Consultation"),
+            ("hospitalisation", "Hospitalisation"),
+            ("both", "Consultation + Hospitalisation"),
+        ],
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
 
     class Meta:
         model = Patient
-        fields = ['code_patient', 'nom', 'prenoms', 'contact', 'nationalite', 'profession', 'situation_matrimoniale',
-                  'genre', 'groupe_sanguin']
+        fields = [
+            "nom",
+            "prenoms",
+            "code_patient",
+            "contact",
+            "genre",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # classes bootstrap/dashlite
+        for name, field in self.form.fields.items():
+            if not isinstance(field.widget, (forms.DateInput, forms.Select)):
+                field.widget.attrs["class"] = "form-control"
+
+    def filter_consultation_after(self, queryset, name, value):
+        return queryset.filter(consultation__consultation_date__date__gte=value).distinct()
+
+    def filter_consultation_before(self, queryset, name, value):
+        return queryset.filter(consultation__consultation_date__date__lte=value).distinct()
+
+    def filter_hospitalization_after(self, queryset, name, value):
+        return queryset.filter(hospitalized__admission_date__date__gte=value).distinct()
+
+    def filter_hospitalization_before(self, queryset, name, value):
+        return queryset.filter(hospitalized__admission_date__date__lte=value).distinct()
+
+    def filter_passage_type(self, queryset, name, value):
+        if value == "consultation":
+            return queryset.filter(consultation__isnull=False).distinct()
+
+        if value == "hospitalisation":
+            return queryset.filter(hospitalized__isnull=False).distinct()
+
+        if value == "both":
+            return queryset.filter(
+                consultation__isnull=False,
+                hospitalized__isnull=False
+            ).distinct()
+
+        return queryset
 
 
 class ExamenFilter(django_filters.FilterSet):

@@ -1,976 +1,1322 @@
 {% extends 'layout/base.html' %}
 {% load static %}
 
-
 {% block content %}
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --secondary: #06b6d4;
-            --success: #16a34a;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --border: #e2e8f0
-        }
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-        .dashboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem
-        }
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS — SMIT KENEYA PREMIUM
+   Aesthetic: Luxury Medical · Deep Navy + Ivory + Emerald + Gold
+══════════════════════════════════════════ */
+:root {
+  --navy:      #0a1628;
+  --navy-2:    #0f2044;
+  --navy-3:    #162952;
+  --ivory:     #f9f6f0;
+  --ivory-2:   #f2ede4;
+  --emerald:   #059669;
+  --emerald-2: #10b981;
+  --emerald-lt:#d1fae5;
+  --gold:      #b8860b;
+  --gold-2:    #d4a017;
+  --gold-lt:   #fef3c7;
+  --sky:       #0ea5e9;
+  --rose:      #e11d48;
+  --rose-lt:   #ffe4e6;
+  --amber:     #d97706;
+  --amber-lt:  #fef3c7;
+  --violet:    #7c3aed;
+  --violet-lt: #ede9fe;
+  --text:      #1e293b;
+  --text-2:    #475569;
+  --text-3:    #94a3b8;
+  --border:    #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(10,22,40,0.06), 0 1px 2px rgba(10,22,40,0.04);
+  --shadow-md: 0 4px 16px rgba(10,22,40,0.08), 0 2px 4px rgba(10,22,40,0.04);
+  --shadow-lg: 0 20px 48px rgba(10,22,40,0.12), 0 8px 16px rgba(10,22,40,0.06);
+  --radius:    14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Outfit', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --transition:   all 0.25s cubic-bezier(.4,0,.2,1);
+}
 
-        .kpi-card {
-            background: #fff;
-            border-radius: 1rem;
-            padding: 1.25rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05);
-            transition: transform .2s, box-shadow .2s;
-            height: 100%
-        }
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: var(--font-body); background: var(--ivory); color: var(--text); }
+.smit { all: initial; font-family: var(--font-body); }
 
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .08)
-        }
+/* ── Dashboard wrapper ── */
+.smit-wrap {
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--ivory);
+  position: relative;
+}
+.smit-wrap::before {
+  content: '';
+  position: fixed;
+  top: 0; right: 0;
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, rgba(5,150,105,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-        .kpi-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-bottom: 1rem
-        }
+/* ─────────────────────────────────────────
+   HERO HEADER
+───────────────────────────────────────── */
+.smit-hero {
+  background: var(--navy);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  animation: slideDown .5s ease forwards;
+}
+.smit-hero::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, rgba(5,150,105,0.18) 0%, transparent 65%);
+  pointer-events: none;
+}
+.smit-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 200px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(184,134,11,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--emerald-2);
+  margin-bottom: .5rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--emerald-2);
+  display: block;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+  margin: 0 0 .35rem;
+}
+.hero-sub {
+  font-size: .85rem;
+  color: rgba(255,255,255,.5);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.hero-badge {
+  background: rgba(5,150,105,.25);
+  color: var(--emerald-2);
+  border: 1px solid rgba(5,150,105,.3);
+  padding: .2rem .75rem;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+}
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .75rem;
+  flex-shrink: 0;
+}
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 30px;
+  padding: .4rem 1rem;
+  font-size: .75rem;
+  color: rgba(255,255,255,.7);
+}
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  position: relative;
+}
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid #4ade80;
+  animation: pulse-ring 2s ease infinite;
+}
+.hero-time {
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  color: rgba(255,255,255,.45);
+}
+.hero-actions { display: flex; gap: .75rem; }
+.btn-hero {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .55rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-size: .8rem; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: var(--transition);
+}
+.btn-hero-primary {
+  background: var(--emerald);
+  color: #fff;
+}
+.btn-hero-primary:hover { background: var(--emerald-2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(5,150,105,.35); }
+.btn-hero-ghost {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.btn-hero-ghost:hover { background: rgba(255,255,255,.14); }
 
-        .kpi-value {
-            font-size: 1.75rem;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: .25rem
-        }
+/* ─────────────────────────────────────────
+   FILTER BAR
+───────────────────────────────────────── */
+.filter-bar {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+  animation: slideDown .5s .1s ease both;
+}
+.filter-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
+.filter-label {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.filter-select, .filter-input {
+  height: 38px;
+  padding: 0 .875rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .85rem;
+  color: var(--text);
+  background: var(--ivory);
+  appearance: none;
+  outline: none;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.filter-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .875rem center; padding-right: 2.25rem; }
+.filter-select:focus, .filter-input:focus {
+  border-color: var(--emerald);
+  box-shadow: 0 0 0 3px rgba(5,150,105,.1);
+  background-color: #fff;
+}
+.filter-btn {
+  height: 38px;
+  padding: 0 1.25rem;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: .5rem;
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.filter-btn:hover { background: var(--navy-2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(10,22,40,.2); }
+.filter-btn svg { width: 14px; height: 14px; }
 
-        .kpi-label {
-            font-size: .875rem;
-            color: var(--gray);
-            font-weight: 500
-        }
+/* ─────────────────────────────────────────
+   KPI CARDS GRID
+───────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
 
-        .kpi-detail {
-            font-size: .75rem;
-            color: var(--gray);
-            margin-top: .5rem
-        }
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent, var(--emerald));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .35s ease;
+}
+.kpi-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.kpi-card:hover::before { transform: scaleX(1); }
 
-        .card-modern {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            overflow: hidden;
-            height: 100%;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05)
-        }
+.kpi-card:nth-child(1) { --accent: var(--emerald); animation: fadeUp .5s .15s ease both; }
+.kpi-card:nth-child(2) { --accent: var(--sky); animation: fadeUp .5s .2s ease both; }
+.kpi-card:nth-child(3) { --accent: var(--amber); animation: fadeUp .5s .25s ease both; }
+.kpi-card:nth-child(4) { --accent: var(--violet); animation: fadeUp .5s .3s ease both; }
 
-        .card-modern .card-header {
-            padding: 1.25rem;
-            background: var(--light);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between
-        }
+.kpi-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.kpi-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+}
+.kpi-icon-emerald { background: var(--emerald-lt); color: var(--emerald); }
+.kpi-icon-sky     { background: #e0f2fe; color: var(--sky); }
+.kpi-icon-amber   { background: var(--amber-lt); color: var(--amber); }
+.kpi-icon-violet  { background: var(--violet-lt); color: var(--violet); }
 
-        .card-modern .card-header h4 {
-            margin: 0;
-            font-weight: 700;
-            font-size: 1.125rem
-        }
+.kpi-trend {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .25rem .6rem;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-weight: 700;
+}
+.kpi-trend-up   { background: var(--emerald-lt); color: var(--emerald); }
+.kpi-trend-down { background: var(--rose-lt); color: var(--rose); }
+.kpi-trend-neu  { background: var(--ivory-2); color: var(--text-3); }
 
-        .card-modern .card-body {
-            padding: 1.25rem
-        }
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: .3rem;
+  color: var(--text);
+}
+.kpi-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: .6rem;
+}
+.kpi-sub {
+  font-size: .72rem;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.kpi-dot {
+  display: inline-flex; align-items: center; gap: .3rem;
+}
+.kpi-dot::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: block;
+}
+.dot-blue  { color: var(--sky); }
+.dot-rose  { color: var(--rose); }
+.kpi-progress {
+  margin-top: .9rem;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.kpi-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent, var(--emerald));
+  width: 0;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
 
-        .table-modern th {
-            font-size: .75rem;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            color: var(--gray);
-            font-weight: 600;
-            border-bottom: 1px solid var(--border)
-        }
+/* ─────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
-        .table-modern td {
-            font-weight: 500;
-            color: var(--dark);
-            border-bottom: 1px solid var(--border)
-        }
+/* ─────────────────────────────────────────
+   CARD COMPONENT
+───────────────────────────────────────── */
+.s-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  height: 100%;
+}
+.s-card:hover { box-shadow: var(--shadow-md); }
 
-        .badge-modern {
-            display: inline-block;
-            padding: .25rem .75rem;
-            border-radius: .5rem;
-            font-size: .75rem;
-            font-weight: 600
-        }
+.s-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.s-card-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.s-card-title-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent, var(--emerald));
+  flex-shrink: 0;
+}
+.s-card-badge {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  padding: .25rem .7rem;
+  border-radius: 20px;
+  background: var(--ivory-2);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.s-card-body { padding: 1.5rem; }
 
-        .filter-bar {
-            background: #fff;
-            border-radius: .75rem;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            margin-bottom: 1.5rem
-        }
+/* ─────────────────────────────────────────
+   TABLE
+───────────────────────────────────────── */
+.s-table { width: 100%; border-collapse: collapse; }
+.s-table th {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+  padding: .75rem 1rem;
+  text-align: left;
+  border-bottom: 1.5px solid var(--border);
+}
+.s-table td {
+  padding: .85rem 1rem;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text);
+  border-bottom: 1px solid var(--ivory-2);
+  transition: background .15s;
+}
+.s-table tr:last-child td { border-bottom: none; }
+.s-table tbody tr:hover td { background: var(--ivory); }
+.s-table .num {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  color: var(--text-2);
+  text-align: center;
+}
+.s-table .num-blue { color: var(--sky); }
+.s-table .num-rose { color: var(--rose); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem
-        }
+/* ─────────────────────────────────────────
+   STATUS BADGE
+───────────────────────────────────────── */
+.s-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .25rem .65rem;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.s-badge-emerald { background: var(--emerald-lt); color: var(--emerald); }
+.s-badge-rose    { background: var(--rose-lt);    color: var(--rose);    }
+.s-badge-amber   { background: var(--amber-lt);   color: var(--amber);   }
+.s-badge-sky     { background: #e0f2fe;            color: var(--sky);     }
 
-        .chart-container {
-            position: relative;
-            height: 100%;
-            min-height: 300px
-        }
+/* ─────────────────────────────────────────
+   SERVICE LIST
+───────────────────────────────────────── */
+.service-list { list-style: none; margin: 0; padding: 0; }
+.service-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--ivory-2);
+}
+.service-item:last-child { border-bottom: none; }
+.service-rank {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--text-3);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.service-info { flex: 1; min-width: 0; }
+.service-name {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.service-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin-top: .35rem;
+  overflow: hidden;
+}
+.service-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--emerald), var(--emerald-2));
+  transition: width 1s ease;
+}
+.service-count {
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--text-2);
+  flex-shrink: 0;
+}
 
-        .list-clean {
-            list-style: none;
-            margin: 0;
-            padding: 0
-        }
+/* ─────────────────────────────────────────
+   CHART PLACEHOLDER
+───────────────────────────────────────── */
+.chart-box { position: relative; min-height: 320px; }
+.chart-box canvas { display: block; }
 
-        .list-clean li {
-            display: flex;
-            justify-content: space-between;
-            padding: .75rem 0;
-            border-bottom: 1px solid var(--border)
-        }
+/* ─────────────────────────────────────────
+   LAYOUT ROWS
+───────────────────────────────────────── */
+.smit-row {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.smit-row-83 { grid-template-columns: 1fr .46fr; }
+.smit-row-2  { grid-template-columns: 1fr 1fr; }
+.smit-row-3  { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 1100px) {
+  .smit-row-83, .smit-row-2, .smit-row-3 { grid-template-columns: 1fr; }
+}
 
-        .list-clean li:last-child {
-            border-bottom: none
-        }
+/* ─────────────────────────────────────────
+   ANOMALY HIGHLIGHT TAG
+───────────────────────────────────────── */
+.anml-tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .2rem .65rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 500;
+  background: var(--gold-lt);
+  color: var(--gold);
+  border-left: 2px solid var(--gold-2);
+}
 
-        .trend-indicator {
-            display: inline-flex;
-            align-items: center;
-            font-size: .75rem;
-            font-weight: 600;
-            padding: .25rem .5rem;
-            border-radius: .375rem
-        }
+/* ─────────────────────────────────────────
+   EMPTY STATE
+───────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-3);
+  font-size: .85rem;
+}
+.empty svg {
+  width: 36px; height: 36px;
+  margin: 0 auto .75rem;
+  display: block;
+  stroke: var(--border);
+}
 
-        .trend-up {
-            background: #dcfce7;
-            color: #16a34a
-        }
+/* ─────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: .7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
 
-        .trend-down {
-            background: #fee2e2;
-            color: #dc2626
-        }
-    </style>
+/* ─────────────────────────────────────────
+   TOOLTIP
+───────────────────────────────────────── */
+[data-tip] { position: relative; cursor: help; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy);
+  color: #fff;
+  font-size: .7rem;
+  padding: .35rem .7rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 100;
+}
+[data-tip]:hover::after { opacity: 1; }
+</style>
 
-    <div class="nk-content nk-content-fluid ">
-        <div class="container-xl wide-lg ">
-            <div class="nk-content-body ">
 
-                <div class="dashboard-header">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between">
-                        <div>
-                            <h1 class="h2 mb-1 text-white">SMIT — Tableau de bord</h1>
-                            <p class="mb-0 opacity-75">Bienvenue sur le tableau de bord KENEYA · <span class="badge-modern" style="background:rgba(255,255,255,0.2);color:#fff">National</span></p>
-                        </div>
-                        <div class="mt-2 mt-md-0">
-                            <div class="d-flex align-items-center text-white">
-                                <span class="me-2">Mise à jour:</span>
-                                <span id="current-time">{{ current_time|default:"Chargement..." }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="smit-wrap">
 
-                <div class="filter-bar">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Période</label>
-                            <select class="form-select" id="period-filter">
-                                <option>2025 (YTD)</option>
-                                <option>2024</option>
-                                <option>2023</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Niveau</label>
-                            <select class="form-select" id="level-filter">
-                                <option>CHU</option>
-                                <option>Région</option>
-                                <option>District</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Spécialité</label>
-                            <select class="form-select" id="specialty-filter">
-                                <option>Toutes</option>
-                                <option>Médecine</option>
-                                <option>Chirurgie</option>
-                                <option>Pédiatrie</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small fw-bold">Date</label>
-                            <input type="text" class="form-control" id="date-range"
-                                   placeholder="Sélectionner une plage">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff"><i
-                                class="fas fa-users-line text-lg"></i></div>
-                        <div class="kpi-value text-primary">{{ total_patients|default:0 }}</div>
-                        <div class="kpi-label">Total Patients</div>
-                        <div class="kpi-detail">Hommes: {{ total_patients_homme|default:0 }} ·
-                            Femmes: {{ total_patients_femme|default:0 }}</div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff"><i
-                                class="fas fa-calendar text-lg"></i></div>
-                        <div class="kpi-value text-info">{{ total_scheduled_appointments|default:0 }}</div>
-                        <div class="kpi-label">Rendez-vous planifiés</div>
-                        <div class="kpi-detail"><span class="trend-indicator trend-up">+12% vs semaine dernière</span>
-                        </div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff"><i
-                                class="fas fa-hospital-symbol text-lg"></i></div>
-                        <div class="kpi-value text-warning">{{ current_hospitalizations|default:0 }}</div>
-                        <div class="kpi-label">Hospitalisations en cours</div>
-                        <div class="kpi-detail">Taux d'occupation: {{ occupancy_rate|default:"0" }}%</div>
-                    </div>
-
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff"><i
-                                class="fas fa-cake-candles text-lg"></i></div>
-                        <div class="kpi-value text-success">{{ average_age|floatformat:0|default:"-" }}</div>
-                        <div class="kpi-label">Âge moyen</div>
-                        <div class="kpi-detail">Population suivie</div>
-                    </div>
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-8">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Tendances mensuelles</h4><span class="text-muted small">Consultations & rendez-vous</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="monthlyTrendsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Répartition par âge & sexe</h4><span class="badge-modern"
-                                                                                              style="background:#ecfeff;color:#155e75">Dernier mois</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-modern">
-                                        <thead>
-                                        <tr>
-                                            <th>Âge</th>
-                                            <th class="text-center">Hommes</th>
-                                            <th class="text-center">Femmes</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for age_group, data in patient_age_distribution.items %}
-                                            <tr>
-                                                <td>{{ age_group }}</td>
-                                                <td class="text-center text-primary fw-bold">{{ data.Hommes|default:0 }}</td>
-                                                <td class="text-center text-danger fw-bold">{{ data.Femmes|default:0 }}</td>
-                                            </tr>
-                                        {% empty %}
-                                            <tr>
-                                                <td colspan="3" class="text-center text-muted py-3">Aucune donnée
-                                                    disponible
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Statistiques des hospitalisations</h4><span
-                                    class="text-muted small">Par période</span></div>
-                            <div class="card-body">
-                                <div id="hospitalization_chart" class="chart-container"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-6">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Répartition des patients par statut</h4></div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="patientStatusChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>État des rendez-vous</h4></div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="appointmentStatusChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-lg-4">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Consultations par service</h4></div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="consultationsByServiceChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Raisons d'hospitalisation</h4></div>
-                            <div class="card-body">
-                                <div class="chart-container">
-                                    <canvas id="hospitalizationReasonChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card-modern">
-                            <div class="card-header"><h4>Top services utilisés</h4></div>
-                            <div class="card-body">
-                                <ul class="list-clean">
-                                    {% for service in top_services %}
-                                        <li><span>{{ service.nom|default:"Service inconnu" }}</span><span
-                                                class="text-muted">{{ service.total_use|default:0 }} utilisations</span>
-                                        </li>
-                                    {% empty %}
-                                        <li class="text-center text-muted py-2">Aucun service disponible</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+  <!-- ═══════════════════════════════════
+       HERO HEADER
+  ═══════════════════════════════════ -->
+  <header class="smit-hero">
+    <div>
+      <div class="hero-eyebrow">SMIT · KENEYA</div>
+      <h1 class="hero-title">Tableau de bord clinique</h1>
+      <div class="hero-sub">
+        <span>Suivi médical national</span>
+        <span class="hero-badge">National</span>
+      </div>
     </div>
-    {# --------- Blobs JSON injectés par la vue (voir patch ci-dessous) --------- #}
-    <script id="consultations-by-service"
-            type="application/json">{{ consultations_by_service_json|default:"[]"|safe }}</script>
-    <script id="hosp-reasons" type="application/json">{{ hospitalizations_by_reason_json|default:"[]"|safe }}</script>
-    <script id="appt-status" type="application/json">{{ appointment_status_counts_json|default:"[]"|safe }}</script>
-    <script id="patient-status" type="application/json">{{ patient_status_counts_json|default:"[]"|safe }}</script>
-    <script id="monthly-consultations" type="application/json">{{ consultation_counts_json|default:"[]"|safe }}</script>
-    <script id="monthly-appointments" type="application/json">{{ appointment_counts_json|default:"[]"|safe }}</script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
-document.addEventListener("DOMContentLoaded", function () {
-  function updateTime() {
-    const el = document.getElementById('current-time');
-    if (el) el.textContent = new Date().toLocaleString('fr-FR');
+    <div class="hero-meta">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        En direct
+      </div>
+      <div class="hero-time" id="current-time">{{ current_time|default:"Chargement..." }}</div>
+      <div class="hero-actions">
+        <button class="btn-hero btn-hero-ghost">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exporter
+        </button>
+        <button class="btn-hero btn-hero-primary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouveau rapport
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════
+       FILTER BAR
+  ═══════════════════════════════════ -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Période</span>
+      <select class="filter-select" id="period-filter">
+        <option>2025 (YTD)</option>
+        <option>2024</option>
+        <option>2023</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Niveau</span>
+      <select class="filter-select" id="level-filter">
+        <option>CHU</option>
+        <option>Région</option>
+        <option>District</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Spécialité</span>
+      <select class="filter-select" id="specialty-filter">
+        <option>Toutes</option>
+        <option>Médecine</option>
+        <option>Chirurgie</option>
+        <option>Pédiatrie</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Plage de dates</span>
+      <input type="text" class="filter-input" id="date-range" placeholder="jj/mm/aaaa — jj/mm/aaaa">
+    </div>
+    <button class="filter-btn" onclick="applyFilters()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      Appliquer
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       KPI CARDS
+  ═══════════════════════════════════ -->
+  <p class="section-label">Indicateurs clés de performance</p>
+
+  <div class="kpi-grid">
+
+    <!-- Patients -->
+    <div class="kpi-card" onclick="highlightCard(this)">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-emerald">
+          <i class="fas fa-users"></i>
+        </div>
+        <span class="kpi-trend kpi-trend-up">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +8.4%
+        </span>
+      </div>
+      <div class="kpi-value" data-target="{{ total_patients|default:0 }}">{{ total_patients|default:0 }}</div>
+      <div class="kpi-label">Total Patients</div>
+      <div class="kpi-sub">
+        <span class="kpi-dot dot-blue">{{ total_patients_homme|default:0 }} H</span>
+        <span class="kpi-dot dot-rose">{{ total_patients_femme|default:0 }} F</span>
+      </div>
+      <div class="kpi-progress"><div class="kpi-progress-fill" style="width:0" data-width="72"></div></div>
+    </div>
+
+    <!-- Rendez-vous -->
+    <div class="kpi-card" onclick="highlightCard(this)">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-sky">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <span class="kpi-trend kpi-trend-up">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +12%
+        </span>
+      </div>
+      <div class="kpi-value">{{ total_scheduled_appointments|default:0 }}</div>
+      <div class="kpi-label">Rendez-vous planifiés</div>
+      <div class="kpi-sub">vs semaine dernière</div>
+      <div class="kpi-progress"><div class="kpi-progress-fill" data-width="58"></div></div>
+    </div>
+
+    <!-- Hospitalisations -->
+    <div class="kpi-card" onclick="highlightCard(this)">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-amber">
+          <i class="fas fa-hospital"></i>
+        </div>
+        <span class="kpi-trend kpi-trend-neu" data-tip="Stable cette semaine">
+          →&nbsp;Stable
+        </span>
+      </div>
+      <div class="kpi-value">{{ current_hospitalizations|default:0 }}</div>
+      <div class="kpi-label">Hospitalisations en cours</div>
+      <div class="kpi-sub">Taux d'occupation&nbsp;<strong style="color:var(--amber)">{{ occupancy_rate|default:"0" }}%</strong></div>
+      <div class="kpi-progress"><div class="kpi-progress-fill" data-width="{{ occupancy_rate|default:40 }}"></div></div>
+    </div>
+
+    <!-- Âge moyen -->
+    <div class="kpi-card" onclick="highlightCard(this)">
+      <div class="kpi-header">
+        <div class="kpi-icon kpi-icon-violet">
+          <i class="fas fa-birthday-cake"></i>
+        </div>
+        <span class="s-badge s-badge-sky">Population</span>
+      </div>
+      <div class="kpi-value" style="display:flex;align-items:baseline;gap:.3rem">
+        {{ average_age|floatformat:0|default:"—" }}
+        <span style="font-size:1rem;font-weight:400;color:var(--text-3);font-family:var(--font-body)">ans</span>
+      </div>
+      <div class="kpi-label">Âge moyen</div>
+      <div class="kpi-sub">Patients suivis</div>
+      <div class="kpi-progress"><div class="kpi-progress-fill" data-width="60"></div></div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ROW 1 — Tendances + Table âge/sexe
+  ═══════════════════════════════════ -->
+  <p class="section-label">Analyse temporelle & démographie</p>
+
+  <div class="smit-row smit-row-83" style="animation: fadeUp .5s .35s ease both; opacity:0">
+
+    <!-- Tendances mensuelles -->
+    <div class="s-card" style="--accent: var(--sky)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Tendances mensuelles
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <span class="s-card-badge">Consultations & RDV</span>
+          <button onclick="toggleChartType()" style="background:var(--ivory-2);border:1px solid var(--border);border-radius:6px;padding:.25rem .6rem;font-size:.7rem;cursor:pointer;color:var(--text-2);transition:var(--transition)" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--ivory-2)'">
+            Changer vue
+          </button>
+        </div>
+      </div>
+      <div class="s-card-body">
+        <div class="chart-box"><canvas id="monthlyTrendsChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Table âge & sexe -->
+    <div class="s-card" style="--accent: var(--rose)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Âge & Sexe
+        </div>
+        <span class="s-card-badge">Dernier mois</span>
+      </div>
+      <div class="s-card-body" style="padding: 0">
+        <table class="s-table">
+          <thead>
+            <tr>
+              <th>Tranche</th>
+              <th style="text-align:center">Hommes</th>
+              <th style="text-align:center">Femmes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for age_group, data in patient_age_distribution.items %}
+            <tr>
+              <td>
+                <span style="font-family:var(--font-mono);font-size:.75rem;font-weight:600;background:var(--ivory-2);padding:.15rem .5rem;border-radius:4px">{{ age_group }}</span>
+              </td>
+              <td class="num num-blue">{{ data.Hommes|default:0 }}</td>
+              <td class="num num-rose">{{ data.Femmes|default:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="empty">Aucune donnée</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ROW 2 — Hospitalisations (full)
+  ═══════════════════════════════════ -->
+  <p class="section-label">Suivi des hospitalisations</p>
+
+  <div style="margin-bottom:1.5rem;animation: fadeUp .5s .45s ease both; opacity:0">
+    <div class="s-card" style="--accent: var(--amber)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Statistiques des hospitalisations par période
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center">
+          <span class="anml-tag">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Données cumulatives
+          </span>
+          <span class="s-card-badge">Apex Charts</span>
+        </div>
+      </div>
+      <div class="s-card-body">
+        <div id="hospitalization_chart" style="min-height:340px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ROW 3 — Statut patients + RDV
+  ═══════════════════════════════════ -->
+  <p class="section-label">Distribution & états</p>
+
+  <div class="smit-row smit-row-2" style="animation: fadeUp .5s .55s ease both; opacity:0">
+
+    <div class="s-card" style="--accent: var(--violet)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Patients par statut
+        </div>
+        <span class="s-card-badge">Vue globale</span>
+      </div>
+      <div class="s-card-body">
+        <div class="chart-box"><canvas id="patientStatusChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="s-card" style="--accent: var(--sky)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          État des rendez-vous
+        </div>
+        <span class="s-card-badge">Période courante</span>
+      </div>
+      <div class="s-card-body">
+        <div class="chart-box"><canvas id="appointmentStatusChart"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ROW 4 — Consultations + Raisons + Top services
+  ═══════════════════════════════════ -->
+  <p class="section-label">Activité & services</p>
+
+  <div class="smit-row smit-row-3" style="animation: fadeUp .5s .65s ease both; opacity:0">
+
+    <div class="s-card" style="--accent: var(--sky)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Consultations par service
+        </div>
+      </div>
+      <div class="s-card-body">
+        <div class="chart-box"><canvas id="consultationsByServiceChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="s-card" style="--accent: var(--amber)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Raisons d'hospitalisation
+        </div>
+      </div>
+      <div class="s-card-body">
+        <div class="chart-box"><canvas id="hospitalizationReasonChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="s-card" style="--accent: var(--emerald)">
+      <div class="s-card-header">
+        <div class="s-card-title">
+          <div class="s-card-title-dot"></div>
+          Top services utilisés
+        </div>
+        <span class="s-card-badge">Classement</span>
+      </div>
+      <div class="s-card-body" style="padding: 1rem 1.5rem">
+        <ul class="service-list" id="service-list">
+          {% for service in top_services %}
+          <li class="service-item">
+            <span class="service-rank">#{{ forloop.counter }}</span>
+            <div class="service-info">
+              <div class="service-name">{{ service.nom|default:"Service inconnu" }}</div>
+              <div class="service-bar">
+                <div class="service-bar-fill" style="width:0" data-width="{{ service.pct|default:70 }}"></div>
+              </div>
+            </div>
+            <span class="service-count">{{ service.total_use|default:0 }}</span>
+          </li>
+          {% empty %}
+          <li class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Aucun service disponible
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /smit-wrap -->
+
+
+<!-- ═══════════════════════════════════
+     DATA BLOBS (Django JSON inject)
+═══════════════════════════════════ -->
+<script id="consultations-by-service" type="application/json">{{ consultations_by_service_json|default:"[]"|safe }}</script>
+<script id="hosp-reasons"             type="application/json">{{ hospitalizations_by_reason_json|default:"[]"|safe }}</script>
+<script id="appt-status"              type="application/json">{{ appointment_status_counts_json|default:"[]"|safe }}</script>
+<script id="patient-status"           type="application/json">{{ patient_status_counts_json|default:"[]"|safe }}</script>
+<script id="monthly-consultations"    type="application/json">{{ consultation_counts_json|default:"[]"|safe }}</script>
+<script id="monthly-appointments"     type="application/json">{{ appointment_counts_json|default:"[]"|safe }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SMIT DASHBOARD — Scripts Premium
+═══════════════════════════════════════════════════════ */
+
+/* ── Design tokens (mirror CSS) ── */
+const COLORS = {
+  navy:      '#0a1628',
+  emerald:   '#059669',
+  emerald2:  '#10b981',
+  sky:       '#0ea5e9',
+  rose:      '#e11d48',
+  amber:     '#d97706',
+  violet:    '#7c3aed',
+  gold:      '#b8860b',
+  text:      '#1e293b',
+  text2:     '#475569',
+  text3:     '#94a3b8',
+  border:    '#e2e8f0',
+  ivory:     '#f9f6f0',
+};
+const PALETTE = [COLORS.emerald, COLORS.sky, COLORS.rose, COLORS.amber, COLORS.violet, '#ec4899', '#14b8a6'];
+
+/* ── Chart.js global defaults ── */
+if (window.Chart) {
+  Chart.defaults.font.family = "'Outfit', sans-serif";
+  Chart.defaults.font.size   = 12;
+  Chart.defaults.color       = COLORS.text3;
+  Chart.defaults.borderColor = COLORS.border;
+  Chart.defaults.plugins.legend.labels.boxWidth      = 10;
+  Chart.defaults.plugins.legend.labels.borderRadius  = 3;
+  Chart.defaults.plugins.legend.labels.padding       = 14;
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+}
+
+/* ── Helpers ── */
+const $ = id => document.getElementById(id);
+const getJSON = id => {
+  const el = $(id);
+  try { return el ? JSON.parse(el.textContent || '[]') : []; }
+  catch(e) { console.error('JSON parse error:', id, e); return []; }
+};
+
+/* ── Clock ── */
+function updateTime() {
+  const el = $('current-time');
+  if (el) el.textContent = new Date().toLocaleString('fr-FR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+updateTime();
+setInterval(updateTime, 30000);
+
+/* ── Progress bar animation on load ── */
+function animateProgressBars() {
+  document.querySelectorAll('.kpi-progress-fill').forEach(el => {
+    const w = el.dataset.width || 50;
+    setTimeout(() => el.style.width = w + '%', 400);
+  });
+  document.querySelectorAll('.service-bar-fill').forEach(el => {
+    const w = el.dataset.width || 60;
+    setTimeout(() => el.style.width = w + '%', 600);
+  });
+}
+
+/* ── Card click ── */
+function highlightCard(card) {
+  card.style.transform = 'scale(.97)';
+  setTimeout(() => card.style.transform = '', 180);
+}
+
+/* ── Filter apply (stub) ── */
+function applyFilters() {
+  const btn = document.querySelector('.filter-btn');
+  btn.textContent = '↻ Chargement...';
+  setTimeout(() => {
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Appliquer`;
+  }, 1200);
+}
+
+/* ── Toggle chart type ── */
+let trendType = 'line';
+function toggleChartType() {
+  if (monthlyChart) {
+    trendType = trendType === 'line' ? 'bar' : 'line';
+    monthlyChart.config.type = trendType;
+    monthlyChart.update('active');
   }
+}
 
-  updateTime();
-  setInterval(updateTime, 60000);
+/* ══════════════════════════════════════════
+   CHART FACTORY — common options builders
+══════════════════════════════════════════ */
+const baseScales = () => ({
+  y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.045)', drawBorder: false }, ticks: { precision: 0, padding: 6 }, border: { dash: [4,4] } },
+  x: { grid: { display: false }, ticks: { padding: 4 } }
+});
 
-  // Lecture sûre des JSON (si vide -> [])
-  const getJSON = (id) => {
-    const el = document.getElementById(id);
-    try {
-      return el ? JSON.parse(el.textContent || '[]') : [];
-    } catch (e) {
-      console.error('JSON invalide pour', id, e);
-      return [];
+const basePie = () => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'right', labels: { padding: 16 } },
+    tooltip: {
+      backgroundColor: COLORS.navy,
+      titleFont: { family: "'Outfit'", weight: '600', size: 12 },
+      bodyFont:  { family: "'Outfit'", size: 11 },
+      padding: 12, cornerRadius: 8, borderWidth: 0
     }
-  };
+  },
+  cutout: '55%'
+});
 
-  const CBS       = getJSON('consultations-by-service');   // [{services__nom, count}]
-  const HREAS     = getJSON('hosp-reasons');               // [{reason_for_admission, count}]
-  const APST      = getJSON('appt-status');                // [{status, count}]
-  const PTST      = getJSON('patient-status');             // [{status, count}]
-  const MONTH_CONS= getJSON('monthly-consultations');      // [..12]
-  const MONTH_APPT= getJSON('monthly-appointments');       // [..12]
+/* ══════════════════════════════════════════
+   CHARTS INIT
+══════════════════════════════════════════ */
+let monthlyChart = null;
 
-  // ApexCharts: hospitalisations
-  fetch("{% url 'hospitalization_chart_data' %}")
-    .then(r => r.json())
-    .then(data => {
-      const periods     = data.map(it => it.periode);
-      const hospitalized= data.map(it => it.total_hospitalized || 0);
-      const deaths      = data.map(it => it.total_deaths || 0);
-      const recovered   = data.map(it => it.total_recovered || 0);
-      const transferred = data.map(it => it.total_transferred || 0);
-      const scam        = data.map(it => it.total_scam || 0);
-      const evaded      = data.map(it => it.total_evade || 0);
+document.addEventListener('DOMContentLoaded', () => {
+  animateProgressBars();
 
-      const opts = {
-        series: [
-          {name: "Hospitalisés", data: hospitalized},
-          {name: "Décès",        data: deaths},
-          {name: "Guéris",       data: recovered},
-          {name: "Transférés",   data: transferred},
-          {name: "SCAM",         data: scam},
-          {name: "Évadés",       data: evaded}
-        ],
-        chart: {type: "bar", height: 380, toolbar: {show: true}, zoom: {enabled: false}},
-        plotOptions: {
-          bar: {horizontal: false, columnWidth: "55%", borderRadius: 6, dataLabels: {position: "top"}}
+  const CBS       = getJSON('consultations-by-service');
+  const HREAS     = getJSON('hosp-reasons');
+  const APST      = getJSON('appt-status');
+  const PTST      = getJSON('patient-status');
+  const MCONS     = getJSON('monthly-consultations');
+  const MAPPT     = getJSON('monthly-appointments');
+
+  /* 1. Tendances mensuelles */
+  const monthEl = $('monthlyTrendsChart');
+  if (monthEl && window.Chart) {
+    monthlyChart = new Chart(monthEl, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+        datasets: [
+          {
+            label: 'Consultations',
+            data: MCONS,
+            borderColor: COLORS.sky,
+            backgroundColor: 'rgba(14,165,233,.08)',
+            tension: 0.45, fill: true,
+            pointRadius: 4, pointHoverRadius: 7,
+            pointBackgroundColor: '#fff', pointBorderColor: COLORS.sky, pointBorderWidth: 2
+          },
+          {
+            label: 'Rendez-vous',
+            data: MAPPT,
+            borderColor: COLORS.emerald,
+            backgroundColor: 'rgba(5,150,105,.08)',
+            tension: 0.45, fill: true,
+            pointRadius: 4, pointHoverRadius: 7,
+            pointBackgroundColor: '#fff', pointBorderColor: COLORS.emerald, pointBorderWidth: 2,
+            borderDash: [0]
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', align: 'end' },
+          tooltip: {
+            backgroundColor: COLORS.navy, padding: 14, cornerRadius: 10,
+            titleFont: { family: "'Outfit'", weight: '600', size: 12 },
+            bodyFont: { family: "'Outfit'", size: 11 },
+            callbacks: {
+              label: ctx => `  ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('fr-FR')}`
+            }
+          }
         },
-        dataLabels: {enabled: false},
-        stroke: {show: true, width: 2, colors: ["transparent"]},
-        xaxis: {categories: periods},
-        yaxis: {title: {text: "Nombre de patients"}},
-        fill: {opacity: 1},
-        colors: ["#22c55e", "#ef4444", "#3b82f6", "#7c3aed", "#f59e0b", "#ec4899"],
-        legend: {position: "top", horizontalAlign: "center"},
-        tooltip: {y: {formatter: val => `${val} patients`}}
-      };
-      const host = document.querySelector("#hospitalization_chart");
-      if (host) new ApexCharts(host, opts).render();
-    })
-    .catch(() => {
-      const host = document.querySelector("#hospitalization_chart");
-      if (host) {
-        host.innerHTML = '<div class="text-center text-muted py-5">Erreur de chargement des données</div>';
+        scales: baseScales()
       }
     });
-
-  const ChartCtor = window.Chart;
-  if (!ChartCtor) {
-    console.error('Chart.js non chargé');
-    return;
   }
 
-  // Consultations par service
-  (function () {
-    const el = document.getElementById('consultationsByServiceChart');
-    if (!el) return;
-    new ChartCtor(el, {
+  /* 2. Consultations par service */
+  const cbs = $('consultationsByServiceChart');
+  if (cbs && window.Chart) {
+    new Chart(cbs, {
       type: 'bar',
       data: {
         labels: CBS.map(x => x.services__nom ?? 'Inconnu'),
         datasets: [{
           label: 'Consultations',
           data: CBS.map(x => x.count ?? 0),
-          backgroundColor: '#60a5fa',
-          borderRadius: 8
+          backgroundColor: CBS.map((_, i) => PALETTE[i % PALETTE.length] + 'cc'),
+          borderColor:      CBS.map((_, i) => PALETTE[i % PALETTE.length]),
+          borderWidth: 1.5,
+          borderRadius: 6, borderSkipped: false
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: COLORS.navy, padding: 12, cornerRadius: 8 } },
         scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { precision: 0 } },
-          x: { grid: { display: false } }
+          x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,.04)' }, ticks: { precision: 0 } },
+          y: { grid: { display: false } }
         }
       }
     });
-  })();
+  }
 
-  // Raisons d'hospitalisation
-  (function () {
-    const el = document.getElementById('hospitalizationReasonChart');
-    if (!el) return;
-    new ChartCtor(el, {
+  /* 3. Raisons hospitalisation */
+  const hre = $('hospitalizationReasonChart');
+  if (hre && window.Chart) {
+    new Chart(hre, {
       type: 'bar',
       data: {
         labels: HREAS.map(x => x.reason_for_admission ?? 'Inconnue'),
         datasets: [{
           label: 'Admissions',
           data: HREAS.map(x => x.count ?? 0),
-          backgroundColor: '#fbbf24',
-          borderRadius: 8
+          backgroundColor: COLORS.amber + 'bb',
+          borderColor: COLORS.amber,
+          borderWidth: 1.5,
+          borderRadius: 6, borderSkipped: false
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { precision: 0 } },
-          x: { grid: { display: false } }
-        }
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: COLORS.navy, padding: 12, cornerRadius: 8 } },
+        scales: baseScales()
       }
     });
-  })();
+  }
 
-  // Statuts rendez-vous
-  (function () {
-    const el = document.getElementById('appointmentStatusChart');
-    if (!el) return;
-    new ChartCtor(el, {
+  /* 4. Statuts rendez-vous — Doughnut */
+  const apptEl = $('appointmentStatusChart');
+  if (apptEl && window.Chart) {
+    new Chart(apptEl, {
       type: 'doughnut',
       data: {
         labels: APST.map(x => x.status ?? 'Inconnu'),
         datasets: [{
           data: APST.map(x => x.count ?? 0),
-          backgroundColor: ['#6366f1', '#10b981', '#06b6d4', '#f59e0b', '#ef4444']
+          backgroundColor: PALETTE.slice(0, APST.length),
+          borderWidth: 0,
+          hoverOffset: 8
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'right' } }
-      }
+      options: basePie()
     });
-  })();
+  }
 
-  // Statuts patients
-  (function () {
-    const el = document.getElementById('patientStatusChart');
-    if (!el) return;
-    new ChartCtor(el, {
-      type: 'pie',
+  /* 5. Statuts patients — Doughnut */
+  const ptEl = $('patientStatusChart');
+  if (ptEl && window.Chart) {
+    new Chart(ptEl, {
+      type: 'doughnut',
       data: {
         labels: PTST.map(x => x.status ?? 'Inconnu'),
         datasets: [{
           data: PTST.map(x => x.count ?? 0),
-          backgroundColor: ['#4f46e5', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6']
+          backgroundColor: [COLORS.emerald, COLORS.sky, COLORS.rose, COLORS.amber, COLORS.violet].slice(0, PTST.length),
+          borderWidth: 0,
+          hoverOffset: 8
         }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'right' } }
-      }
+      options: { ...basePie(), plugins: { ...basePie().plugins, legend: { ...basePie().plugins.legend, position: 'bottom' } } }
     });
-  })();
+  }
 
-  // Tendances mensuelles
-  (function () {
-    const el = document.getElementById('monthlyTrendsChart');
-    if (!el) return;
-    new ChartCtor(el, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-        datasets: [
-          {
-            label: 'Consultations',
-            data: MONTH_CONS,
-            borderColor: '#4f46e5',
-            backgroundColor: 'rgba(79,70,229,.1)',
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Rendez-vous',
-            data: MONTH_APPT,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16,185,129,.1)',
-            tension: 0.4,
-            fill: true
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'top' } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
+  /* 6. Hospitalisations — ApexCharts ── */
+  fetch("{% url 'hospitalization_chart_data' %}")
+    .then(r => r.json())
+    .then(data => {
+      const host = $('hospitalization_chart');
+      if (!host || !window.ApexCharts) return;
+
+      new ApexCharts(host, {
+        series: [
+          { name: "Hospitalisés", data: data.map(d => d.total_hospitalized || 0) },
+          { name: "Guéris",       data: data.map(d => d.total_recovered  || 0) },
+          { name: "Décès",        data: data.map(d => d.total_deaths      || 0) },
+          { name: "Transférés",   data: data.map(d => d.total_transferred || 0) },
+          { name: "SCAM",         data: data.map(d => d.total_scam        || 0) },
+          { name: "Évadés",       data: data.map(d => d.total_evade       || 0) }
+        ],
+        chart: {
+          type: 'bar', height: 340, toolbar: { show: true, tools: { download: true, selection: false, zoom: false, zoomin: false, zoomout: false, pan: false } },
+          fontFamily: "'Outfit', sans-serif",
+          background: 'transparent',
+          animations: { enabled: true, easing: 'easeinout', speed: 700 }
+        },
+        plotOptions: {
+          bar: { horizontal: false, columnWidth: '52%', borderRadius: 5, dataLabels: { position: 'top' } }
+        },
+        dataLabels: { enabled: false },
+        stroke: { show: true, width: 2, colors: ['transparent'] },
+        xaxis: {
+          categories: data.map(d => d.periode),
+          labels: { style: { fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', colors: COLORS.text3 } }
+        },
+        yaxis: {
+          title: { text: 'Patients', style: { fontFamily: "'Outfit'", fontWeight: 500, color: COLORS.text3 } },
+          labels: { style: { fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', colors: COLORS.text3 } }
+        },
+        fill: { opacity: .9, type: 'solid' },
+        colors: [COLORS.sky, COLORS.emerald, COLORS.rose, COLORS.violet, COLORS.amber, '#ec4899'],
+        legend: {
+          position: 'top', horizontalAlign: 'right',
+          fontFamily: "'Outfit'", fontSize: '12px',
+          markers: { radius: 3 }
+        },
+        tooltip: {
+          theme: 'dark', style: { fontFamily: "'Outfit'" },
+          y: { formatter: v => `${v.toLocaleString('fr-FR')} patients` }
+        },
+        grid: { borderColor: COLORS.border, strokeDashArray: 4, padding: { left: 8, right: 8 } }
+      }).render();
+    })
+    .catch(() => {
+      const host = $('hospitalization_chart');
+      if (host) host.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Erreur de chargement des données d'hospitalisation</div>`;
     });
-  })();
 
-});
+}); /* /DOMContentLoaded */
 </script>
+
 {% endblock %}
-{#{% extends 'layout/base.html' %}#}
-{#{% load static %}#}
-{##}
-{##}
-{#{% block content %}#}
-{##}
-{#     <!-- content @s -->#}
-{##}
-{#<div class="nk-content nk-content-fluid">#}
-{#    <div class="container-xl wide-lg">#}
-{#        <div class="nk-content-body">#}
-{##}
-{#            <!-- Page Header -->#}
-{#            <div class="nk-block-head nk-block-head-lg text-center">#}
-{#                <h3 class="nk-block-title page-title">SMIT Dashboard</h3>#}
-{#                <p class="nk-block-des text-soft">Bienvenue sur le tableau de bord KENEYA.</p>#}
-{#            </div>#}
-{##}
-{#            <div class="row g-gs">#}
-{#                <!-- Monthly Trends Section -->#}
-{#                <div class="col-lg-8">#}
-{#                    <div class="card card-bordered h-100">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">Tendances Mensuelles</h4>#}
-{#                            <canvas id="monthlyTrendsChart"></canvas>#}
-{#                            <p class="sub-text mt-2">Consultations et Rendez-vous par Mois</p>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                <div class="col-lg-4">#}
-{##}
-{#                        <div class="card card-bordered h-100">#}
-{#                        <div class="card-header">#}
-{#                            <ul class="d-flex flex-row justify-content-between align-items-center gap-3 list-unstyled">#}
-{#    <li class="d-flex flex-column text-center">#}
-{#        <span>Total Patients</span>#}
-{#        <span class="text-primary">{{ total_patients }}</span>#}
-{#    </li>#}
-{#    <li class=" d-flex flex-column text-center">#}
-{#        <span>Hommes</span>#}
-{#        <span class="text-success">{{ total_patients_homme }}</span>#}
-{#    </li>#}
-{#    <li class="d-flex flex-column text-center">#}
-{#        <span>Femmes</span>#}
-{#        <span class="text-danger">{{ total_patients_femme }}</span>#}
-{#    </li>#}
-{#</ul></div>#}
-{#    <div class="card-inner">#}
-{#        <h4 class="nk-block-title">Répartition des Patients par Tranche d'Âge et Sexe</h4>#}
-{##}
-{#        <table class="table table-bordered">#}
-{#            <thead>#}
-{#                <tr>#}
-{#                    <th>âge</th>#}
-{#                    <th>Hommes</th>#}
-{#                    <th>Femmes</th>#}
-{#                </tr>#}
-{#            </thead>#}
-{#            <tbody>#}
-{#                {% for age_group, data in patient_age_distribution.items %}#}
-{#                <tr>#}
-{#                    <td>{{ age_group }}</td>#}
-{#                    <td>{{ data.Hommes }}</td>#}
-{#                    <td>{{ data.Femmes }}</td>#}
-{#                </tr>#}
-{#                {% endfor %}#}
-{#            </tbody>#}
-{#        </table>#}
-{#    </div>#}
-{#</div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{##}
-{#        <div class="row g-gs mt-4">#}
-{#                <div class="col-lg-4">#}
-{#                    <div class="card card-bordered text-center bg-primary-dim">#}
-{#                        <div class="card-inner">#}
-{#                            <h3 class="text-info">{{ total_scheduled_appointments }}</h3>#}
-{#                            <p class="sub-text">Rendez-vous Planifiés</p>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                 <div class="col-lg-4">#}
-{#                    <div class="card card-bordered text-center bg-primary-dim">#}
-{#                        <div class="card-inner">#}
-{#                            <h3 class="text-primary">{{ average_age|floatformat:0|default:"-" }} ans</h3>#}
-{#                            <p class="sub-text">Âge Moyen</p>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                  <div class="col-lg-4">#}
-{#                    <div class="card card-bordered text-center bg-primary-dim">#}
-{#                        <div class="card-inner">#}
-{#                            <h3 class="text-warning">{{ current_hospitalizations }}</h3>#}
-{#                            <p class="sub-text">Hospitalisations en cours</p>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{##}
-{#    <div class="row g-gs mt-4">#}
-{#         <div class="col-lg-12">#}
-{#             <div class="card card-bordered h-100">#}
-{#                 <div class="card-header"> <h4 class="nk-block-title">Statistiques des Hospitalisations</h4></div>#}
-{#                 <div class="card-inner">#}
-{#                         <div id="hospitalization_chart"></div>#}
-{##}
-{##}
-{##}
-{#                 </div>#}
-{#             </div>#}
-{#         </div>#}
-{##}
-{##}
-{#    </div>#}
-{#            <div class="row g-gs mt-4">#}
-{#                <div class="col-lg-6">#}
-{#                    <div class="card card-bordered">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">Répartition par Statut</h4>#}
-{#                            <canvas id="patientStatusChart"></canvas>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                 <div class="col-lg-6">#}
-{#                    <div class="card card-bordered">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">État des Rendez-vous</h4>#}
-{#                            <canvas id="appointmentStatusChart"></canvas>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{##}
-{#            </div>#}
-{##}
-{#            <div class="row g-gs mt-4">#}
-{#                <div class="col-lg-4">#}
-{#                    <div class="card card-bordered">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">Consultations par Service</h4>#}
-{#                            <canvas id="consultationsByServiceChart"></canvas>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{##}
-{##}
-{#             <div class="col-lg-4">#}
-{#                    <div class="card card-bordered">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">Raisons des Hospitalisations</h4>#}
-{#                            <canvas id="hospitalizationReasonChart"></canvas>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                   <div class="col-lg-4">#}
-{#                    <div class="card card-bordered">#}
-{#                        <div class="card-inner">#}
-{#                            <h4 class="nk-block-title">Top Services Utilisés</h4>#}
-{#                            <ul class="list-group">#}
-{#                                {% for service in top_services %}#}
-{#                                <li class="list-group-item d-flex justify-content-between">#}
-{#                                    <span>{{ service.nom }}</span>#}
-{#                                    <span class="text-muted">{{ service.total_use }} utilisations</span>#}
-{#                                </li>#}
-{#                                {% endfor %}#}
-{#                            </ul>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{##}
-{#            </div>#}
-{##}
-{##}
-{##}
-{#            <div class="row g-gs mt-4">#}
-{##}
-{##}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#</div>#}
-{#                <!-- content @e -->#}
-{##}
-{##}
-{##}
-{##}
-{##}
-{#    <script>#}
-{#    document.addEventListener("DOMContentLoaded", function () {#}
-{#        fetch("{% url 'hospitalization_chart_data' %}")  // Récupération des données JSON depuis Django#}
-{#            .then(response => response.json())#}
-{#            .then(data => {#}
-{#                let periods = data.map(item => item.periode);#}
-{#                let hospitalized = data.map(item => item.total_hospitalized);#}
-{#                let deaths = data.map(item => item.total_deaths);#}
-{#                let recovered = data.map(item => item.total_recovered);#}
-{#                let transferred = data.map(item => item.total_transferred);#}
-{#                let scam = data.map(item => item.total_scam);#}
-{#                let evaded = data.map(item => item.total_evade);#}
-{##}
-{#                var options = {#}
-{#                    series: [#}
-{#                        { name: "Hospitalisés", data: hospitalized },#}
-{#                        { name: "Décès", data: deaths },#}
-{#                        { name: "Guéris", data: recovered },#}
-{#                        { name: "Transférés", data: transferred },#}
-{#                        { name: "SCAM", data: scam },#}
-{#                        { name: "Évadés", data: evaded }#}
-{#                    ],#}
-{#                    chart: {#}
-{#                        type: "bar",#}
-{#                        height: 400#}
-{#                    },#}
-{#                    plotOptions: {#}
-{#                        bar: {#}
-{#                            horizontal: false,#}
-{#                            columnWidth: "50%"#}
-{#                        }#}
-{#                    },#}
-{#                    dataLabels: {#}
-{#                        enabled: false#}
-{#                    },#}
-{#                    xaxis: {#}
-{#                        categories: periods#}
-{#                    },#}
-{#                    colors: ["#00E396", "#FF4560", "#008FFB", "#775DD0", "#FEB019", "#FF66B2"],#}
-{#                    title: {#}
-{#                        text: "Statistiques des Hospitalisations par Période"#}
-{#                    }#}
-{#                };#}
-{##}
-{#                var chart = new ApexCharts(document.querySelector("#hospitalization_chart"), options);#}
-{#                chart.render();#}
-{#            });#}
-{#    });#}
-{#</script>#}
-{##}
-{#    <script>#}
-{#        new Chart(document.getElementById('consultationsByServiceChart'), {#}
-{#            type: 'bar',#}
-{#            data: {#}
-{#                labels: [{% for service in consultation_by_service %}'{{ service.services__nom }}',{% endfor %}],#}
-{#                datasets: [{#}
-{#                    label: 'Nombre de Consultations',#}
-{#                    data: [{% for service in consultation_by_service %}{{ service.count }}, {% endfor %}],#}
-{#                    backgroundColor: '#36b9cc'#}
-{#                }]#}
-{#            },#}
-{#            options: {#}
-{#                scales: {#}
-{#                    y: {#}
-{#                        beginAtZero: true#}
-{#                    }#}
-{#                }#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-{##}
-{#    <script>#}
-{#        new Chart(document.getElementById('hospitalizationReasonChart'), {#}
-{#            type: 'bar',#}
-{#            data: {#}
-{#                labels: [{% for reason in hospitalizations_by_reason %}'{{ reason.reason_for_admission }}',{% endfor %}],#}
-{#                datasets: [{#}
-{#                    label: 'Raisons d\'Admission',#}
-{#                    data: [{% for reason in hospitalizations_by_reason %}{{ reason.count }}, {% endfor %}],#}
-{#                    backgroundColor: '#f6c23e'#}
-{#                    }]#}
-{#        },#}
-{#            options: {#}
-{#                scales: {#}
-{#                    y: {#}
-{#                        beginAtZero: true#}
-{#                    }#}
-{#                }#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-{##}
-{#    <script>#}
-{#        new Chart(document.getElementById('appointmentStatusChart'), {#}
-{#            type: 'doughnut',#}
-{#            data: {#}
-{#                labels: [{% for status in appointment_status_counts %}'{{ status.status }}',{% endfor %}],#}
-{#                datasets: [{#}
-{#                    data: [{% for status in appointment_status_counts %}{{ status.count }}, {% endfor %}],#}
-{#                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']#}
-{#                }]#}
-{#            },#}
-{#            options: {#}
-{#                responsive: true,#}
-{#                plugins: {#}
-{#                    legend: {#}
-{#                        position: 'top'#}
-{#                    }#}
-{#                }#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-{##}
-{#    <script>#}
-{#        new Chart(document.getElementById('patientStatusChart'), {#}
-{#            type: 'pie',#}
-{#            data: {#}
-{#                labels: [{% for status in patient_status_counts %}'{{ status.status }}',{% endfor %}],#}
-{#                datasets: [{#}
-{#                    data: [{% for status in patient_status_counts %}{{ status.count }}, {% endfor %}],#}
-{#                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']#}
-{#                }]#}
-{#            },#}
-{#            options: {#}
-{#                responsive: true,#}
-{#                plugins: {#}
-{#                    legend: {#}
-{#                        position: 'top'#}
-{#                    }#}
-{#                }#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-{##}
-{#    <script>#}
-{#        new Chart(document.getElementById('monthlyTrendsChart'), {#}
-{#            type: 'line',#}
-{#            data: {#}
-{#                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],#}
-{#                datasets: [#}
-{#                    {#}
-{#                        label: 'Consultations',#}
-{#                        data: {{ consultation_counts|safe }},#}
-{#                        borderColor: '#4e73df',#}
-{#                        fill: false#}
-{#                    },#}
-{#                    {#}
-{#                        label: 'Rendez-vous',#}
-{#                        data: {{ appointment_counts|safe }},#}
-{#                        borderColor: '#1cc88a',#}
-{#                        fill: false#}
-{#                    }#}
-{#                ]#}
-{#            },#}
-{#            options: {#}
-{#                scales: {#}
-{#                    yAxes: [{#}
-{#                        ticks: {#}
-{#                            beginAtZero: true#}
-{#                        }#}
-{#                    }]#}
-{#                }#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-{##}
-{#{% endblock %}#}

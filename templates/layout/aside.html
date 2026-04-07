@@ -1,617 +1,1069 @@
 {% load static %}
 
-<!-- sidebar @s -->
-<div class="nk-sidebar nk-sidebar-fixed shadow" data-content="sidebarMenu">
-  <!-- Header -->
-  <div class="nk-sidebar-element nk-sidebar-head">
-    <div class="nk-sidebar-brand">
-      <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">
-        <img class="logo-light logo-img" src="{% static 'images/lyne_hospital.png' %}" alt="logo">
-        <img class="logo-dark logo-img" src="{% static 'images/lyne_hospital.png' %}" alt="logo-dark">
-      </a>
-      
-        <a href="{% url 'home' %}" class="logo-link nk-sidebar-logo">
-        <img class="logo-light logo-img" src="{% static 'images/logocermipa.png' %}" alt="logo">
-        <img class="logo-dark logo-img" src="{% static 'images/logocermipa.png' %}" alt="logo-dark">
-      </a><span class="sidebar-brand-title">SMIT</span>
-    </div>
+<!-- ═══════════════════════════════════════════════════════
+     SMIT KENEYA — Sidebar Premium · Light Mode
+     Fixes:
+     - z-index safe with Bootstrap modal/backdrop
+     - brand/user text colors corrected for light bg
+     - robust active-link matching (ignores query/hash & trailing slash)
+     - submenu open if any child is active (href startswith path)
+     - menu filter also searches submenu items + keeps parents visible
+═══════════════════════════════════════════════════════ -->
 
-    <div class="nk-menu-trigger mr-n2">
-      <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu" aria-label="Fermer le menu">
-        <em class="icon ni ni-arrow-left"></em>
-      </a>
-    </div>
-  </div>
-
-  <div class="sidebar-department">
-    SERVICE DES MALADIES INFECTIEUSES ET TROPICALES
-  </div>
-  <!-- Body -->
-  <div class="nk-sidebar-element">
-    <div class="nk-sidebar-body" data-simplebar>
-      <div class="nk-sidebar-content">
-
-        <!-- User Card -->
-        <div class="nk-sidebar-user">
-          <div class="user-avatar">
-            <span class="user-initials">{{ user.first_name|slice:1 }}{{ user.last_name|slice:1 }}</span>
-          </div>
-
-          <div class="user-info">
-            <div class="user-name">Dr. {{ user.get_full_name|default:user.username }}</div>
-            <div class="user-role">{{ user.groups.first.name|default:"Médecin" }}</div>
-          </div>
-
-          <div class="user-status online" title="Connecté"></div>
-        </div>
-
-        <!-- Menu -->
-        <div class="nk-sidebar-menu">
-          <ul class="nk-menu">
-
-            <!-- Générale -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Générale</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'home' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><em class="icon ni ni-dashboard-fill text-primary"></em></span>
-                </span>
-                <span class="nk-menu-text text-dark">Dashboard</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'global_search' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><em class="icon ni ni-search"></em></span>
-                </span>
-                <span class="nk-menu-text">Recherche</span>
-                <span class="nk-menu-badge">{{ patient_nbr }}</span>
-              </a>
-            </li>
-
-            <!-- Accueil -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Accueil</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'attente' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><em class="icon ni ni-users-fill"></em></span>
-                </span>
-                <span class="nk-menu-text">Salle d'attente</span>
-                <span class="nk-menu-badge badge-danger">{{ apointments_nbr }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'appointment_over' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><em class="icon ni ni-calendar-check"></em></span>
-                </span>
-                <span class="nk-menu-text">Patients reçus</span>
-                <span class="nk-menu-badge">{{ appointments_all }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'appointment_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><em class="icon ni ni-calendar-booking-fill"></em></span>
-                </span>
-                <span class="nk-menu-text">Rendez-vous</span>
-                <span class="nk-menu-badge">{{ appointments_all }}</span>
-              </a>
-            </li>
-
-            <!-- Consultation -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Consultation</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'consultation_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-stethoscope"></i></span>
-                </span>
-                <span class="nk-menu-text">Liste Consultations  <span class="text-danger">{{ consul_nbr }}</span></span>
-               
-              </a>
-            </li>
-
-            <!-- Urgences -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Urgences</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'urgences_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon icon-danger"><i class="fa-solid fa-ambulance"></i></span>
-                </span>
-                <span class="nk-menu-text">Liste des Urgences <span class="text-danger">{{ urgencehospi }}</span></span>
-                
-              </a>
-            </li>
-
-            <!-- Hospitalisation -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Hospitalisation</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'hospitalisation' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-bed-pulse"></i></span>
-                </span>
-                <span class="nk-menu-text">En cours d'hospitalisation</span>
-                <span class="nk-menu-badge badge-danger">{{ Hospitaliza_encours }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'suivie_soins_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
-                </span>
-                <span class="nk-menu-text">Suivi soins hospitalisation</span>
-                <span class="nk-menu-badge badge-danger">{{ Hospitaliza_encours }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'hospitalised_patient' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-bed"></i></span>
-                </span>
-                <span class="nk-menu-text">Patients Sortis</span>
-                <span class="nk-menu-badge">{{ discharged_count }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'hospi_unites' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-hospital"></i></span>
-                </span>
-                <span class="nk-menu-text">Unités d'hospitalisation</span>
-              </a>
-            </li>
-
-            <!-- Paramètres hospi (submenu) -->
-            <li class="nk-menu-item has-sub">
-              <a href="#" class="nk-menu-link nk-menu-toggle" aria-expanded="false">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-gears"></i></span>
-                </span>
-                <span class="nk-menu-text">Paramètres</span>
-                <span class="submenu-caret"><em class="icon ni ni-chevron-right"></em></span>
-              </a>
-              <ul class="nk-menu-sub">
-                <li class="nk-menu-item">
-                  <a href="#" class="nk-menu-link">
-                    <span class="sub-dot"></span>
-                    <span class="nk-menu-text">Analyses</span>
-                  </a>
-                </li>
-                <li class="nk-menu-item">
-                  <a href="#" class="nk-menu-link">
-                    <span class="sub-dot"></span>
-                    <span class="nk-menu-text">Kits</span>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <!-- Suivi -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Suivi Patients</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'bilan_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-file-arrow-up"></i></span>
-                </span>
-                <span class="nk-menu-text">Bilans Initiaux</span>
-                <span class="nk-menu-badge badge-primary">{{ bilaninitial }}</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'suivi_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-folder-tree"></i></span>
-                </span>
-                <span class="nk-menu-text">Suivi des Patients <span class="text-danger">{{ suivi_nbr }}</span></span>
-                
-              </a>
-            </li>
-
-            <!-- Maladies -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Maladies sous surveillance</h6>
-            </li>
-
-            {% for maladie in services %}
-              <li class="nk-menu-item has-sub">
-                <a href="#" class="nk-menu-link nk-menu-toggle" aria-expanded="false">
-                  <span class="nk-menu-icon">
-                    <span class="medical-icon"><i class="fa-solid fa-virus"></i></span>
-                  </span>
-                  <span class="nk-menu-text">{{ maladie }}</span>
-                  <span class="submenu-caret"><em class="icon ni ni-chevron-right"></em></span>
-                </a>
-                <ul class="nk-menu-sub">
-                  {% for sbactivity in maladie.subactivities.all %}
-                    <li class="nk-menu-item">
-                      <a href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}"
-                         class="nk-menu-link">
-                        <span class="sub-dot"></span>
-                        <span class="nk-menu-text">{{ sbactivity.nom }}</span>
-                      </a>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </li>
-            {% endfor %}
-
-            <!-- Laboratoire -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Laboratoire</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'echantillons_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-vial"></i></span>
-                </span>
-                <span class="nk-menu-text">Prélèvements</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'examen_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-flask-vial"></i></span>
-                </span>
-                <span class="nk-menu-text">Demande d'Analyse  <span class="text-danger">{{ examencount }}</span></span>
-               
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'examen_done_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-clipboard-check"></i></span>
-                </span>
-                <span class="nk-menu-text">Analyses effectuées <span class="text-danger">{{ examensdonecount }}</span></span>
-                
-              </a>
-            </li>
-
-            <!-- Pharmacie -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Pharmacie</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'medicaments' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
-                </span>
-                <span class="nk-menu-text">Médicaments</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'mouvement-stock' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-arrow-down-up-across-line"></i></span>
-                </span>
-                <span class="nk-menu-text">Mouvement de stock</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'rendezvous_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-calendar"></i></span>
-                </span>
-                <span class="nk-menu-text">Rendez-vous</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'commandes-list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-basket-shopping"></i></span>
-                </span>
-                <span class="nk-menu-text">Commandes</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="#" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-chart-bar"></i></span>
-                </span>
-                <span class="nk-menu-text">Rapports</span>
-              </a>
-            </li>
-
-            <!-- Paramètres -->
-            <li class="nk-menu-heading">
-              <h6 class="overline-title text-primary-alt">Paramètres</h6>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'employee_list' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-user-circle"></i></span>
-                </span>
-                <span class="nk-menu-text">Gestion des Employés</span>
-              </a>
-            </li>
-
-            <li class="nk-menu-item">
-              <a href="{% url 'user_role' %}" class="nk-menu-link">
-                <span class="nk-menu-icon">
-                  <span class="medical-icon"><i class="fa-solid fa-user-secret"></i></span>
-                </span>
-                <span class="nk-menu-text">Gestion des Rôles</span>
-              </a>
-            </li>
-
-          </ul>
-
-          <!-- Quick Actions -->
-          <div class="sidebar-quick-actions mb-5">
-            <div class="quick-actions-title">Actions Rapides</div>
-
-            <div class="quick-actions-grid mb-3">
-              <a href="{% url 'add_patient' %}" class="quick-action-item qa-danger">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Nouveau Patient</span>
-              </a>
-
-              <a href="{% url 'consultation_list' %}" class="quick-action-item qa-primary">
-                <i class="fa-solid fa-stethoscope"></i>
-                <span>Nouvelle Consultation</span>
-              </a>
-
-              <a href="{% url 'examen_list' %}" class="quick-action-item qa-warning">
-                <i class="fa-solid fa-flask-vial"></i>
-                <span>Demande d'Analyse</span>
-              </a>
-
-              <a href="{% url 'urgences_list' %}" class="quick-action-item qa-teal">
-                <i class="fa-solid fa-ambulance"></i>
-                <span>Cas Urgent</span>
-              </a>
-            </div>
-          </div>
-
-        </div><!-- .nk-sidebar-menu -->
-      </div><!-- .nk-sidebar-content -->
-    </div><!-- .nk-sidebar-body -->
-  </div><!-- .nk-sidebar-element -->
-</div>
-<!-- sidebar @e -->
-
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-  /* ============== Sidebar brand ============== */
-  .sidebar-brand-title{
-    font-weight: 900;
-    color: var(--text);
-    margin-left: 5px;
-    letter-spacing: .4px;
-  }
-  html[data-theme="dark"] .sidebar-brand-title{
-    color: var(--text);
-  }
+/* ═══════════════════════════════════════
+   SIDEBAR DESIGN TOKENS — LIGHT MODE
+═══════════════════════════════════════ */
+:root {
+  --sb-bg:         #ffffff;
+  --sb-surface:    #f8fafb;
+  --sb-surface-2:  #f1f5f9;
+  --sb-surface-3:  #e8eef5;
+  --sb-border:     #e2e8f0;
+  --sb-border-2:   #eef2f7;
+  --sb-text:       #0f172a;
+  --sb-text-2:     #334155;
+  --sb-text-3:     #94a3b8;
+  --sb-emerald:    #059669;
+  --sb-emerald-d:  #047857;
+  --sb-emerald-lt: rgba(5,150,105,.09);
+  --sb-sky:        #0284c7;
+  --sb-sky-lt:     rgba(2,132,199,.08);
+  --sb-rose:       #e11d48;
+  --sb-rose-lt:    rgba(225,29,72,.08);
+  --sb-amber:      #b45309;
+  --sb-amber-lt:   rgba(180,83,9,.08);
+  --sb-violet:     #7c3aed;
+  --sb-violet-lt:  rgba(124,58,237,.08);
+  --sb-gold:       #a16207;
+  --sb-teal:       #0f766e;
+  --sb-width:      280px;
+  --sb-radius:     14px;
+  --sb-ease:       cubic-bezier(.4,0,.2,1);
+  --sb-transition: all .25s var(--sb-ease);
+  --font-body:     'Outfit', system-ui, sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+  --font-display:  'Playfair Display', Georgia, serif;
+}
 
-  .sidebar-department{
-    font-size: 7px;
-    padding: 5px 7px;
-    text-align: center;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    letter-spacing: .6px;
-    text-transform: uppercase;
-  }
+/* ✅ Make sure modals are always above the sidebar (works for BS4 & BS5) */
+.modal-backdrop { z-index: 3000 !important; }
+.modal          { z-index: 3010 !important; }
 
-  /* ============== User card ============== */
-  .nk-sidebar-user{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 14px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(135deg, rgba(7, 85, 232, 0.22) 0%, rgba(2, 48, 83, 0.65) 100%);
-  }
-  html[data-theme="dark"] .nk-sidebar-user{
-    background: linear-gradient(135deg, rgba(14,165,233,.18) 0%, rgba(3,105,161,.20) 100%);
-  }
+/* ═══════════════════════════════════════
+   SIDEBAR SHELL — LIGHT
+═══════════════════════════════════════ */
+.sb {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sb-width);
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 900; /* below modal/backdrop */
+  font-family: var(--font-body);
+  overflow: hidden;
+  border-right: 1px solid var(--sb-border);
+  box-shadow:
+    4px 0 24px rgba(15,23,42,.06),
+    inset -1px 0 0 rgba(5,150,105,.05);
+}
 
-  .user-avatar{
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    border: 2px solid rgba(255,255,255,.55);
-    background: rgba(15,23,42,.30);
-    flex: 0 0 auto;
-    overflow: hidden;
-  }
+.sb::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(5,150,105,.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.sb::after {
+  content: '';
+  position: absolute;
+  bottom: 100px; left: -30px;
+  width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(2,132,199,.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  .user-initials{
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: .5px;
-  }
+/* ═══════════════════════════════════════
+   HEADER / BRAND
+═══════════════════════════════════════ */
+.sb-head {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--sb-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
 
-  .user-info{ flex: 1; min-width: 0; }
-  .user-name{
-    font-weight: 800;
-    color: #fff;
-    font-size: .95rem;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .user-role{
-    font-size: .78rem;
-    color: rgba(255,255,255,.88);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
 
-  .user-status{
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    border: 2px solid rgba(255,255,255,.9);
-    flex: 0 0 auto;
-  }
-  .user-status.online{ background: var(--success); }
-  .user-status.offline{ background: var(--danger); }
+.sb-logos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-  /* ============== Submenu visuals ============== */
-  .submenu-caret{
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 10px;
-    background: rgba(14,165,233,.10);
-    transition: transform .28s var(--ease), background .28s var(--ease);
-  }
-  html[data-theme="dark"] .submenu-caret{
-    background: rgba(14,165,233,.14);
-  }
+.sb-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  opacity: .9;
+  transition: var(--sb-transition);
+}
+.sb-logo-img:hover { opacity: 1; transform: scale(1.05); }
 
-  .nk-menu-item.has-sub.open > .nk-menu-toggle .submenu-caret{
-    transform: rotate(90deg);
-    background: rgba(14,165,233,.18);
-  }
+.sb-logo-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--sb-border);
+}
 
-  /* Submenu dot */
-  .sub-dot{
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: rgba(14,165,233,.55);
-    display: inline-block;
-    margin-right: 10px;
-    flex: 0 0 auto;
-  }
-  html[data-theme="dark"] .sub-dot{
-    background: rgba(14,165,233,.65);
-  }
+/* ✅ FIX: brand name was white on white bg */
+.sb-brand-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--sb-text);
+  letter-spacing: -.3px;
+  line-height: 1;
+}
+.sb-brand-name span { color: var(--sb-emerald); }
 
-  /* ============== Badges premium ============== */
-  .nk-menu-badge{
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 12px;
-    padding: 4px 10px;
-    background: rgba(100,116,139,.12);
-    color: var(--text-2);
-    border: 1px solid rgba(100,116,139,.16);
-  }
-  html[data-theme="dark"] .nk-menu-badge{
-    background: rgba(148,163,184,.12);
-    color: var(--text-2);
-    border-color: rgba(148,163,184,.18);
-  }
+.sb-close-btn {
+  display: none;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--sb-surface-2);
+  border: 1px solid var(--sb-border);
+  color: var(--sb-text-2);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: var(--sb-transition);
+  flex-shrink: 0;
+}
+.sb-close-btn:hover { background: var(--sb-surface-3); color: var(--sb-text); }
+@media (max-width: 1200px) { .sb-close-btn { display: flex; } }
 
-  .nk-menu-badge.badge-danger{
-    background: rgba(239,68,68,.14);
-    color: #991b1b;
-    border-color: rgba(239,68,68,.22);
-  }
-  html[data-theme="dark"] .nk-menu-badge.badge-danger{
-    color: #fecaca;
-  }
+/* Department strip */
+.sb-dept {
+  padding: 7px 20px;
+  background: rgba(16,185,129,.06);
+  border-bottom: 1px solid var(--sb-border);
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--sb-emerald);
+  text-align: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
 
-  .nk-menu-badge.badge-primary{
-    background: rgba(14,165,233,.16);
-    color: var(--primary-700);
-    border-color: rgba(14,165,233,.26);
-  }
-  html[data-theme="dark"] .nk-menu-badge.badge-primary{
-    color: #e0f2fe;
-  }
+/* ═══════════════════════════════════════
+   USER CARD
+═══════════════════════════════════════ */
+.sb-user {
+  margin: 12px 14px;
+  background: linear-gradient(135deg, rgba(16,185,129,.12) 0%, rgba(56,189,248,.08) 100%);
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: var(--sb-radius);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: var(--sb-transition);
+  cursor: default;
+}
+.sb-user:hover {
+  background: linear-gradient(135deg, rgba(16,185,129,.18) 0%, rgba(56,189,248,.12) 100%);
+  border-color: rgba(16,185,129,.35);
+}
 
-  /* Danger icon helper */
-  .medical-icon.icon-danger{
-    background: rgba(239,68,68,.14) !important;
-    color: #ef4444 !important;
-  }
-  .nk-menu-link:hover .medical-icon.icon-danger{
-    background: #ef4444 !important;
-    color: #fff !important;
-  }
+.sb-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--sb-emerald-d), var(--sb-sky));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,.15);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.sb-avatar-initials {
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .05em;
+}
 
-  /* ============== Quick actions premium ============== */
-  .sidebar-quick-actions{
-    padding: 16px 14px 18px;
-    border-top: 1px solid var(--border);
-    margin-top: 12px;
-  }
-  .quick-actions-title{
-    font-size: .78rem;
-    font-weight: 900;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .7px;
-    margin-bottom: 12px;
-  }
-  .quick-actions-grid{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+.sb-user-info { flex: 1; min-width: 0; }
 
-  .quick-action-item{
-    display: grid;
-    place-items: center;
-    gap: 6px;
-    padding: 12px 10px;
-    border-radius: 14px;
-    color: #fff !important;
-    text-decoration: none !important;
-    font-weight: 800;
-    line-height: 1.1;
-    border: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 10px 22px rgba(2, 8, 23, .08);
-    transition: transform .28s var(--ease), box-shadow .28s var(--ease), filter .28s var(--ease);
-  }
+/* ✅ FIX: name/role were white -> unreadable on light card */
+.sb-user-name {
+  font-weight: 700;
+  font-size: .88rem;
+  color: var(--sb-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.sb-user-role {
+  font-size: .72rem;
+  color: var(--sb-text-2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .quick-action-item i{ font-size: 1.15rem; }
-  .quick-action-item span{ font-size: .72rem; text-align: center; opacity: .95; }
+.sb-online {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--sb-emerald);
+  border: 2px solid var(--sb-bg);
+  flex-shrink: 0;
+  position: relative;
+}
+.sb-online::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sb-emerald);
+  animation: sb-pulse 2.5s ease infinite;
+}
+@keyframes sb-pulse {
+  0%, 100% { transform: scale(1); opacity: .6; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
 
-  .quick-action-item:hover{
-    transform: translateY(-3px);
-    box-shadow: 0 16px 34px rgba(2, 8, 23, .12);
-    filter: brightness(1.02);
-  }
+/* ═══════════════════════════════════════
+   SCROLLABLE BODY
+═══════════════════════════════════════ */
+.sb-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0 16px;
+  position: relative;
+  z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15,23,42,.18) transparent;
+}
+.sb-body::-webkit-scrollbar { width: 3px; }
+.sb-body::-webkit-scrollbar-track { background: transparent; }
+.sb-body::-webkit-scrollbar-thumb { background: rgba(15,23,42,.18); border-radius: 2px; }
 
-  /* Color variants aligned to system tokens */
-  .qa-primary{ background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%); }
-  .qa-danger{ background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
-  .qa-warning{ background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
-  .qa-teal{ background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
+/* ═══════════════════════════════════════
+   SECTION HEADINGS
+═══════════════════════════════════════ */
+.sb-heading {
+  padding: 16px 20px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sb-heading-text {
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--sb-text-3);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sb-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sb-border-2);
+}
+
+/* ═══════════════════════════════════════
+   MENU ITEMS
+═══════════════════════════════════════ */
+.sb-menu { list-style: none; margin: 0; padding: 0 10px; }
+
+.sb-item { position: relative; }
+
+.sb-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  text-decoration: none !important;
+  color: var(--sb-text-2);
+  font-size: .83rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--sb-transition);
+  user-select: none;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.sb-link:hover {
+  background: var(--sb-surface-2);
+  color: var(--sb-text);
+  border-color: var(--sb-border);
+}
+
+/* Active state */
+.sb-link.active {
+  background: var(--sb-emerald-lt);
+  color: var(--sb-emerald);
+  border-color: rgba(16,185,129,.2);
+  font-weight: 600;
+}
+.sb-link.active .sb-icon {
+  background: rgba(16,185,129,.2);
+  color: var(--sb-emerald);
+}
+
+/* Icon */
+.sb-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--sb-surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  flex-shrink: 0;
+  color: var(--sb-text-3);
+  transition: var(--sb-transition);
+  border: 1px solid var(--sb-border-2);
+}
+
+.sb-link:hover .sb-icon {
+  background: var(--sb-surface-3);
+  color: var(--sb-text);
+  border-color: var(--sb-border);
+}
+
+/* Icon color variants */
+.sb-icon-emerald { color: var(--sb-emerald) !important; background: var(--sb-emerald-lt) !important; }
+.sb-icon-sky     { color: var(--sb-sky)     !important; background: var(--sb-sky-lt)     !important; }
+.sb-icon-rose    { color: var(--sb-rose)    !important; background: var(--sb-rose-lt)    !important; }
+.sb-icon-amber   { color: var(--sb-amber)   !important; background: var(--sb-amber-lt)   !important; }
+.sb-icon-violet  { color: var(--sb-violet)  !important; background: var(--sb-violet-lt)  !important; }
+.sb-icon-teal    { color: var(--sb-teal)    !important; background: rgba(45,212,191,.1)  !important; }
+
+/* Label */
+.sb-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Badge */
+.sb-badge {
+  font-family: var(--font-mono);
+  font-size: .6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: .04em;
+  transition: var(--sb-transition);
+}
+.sb-badge-default { background: var(--sb-surface-3); color: var(--sb-text-3); border: 1px solid var(--sb-border); }
+.sb-badge-rose    { background: var(--sb-rose-lt);    color: var(--sb-rose);   border: 1px solid rgba(248,113,113,.2); }
+.sb-badge-sky     { background: var(--sb-sky-lt);     color: var(--sb-sky);    border: 1px solid rgba(56,189,248,.2); }
+.sb-badge-emerald { background: var(--sb-emerald-lt); color: var(--sb-emerald);border: 1px solid rgba(16,185,129,.2); }
+.sb-badge-amber   { background: var(--sb-amber-lt);   color: var(--sb-amber);  border: 1px solid rgba(251,191,36,.2); }
+
+/* ═══════════════════════════════════════
+   SUBMENU
+═══════════════════════════════════════ */
+.sb-caret {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: var(--sb-surface-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform .3s var(--sb-ease), background .25s var(--sb-ease);
+  font-size: .6rem;
+  color: var(--sb-text-3);
+}
+.sb-item.open > .sb-link .sb-caret {
+  transform: rotate(90deg);
+  background: var(--sb-emerald-lt);
+  color: var(--sb-emerald);
+}
+
+.sb-submenu {
+  display: none;
+  margin: 2px 0 4px 20px;
+  padding: 2px 0;
+  list-style: none;
+  border-left: 1px solid var(--sb-border);
+}
+.sb-item.open > .sb-submenu { display: block; animation: sb-slide-in .22s var(--sb-ease); }
+
+@keyframes sb-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sb-sub-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px 7px 14px;
+  border-radius: 8px;
+  text-decoration: none !important;
+  color: var(--sb-text-3);
+  font-size: .8rem;
+  font-weight: 400;
+  transition: var(--sb-transition);
+}
+.sb-sub-link:hover { color: var(--sb-text); background: var(--sb-surface-2); }
+.sb-sub-link.active { color: var(--sb-emerald); font-weight: 600; }
+
+.sb-sub-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--sb-text-3);
+  flex-shrink: 0;
+  transition: var(--sb-transition);
+}
+.sb-sub-link:hover .sb-sub-dot { background: var(--sb-emerald); transform: scale(1.4); }
+.sb-sub-link.active .sb-sub-dot { background: var(--sb-emerald); }
+
+/* ═══════════════════════════════════════
+   QUICK ACTIONS
+═══════════════════════════════════════ */
+.sb-actions {
+  margin: 8px 10px 4px;
+  padding: 14px;
+  background: var(--sb-surface-2);
+  border: 1px solid var(--sb-border);
+  border-radius: var(--sb-radius);
+  flex-shrink: 0;
+}
+
+.sb-actions-title {
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--sb-text-3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sb-actions-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sb-border-2);
+}
+
+.sb-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sb-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: 10px;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: .7rem;
+  text-align: center;
+  line-height: 1.2;
+  transition: all .28s var(--sb-ease);
+  border: 1px solid rgba(255,255,255,.1);
+  position: relative;
+  overflow: hidden;
+}
+.sb-action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.10);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.sb-action-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(15,23,42,.18); }
+.sb-action-btn:hover::before { opacity: 1; }
+.sb-action-btn:active { transform: scale(.96); }
+
+.sb-action-btn i { font-size: 1.05rem; opacity: .95; }
+.sb-action-btn span { color: rgba(255,255,255,.92); }
+
+.sba-danger  { background: linear-gradient(135deg, #dc2626, #991b1b); }
+.sba-primary { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.sba-amber   { background: linear-gradient(135deg, #d97706, #92400e); }
+.sba-teal    { background: linear-gradient(135deg, #0d9488, #0f766e); }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.sb-footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--sb-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.sb-footer-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none !important;
+  color: var(--sb-text-3);
+  font-size: .6rem;
+  font-weight: 500;
+  transition: var(--sb-transition);
+  cursor: pointer;
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.sb-footer-link:hover {
+  background: var(--sb-surface-2);
+  color: var(--sb-text-2);
+  border-color: var(--sb-border);
+}
+.sb-footer-link i { font-size: .95rem; }
+
+.sb-footer-version {
+  font-family: var(--font-mono);
+  font-size: .55rem;
+  color: var(--sb-text-3);
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* ═══════════════════════════════════════
+   SEARCH BOX (top of menu)
+═══════════════════════════════════════ */
+.sb-search {
+  margin: 6px 10px 4px;
+  position: relative;
+}
+.sb-search input {
+  width: 100%;
+  height: 34px;
+  background: var(--sb-surface-2);
+  border: 1px solid var(--sb-border);
+  border-radius: 8px;
+  padding: 0 10px 0 32px;
+  font-family: var(--font-body);
+  font-size: .8rem;
+  color: var(--sb-text);
+  outline: none;
+  transition: var(--sb-transition);
+}
+.sb-search input::placeholder { color: var(--sb-text-3); }
+.sb-search input:focus {
+  border-color: rgba(16,185,129,.4);
+  background: var(--sb-surface-3);
+  box-shadow: 0 0 0 3px rgba(16,185,129,.08);
+}
+.sb-search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--sb-text-3);
+  font-size: .75rem;
+  pointer-events: none;
+}
 </style>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<aside class="sb" id="smit-sidebar">
+
+  <!-- Head -->
+  <div class="sb-head">
+    <a href="{% url 'home' %}" class="sb-brand">
+      <div class="sb-logos">
+        <img class="sb-logo-img" src="{% static 'images/lyne_hospital.png' %}" alt="Lyne Hospital">
+        <div class="sb-logo-sep"></div>
+        <img class="sb-logo-img" src="{% static 'images/logocermipa.png' %}" alt="CERMIPA">
+      </div>
+      <div class="sb-brand-name">SM<span>IT</span></div>
+    </a>
+    <button class="sb-close-btn" onclick="closeSidebar()" aria-label="Fermer le menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Department -->
+  <div class="sb-dept">Service des Maladies Infectieuses &amp; Tropicales</div>
+
+  <!-- User Card -->
+  <div class="sb-user">
+    <div class="sb-avatar">
+      <span class="sb-avatar-initials">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</span>
+    </div>
+    <div class="sb-user-info">
+      <div class="sb-user-name">Dr. {{ user.get_full_name|default:user.username }}</div>
+      <div class="sb-user-role">{{ user.groups.first.name|default:"Médecin" }}</div>
+    </div>
+    <div class="sb-online" title="Connecté"></div>
+  </div>
+
+  <!-- Scrollable body -->
+  <div class="sb-body">
+
+    <!-- Search -->
+    <div class="sb-search">
+      <i class="fa-solid fa-search sb-search-icon"></i>
+      <input type="text" placeholder="Rechercher dans le menu..." id="sb-search-input" oninput="filterMenu(this.value)">
+    </div>
+
+    <!-- ── GÉNÉRALE ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Générale</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'home' %}" class="sb-link">
+          <span class="sb-icon sb-icon-emerald"><i class="fa-solid fa-gauge-high"></i></span>
+          <span class="sb-label">Dashboard</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'global_search' %}" class="sb-link">
+          <span class="sb-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <span class="sb-label">Recherche globale</span>
+          <span class="sb-badge sb-badge-default">{{ patient_nbr }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── ACCUEIL ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Accueil</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'attente' %}" class="sb-link">
+          <span class="sb-icon sb-icon-amber"><i class="fa-solid fa-hourglass-half"></i></span>
+          <span class="sb-label">Salle d'attente</span>
+          <span class="sb-badge sb-badge-rose">{{ apointments_nbr }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'appointment_over' %}" class="sb-link">
+          <span class="sb-icon sb-icon-emerald"><i class="fa-solid fa-circle-check"></i></span>
+          <span class="sb-label">Patients reçus</span>
+          <span class="sb-badge sb-badge-default">{{ appointments_all }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'appointment_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-calendar-days"></i></span>
+          <span class="sb-label">Rendez-vous</span>
+          <span class="sb-badge sb-badge-sky">{{ appointments_all }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── CONSULTATION ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Consultation</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'consultation_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-violet"><i class="fa-solid fa-stethoscope"></i></span>
+          <span class="sb-label">Liste Consultations</span>
+          <span class="sb-badge sb-badge-rose">{{ consul_nbr }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── URGENCES ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Urgences</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'urgences_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-rose"><i class="fa-solid fa-truck-medical"></i></span>
+          <span class="sb-label">Liste des Urgences</span>
+          <span class="sb-badge sb-badge-rose">{{ urgencehospi }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── HOSPITALISATION ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Hospitalisation</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'hospitalisation' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-bed-pulse"></i></span>
+          <span class="sb-label">En cours</span>
+          <span class="sb-badge sb-badge-rose">{{ Hospitaliza_encours }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'suivie_soins_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-teal"><i class="fa-solid fa-clock-rotate-left"></i></span>
+          <span class="sb-label">Suivi soins</span>
+          <span class="sb-badge sb-badge-rose">{{ Hospitaliza_encours }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'hospitalised_patient' %}" class="sb-link">
+          <span class="sb-icon"><i class="fa-solid fa-person-walking-arrow-right"></i></span>
+          <span class="sb-label">Patients sortis</span>
+          <span class="sb-badge sb-badge-default">{{ discharged_count }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'hospi_unites' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-hospital"></i></span>
+          <span class="sb-label">Unités d'hospitalisation</span>
+        </a>
+      </li>
+
+      <!-- Paramètres submenu -->
+      <li class="sb-item has-sub" id="sub-params-hospi">
+        <a href="#" class="sb-link" onclick="toggleSub('sub-params-hospi', event)">
+          <span class="sb-icon"><i class="fa-solid fa-gears"></i></span>
+          <span class="sb-label">Paramètres</span>
+          <span class="sb-caret"><i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <ul class="sb-submenu">
+          <li><a href="#" class="sb-sub-link"><span class="sb-sub-dot"></span>Analyses</a></li>
+          <li><a href="#" class="sb-sub-link"><span class="sb-sub-dot"></span>Kits</a></li>
+        </ul>
+      </li>
+
+    </ul>
+
+    <!-- ── SUIVI PATIENTS ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Suivi Patients</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'bilan_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-emerald"><i class="fa-solid fa-file-arrow-up"></i></span>
+          <span class="sb-label">Bilans initiaux</span>
+          <span class="sb-badge sb-badge-emerald">{{ bilaninitial }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'suivi_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-violet"><i class="fa-solid fa-folder-tree"></i></span>
+          <span class="sb-label">Suivi des patients</span>
+          <span class="sb-badge sb-badge-rose">{{ suivi_nbr }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── MALADIES SOUS SURVEILLANCE ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Maladies sous surveillance</span></div>
+    <ul class="sb-menu">
+
+      {% for maladie in services %}
+      <li class="sb-item has-sub" id="sub-mal-{{ forloop.counter }}">
+        <a href="#" class="sb-link" onclick="toggleSub('sub-mal-{{ forloop.counter }}', event)">
+          <span class="sb-icon sb-icon-rose"><i class="fa-solid fa-virus"></i></span>
+          <span class="sb-label">{{ maladie }}</span>
+          <span class="sb-caret"><i class="fa-solid fa-chevron-right"></i></span>
+        </a>
+        <ul class="sb-submenu">
+          {% for sbactivity in maladie.subactivities.all %}
+          <li>
+            <a href="{% url 'service_content_detail' serv=maladie.nom acty=sbactivity.nom pk=sbactivity.id %}" class="sb-sub-link">
+              <span class="sb-sub-dot"></span>
+              {{ sbactivity.nom }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+
+    </ul>
+
+    <!-- ── LABORATOIRE ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Laboratoire</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'echantillons_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-teal"><i class="fa-solid fa-vial-virus"></i></span>
+          <span class="sb-label">Prélèvements</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'examen_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-flask-vial"></i></span>
+          <span class="sb-label">Demandes d'analyse</span>
+          <span class="sb-badge sb-badge-rose">{{ examencount }}</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'examen_done_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-emerald"><i class="fa-solid fa-clipboard-check"></i></span>
+          <span class="sb-label">Analyses effectuées</span>
+          <span class="sb-badge sb-badge-emerald">{{ examensdonecount }}</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── PHARMACIE ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Pharmacie</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'medicaments' %}" class="sb-link">
+          <span class="sb-icon sb-icon-violet"><i class="fa-solid fa-prescription-bottle-medical"></i></span>
+          <span class="sb-label">Médicaments</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'mouvement-stock' %}" class="sb-link">
+          <span class="sb-icon sb-icon-amber"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>
+          <span class="sb-label">Mouvement de stock</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'rendezvous_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-calendar-plus"></i></span>
+          <span class="sb-label">Rendez-vous</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'commandes-list' %}" class="sb-link">
+          <span class="sb-icon"><i class="fa-solid fa-cart-flatbed"></i></span>
+          <span class="sb-label">Commandes</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="#" class="sb-link">
+          <span class="sb-icon sb-icon-emerald"><i class="fa-solid fa-chart-column"></i></span>
+          <span class="sb-label">Rapports</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- ── PARAMÈTRES ── -->
+    <div class="sb-heading"><span class="sb-heading-text">Paramètres</span></div>
+    <ul class="sb-menu">
+
+      <li class="sb-item">
+        <a href="{% url 'employee_list' %}" class="sb-link">
+          <span class="sb-icon sb-icon-sky"><i class="fa-solid fa-user-tie"></i></span>
+          <span class="sb-label">Gestion des employés</span>
+        </a>
+      </li>
+
+      <li class="sb-item">
+        <a href="{% url 'user_role' %}" class="sb-link">
+          <span class="sb-icon sb-icon-violet"><i class="fa-solid fa-shield-halved"></i></span>
+          <span class="sb-label">Gestion des rôles</span>
+        </a>
+      </li>
+
+    </ul>
+
+    <!-- Quick Actions -->
+    <div class="sb-actions">
+      <div class="sb-actions-title">Actions rapides</div>
+      <div class="sb-actions-grid">
+        <a href="{% url 'add_patient' %}" class="sb-action-btn sba-danger">
+          <i class="fa-solid fa-user-plus text-white"></i>
+          <span>Nouveau Patient</span>
+        </a>
+        <a href="{% url 'consultation_list' %}" class="sb-action-btn sba-primary">
+          <i class="fa-solid fa-stethoscope text-white"></i>
+          <span>Consultation</span>
+        </a>
+        <a href="{% url 'examen_list' %}" class="sb-action-btn sba-amber">
+          <i class="fa-solid fa-flask-vial text-white"></i>
+          <span>Demande Analyse</span>
+        </a>
+        <a href="{% url 'urgences_list' %}" class="sb-action-btn sba-teal">
+          <i class="fa-solid fa-truck-medical text-white"></i>
+          <span>Cas Urgent</span>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /sb-body -->
+
+  <!-- Footer -->
+  <div class="sb-footer">
+    <a href="#" class="sb-footer-link" title="Paramètres">
+      <i class="fa-solid fa-gear"></i>
+      <span>Réglages</span>
+    </a>
+    <a href="#" class="sb-footer-link" title="Aide">
+      <i class="fa-regular fa-circle-question"></i>
+      <span>Aide</span>
+    </a>
+    <a href="#" class="sb-footer-link" title="Notifications">
+      <i class="fa-regular fa-bell"></i>
+      <span>Alertes</span>
+    </a>
+    <a href="{% url 'account_logout' %}" class="sb-footer-link" title="Déconnexion" style="color: var(--sb-rose);">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Sortir</span>
+    </a>
+  </div>
+
+</aside><!-- /sidebar -->
+
+<script>
+/* ══════════════════════════════════════
+   SIDEBAR INTERACTIONS
+══════════════════════════════════════ */
+
+/* Submenu toggle */
+function toggleSub(id, e) {
+  e.preventDefault();
+  const item = document.getElementById(id);
+  if (!item) return;
+  const wasOpen = item.classList.contains('open');
+  const siblings = item.parentElement.querySelectorAll('.sb-item.has-sub.open');
+  siblings.forEach(s => { if (s !== item) s.classList.remove('open'); });
+  item.classList.toggle('open', !wasOpen);
+}
+
+/* Close sidebar (mobile) */
+function closeSidebar() {
+  const sb = document.getElementById('smit-sidebar');
+  if (!sb) return;
+  sb.style.transform = 'translateX(-100%)';
+  sb.style.transition = 'transform .3s cubic-bezier(.4,0,.2,1)';
+}
+
+/* Helpers */
+function normalizePath(p) {
+  if (!p) return '/';
+  // remove query/hash
+  p = p.split('?')[0].split('#')[0];
+  // normalize trailing slash (keep root)
+  if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+  return p;
+}
+
+/* Active link detection (robust) */
+(function markActive() {
+  const current = normalizePath(window.location.pathname);
+
+  // clear any hardcoded "active"
+  document.querySelectorAll('.sb-link.active, .sb-sub-link.active').forEach(a => a.classList.remove('active'));
+
+  // mark exact matches
+  const allLinks = document.querySelectorAll('.sb-link, .sb-sub-link');
+  allLinks.forEach(link => {
+    const href = normalizePath(link.getAttribute('href'));
+    if (!href || href === '#') return;
+
+    if (href === current) {
+      link.classList.add('active');
+      const parentItem = link.closest('.sb-item.has-sub');
+      if (parentItem) parentItem.classList.add('open');
+    }
+  });
+
+  // if a submenu item matches by prefix (useful when urls have pk/etc.)
+  document.querySelectorAll('.sb-item.has-sub').forEach(item => {
+    const subLinks = item.querySelectorAll('.sb-sub-link[href]:not([href="#"])');
+    const shouldOpen = Array.from(subLinks).some(a => {
+      const href = normalizePath(a.getAttribute('href'));
+      return href && href !== '/' && current.startsWith(href);
+    });
+    if (shouldOpen) item.classList.add('open');
+  });
+})();
+
+/* Menu search filter (searches labels + submenu text; keeps parents visible if a child matches) */
+function filterMenu(query) {
+  const q = (query || '').toLowerCase().trim();
+
+  document.querySelectorAll('.sb-item').forEach(item => {
+    const label = item.querySelector('.sb-label')?.textContent.toLowerCase() || '';
+    const subText = item.querySelector('.sb-submenu')?.textContent.toLowerCase() || '';
+    const match = !q || label.includes(q) || subText.includes(q);
+    item.style.display = match ? '' : 'none';
+
+    // if searching and a child matches, keep submenu visible
+    if (q && match && item.classList.contains('has-sub')) {
+      item.classList.add('open');
+    }
+  });
+
+  document.querySelectorAll('.sb-heading').forEach(h => {
+    const nextUl = h.nextElementSibling;
+    if (!nextUl) return;
+    const visible = nextUl.querySelectorAll('.sb-item:not([style*="display: none"])').length;
+    h.style.display = visible ? '' : 'none';
+  });
+}
+
+/* Keyboard shortcut: Ctrl+B / Cmd+B to toggle */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+    e.preventDefault();
+    const sb = document.getElementById('smit-sidebar');
+    if (!sb) return;
+    const hidden = sb.style.transform === 'translateX(-100%)';
+    sb.style.transform = hidden ? '' : 'translateX(-100%)';
+    sb.style.transition = 'transform .3s cubic-bezier(.4,0,.2,1)';
+  }
+});
+</script>

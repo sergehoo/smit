@@ -1908,7 +1908,7 @@ document.addEventListener("DOMContentLoaded", function () {
             data-toggle="modal" data-target="#resumesyndromiqueModal">
         <em class="icon ni ni-plus-circle-fill"></em> Résumé Syndromique
     </button>
-    
+
     <div class="modal fade" id="resumesyndromiqueModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1926,12 +1926,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             </div>
                         {% endfor %}
                     {% endif %}
-                    
-                    <form method="post" 
+
+                    <form method="post"
                           action="{% url 'add_resume_syndromique' hospitalisation_id=hospitalisationdetail.id %}"
                           id="resumeSyndromiqueForm">
                         {% csrf_token %}
-                        
+
                         <!-- Affichage des erreurs non-field -->
                         {% if resumesyndromiqueform.non_field_errors %}
                             <div class="alert alert-danger">
@@ -1940,9 +1940,9 @@ document.addEventListener("DOMContentLoaded", function () {
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        
+
                         <div class="mb-3">
-                            <label for="{{ resumesyndromiqueform.description.id_for_label }}" 
+                            <label for="{{ resumesyndromiqueform.description.id_for_label }}"
                                    class="form-label fw-bold">
                                 {{ resumesyndromiqueform.description.label }}
                             </label>
@@ -1956,7 +1956,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             {% endif %}
                             <div class="form-text">Décrivez le résumé syndromique du patient de manière détaillée.</div>
                         </div>
-                        
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                             <button type="submit" class="btn btn-primary" id="submitResume">
@@ -1974,7 +1974,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let tinymceInitialized = false;
-    
+
     // Initialisation de TinyMCE
     function initTinyMCE() {
         if (!tinymceInitialized) {
@@ -1997,12 +1997,12 @@ document.addEventListener('DOMContentLoaded', function () {
             tinymceInitialized = true;
         }
     }
-    
+
     // Initialiser TinyMCE quand le modal est affiché
     $('#resumesyndromiqueModal').on('shown.bs.modal', function () {
         initTinyMCE();
     });
-    
+
     // Nettoyer TinyMCE quand le modal est fermé
     $('#resumesyndromiqueModal').on('hidden.bs.modal', function () {
         if (tinymceInitialized) {
@@ -2012,7 +2012,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Réinitialiser le formulaire
         document.getElementById('resumeSyndromiqueForm').reset();
     });
-    
+
     // Gestion du loading state sur le bouton submit
     document.getElementById('resumeSyndromiqueForm').addEventListener('submit', function() {
         const submitBtn = document.getElementById('submitResume');
@@ -2029,7 +2029,7 @@ document.addEventListener('DOMContentLoaded', function () {
             data-toggle="modal" data-target="#problemesposerModal">
         <em class="icon ni ni-plus-circle-fill"></em> Problèmes Posés
     </button>
-    
+
     <div class="modal fade" id="problemesposerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -2047,12 +2047,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             </div>
                         {% endfor %}
                     {% endif %}
-                    
-                    <form method="post" 
+
+                    <form method="post"
                           action="{% url 'add_problemes_pose' hospitalisation_id=hospitalisationdetail.id %}"
                           id="problemesPoseForm">
                         {% csrf_token %}
-                        
+
                         <!-- Affichage des erreurs non-field -->
                         {% if problemesposerform.non_field_errors %}
                             <div class="alert alert-danger">
@@ -2061,9 +2061,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        
+
                         <div class="mb-3">
-                            <label for="{{ problemesposerform.description.id_for_label }}" 
+                            <label for="{{ problemesposerform.description.id_for_label }}"
                                    class="form-label fw-bold">
                                 {{ problemesposerform.description.label }}
                             </label>
@@ -2079,7 +2079,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 Listez et décrivez les problèmes de santé identifiés chez le patient.
                             </div>
                         </div>
-                        
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                             <button type="submit" class="btn btn-primary" id="submitProbleme">
@@ -2097,7 +2097,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let tinymceInitializedProblemes = false;
-    
+
     // Initialisation de TinyMCE pour problèmes posés
     function initTinyMCEProblemes() {
         if (!tinymceInitializedProblemes) {
@@ -2120,12 +2120,12 @@ document.addEventListener('DOMContentLoaded', function () {
             tinymceInitializedProblemes = true;
         }
     }
-    
+
     // Initialiser TinyMCE quand le modal est affiché
     $('#problemesposerModal').on('shown.bs.modal', function () {
         initTinyMCEProblemes();
     });
-    
+
     // Nettoyer TinyMCE quand le modal est fermé
     $('#problemesposerModal').on('hidden.bs.modal', function () {
         if (tinymceInitializedProblemes) {
@@ -2137,7 +2137,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Supprimer les messages d'alerte
         $('.alert').alert('close');
     });
-    
+
     // Gestion du loading state sur le bouton submit
     document.getElementById('problemesPoseForm').addEventListener('submit', function() {
         const submitBtn = document.getElementById('submitProbleme');
@@ -2145,7 +2145,7 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.disabled = true;
         spinner.classList.remove('d-none');
     });
-    
+
     // Fermer les alertes après 5 secondes
     setTimeout(function() {
         $('.alert').alert('close');
@@ -2645,10 +2645,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         {% if 'commentaire' in message.extra_tags %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas 
+                                    <i class="fas
                                         {% if message.tags == 'success' %}fa-check-circle
                                         {% elif message.tags == 'error' %}fa-exclamation-circle
-                                        {% else %}fa-info-circle{% endif %} 
+                                        {% else %}fa-info-circle{% endif %}
                                         me-2"></i>
                                     <div>{{ message }}</div>
                                 </div>
@@ -2923,9 +2923,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                             </div>
                                         {% endif %}
                                     </div>
-                                
+
                                     <div class="col-lg-6 mx-auto">
-                                    
+
                                         {% if next_execution %}
                                             <div class="card shadow-sm border-0 bg-light rounded-lg p-4">
                                                 <div class="card-body text-center">
@@ -3034,17 +3034,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                     <div class="row col-12">
 
-                                       
+
                                         <div class="col-xl-12" id="constantesChart"></div>
 
 
                                     </div>
 
                                     <div class="row col-12">
-                                    
+
                                         <!-- Constantes Card -->
                                         <!-- Tableau des constantes -->
-                                    
+
                                         <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header">
@@ -3068,7 +3068,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        
+
                                                         {% if constantes %}
                                                             {% for constante in constantes %}
                                                                 <tr class="{% if forloop.counter > 3 %}constante-data d-none{% endif %}">
@@ -3373,7 +3373,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         </div>
 
                                         <!-- Styles CSS pour le calendrier -->
-                                    
+
                                         <style>
                                             .table-calendar {
                                                 font-size: 0.875rem;
@@ -3556,7 +3556,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                             });
                                         </script>
                                         <!-- Executes prescriptions -->
-                                    
+
                                         <div class="col-12 col-md-12 mb-5">
                                             <div class="card text-black-100 border">
                                                 <div class="card-header d-flex justify-content-between">
